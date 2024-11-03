@@ -1,0 +1,19 @@
+version: '3'
+services:
+  sistemamf-postgres:
+    image: postgres:12-alpine
+    volumes:
+      - ./.data/postgresql:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: sistemamf
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - '5432:5432'
+    networks:
+      - sistemamf_internal
+
+networks:
+  sistemamf_internal:
+    external:
+      name: sistemamf_internal
