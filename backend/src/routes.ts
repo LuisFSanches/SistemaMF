@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import { GetAllClientController } from './controllers/client/GetAllClientController'
 import { CreateClientController } from './controllers/client/CreateClientController'
 import { CreateAdminController } from './controllers/admin/CreateAdminController'
 import { LoginAdminController } from './controllers/admin/LoginAdminController'
@@ -14,6 +15,7 @@ const router = Router();
 
 //-- ROTAS CLIENT --
 router.post('/clients', adminAuthMiddleware, new CreateClientController().handle)
+router.get('/clients/all', adminAuthMiddleware, new GetAllClientController().handle)
 
 //-- ROTAS ADMIN --
 router.post('/admins/create', superAdminAuthMiddleware, new CreateAdminController().handle)
