@@ -1,16 +1,18 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
 
-  class GetAllClientAddressService{
-    async execute(client_id: string) {
+  class GetClientByPhoneNumberService{
+    async execute(phone_number: string) {      
       try {
-        const address = await prismaClient.address.findMany({
+        if (!phone_number) return null;
+
+        const client = await prismaClient.client.findFirst({
           where: {
-            client_id
+            phone_number
           }
         });
 
-        return address;
+        return client;
 
       } catch(error: any) {
         return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
@@ -18,4 +20,4 @@ import { ErrorCodes } from "../../exceptions/root";
     }
   }
   
-  export { GetAllClientAddressService }
+  export { GetClientByPhoneNumberService }
