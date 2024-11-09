@@ -3,7 +3,6 @@ import { createContext, ReactNode, useEffect, useState } from "react";
 
 import { api } from "../services/api";
 import { authenticateUser } from "../services/authenticationService";
-import { createUser } from "../services/clientService";
 
 interface IAuthContextData {
   isAuthenticated: boolean;
@@ -13,7 +12,6 @@ interface IAuthContextData {
     username: string;
   };
   handleLogin: (username: string, password: string) => Promise<any>;
-  handleSignUp: (username: string, password: string) => Promise<any>;
   handleSignOut: () => void;
 }
 
@@ -46,17 +44,8 @@ export function AuthProvider({ children }: IAuthProviderProps) {
     }
   };
 
-  const handleSignUp = async (username: string, password: string) => {
-    try {
-      await createUser(username, password);
-      const login = await handleLogin(username, password);
-      return login;
-    } catch (error) {
-      return error;
-    }
-  };
-
   const handleSignOut = async () => {
+    console.log('OKOKOK')
     setAuthenticated(false);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -83,7 +72,6 @@ export function AuthProvider({ children }: IAuthProviderProps) {
         loading,
         userData,
         handleLogin,
-        handleSignUp,
         handleSignOut,
       }}
     >

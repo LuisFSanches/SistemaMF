@@ -1,17 +1,18 @@
 import { api } from "./api";
 
-export const createUser = async (username: string, password: string) => {
-  const response = await api.post("/user/create", {
-    username,
-    password,
+
+export const getClientByPhone = async (params = "") => {
+  const token = localStorage.getItem("token")?.replace(/"/g, '');
+
+  const response = await api.get(`/client/phone_number?phone_number=${params}`, {
+    headers: {
+      Authorization: `${token}`,
+    }
   });
+  
   return response;
 };
 
-export const getUserData = async () => {
-  const response = await api.get("/user");
-  return response;
-};
 
 export const listClients = async () => {
   const token = localStorage.getItem("token")?.replace(/"/g, '');

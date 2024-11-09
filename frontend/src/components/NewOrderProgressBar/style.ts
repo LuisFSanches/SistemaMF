@@ -53,7 +53,7 @@ export const Progress = styled.div<{ activeStep: number }>`
     css`
       background: linear-gradient(
         to right,
-        #f5cb2e ${(activeStep - 1) * 33.33}%,
+        #fcc5d0 ${(activeStep - 1) * 33.33}%,
         #7d7d7d ${(activeStep - 1) * 33.33}%
       );
     `}
