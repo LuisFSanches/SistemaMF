@@ -24,12 +24,13 @@ import {
 import { NewOrderProgressBar } from "../../components/NewOrderProgressBar";
 import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
+import { createOrder } from "../../services/orderService";
 
 interface INewOrder {
-    telephone: string;
+    phone_number: string;
     first_name: string;
     last_name: string;
-    selectedAddress: string;
+    addressId: string;
     street: string;
     street_number: string;
     complement: string;
@@ -38,23 +39,26 @@ interface INewOrder {
     state: string;
     postal_code: string;
     country: string;
-    order_description: string;
-    order_value: string;
+    description: string;
+    additional_information: string;
+    products_value: number;
     total: number;
     delivery_fee: number;
+    has_card: boolean;
 }
 
 export function DashboardPage(){
     const formRef = useRef<HTMLDivElement>(null);
     const [step, setStep] = useState(1);
-    const [id, setId] = useState("");
+    const [client_id, setClientId] = useState("");
     const [addresses, setAddresses] = useState([]);
+    const [addressId, setAddressId] = useState("");
     const [newAddress, setNewAddress] = useState(false);
     const [order, setOrder] = useState<INewOrder>({
-        telephone: "",
+        phone_number: "",
         first_name: "",
         last_name: "",
-        selectedAddress: "",
+        addressId: "",
         street: "",
         street_number: "",
         complement: "",
@@ -63,10 +67,12 @@ export function DashboardPage(){
         state: "",
         postal_code: "",
         country: "",
-        order_description: "",
-        order_value: "",
+        description: "",
+        additional_information: "",
+        products_value: 0.00,
         total: 0.00,
-        delivery_fee: 0.00
+        delivery_fee: 0.00,
+        has_card: false
     });
 
     const handleNextStep = () => {
@@ -96,10 +102,10 @@ export function DashboardPage(){
     });
 
     const onSubmitStep = async ({
-        telephone,
+        phone_number,
         first_name,
         last_name,
-        selectedAddress,
+        addressId,
         street,
         street_number,
         complement,
@@ -108,55 +114,70 @@ export function DashboardPage(){
         state,
         postal_code,
         country,
-        order_description,
-        order_value,
-        total,
-        delivery_fee
+        description,
+        additional_information,
+        products_value,
+        delivery_fee,
+        has_card
     }: INewOrder) => {
-        const response = await getClientByPhone(telephone);
+
+        const total = Number(products_value) + Number(delivery_fee);
+
+        const orderData = {
+            phone_number,
+            first_name,
+            last_name,
+            addressId,
+            street,
+            street_number,
+            complement,
+            neighborhood,
+            city,
+            state,
+            postal_code,
+            country,
+            description,
+            additional_information,
+            products_value: Number(products_value),
+            delivery_fee: Number(delivery_fee),
+            total: Number(total),
+            status: "OPENED",
+            has_card
+        }
 
         if (step === 3) {
-            setOrder({
-                telephone,
-                first_name,
-                last_name,
-                selectedAddress,
-                street,
-                street_number,
-                complement,
-                neighborhood,
-                city,
-                state,
-                postal_code,
-                country,
-                order_description,
-                order_value,
-                total,
-                delivery_fee
+            setOrder(orderData);
+        }
+
+        if (step === 4) {
+            await createOrder({
+                admin_id: "89421bec-9b8c-4ace-9bc9-53663248538f",
+                clientId: client_id,
+                ...orderData,
             })
         }
 
         handleNextStep();
     };
 
-    const telephone = watch("telephone");
+    const phone_number = watch("phone_number");
 
     useEffect(() => {
         const fetchClientData = async () => {
 
-            if (telephone && telephone.length > 7) {
+            if (phone_number && phone_number.length > 7) {
                 try {
-                    const response = await getClientByPhone(telephone);
+                    const response = await getClientByPhone(phone_number);
                     const { data: client } = response;
 
                     if (!client) {
-                        setId("");
+                        setClientId("");
                     }
 
                     if (client) {
                         setValue("first_name", client.first_name);
                         setValue("last_name", client.last_name);
-                        setId(client.id);
+                        setClientId(client.id);
                         const { data: addresses } = await getClientAddresses(client.id);
                     
                         if (addresses) {
@@ -164,13 +185,13 @@ export function DashboardPage(){
                         }
                     }
                 } catch (error) {
-                    setError("telephone", { message: "Usuário não encontrado." });
+                    setError("phone_number", { message: "Usuário não encontrado." });
                 }
             }
         };
         
         fetchClientData();
-    }, [telephone, setValue, setError]);
+    }, [phone_number, setValue, setError]);
 
     const handlePrint = () => {
         if (formRef.current) {
@@ -197,11 +218,11 @@ export function DashboardPage(){
                         <FormField>
                             <Label>Telefone</Label>
                             <Input type="tel" placeholder="Digite seu telefone" 
-                                {...register("telephone", {
-                                    required: "Telephone inválido",
+                                {...register("phone_number", {
+                                    required: "Telefone inválido",
                                 })}
                             />
-                            {errors.telephone && <ErrorMessage>{errors.telephone.message}</ErrorMessage>}
+                            {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
                         </FormField>
                         <FormField>
                             <Label>Nome</Label>
@@ -209,7 +230,7 @@ export function DashboardPage(){
                                 {...register("first_name", {
                                     required: "Nome inválido",
                                 })}
-                                disabled={id ? true : false}
+                                disabled={client_id ? true : false}
                             />
                             {errors.first_name && <ErrorMessage>{errors.first_name.message}</ErrorMessage>}
                         </FormField>
@@ -219,7 +240,7 @@ export function DashboardPage(){
                                 {...register("last_name", {
                                     required: "Sobrenome inválido",
                                 })}
-                                disabled={id ? true : false}
+                                disabled={client_id ? true : false}
                             />
                             {errors.last_name && <ErrorMessage>{errors.last_name.message}</ErrorMessage>}
                         </FormField>
@@ -233,7 +254,7 @@ export function DashboardPage(){
                                 <FormField>
                                     <Label>Selecione o Endereço</Label>
                                     <Select
-                                        {...register("selectedAddress")}
+                                        {...register("addressId")}
                                         onChange={(e) => {
                                             const selectedAddressId = e.target.value;
                                             const selectedAddress: any = addresses.find((address: any) => address.id === selectedAddressId);
@@ -242,6 +263,7 @@ export function DashboardPage(){
                                                 setValue("street", selectedAddress.street);
                                                 setValue("street_number", selectedAddress.number);
                                                 setValue("city", selectedAddress.city);
+                                                setAddressId(selectedAddressId);
                                             }
                                         }}
                                     >
@@ -348,22 +370,33 @@ export function DashboardPage(){
                             <Label>Descrição do Pedido</Label>
                             <Textarea placeholder=" 1x Bouquet de rosas
                             1x cartao
-                            1x caixa de bombom" {...register("order_description", {
+                            1x caixa de bombom" {...register("description", {
                                 required: "Descrição do pedido é obrigatória",
                             })}
                             />
-                            {errors.order_description && <ErrorMessage>{errors.order_description.message}</ErrorMessage>}
+                            {errors.description && <ErrorMessage>{errors.description.message}</ErrorMessage>}
+                        </FormField>
+                        <FormField>
+                            <Label>Observações</Label>
+                            <Textarea placeholder="Observações" {...register("additional_information")}
+                            />
+                        </FormField>
+                        <FormField>
+                            <CheckboxContainer>
+                                <Checkbox type="checkbox" {...register("has_card")} />
+                                <Label>Pedido Contém Cartão</Label>
+                            </CheckboxContainer>
                         </FormField>
                         <FormField>
                             <Label>Valor total dos Produtos</Label>
-                            <Input type="text" placeholder="Total" {...register("total", {
+                            <Input type="number" placeholder="Total" {...register("products_value", {
                                 required: "Valor total é obrigatório",
                             })} />
-                            {errors.total && <ErrorMessage>{errors.total.message}</ErrorMessage>}
+                            {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
                         </FormField>
                         <FormField>
                             <Label>Taxa de entrega</Label>
-                            <Input type="text" placeholder="0.00" {...register("delivery_fee", {
+                            <Input type="number" placeholder="0.00" {...register("delivery_fee", {
                                 required: "Taxa de entrega é obrigatório",
                             })} />
                             {errors.delivery_fee && <ErrorMessage>{errors.delivery_fee.message}</ErrorMessage>}
@@ -379,12 +412,14 @@ export function DashboardPage(){
                         </div>
                         <div>
                             <p><strong>Descrição do pedido:</strong></p>
-                            <p>{order.order_description}</p>
+                            <p>{order.description}</p>
+                            <p>Observações:</p>
+                            <p>{order.additional_information}</p>
                         </div>
                         <div>
-                            <p><strong>Valor dos produtos:</strong> R$ {order.total}</p>
+                            <p><strong>Valor dos produtos:</strong> R$ {order.products_value}</p>
                             <p><strong>Taxa de entrega:</strong> R$ {order.delivery_fee}</p>
-                            <p><strong>Total:</strong> R$ {Number(order.total) + Number(order.delivery_fee)}</p>
+                            <p><strong>Total:</strong> R$ {Number(order.products_value) + Number(order.delivery_fee)}</p>
                         </div>
                         <div>
                             <p><strong>Cliente:</strong></p>

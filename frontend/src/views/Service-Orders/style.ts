@@ -29,9 +29,8 @@ export const Container = styled.div`
 
     .opened-order{
         background: var(--order-yellow);
-
     }
-    .being-made-order{
+    .in-progress-order{
         background: var(--order-blue);
     }
     .finished-order{
@@ -42,11 +41,13 @@ export const Container = styled.div`
         background: #f8f4de;
         box-shadow:0.1rem 0.2rem var(--shadow-color)
     }
-    .being-made{
-        background:#c3d7f1
+    .in_progress{
+        background:#c3d7f1;
+        box-shadow: 0.1rem 0.2rem var(--shadow-color);
     }
-    .finished{
-        background:#d2e4ca
+    .done {
+        background:#d2e4ca;
+        box-shadow: 0.1rem 0.2rem var(--shadow-color);
     }
 
     @media (max-width: 1200px){
@@ -68,12 +69,17 @@ export const OrderCard= styled.div`
     border-radius: 0.3rem;
     color: var(--text-body);
 
-;
-   .order-number{
-       width: 100%;
-       text-align: center;
+    .order-number{
+        width: 100%;
+        text-align: center;
         margin-bottom: 0.5rem;
-   }
+    }
+
+    .inline-container {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
 
     .order-info{
         display: flex;
@@ -86,6 +92,7 @@ export const OrderCard= styled.div`
     }
     .client-info{
         display: flex;
+        justify-content: space-between;
         margin-bottom: 0.6rem;
     }
     .order-content{
@@ -98,14 +105,21 @@ export const OrderCard= styled.div`
         display: flex;
         justify-content: space-around;
         padding: 0.5rem;
-        
     }
 
-    ul{
-        list-style: none;
+    .address-container, .value-container {
+        margin: 10px 0;
+
+        p {
+            margin: 5px 0;
+        }
     }
-    li{
-        line-height: 1.3rem;
+
+    .value-container {
+        display: flex;
+        align-items: center;
+        justify-content: end;
+        font-size: 1.1rem;
     }
 
     button{
