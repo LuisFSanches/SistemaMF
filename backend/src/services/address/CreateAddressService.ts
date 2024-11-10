@@ -20,7 +20,7 @@ class CreateAddressService{
         }
       })
 
-      return { address };
+      return address;
 
     } catch(error: any) {
       return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }

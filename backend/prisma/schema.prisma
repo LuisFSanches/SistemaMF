@@ -47,7 +47,7 @@ model Address {
   client_id   String
   street      String
   street_number String
-  complement  String
+  complement  String?
   neighborhood String
   city        String
   state       String
@@ -64,16 +64,18 @@ model Address {
 
 model Order {
   id                String        @id @default(uuid())
-  order_description String
+  code              Int           @default(autoincrement())
+  description       String
+  additional_information String?
   client_id         String
   client_address_id String
-  order_value       Float
+  products_value    Float
   delivery_fee      Float
   total             Float
   created_by        String
   updated_by        String
   status            String        @default("Opened")
-  has_letter        Boolean       @default(false)
+  has_card        Boolean       @default(false)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 

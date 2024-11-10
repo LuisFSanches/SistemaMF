@@ -14,13 +14,13 @@ class CreateClientController{
       phone_number
     });
     
-    if (client.error) {
+    if ('error' in client && client.error) {
       next(new BadRequestException(
         client.message,
         client.code
-      ))
+      ));
     }
-
+    
     return res.json(client)
   }
 }

@@ -24,7 +24,7 @@ class CreateClientService{
         }
       })
 
-      return { client: newClient };
+      return newClient;
 
     } catch(error: any) {
       return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
