@@ -4,13 +4,15 @@ import { GetAllClientController } from './controllers/client/GetAllClientControl
 import { GetClientController } from './controllers/client/GetClientController'
 import { GetClientByPhoneNumbeController } from './controllers/client/GetClientByPhoneNumbeController'
 import { CreateClientController } from './controllers/client/CreateClientController'
+import { UpdateClientController } from './controllers/client/UpdateClientController';
 
 import { CreateAddressController } from './controllers/address/CreateAddressController';
 import { GetAllClientAddressController } from './controllers/address/GetAllClientAddressController';
 
 import { CreateOrderController } from './controllers/order/CreateOrderController';
 import { GetOnGoingOrderController } from './controllers/order/GetOnGoingOrderController';
-
+import { GetAllOrderController } from './controllers/order/GetAllOrderController';
+import { UpdateOrderStatusController } from './controllers/order/UpdateOrderStatusController';
 
 import { CreateAdminController } from './controllers/admin/CreateAdminController'
 import { LoginAdminController } from './controllers/admin/LoginAdminController'
@@ -28,6 +30,7 @@ router.post('/client', adminAuthMiddleware, new CreateClientController().handle)
 router.get('/clients/all', adminAuthMiddleware, new GetAllClientController().handle)
 router.get('/client/phone_number', superAdminAuthMiddleware, new GetClientByPhoneNumbeController().handle)
 router.get('/client/:id', superAdminAuthMiddleware, new GetClientController().handle)
+router.put('/client/:id', adminAuthMiddleware, new UpdateClientController().handle)
 
 //-- ROTAS ADDRESS --
 router.post('/address', adminAuthMiddleware, new CreateAddressController().handle)
@@ -35,7 +38,9 @@ router.get('/address/:client_id', superAdminAuthMiddleware, new GetAllClientAddr
 
 //-- ROTAS ORDER --
 router.post('/order', adminAuthMiddleware, new CreateOrderController().handle);
+router.patch('/order/:id', adminAuthMiddleware, new UpdateOrderStatusController().handle);
 router.get('/order/ongoing', adminAuthMiddleware, new GetOnGoingOrderController().handle);
+router.get('/order/all', adminAuthMiddleware, new GetAllOrderController().handle);
 
 //-- ROTAS ADMIN --
 router.post('/admins/create', new CreateAdminController().handle)
@@ -45,4 +50,4 @@ router.get('/admins/all', superAdminAuthMiddleware, new GetAllAdminController().
 router.delete('/admins/delete/:id', superAdminAuthMiddleware, new DeleteAdminController().handle)
 
 
-export { router }; 
+export { router };

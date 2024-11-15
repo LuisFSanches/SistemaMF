@@ -11,7 +11,7 @@ class LoginAdminService{
       const admin = await prismaClient.admin.findFirst({
         where: {
           username,
-        }
+        },
       })
 
       if (!admin) {
@@ -28,6 +28,8 @@ class LoginAdminService{
       }, process.env.JWT_SECRET!, {
         expiresIn: '1w'
       })
+
+      delete (admin as { password?: string }).password;
 
       return { admin, token }
 
