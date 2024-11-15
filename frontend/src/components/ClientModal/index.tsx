@@ -1,7 +1,8 @@
 import { useEffect, useContext } from "react";
 import Modal from 'react-modal';
-import { set, useForm } from "react-hook-form";
-import { ModalContainer, Form, Input } from '../../styles/global';
+import { useForm } from "react-hook-form";
+import InputMask from "react-input-mask";
+import { ModalContainer, Form, Input, ErrorMessage } from '../../styles/global';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { createClient, updateClient } from "../../services/clientService";
@@ -77,9 +78,23 @@ export function ClientModal({
             <ModalContainer>
                 <Form onSubmit={handleSubmit(handleUser)}>
                     <h2>{action === "create" ? "Novo" : "Editar"} cliente</h2>
-                    <Input placeholder='Nome' {...register("first_name")}/>
-                    <Input placeholder='Sobrenome' {...register("last_name")}/>
-                    <Input placeholder='Telefone' {...register("phone_number")}/>
+                    {errors.first_name && <ErrorMessage>{errors.first_name.message}</ErrorMessage>}
+                    <Input placeholder='Nome' {...register("first_name", {required: "Nome inválido"})}/>
+                    {errors.last_name && <ErrorMessage>{errors.last_name.message}</ErrorMessage>}
+                    <Input placeholder='Sobrenome' {...register("last_name", { required: "Sobrenome inválido" })}/>
+                    {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
+                    <InputMask
+                        mask={'(99)99999-9999'}
+                        placeholder='Telefone'
+                        {...register("phone_number", { 
+                            required: "Telefone inválido",
+                            validate: (value) => {
+                                if (value.replace(/[^0-9]/g, "").length < 10) {
+                                    return "Telefone inválido";
+                                }
+                                return true;
+                            }
+                        })}/>
                     <button type="submit" className="create-button">
                         {action === "create" ? "Criar" : "Editar"}
                     </button>

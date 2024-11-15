@@ -59,7 +59,7 @@ export default function routes(){
                                 <CategoriesPage/>
                             </PrivateRoute>
                         }/>  
-                        <Route path="usuarios" element={
+                        <Route path="clientes" element={
                             <PrivateRoute>
                                 <UsersPage/>
                             </PrivateRoute>

@@ -197,7 +197,7 @@ export function SideBar(){
                 </SideBarItemContainer>
             </NavLink>
 
-            <NavLink to="/usuarios">
+            <NavLink to="/clientes">
                 <SideBarItemContainer>
                     <SideBarButton
                         isActive={isActive['users']}
@@ -205,7 +205,7 @@ export function SideBar(){
                         onClick={()=>handleActiveMenuButton('users')}
                     >
                         <FontAwesomeIcon icon={faUsers} className="Side-Bar-Icon"/>
-                        <span>Usuários</span>
+                        <span>Clientes</span>
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>

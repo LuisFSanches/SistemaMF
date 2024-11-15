@@ -1,5 +1,6 @@
 import { IAddress } from "./IAddress";
 import { IClient } from "./IClient";
+import { Status } from "./IStatus";
 
 export interface IOrder {
   id?: string;
@@ -10,7 +11,7 @@ export interface IOrder {
   clientAddress: IAddress;
   delivery_fee: number;
   has_card: false;
-  status: string;
+  status: Status;
   products_value: number;
   total: number;
 }

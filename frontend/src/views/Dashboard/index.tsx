@@ -226,6 +226,10 @@ export function DashboardPage(){
                             <Input type="tel" placeholder="Digite seu telefone" 
                                 {...register("phone_number", {
                                     required: "Telefone inválido",
+                                    minLength: {
+                                        value: 9,
+                                        message: "Telefone inválido"
+                                    }
                                 })}
                             />
                             {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
