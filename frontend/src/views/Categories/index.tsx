@@ -88,10 +88,6 @@ export function CategoriesPage(){
                             <td className="table-icon"><button className="edit-button"><span>Editar</span>  <FontAwesomeIcon icon={faPen}/></button></td>
                             <td className="table-icon"><button className="del-button"><span>Excluir</span> <FontAwesomeIcon icon={faTrash}/></button></td>
                         </tr>
-
-                        
-             
-               
                     </tbody>
                 </table>
                 <NewCategoryModal isOpen={isNewCategoryModalOpen} onRequestClose={handleCloseNewCategoryModal} />

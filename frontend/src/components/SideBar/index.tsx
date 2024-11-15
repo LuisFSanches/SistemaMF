@@ -31,6 +31,7 @@ export function SideBar(){
                     'activeOrders':false,
                     'products':false,
                     'categories':false,
+                    'allOrders':false,
                     'users':false,
                     'statistics':false
                 })
@@ -41,6 +42,7 @@ export function SideBar(){
                     'activeOrders':true,
                     'products':false,
                     'categories':false,
+                    'allOrders':false,
                     'users':false,
                     'statistics':false
                 })
@@ -51,6 +53,7 @@ export function SideBar(){
                     'activeOrders':false,
                     'products':true,
                     'categories':false,
+                    'allOrders':false,
                     'users':false,
                     'statistics':false
                 })
@@ -61,6 +64,7 @@ export function SideBar(){
                     'activeOrders':false,
                     'products':false,
                     'categories':false,
+                    'allOrders':false,
                     'users':false,
                     'statistics':true
                 })
@@ -71,7 +75,20 @@ export function SideBar(){
                     'activeOrders':false,
                     'products':false,
                     'categories':true,
+                    'allOrders':false,
                     'users':false
+                })
+            break;
+
+            case 'allOrders':
+                setActive({...isActive,
+                    'home':false,
+                    'activeOrders':false,
+                    'products':false,
+                    'categories':false,
+                    'allOrders':true,
+                    'users':false,
+                    'statistics':false
                 })
             break;
 
@@ -81,6 +98,7 @@ export function SideBar(){
                     'activeOrders':false,
                     'products':false,
                     'categories':false,
+                    'allOrders':false,
                     'users':true,
                     'statistics':false
                 })
@@ -138,8 +156,7 @@ export function SideBar(){
                 </SideBarItemContainer>
             </NavLink>
 
-
-            <NavLink to="/produtos">
+            <NavLink to="/produtos" style={{ 'display': 'none'}}>
                 <SideBarItemContainer>
                     <SideBarButton
                         isActive={isActive['products']}

@@ -37,7 +37,7 @@ export const Container = styled.div`
         background: var(--order-green);
     }
 
-    .opened{
+    .opened {
         background: #f8f4de;
         box-shadow:0.1rem 0.2rem var(--shadow-color)
     }
@@ -45,7 +45,7 @@ export const Container = styled.div`
         background:#c3d7f1;
         box-shadow: 0.1rem 0.2rem var(--shadow-color);
     }
-    .done {
+    .in_delivery {
         background:#d2e4ca;
         box-shadow: 0.1rem 0.2rem var(--shadow-color);
     }
@@ -61,93 +61,4 @@ export const Container = styled.div`
             padding: 0.4rem;
         }
     }
-`
-
-export const OrderCard= styled.div`
-    margin: 0.6rem;
-    padding: 0.5rem 0.7rem;
-    border-radius: 0.3rem;
-    color: var(--text-body);
-
-    .order-number{
-        width: 100%;
-        text-align: center;
-        margin-bottom: 0.5rem;
-    }
-
-    .inline-container {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .order-info{
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.2rem;
-
-        h2{
-            font-size: 1.65rem;
-        }
-    }
-    .client-info{
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.6rem;
-    }
-    .order-content{
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-    }
-    .order-actions{
-        width: 100%;
-        display: flex;
-        justify-content: space-around;
-        padding: 0.5rem;
-    }
-
-    .address-container, .value-container {
-        margin: 10px 0;
-
-        p {
-            margin: 5px 0;
-        }
-    }
-
-    .value-container {
-        display: flex;
-        align-items: center;
-        justify-content: end;
-        font-size: 1.1rem;
-    }
-
-    button{
-        display: flex;
-        font-size: 1.1rem;
-        padding: 0.6rem;
-        border-radius: 0.3rem;
-
-        p{
-            margin-left: 0.3rem;
-        }
-    }
-
-    .print{
-        color: var(--text-title);
-        background: #fff;
-    }
-    .to-production{
-        color: #fff;
-        background: var(--order-blue);
-    }
-    .to-finished{
-        color: #fff;
-        background: var(--order-green);
-    }
-    .delivered{
-        background: var(--orange);
-        color: #fff;
-    }
-
 `

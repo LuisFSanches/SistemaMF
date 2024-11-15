@@ -9,22 +9,27 @@ import {
     FormHeader,
     Form,
     InlineFormField,
-    FormField,
-    Label,
-    Input,
-    Textarea,
     StepButton,
     ActionButtons,
     ErrorMessage,
-    Select,
     CheckboxContainer,
     Checkbox,
     OrderSummary
 } from "./style";
+
+import {
+    FormField,
+    Label,
+    Input,
+    Select,
+    Textarea,
+} from "../../styles/global";
+
 import { NewOrderProgressBar } from "../../components/NewOrderProgressBar";
 import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
+import { useAdminData } from "../../contexts/AuthContext";
 
 interface INewOrder {
     phone_number: string;
@@ -54,6 +59,8 @@ export function DashboardPage(){
     const [addresses, setAddresses] = useState([]);
     const [addressId, setAddressId] = useState("");
     const [newAddress, setNewAddress] = useState(false);
+    const { adminData } = useAdminData();
+
     const [order, setOrder] = useState<INewOrder>({
         phone_number: "",
         first_name: "",
@@ -151,7 +158,7 @@ export function DashboardPage(){
 
         if (step === 4) {
             await createOrder({
-                admin_id: "89421bec-9b8c-4ace-9bc9-53663248538f",
+                admin_id: adminData.id,
                 clientId: client_id,
                 ...orderData,
             })
@@ -164,7 +171,6 @@ export function DashboardPage(){
 
     useEffect(() => {
         const fetchClientData = async () => {
-
             if (phone_number && phone_number.length > 7) {
                 try {
                     const response = await getClientByPhone(phone_number);

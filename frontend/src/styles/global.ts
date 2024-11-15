@@ -6,7 +6,8 @@ export const GlobalStyle = createGlobalStyle`
     --background: #f7f2f2;
     --primary-color: #e4bfc7;
     --sideBarBackground: #e7b7c2;
-    --light-background: #e4bfc7;
+    --light-background: #E9CBD2;
+    --tbody-background: #F4E5E8;
     --white-background: #fafafa;
     --black-background: #3E3E3E;
     --table-background: #f9f9f9;
@@ -14,8 +15,7 @@ export const GlobalStyle = createGlobalStyle`
     --red: #E52E40;
     --green:#33CC95;
     --blue:#18CECF;
-    --orange:#e4742a;
-    --light-orange:#fcf2eb;
+    --light-orange:var(--tbody-background);
 
     --text-white: #fff;
     --text-title: #666666;
@@ -28,7 +28,6 @@ export const GlobalStyle = createGlobalStyle`
     --order-green:#6aa84f;
 
     --shadow-color: #abb5bc
-
 }
 
 *{
@@ -61,9 +60,10 @@ a{
 }
 
 body{
-     background: var(--background);
-     -webkit-font-smoothing:antialiased;
- }
+    background: var(--background);
+    -webkit-font-smoothing:antialiased;
+}
+
 table{
         width: 100%;
         background:var(--table-background);
@@ -71,7 +71,6 @@ table{
         border: 1px solid var(--shadow-color);
         box-shadow: 0.2rem 0.3rem var(--shadow-color);
         
-       
         th{
             text-align: center;
             color: var(--text-title);
@@ -82,7 +81,7 @@ table{
         thead{
             height: 10px;
             width: calc(100% - 10px);
-            background: #f3cbb1;
+            background: var(--light-background);
         }
         tbody{
             display: block;
@@ -104,7 +103,7 @@ table{
             text-align: center;
         }
         tr:nth-child(even) {
-            background-color: #fcf2eb;
+            background-color: var(--tbody-background);
         }
         
         td{
@@ -130,7 +129,6 @@ table{
             tbody{
                 overflow-x: auto;
             }
-           
             .table-item-id{
                 display: none
             };
@@ -169,9 +167,9 @@ button{
 }
 
 .create-button{
-        background: var(--orange);
-        color:var(--text-white);
-        font-weight:600
+    background: var(--sideBarBackground);
+    color:var(--text-white);
+    font-weight:600
 }
 
 .view-button{
@@ -221,4 +219,112 @@ export const PageContainer = styled.div`
     max-width: 100vw;
     display: flex;
     justify-content: start;
+`
+
+export const ModalContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+
+    h2{
+        color: var(--text-title);
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    input{
+        width: 100%;
+        padding: 0 1.5rem;
+        height: 4rem;
+        border-radius: 0.25rem;
+        margin-bottom:1rem
+    }
+
+    button[type="submit"]{
+        width: 100%;
+        padding:0 1.5rem;
+        height: 4rem;
+        margin-top: 0.5rem;
+        font-size: 1.1rem;
+        transition: filter 0.2s;
+        border-radius: 0.3rem;
+
+            &:hover{
+                filter: brightness(1.2);
+            }
+    }
+`
+
+export const Form = styled.form`
+    display: flex;
+    flex-direction: column;
+`
+
+export const FormField = styled.div<{ isShortField?: boolean }>`
+    width: 85%;
+    width: ${({ isShortField }) => (isShortField ? '35%' : '85%')};
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    margin-top: 20px;
+`;
+
+export const Label = styled.label`
+    font-size: 16px;
+    color: #5B5B5B;
+    font-weight: 600;
+    margin-bottom: 8px;
+`;
+
+export const Input = styled.input`
+    padding: 12px;
+    border: 1px solid #e7b7c2;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    &:focus {
+        border-color: #d48a9b;
+    }
+`;
+
+export const Select = styled.select`
+    padding: 12px;
+    border: 1px solid #e7b7c2;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    &:focus {
+        border-color: #d48a9b;
+    }
+`
+
+export const Textarea = styled.textarea`
+    min-height: 120px;
+    padding: 12px;
+    border: 1px solid #e7b7c2;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    &:focus {
+        border-color: #d48a9b;
+    }
+`;
+
+export const AddButton = styled.button`
+    display: flex;
+    padding: 0.5rem;
+    background: var(--sideBarBackground);
+    font-size: 1.1rem;
+    border-radius: 0.4rem;
+    margin-bottom: 0.8rem;
+    color: white;
+    font-weight: 700;
+
+    p {
+        margin-left: 0.3rem;
+        
+    }
+`
+export const PageHeader = styled.div`
+    display: flex;
+    justify-content: space-between;
 `

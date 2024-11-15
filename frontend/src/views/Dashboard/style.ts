@@ -38,16 +38,6 @@ export const Form = styled.form<{ step?: number }>`
     box-shadow: 0.1rem 0.2rem 0.2rem var(--shadow-color);
 `
 
-export const FormField = styled.div<{ isShortField?: boolean }>`
-    width: 85%;
-    width: ${({ isShortField }) => (isShortField ? '35%' : '85%')};
-    display: flex;
-    flex-direction: column;
-    margin: 0 auto;
-    margin-bottom: 10px;
-    margin-top: 20px;
-`;
-
 export const InlineFormField = styled.div`
     width: 85%;
     display: flex;
@@ -57,47 +47,6 @@ export const InlineFormField = styled.div`
         margin-right: 10px;
     }
 `
-
-export const Label = styled.label`
-    font-size: 16px;
-    color: #5B5B5B;
-    font-weight: 600;
-    margin-bottom: 8px;
-`;
-
-export const Input = styled.input`
-    padding: 12px;
-    border: 1px solid #e7b7c2;
-    border-radius: 8px;
-    font-size: 16px;
-    outline: none;
-    &:focus {
-        border-color: #d48a9b;
-    }
-`;
-
-export const Select = styled.select`
-    padding: 12px;
-    border: 1px solid #e7b7c2;
-    border-radius: 8px;
-    font-size: 16px;
-    outline: none;
-    &:focus {
-        border-color: #d48a9b;
-    }
-`
-
-export const Textarea = styled.textarea`
-    min-height: 120px;
-    padding: 12px;
-    border: 1px solid #e7b7c2;
-    border-radius: 8px;
-    font-size: 16px;
-    outline: none;
-    &:focus {
-        border-color: #d48a9b;
-    }
-`;
 
 export const StepButton = styled.button `
     display: flex;

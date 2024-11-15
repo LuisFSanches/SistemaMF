@@ -63,3 +63,28 @@ export const getOnGoingOrders = async () => {
   
   return response;
 };
+
+export const getAllOrders = async () => {
+  const response = await api.get("/order/all", {
+    headers: {
+      Authorization: `${token}`,
+    }
+  });
+  
+  return response;
+}
+
+export const updateStatus = async({
+  id,
+  status
+}: any) => {
+  const response = await api.patch(`/order/${id}`, {
+    id,
+    status,
+    headers: {
+      Authorization: `${token}`,
+    }
+  });
+  
+  return response;
+};

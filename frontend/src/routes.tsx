@@ -7,6 +7,7 @@ import { DashboardPage } from "./views/Dashboard";
 import { GlobalStyle } from "./styles/global";
 import { ServiceOrdersPage } from "./views/Service-Orders";
 import { UsersPage } from "./views/Users";
+import { OrdersPage } from "./views/Orders";
 import { CategoriesPage } from "./views/Categories";
 import { LoginPage } from "./views/LoginPage";
 import { SideBarLayout } from "./views/SideBarLayout";
@@ -43,11 +44,36 @@ export default function routes(){
                                 <DashboardPage/>
                             </PrivateRoute>
                         }/>
-                        <Route path="ordens-de-servico" element={<ServiceOrdersPage/>}/>
-                        <Route path="produtos" element={<ProductsPage/>}/>
-                        <Route path="categorias" element={<CategoriesPage/>}/>  
-                        <Route path="usuarios" element={<UsersPage/>}/>
-                        <Route path="estatisticas" element={<Statistics/>}/>
+                        <Route path="ordens-de-servico" element={
+                            <PrivateRoute>
+                                <ServiceOrdersPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="produtos" element={
+                            <PrivateRoute>
+                                <ProductsPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="categorias" element={
+                            <PrivateRoute>
+                                <CategoriesPage/>
+                            </PrivateRoute>
+                        }/>  
+                        <Route path="usuarios" element={
+                            <PrivateRoute>
+                                <UsersPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="pedidos" element={
+                            <PrivateRoute>
+                                <OrdersPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="estatisticas" element={
+                            <PrivateRoute>
+                                <Statistics/>
+                            </PrivateRoute>
+                        }/>
                     </Route>
                     <Route path="/" element={
                         <IsAuthenticatedRoutes>

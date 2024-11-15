@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useState, useContext } from "react";
 
 import { api } from "../services/api";
 import { authenticateUser } from "../services/authenticationService";
@@ -7,7 +7,7 @@ import { authenticateUser } from "../services/authenticationService";
 interface IAuthContextData {
   isAuthenticated: boolean;
   loading: boolean;
-  userData: {
+  adminData: {
     id: string;
     username: string;
   };
@@ -24,7 +24,7 @@ export const AuthContext = createContext({} as IAuthContextData);
 export function AuthProvider({ children }: IAuthProviderProps) {
   const [isAuthenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState({
+  const [adminData, setAdminData] = useState({
     id: "",
     username: "",
   });
@@ -32,6 +32,7 @@ export function AuthProvider({ children }: IAuthProviderProps) {
   const handleLogin = async (username: string, password: string) => {
     try {
       const response: any = await authenticateUser(username, password);
+      setAdminData(response.data.admin);
       const token = `${response.data.token}`;
       localStorage.setItem("token", JSON.stringify(token));
       api.defaults.headers.common.authorization = token;
@@ -45,7 +46,6 @@ export function AuthProvider({ children }: IAuthProviderProps) {
   };
 
   const handleSignOut = async () => {
-    console.log('OKOKOK')
     setAuthenticated(false);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -58,10 +58,6 @@ export function AuthProvider({ children }: IAuthProviderProps) {
       api.defaults.headers.common.authorization = `${JSON.parse(token)}`;
       setAuthenticated(true);
     }
-    const user = localStorage.getItem("user");
-    if (user) {
-      setUserData(JSON.parse(user));
-    }
     setLoading(false);
   }, []);
 
@@ -70,7 +66,7 @@ export function AuthProvider({ children }: IAuthProviderProps) {
       value={{
         isAuthenticated,
         loading,
-        userData,
+        adminData,
         handleLogin,
         handleSignOut,
       }}
@@ -79,3 +75,9 @@ export function AuthProvider({ children }: IAuthProviderProps) {
     </AuthContext.Provider>
   );
 }
+
+export const useAdminData = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAdminData must be used within a ClientsProvider");
+  return context;
+};

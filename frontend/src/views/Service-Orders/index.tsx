@@ -1,25 +1,22 @@
 import { useState, useEffect, useRef } from "react";
-import moment from "moment";
-import { Container, OrderCard} from "./style";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faAnglesRight, faPrint } from "@fortawesome/free-solid-svg-icons";
-import { getOnGoingOrders } from "../../services/orderService";
+import { Container } from "./style";
+import { getOnGoingOrders, updateStatus } from "../../services/orderService";
+import { OrderCard } from "../../components/OrderCard";
 
 export function ServiceOrdersPage(){
-
 	const [openedOrders, setOpenedOrders] = useState([]);
 	const [inProgressOrders, setInProgressOrders] = useState([]);
-	const [doneOrders, setDoneOrders] = useState([]);
+	const [inDeliveryOrders, setInDeliveryOrders] = useState([]);
+
+	const fetchOrders = async () => {
+		const response = await getOnGoingOrders();
+		const { data } = response;
+		setOpenedOrders(data.filter((order: any) => order.status === "OPENED"));
+		setInProgressOrders(data.filter((order: any) => order.status === "IN_PROGRESS"));
+		setInDeliveryOrders(data.filter((order: any) => order.status === "IN_DELIVERY"));
+	};
 
 	useEffect(() => {
-		const fetchOrders = async () => {
-			const response = await getOnGoingOrders();
-			const { data } = response;
-			setOpenedOrders(data.filter((order: any) => order.status === "OPENED"));
-			setInProgressOrders(data.filter((order: any) => order.status === "IN_PROGRESS"));
-			setDoneOrders(data.filter((order: any) => order.status === "DONE"));
-		};
-
 		fetchOrders();
 	}, []);
 
@@ -54,9 +51,12 @@ export function ServiceOrdersPage(){
 		}
 	};
 
-	console.log(openedOrders);
+	const handleOrderStatus = async (id: string, status: string) => {
+		await updateStatus({ id, status });
+		await fetchOrders();
+	}
 
-    return(
+    return (
 		<Container>
 			<div className="order-container">
 				<header className="opened-order">
@@ -64,44 +64,13 @@ export function ServiceOrdersPage(){
 				</header>
 				{openedOrders.map((order: any) => (
 					<div key={order.id} id={`order-card-${order.id}`}>
-						<OrderCard className={order?.status?.toLowerCase()}>
-							<div className="order-number">
-								<h2>Pedido #{order.code}</h2>
-							</div>
-							<div className="client-info">
-								<h3>Cliente: {order.client.first_name} {order.client.last_name}</h3>
-								<h3>Realizado em: {moment(order.created_at).format("h:mm")}</h3>
-							</div>
-							<div className="order-content">
-								<div className="order-items">
-									<h3>Descrição do pedido</h3>
-									<p>{order.description}</p>
-								</div>
-								<div className="order-observation">
-									<h3>Observação</h3>
-									<p>{order.additional_information}</p>
-								</div>
-							</div>
-							<div className="address-container">
-								<p><strong>Endereço:</strong></p>
-								<p>{order.clientAddress.street}, {order.clientAddress.street_number}</p>
-								<p>{order.clientAddress.neighborhood}, {order.clientAddress.city}</p>
-							</div>
-							<div className="value-container">
-								<p><strong>Total:</strong> R$ {order.total}</p>
-							</div>
-							<div className="order-actions">
-								<button className="print" onClick={() => handlePrint(`order-card-${order.id}`)}> 
-									<FontAwesomeIcon icon={faPrint}/>
-									<p>Imprimir</p>
-								</button>
-
-								<button className="to-production">
-									<FontAwesomeIcon icon={faAnglesRight}/>
-									<p>Em Produção</p>
-								</button>
-							</div>
-						</OrderCard>
+						<OrderCard order={order}
+							handlePrint={handlePrint}
+							handleOrderStatus={handleOrderStatus}
+							buttonStatus="to-production"
+							nextStatus="IN_PROGRESS"
+							nextAction="Em produção"
+						/>
 					</div>
 				))}
 			</div>
@@ -110,89 +79,33 @@ export function ServiceOrdersPage(){
 					Em produção
 				</header>
 				{inProgressOrders.map((order: any) => (
-                	<div key={order.id} id={`order-card-${order.id}`}>
-						<OrderCard className={order?.status?.toLowerCase()}>
-							<div className="order-number">
-								<h2>Pedido #{order.code}</h2>
-							</div>
-							<div className="client-info">
-								<h3>Cliente: {order.client.first_name} {order.client.last_name}</h3>
-								<h3>Realizado em: {moment(order.created_at).format("h:mm")}</h3>
-							</div>
-							<div className="order-content">
-								<div className="order-items">
-									<h3>Descrição do pedido</h3>
-									<p>{order.description}</p>
-								</div>
-								<div className="order-observation">
-									<h3>Observação</h3>
-									<p>{order.additional_information}</p>
-								</div>
-							</div>
-							<div className="address-container">
-								<p><strong>Endereço:</strong></p>
-								<p>{order.clientAddress.street}, {order.clientAddress.street_number}</p>
-								<p>{order.clientAddress.neighborhood}, {order.clientAddress.city}</p>
-							</div>
-							<div className="order-actions">
-								<button className="print" onClick={() => handlePrint(`order-card-${order.id}`)}> 
-									<FontAwesomeIcon icon={faPrint}/>
-									<p>Imprimir</p>
-								</button>
-
-								<button className="to-finished">
-									<FontAwesomeIcon icon={faAnglesRight}/>
-									<p>Saiu para Entrega</p>
-								</button>
-							</div>
-						</OrderCard>
-                	</div>
-                ))}
+            		<div key={order.id} id={`order-card-${order.id}`}>
+						<OrderCard order={order}
+							handlePrint={handlePrint}
+							handleOrderStatus={handleOrderStatus}
+							buttonStatus="to-finished"
+							nextStatus="IN_DELIVERY"
+							nextAction="Entrega"
+						/>
+            		</div>
+            	))}
 			</div>
 			<div className="order-container">
 				<header className="finished-order">
 					Rota de Entrega
 				</header>
-				{doneOrders.map((order: any) => (
-                	<div key={order.id} id={`order-card-${order.id}`}>
-						<OrderCard className={order?.status?.toLowerCase()}>
-							<div className="order-number">
-								<h2>Pedido #{order.code}</h2>
-							</div>
-							<div className="client-info">
-								<h3>Cliente: {order.client.first_name} {order.client.last_name}</h3>
-								<h3>Realizado em: {moment(order.created_at).format("h:mm")}</h3>
-							</div>
-							<div className="order-content">
-								<div className="order-items">
-									<h3>Descrição do pedido</h3>
-									<p>{order.description}</p>
-								</div>
-								<div className="order-observation">
-									<h3>Observação</h3>
-									<p>{order.additional_information}</p>
-								</div>
-							</div>
-							<div className="address-container">
-								<p><strong>Endereço:</strong></p>
-								<p>{order.clientAddress.street}, {order.clientAddress.street_number}</p>
-								<p>{order.clientAddress.neighborhood}, {order.clientAddress.city}</p>
-							</div>
-							<div className="order-actions">
-								<button className="print" onClick={() => handlePrint(`order-card-${order.id}`)}> 
-									<FontAwesomeIcon icon={faPrint}/>
-									<p>Imprimir</p>
-								</button>
-
-								<button className="delivered">
-									<FontAwesomeIcon icon={faAnglesRight}/>
-									<p>Entregue</p>
-								</button>
-							</div>
-						</OrderCard>
-                	</div>
-                ))}
+				{inDeliveryOrders.map((order: any) => (
+          			<div key={order.id} id={`order-card-${order.id}`}>
+						<OrderCard order={order}
+							handlePrint={handlePrint}
+							handleOrderStatus={handleOrderStatus}
+							buttonStatus="delivered"
+							nextStatus="DONE"
+							nextAction="Finalizado"
+						/>
+          			</div>
+          		))}
 			</div>
 		</Container>
-)
+	)
 }
