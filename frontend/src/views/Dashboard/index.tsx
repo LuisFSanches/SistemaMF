@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { set, useForm } from "react-hook-form";
-
+import { useForm } from "react-hook-form";
+import InputMask from "react-input-mask";
 import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
 import { faPrint, faNewspaper } from "@fortawesome/free-solid-svg-icons";
-
 import {
     Container,
     FormHeader,
@@ -30,6 +29,8 @@ import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
 import { useAdminData } from "../../contexts/AuthContext";
+import { rawTelephone } from "../../utils";
+import { useNavigate } from "react-router-dom";
 
 interface INewOrder {
     phone_number: string;
@@ -59,7 +60,9 @@ export function DashboardPage(){
     const [addresses, setAddresses] = useState([]);
     const [addressId, setAddressId] = useState("");
     const [newAddress, setNewAddress] = useState(false);
+    const [mask, setMask] = useState("(99) 99999-9999");
     const { adminData } = useAdminData();
+    const navigate = useNavigate();
 
     const [order, setOrder] = useState<INewOrder>({
         phone_number: "",
@@ -131,7 +134,7 @@ export function DashboardPage(){
         const total = Number(products_value) + Number(delivery_fee);
 
         const orderData = {
-            phone_number,
+            phone_number: rawTelephone(phone_number),
             first_name,
             last_name,
             addressId,
@@ -162,6 +165,8 @@ export function DashboardPage(){
                 clientId: client_id,
                 ...orderData,
             })
+
+            navigate("/ordensDeServico");
         }
 
         handleNextStep();
@@ -171,9 +176,12 @@ export function DashboardPage(){
 
     useEffect(() => {
         const fetchClientData = async () => {
-            if (phone_number && phone_number.length > 7) {
+            const phoneNumber = rawTelephone(phone_number);
+
+
+            if (phoneNumber && phoneNumber.length > 7) {
                 try {
-                    const response = await getClientByPhone(phone_number);
+                    const response = await getClientByPhone(phoneNumber);
                     const { data: client } = response;
 
                     if (!client) {
@@ -199,6 +207,21 @@ export function DashboardPage(){
         fetchClientData();
     }, [phone_number, setValue, setError]);
 
+    useEffect(() => {
+        const phoneNumber = watch("phone_number") || "";
+        const numericValue = rawTelephone(phoneNumber);
+    
+        const timeout = setTimeout(() => {
+            if (numericValue.length === 10) {
+                setMask("(99) 9999-9999");
+            } else {
+                setMask("(99) 99999-9999");
+            }
+        }, 1000);
+
+        return () => clearTimeout(timeout);
+    }, [watch("phone_number")]);
+
     const handlePrint = () => {
         if (formRef.current) {
             const printWindow = window.open('', '', 'height=800,width=800');
@@ -223,12 +246,18 @@ export function DashboardPage(){
                     <>
                         <FormField>
                             <Label>Telefone</Label>
-                            <Input type="tel" placeholder="Digite seu telefone" 
-                                {...register("phone_number", {
+                            <InputMask
+                                mask={mask}
+                                alwaysShowMask={false}
+                                placeholder='Telefone'
+                                value={watch("phone_number") || ""}
+                                {...register("phone_number", { 
                                     required: "Telefone inválido",
-                                    minLength: {
-                                        value: 9,
-                                        message: "Telefone inválido"
+                                    validate: (value) => {
+                                        if (value.replace(/[^0-9]/g, "").length < 10) {
+                                            return "Telefone inválido";
+                                        }
+                                        return true;
                                     }
                                 })}
                             />

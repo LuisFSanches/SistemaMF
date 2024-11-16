@@ -142,6 +142,15 @@ table{
         
     }
 
+    input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #e7b7c2;
+        outline: none;
+        font-size: 16px;
+    }
+
 button{
     cursor: pointer;
     outline: none;
@@ -230,15 +239,12 @@ export const ModalContainer = styled.div`
         font-size: 1.5rem;
         margin-bottom: 2rem;
     }
+
     input{
-        width: 100%;
         padding: 0 1.5rem;
         height: 4rem;
         border-radius: 0.25rem;
         margin-bottom: 1rem;
-        border: 1px solid #e7b7c2;
-        outline: none;
-        font-size: 16px;
     }
 
     button[type="submit"]{

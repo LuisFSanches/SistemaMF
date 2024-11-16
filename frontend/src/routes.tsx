@@ -44,7 +44,7 @@ export default function routes(){
                                 <DashboardPage/>
                             </PrivateRoute>
                         }/>
-                        <Route path="ordens-de-servico" element={
+                        <Route path="ordensDeServico" element={
                             <PrivateRoute>
                                 <ServiceOrdersPage/>
                             </PrivateRoute>

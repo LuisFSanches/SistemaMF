@@ -1,8 +1,21 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { Container,SideBarItemContainer, SideBarButton, LogoContainer, CompanyInfoContainer, MinimizeButton } from "./style";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowLeft, faArrowRight, faBars, faBasketShopping, faChartLine, faGear, faHouse, faLayerGroup, faRightFromBracket, faUsers, faUtensils } from "@fortawesome/free-solid-svg-icons";
+import {
+    faArrowLeft,
+    faArrowRight,
+    faBars,
+    faBasketShopping,
+    faChartLine,
+    faGear,
+    faHouse,
+    faLayerGroup,
+    faRightFromBracket,
+    faUsers,
+    faUtensils,
+    faUserShield
+} from "@fortawesome/free-solid-svg-icons";
 
 import { NavLink} from 'react-router-dom'
 import logo from '../../assets/images/logo.png'
@@ -11,12 +24,12 @@ export function SideBar(){
     const { handleSignOut } = useContext(AuthContext);
 
     const [isActive, setActive] = useState({
-        home:true,
-        activeOrders:false,
-        products:false,
-        categories:false,
-        allOrders:false,
-        users:false,
+        dashboard:true,
+        ordensDeServico:false,
+        produtos:false,
+        categorias:false,
+        pedidos:false,
+        clientes:false,
         statistics:false,
         configurations:false,
     })
@@ -24,87 +37,93 @@ export function SideBar(){
     const [isMinimized, setMinimized] = useState(false)
 
     function handleActiveMenuButton(name:string){
+        console.log(name)
         switch(name){
-            case 'home':
+            case 'dashboard':
                 setActive({...isActive, 
-                    'home':true,
-                    'activeOrders':false,
-                    'products':false,
-                    'categories':false,
-                    'allOrders':false,
-                    'users':false,
+                    'dashboard':true,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
                     'statistics':false
                 })
             break;
-            case 'orders':
+            case 'ordensDeServico':
                 setActive({...isActive,
-                    'home':false,
-                    'activeOrders':true,
-                    'products':false,
-                    'categories':false,
-                    'allOrders':false,
-                    'users':false,
+                    'dashboard':false,
+                    'ordensDeServico':true,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
                     'statistics':false
                 })
             break;
-            case 'products':
+            case 'produtos':
                 setActive({...isActive,
-                    'home':false,
-                    'activeOrders':false,
-                    'products':true,
-                    'categories':false,
-                    'allOrders':false,
-                    'users':false,
+                    'dashboard':false,
+                    'ordensDeServico':false,
+                    'produtos':true,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
                     'statistics':false
                 })
             break;
             case 'statistics':
                 setActive({...isActive, 
-                    'home':false,
-                    'activeOrders':false,
-                    'products':false,
-                    'categories':false,
-                    'allOrders':false,
-                    'users':false,
+                    'dashboard':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
                     'statistics':true
                 })
             break;
-            case 'categories':
+            case 'categorias':
                 setActive({...isActive,
-                    'home':false,
-                    'activeOrders':false,
-                    'products':false,
-                    'categories':true,
-                    'allOrders':false,
-                    'users':false
+                    'dashboard':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':true,
+                    'pedidos':false,
+                    'clientes':false
                 })
             break;
 
-            case 'allOrders':
+            case 'pedidos':
                 setActive({...isActive,
-                    'home':false,
-                    'activeOrders':false,
-                    'products':false,
-                    'categories':false,
-                    'allOrders':true,
-                    'users':false,
+                    'dashboard':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':true,
+                    'clientes':false,
                     'statistics':false
                 })
             break;
 
-            case 'users':
+            case 'clientes':
                 setActive({...isActive,
-                    'home':false,
-                    'activeOrders':false,
-                    'products':false,
-                    'categories':false,
-                    'allOrders':false,
-                    'users':true,
+                    'dashboard':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':true,
                     'statistics':false
                 })
             break;
         }
     }
+
+    useEffect(() => {
+        const url = window.location.pathname;
+        handleActiveMenuButton(url.replace("/", ""));
+    }, [])
 
     function handleMinimization(){
         setMinimized(!isMinimized)
@@ -130,11 +149,10 @@ export function SideBar(){
                 }
             </MinimizeButton>
             <NavLink to="/dashboard">
-                <SideBarItemContainer>
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('dashboard')}>
                     <SideBarButton
-                        isActive={isActive['home']}
+                        isActive={isActive['dashboard']}
                         isMinimizedActive={isMinimized}
-                        onClick={()=>handleActiveMenuButton('home')}
                     >
                         <FontAwesomeIcon icon={faHouse} className="Side-Bar-Icon"/>
                         <span>Home</span>
@@ -142,12 +160,11 @@ export function SideBar(){
                 </SideBarItemContainer>
             </NavLink>
 
-            <NavLink to="/ordens-de-servico" >
-                <SideBarItemContainer>
+            <NavLink to="/ordensDeServico" >
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('ordensDeServico')}>
                     <SideBarButton
-                        isActive={isActive['activeOrders']}
+                        isActive={isActive['ordensDeServico']}
                         isMinimizedActive={isMinimized}
-                        onClick={()=>handleActiveMenuButton('orders')}
                     >
                         <FontAwesomeIcon icon={faBars} className="Side-Bar-Icon"/>
                         <span>Ordens de Serviço</span>
@@ -157,11 +174,10 @@ export function SideBar(){
             </NavLink>
 
             <NavLink to="/produtos" style={{ 'display': 'none'}}>
-                <SideBarItemContainer>
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('produtos')}>
                     <SideBarButton
-                        isActive={isActive['products']}
+                        isActive={isActive['produtos']}
                         isMinimizedActive={isMinimized}
-                        onClick={()=>handleActiveMenuButton('products')}
                     >
                         <FontAwesomeIcon icon={faUtensils} className="Side-Bar-Icon"/>
                         <span>Produtos</span>
@@ -170,12 +186,11 @@ export function SideBar(){
                 </SideBarItemContainer>
             </NavLink>
 
-            <NavLink to="/categorias">
-                <SideBarItemContainer>
+            <NavLink to="/categorias" style={{ 'display': 'none'}}>
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('categorias')}>
                     <SideBarButton
-                        isActive={isActive['categories']}
+                        isActive={isActive['categorias']}
                         isMinimizedActive={isMinimized}
-                        onClick={()=>handleActiveMenuButton('categories')}
                     >
                         <FontAwesomeIcon icon={faLayerGroup} className="Side-Bar-Icon"/>
                         <span>Categorias</span>
@@ -185,11 +200,10 @@ export function SideBar(){
             </NavLink>
 
             <NavLink to="/pedidos">
-                <SideBarItemContainer>
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidos')}>
                     <SideBarButton
-                        isActive={isActive['allOrders']}
+                        isActive={isActive['pedidos']}
                         isMinimizedActive={isMinimized}
-                        onClick={()=>handleActiveMenuButton('allOrders')}
                     >
                         <FontAwesomeIcon icon={faBasketShopping} className="Side-Bar-Icon"/>
                         <span>Pedidos</span>
@@ -198,11 +212,10 @@ export function SideBar(){
             </NavLink>
 
             <NavLink to="/clientes">
-                <SideBarItemContainer>
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('clientes')}>
                     <SideBarButton
-                        isActive={isActive['users']}
+                        isActive={isActive['clientes']}
                         isMinimizedActive={isMinimized}
-                        onClick={()=>handleActiveMenuButton('users')}
                     >
                         <FontAwesomeIcon icon={faUsers} className="Side-Bar-Icon"/>
                         <span>Clientes</span>
@@ -211,11 +224,10 @@ export function SideBar(){
             </NavLink>
 
             <NavLink to="/estatisticas">
-                <SideBarItemContainer>
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('statistics')}>
                     <SideBarButton
                         isActive={isActive['statistics']}
                         isMinimizedActive={isMinimized}
-                        onClick={()=>handleActiveMenuButton('statistics')}
                     >
                         <FontAwesomeIcon icon={faChartLine} className="Side-Bar-Icon"/>
                         <span>Estatísticas</span>
@@ -223,15 +235,14 @@ export function SideBar(){
                 </SideBarItemContainer>
             </NavLink>
 
-            <NavLink to="/configuracoes">
+            <NavLink to="/administradores" onClick={()=>handleActiveMenuButton('configurations')}>
                 <SideBarItemContainer>
                     <SideBarButton
                         isActive={isActive['configurations']}
                         isMinimizedActive={isMinimized}
-                        onClick={()=>handleActiveMenuButton('configurations')}
                     >
-                        <FontAwesomeIcon icon={faGear} className="Side-Bar-Icon"/>
-                        <span>Configurações</span>
+                        <FontAwesomeIcon icon={faUserShield} className="Side-Bar-Icon"/>
+                        <span>Administradores</span>
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>

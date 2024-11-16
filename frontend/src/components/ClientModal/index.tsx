@@ -1,12 +1,13 @@
-import { useEffect, useContext } from "react";
+import { useEffect, useState } from "react";
 import Modal from 'react-modal';
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { ModalContainer, Form, Input, ErrorMessage } from '../../styles/global';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { createClient, updateClient } from "../../services/clientService";
 import { useClients } from "../../contexts/ClientsContext";
+import { clear } from "console";
 
 interface ClientModalProps{
     isOpen: boolean;
@@ -31,17 +32,23 @@ export function ClientModal({
     currentClient
 }:ClientModalProps){
     const { loadAvailableClients, editClient, addClient } = useClients();
-
+    const [mask, setMask] = useState("(99) 99999-9999");
     const {
         register,
         handleSubmit,
         setValue,
         setError,
         reset,
+        watch,
         formState: { errors },
     } = useForm<IUsers>();
 
-    const handleUser = async (data: IUsers) => {
+    const handleUser = async (formData: IUsers) => {
+        const data = {
+            ...formData,
+            phone_number: formData.phone_number.replace(/[^0-9]/g, "")
+        }
+
         if (action === "create") {
             const { data: clientData } = await createClient(data);
             addClient(clientData);
@@ -64,6 +71,22 @@ export function ClientModal({
         setValue("phone_number", currentClient.phone_number);
     }, [currentClient]);
 
+    useEffect(() => {
+        const phoneNumber = watch("phone_number") || "";
+        const numericValue = phoneNumber.replace(/[^0-9]/g, "");
+    
+        const timeout = setTimeout(() => {
+            if (numericValue.length === 10) {
+                setMask("(99) 9999-9999");
+            } else {
+                setMask("(99) 99999-9999");
+            }
+            console.log('CHAMOU')
+        }, 1000);
+
+        return () => clearTimeout(timeout);
+    }, [watch("phone_number")]);
+
     return(
         <Modal 
             isOpen={isOpen}
@@ -84,8 +107,9 @@ export function ClientModal({
                     <Input placeholder='Sobrenome' {...register("last_name", { required: "Sobrenome inválido" })}/>
                     {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
                     <InputMask
-                        mask={'(99)99999-9999'}
+                        mask={mask}
                         placeholder='Telefone'
+                        value={watch("phone_number") || ""}
                         {...register("phone_number", { 
                             required: "Telefone inválido",
                             validate: (value) => {
@@ -94,7 +118,8 @@ export function ClientModal({
                                 }
                                 return true;
                             }
-                        })}/>
+                        })}
+                    />
                     <button type="submit" className="create-button">
                         {action === "create" ? "Criar" : "Editar"}
                     </button>
