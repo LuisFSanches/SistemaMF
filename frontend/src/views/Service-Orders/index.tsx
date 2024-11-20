@@ -23,7 +23,7 @@ export function ServiceOrdersPage(){
 	const handlePrint = (orderCardId: string) => {
 		const orderCard = document.getElementById(orderCardId);
 		if (orderCard) {
-			const printWindow = window.open('', '_blank');
+			const printWindow = window.open('', '', 'height=840,width=1100');
 			printWindow?.document.write(`
 				<html>
 					<head>
@@ -68,8 +68,11 @@ export function ServiceOrdersPage(){
 							handlePrint={handlePrint}
 							handleOrderStatus={handleOrderStatus}
 							buttonStatus="to-production"
+							previousButtonStatus={null}
 							nextStatus="IN_PROGRESS"
+							previousStatus={null}
 							nextAction="Em produção"
+							previousAction={null}
 						/>
 					</div>
 				))}
@@ -79,13 +82,16 @@ export function ServiceOrdersPage(){
 					Em produção
 				</header>
 				{inProgressOrders.map((order: any) => (
-            		<div key={order.id} id={`order-card-${order.id}`}>
+          	<div key={order.id} id={`order-card-${order.id}`}>
 						<OrderCard order={order}
 							handlePrint={handlePrint}
 							handleOrderStatus={handleOrderStatus}
 							buttonStatus="to-finished"
+							previousButtonStatus="to-production"
 							nextStatus="IN_DELIVERY"
+							previousStatus="OPENED"
 							nextAction="Entrega"
+							previousAction="Em produção"
 						/>
             		</div>
             	))}
@@ -100,8 +106,11 @@ export function ServiceOrdersPage(){
 							handlePrint={handlePrint}
 							handleOrderStatus={handleOrderStatus}
 							buttonStatus="delivered"
+							previousButtonStatus="to-finished"
 							nextStatus="DONE"
+							previousStatus="IN_PROGRESS"
 							nextAction="Finalizado"
+							previousAction="Entrega"
 						/>
           			</div>
           		))}

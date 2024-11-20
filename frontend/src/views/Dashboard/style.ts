@@ -36,6 +36,25 @@ export const Form = styled.form<{ step?: number }>`
     background: ${({ step }) => (step === 4 ? '#FAF2E7' : 'white')};
     border-radius: 20px;
     box-shadow: 0.1rem 0.2rem 0.2rem var(--shadow-color);
+    overflow-y: scroll;
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #fcc5d0;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
 `
 
 export const InlineFormField = styled.div`
@@ -64,12 +83,12 @@ export const StepButton = styled.button `
 export const ActionButtons = styled.div`
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin: 20px 0;
 `
 
 export const CheckboxContainer = styled.div`
     display: flex;
-    align-items: initial;
+    align-items: center;
     margin: 10px 0px;
     
     label {
@@ -101,7 +120,7 @@ export const Checkbox = styled.input`
     &:checked::after {
         content: '✓';
         color: white;
-        font-size: 14px;
+        font-size: 19px;
         position: absolute;
         top: 1px;
         left: 4px;

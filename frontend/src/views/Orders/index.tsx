@@ -1,33 +1,26 @@
 import { useState } from "react";
-
+import { IOrder } from "../../interfaces/IOrder";
 import { Container } from "./style";
 import { PageHeader } from "../../styles/global";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faEye, faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
-import { ClientModal } from "../../components/ClientModal";
+import { OrderDetailModal } from "../../components/OrderDetailModal";
 import { useOrders } from "../../contexts/OrdersContext";
-import { statusLabel } from "../../constants";
+import { STATUS_LABEL } from "../../constants";
+
 
 export function OrdersPage(){
     const { orders } = useOrders();
-	console.log(orders);
 
-    const [clientModalModal, setClientModal] = useState(false);
-    const [action, setAction] = useState("");
-    const [currentClient, setCurrentClient] = useState({
-        id: "",
-        first_name: "",
-        last_name: "",
-        phone_number: ""
-    });
+    const [orderDetailModal, setOrderDetailModal] = useState(false);
+    const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 
-    function handleOpenClientModal(action:string, client: any){
-        setClientModal(true)
-        setAction(action)
-        setCurrentClient(client)
+    function handleOpenOrderDetailModal(order: IOrder){
+        setOrderDetailModal(true);
+        setCurrentOrder(order);
     }
-    function handleCloseClientModal(){
-        setClientModal(false)
+    function handleCloseOrderDetailModal(){
+        setOrderDetailModal(false);
     }
 
     return(
@@ -48,28 +41,29 @@ export function OrdersPage(){
                 </thead>
                 <tbody>
                     {orders?.map(order => (
-                        <tr key={order.id}>
-                            <td>#{order.code}</td>
-                            <td>{order.description}</td>
-                            <td>{order.client.first_name} {order.client.last_name}</td>
-                            <td>{statusLabel[order.status]}</td>
-                            <td>R$ {order.total}</td>
+                        <>
+                            <tr key={order.id}>
+                                <td>#{order.code}</td>
+                                <td>{order.description}</td>
+                                <td>{order.client.first_name} {order.client.last_name}</td>
+                                <td>{STATUS_LABEL[order.status]}</td>
+                                <td>R$ {order.total}</td>
 
-                            <td className="table-icon">
-                                <button className="view-button">
-                                    <span>Visualizar</span> <FontAwesomeIcon icon={faEye}/>
-                                </button>
-                            </td>
-                        </tr>
+                                <td className="table-icon">
+                                    <button className="view-button" onClick={() => handleOpenOrderDetailModal(order)}>
+                                        <span>Visualizar</span> <FontAwesomeIcon icon={faEye}/>
+                                    </button>
+                                </td>
+                            </tr>
+                        </>
                     ))}
                 </tbody>
             </table>
-            <ClientModal
-                isOpen={clientModalModal}
-                onRequestClose={handleCloseClientModal}
-                loadData={() => {}}
-                action={action}
-                currentClient={currentClient}
+
+            <OrderDetailModal
+                isOpen={orderDetailModal}
+                onRequestClose={handleCloseOrderDetailModal}
+                order={currentOrder as any}
             />
         </Container>
     )

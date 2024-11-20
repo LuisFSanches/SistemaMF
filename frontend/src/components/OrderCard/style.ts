@@ -6,7 +6,11 @@ export const OrderCardContainer= styled.div`
     border-radius: 0.3rem;
     color: var(--text-body);
 
-    .order-number{
+    h3 {
+        font-size: 17px;
+    }
+
+    .order-number {
         width: 100%;
         text-align: center;
         margin-bottom: 0.5rem;
@@ -32,6 +36,15 @@ export const OrderCardContainer= styled.div`
         justify-content: space-between;
         margin-bottom: 0.6rem;
     }
+
+    .delivery-date {
+        text-align: end;
+    }
+
+    .card-container {
+        margin-top: 10px;
+    }
+
     .order-content{
         width: 100%;
         display: flex;
@@ -67,6 +80,12 @@ export const OrderCardContainer= styled.div`
 
         p{
             margin-left: 0.3rem;
+        }
+    }
+
+    .view-button {
+        svg {
+            margin-left: 5px;
         }
     }
 

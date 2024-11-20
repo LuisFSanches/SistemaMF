@@ -155,7 +155,7 @@ export function SideBar(){
                         isMinimizedActive={isMinimized}
                     >
                         <FontAwesomeIcon icon={faHouse} className="Side-Bar-Icon"/>
-                        <span>Home</span>
+                        <span>Ordem Balcão</span>
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>

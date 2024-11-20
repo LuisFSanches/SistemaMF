@@ -5,6 +5,7 @@ export interface IAddress {
   street_number: string;
   complement: string;
   neighborhood: string;
+  reference_point?: string;
   city: string;
   state: string;
   postal_code: string;

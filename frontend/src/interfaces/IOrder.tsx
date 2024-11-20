@@ -9,9 +9,14 @@ export interface IOrder {
   additional_information: string;
   client: IClient;
   clientAddress: IAddress;
+  receiver_name?: string;
+  receiver_phone?: string;
   delivery_fee: number;
-  has_card: false;
-  status: Status;
   products_value: number;
   total: number;
+  payment_method: string;
+  payment_received: boolean;
+  delivery_date: Date;
+  status: Status;
+  has_card: false;
 }

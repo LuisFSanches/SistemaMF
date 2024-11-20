@@ -188,7 +188,7 @@ button{
 }
 
 .react-modal-overlay{
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.25);
     width: 100vw;
     height: 100vh;
     position: fixed;
@@ -304,6 +304,8 @@ export const Select = styled.select`
     &:focus {
         border-color: #d48a9b;
     }
+        
+    background: white;
 `
 
 export const Textarea = styled.textarea`
