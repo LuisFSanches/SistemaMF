@@ -49,6 +49,7 @@ model Address {
   street_number String
   complement  String?
   neighborhood String
+  reference_point String?
   city        String
   state       String
   postal_code String?
@@ -69,13 +70,18 @@ model Order {
   additional_information String?
   client_id         String
   client_address_id String
+  receiver_name     String?
+  receiver_phone    String?
   products_value    Float
   delivery_fee      Float
   total             Float
+  payment_method    String?
+  payment_received  Boolean      @default(false)
+  delivery_date     DateTime     @default(now())
   created_by        String
   updated_by        String
   status            String        @default("Opened")
-  has_card        Boolean       @default(false)
+  has_card          Boolean       @default(false)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 

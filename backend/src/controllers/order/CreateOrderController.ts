@@ -11,15 +11,17 @@ import { GetAdminService } from '../../services/admin/GetAdminService'
 class CreateOrderController{
 	async handle(req: Request, res: Response, next: NextFunction) {
 		const {
-			admin_id,
 			clientId,
 			first_name,
 			last_name,
 			phone_number,
+			receiver_name,
+			receiver_phone,
 			addressId,
 			street,
 			street_number,
 			complement,
+			reference_point,
 			neighborhood,
 			city,
 			state,
@@ -30,9 +32,14 @@ class CreateOrderController{
 			products_value,
 			delivery_fee,
 			total,
+			payment_method,
+			payment_received,
+			delivery_date,
 			status,
 			has_card,
 		} = req.body;
+
+		const { id: admin_id }: any = req.admin;
 
 		let client_id = clientId;
 		let address_id = addressId;
@@ -67,6 +74,7 @@ class CreateOrderController{
 				street,
 				street_number,
 				complement,
+				reference_point,
 				neighborhood,
 				city,
 				state,
@@ -87,9 +95,14 @@ class CreateOrderController{
 			additional_information,
 			client_id,
 			client_address_id: address_id,
+			receiver_name,
+			receiver_phone,
 			products_value,
 			delivery_fee,
 			total,
+			payment_method,
+			payment_received,
+			delivery_date: new Date(`${delivery_date}T00:00:00Z`),
 			created_by: admin_id,
 			updated_by: admin_id,
 			status,

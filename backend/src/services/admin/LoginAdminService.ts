@@ -26,7 +26,7 @@ class LoginAdminService{
         id: admin.id,
         role: admin.role
       }, process.env.JWT_SECRET!, {
-        expiresIn: '1w'
+        expiresIn: '1y'
       })
 
       delete (admin as { password?: string }).password;
