@@ -13,6 +13,8 @@ import { ErrorCodes } from "../../exceptions/root";
 
         return { orders };
 
+        console.log('teste')
+
       } catch(error: any) {
         return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
       }
