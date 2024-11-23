@@ -19,6 +19,7 @@ import { LoginAdminController } from './controllers/admin/LoginAdminController'
 import { GetAdminController } from './controllers/admin/GetAdminController'
 import { GetAllAdminController } from './controllers/admin/GetAllAdminController'
 import { DeleteAdminController } from './controllers/admin/DeleteAdminController'
+import { UpdateOrderController } from './controllers/order/UpdateOrderController';
 
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
@@ -48,6 +49,7 @@ router.post('/admins/login', new LoginAdminController().handle)
 router.get('/admins/admin', adminAuthMiddleware, new GetAdminController().handle)
 router.get('/admins/all', superAdminAuthMiddleware, new GetAllAdminController().handle)
 router.delete('/admins/delete/:id', superAdminAuthMiddleware, new DeleteAdminController().handle)
+router.put('/order/:id', adminAuthMiddleware, new UpdateOrderController().handle)
 
 
 export { router };

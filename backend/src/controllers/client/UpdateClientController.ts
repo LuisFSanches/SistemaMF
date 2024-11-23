@@ -1,24 +1,31 @@
-import {Request, Response, NextFunction} from 'express'
-import { UpdateClientService } from '../../services/client/UpdateClientService'
+import {Request, Response, NextFunction} from 'express';
+import { UpdateClientService } from '../../services/client/UpdateClientService';
+import { BadRequestException } from '../../exceptions/bad-request';
 
 class UpdateClientController{
-  async handle(req: Request, res: Response, next: NextFunction) {
-    const { id, first_name, last_name, phone_number } = req.body;
+	async handle(req: Request, res: Response, next: NextFunction) {
+		const { id, first_name, last_name, phone_number } = req.body;
 
-    console.log('FIRST_NAME', first_name)
+		const updateClientService = new UpdateClientService();
 
-    const updateClientService = new UpdateClientService();
+		const client = await updateClientService.execute({
+			id,
+			first_name,
+			last_name,
+			phone_number
+		});
 
-    const { status, client } = await updateClientService.execute({
-      id,
-      first_name,
-      last_name,
-      phone_number
-    });
-    
+		if ('error' in client && client.error) {
+			next(new BadRequestException(
+				client.message,
+				client.code
+			));
 
-    return res.json({ status, client })
-  }
+			return;
+		}
+
+		return res.json(client)
+	}
 }
 
 export { UpdateClientController }

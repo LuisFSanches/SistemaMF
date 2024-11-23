@@ -47,7 +47,6 @@ class CreateOrderService{
 		return order;
 
 		} catch(error: any) {
-			console.log('error', error)
 			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
 		}
 	}

@@ -4,7 +4,6 @@ import { ErrorCodes } from "../../exceptions/root";
 
 class UpdateClientService{
 	async execute({ id, first_name, last_name, phone_number }: IClient) {
-		console.log('id', id)
 		try {
 			const updateUser = await prismaClient.client.update({
 				where: {
@@ -17,7 +16,7 @@ class UpdateClientService{
 				}
 			})
 
-			return { status: "Client successfully updated", client: updateUser };
+			return updateUser;
 
 		} catch(error: any) {
 			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
