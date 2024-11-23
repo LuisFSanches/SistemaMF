@@ -32,6 +32,7 @@ export function SideBar(){
         clientes:false,
         statistics:false,
         configurations:false,
+        administradores: false
     })
     
     const [isMinimized, setMinimized] = useState(false)
@@ -47,7 +48,8 @@ export function SideBar(){
                     'categorias':false,
                     'pedidos':false,
                     'clientes':false,
-                    'statistics':false
+                    'statistics':false,
+                    "administradores": false
                 })
             break;
             case 'ordensDeServico':
@@ -58,7 +60,8 @@ export function SideBar(){
                     'categorias':false,
                     'pedidos':false,
                     'clientes':false,
-                    'statistics':false
+                    'statistics':false,
+                    "administradores": false
                 })
             break;
             case 'produtos':
@@ -69,7 +72,8 @@ export function SideBar(){
                     'categorias':false,
                     'pedidos':false,
                     'clientes':false,
-                    'statistics':false
+                    'statistics':false,
+                    "administradores": false
                 })
             break;
             case 'statistics':
@@ -80,7 +84,8 @@ export function SideBar(){
                     'categorias':false,
                     'pedidos':false,
                     'clientes':false,
-                    'statistics':true
+                    'statistics':true,
+                    "administradores": false
                 })
             break;
             case 'categorias':
@@ -90,7 +95,9 @@ export function SideBar(){
                     'produtos':false,
                     'categorias':true,
                     'pedidos':false,
-                    'clientes':false
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false
                 })
             break;
 
@@ -102,7 +109,8 @@ export function SideBar(){
                     'categorias':false,
                     'pedidos':true,
                     'clientes':false,
-                    'statistics':false
+                    'statistics':false,
+                    "administradores": false
                 })
             break;
 
@@ -114,7 +122,21 @@ export function SideBar(){
                     'categorias':false,
                     'pedidos':false,
                     'clientes':true,
-                    'statistics':false
+                    'statistics':false,
+                    "administradores": false
+                })
+            break;
+
+            case 'administradores':
+                setActive({...isActive,
+                    'dashboard':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": true
                 })
             break;
         }
@@ -235,10 +257,10 @@ export function SideBar(){
                 </SideBarItemContainer>
             </NavLink>
 
-            <NavLink to="/administradores" onClick={()=>handleActiveMenuButton('configurations')}>
+            <NavLink to="/administradores" onClick={()=>handleActiveMenuButton('administradores')}>
                 <SideBarItemContainer>
                     <SideBarButton
-                        isActive={isActive['configurations']}
+                        isActive={isActive['administradores']}
                         isMinimizedActive={isMinimized}
                     >
                         <FontAwesomeIcon icon={faUserShield} className="Side-Bar-Icon"/>

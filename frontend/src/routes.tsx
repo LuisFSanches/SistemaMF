@@ -12,6 +12,7 @@ import { CategoriesPage } from "./views/Categories";
 import { LoginPage } from "./views/LoginPage";
 import { SideBarLayout } from "./views/SideBarLayout";
 import { Statistics } from "./views/Statistics";
+import { AdminsPage } from "./views/Admins";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -72,6 +73,11 @@ export default function routes(){
                         <Route path="estatisticas" element={
                             <PrivateRoute>
                                 <Statistics/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="administradores" element={
+                            <PrivateRoute>
+                                <AdminsPage/>
                             </PrivateRoute>
                         }/>
                     </Route>

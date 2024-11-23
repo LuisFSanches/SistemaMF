@@ -88,6 +88,10 @@ export function ClientModal({
         return () => clearTimeout(timeout);
     }, [watch("phone_number")]);
 
+    if (!currentClient) {
+		return null;
+	}
+
     return(
         <Modal 
             isOpen={isOpen}
