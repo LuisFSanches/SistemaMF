@@ -59,7 +59,8 @@ export function ClientModal({
                 id: currentClient.id,
                 ...data
             });
-            editClient(clientData.client);
+
+            editClient(clientData);
             loadAvailableClients();
             onRequestClose();
         }

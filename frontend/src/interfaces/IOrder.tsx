@@ -7,6 +7,8 @@ export interface IOrder {
   code: string;
   description: string;
   additional_information: string;
+  client_id?: string;
+  client_address_id?: string;
   client: IClient;
   clientAddress: IAddress;
   receiver_name?: string;
@@ -16,7 +18,7 @@ export interface IOrder {
   total: number;
   payment_method: string;
   payment_received: boolean;
-  delivery_date: Date;
+  delivery_date: string;
   status: Status;
   has_card: false;
 }

@@ -99,3 +99,14 @@ export const updateStatus = async({
   
   return response;
 };
+
+export const updateOrder = async(order: any) => {
+  const response = await api.put(`/order/${order.id}`, {
+    order,
+    headers: {
+      Authorization: `${token}`,
+    }
+  });
+  
+  return response;
+};

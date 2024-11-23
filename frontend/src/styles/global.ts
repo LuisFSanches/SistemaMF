@@ -202,12 +202,43 @@ button{
 }
 
 .react-modal-content{
-        width: 100%;
-        max-width: 576px;
-        background: var(--background);
-        padding: 3rem;
-        position: relative;
-        border-radius: 0.25rem;
+    width: 100%;
+    max-width: 576px;
+    background: var(--background);
+    padding: 3rem;
+    position: relative;
+    border-radius: 0.25rem;
+}
+
+.react-modal-content-edit-order {
+    width: 100%;
+    max-height: 835px;
+    max-width: 800px;
+    background: var(--background);
+    padding: 3rem;
+    position: relative;
+    border-radius: 0.25rem;
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #fcc5d0;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
 }
 .modal-close{
         position: absolute;
@@ -240,11 +271,18 @@ export const ModalContainer = styled.div`
         margin-bottom: 2rem;
     }
 
-    input{
+    input {
         padding: 0 1.5rem;
         height: 4rem;
         border-radius: 0.25rem;
         margin-bottom: 1rem;
+    }
+
+    input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        padding: 12px;
+        margin-bottom: 0px;
     }
 
     button[type="submit"]{
@@ -277,6 +315,26 @@ export const FormField = styled.div<{ isShortField?: boolean }>`
     margin-top: 20px;
 `;
 
+export const EditFormField = styled.div<{ isShortField?: boolean }>`
+    width: 100% !important;
+    width: ${({ isShortField }) => (isShortField ? '35%' : '85%')};
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    margin-top: 20px;
+`;
+
+export const InlineFormField = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    div:first-child{
+        margin-right: 10px;
+    }
+`
+
 export const Label = styled.label`
     font-size: 16px;
     color: #5B5B5B;
@@ -295,7 +353,8 @@ export const Input = styled.input`
     }
 `;
 
-export const Select = styled.select`
+export const Select = styled.select<{ isEditField?: boolean }>`
+    height: ${({ isEditField }) => (isEditField ? '4rem' : 'auto')};
     padding: 12px;
     border: 1px solid #e7b7c2;
     border-radius: 8px;
@@ -316,6 +375,51 @@ export const Textarea = styled.textarea`
     font-size: 16px;
     outline: none;
     &:focus {
+        border-color: #d48a9b;
+    }
+`;
+
+export const CheckboxContainer = styled.div`
+    display: flex;
+    align-items: center;
+    margin: 10px 0px;
+    
+    label {
+        margin: 0px 10px;
+    }
+`;
+
+export const Checkbox = styled.input`
+    max-width: 20px;
+    max-height: 20px;
+    appearance: none;
+    border: 1px solid #e7b7c2;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s, border-color 0.3s;
+
+    &:focus {
+        border-color: #d48a9b;
+        box-shadow: 0 0 0 2px rgba(212, 138, 155, 0.3);
+    }
+
+    &:checked {
+        background-color: #d48a9b;
+        border-color: #d48a9b;
+    }
+
+    &:checked::after {
+        content: '✓';
+        color: white;
+        font-size: 19px;
+        position: absolute;
+        top: 1px;
+        left: 4px;
+    }
+
+    &:hover {
         border-color: #d48a9b;
     }
 `;

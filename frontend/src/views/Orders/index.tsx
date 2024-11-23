@@ -3,8 +3,9 @@ import { IOrder } from "../../interfaces/IOrder";
 import { Container } from "./style";
 import { PageHeader } from "../../styles/global";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faEye, faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faEye, faPen } from "@fortawesome/free-solid-svg-icons";
 import { OrderDetailModal } from "../../components/OrderDetailModal";
+import { EditOrderModal } from "../../components/EditOrderModal";
 import { useOrders } from "../../contexts/OrdersContext";
 import { STATUS_LABEL } from "../../constants";
 
@@ -13,6 +14,7 @@ export function OrdersPage(){
     const { orders } = useOrders();
 
     const [orderDetailModal, setOrderDetailModal] = useState(false);
+    const [editOrderModal, setEditOrderModal] = useState(false);
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 
     function handleOpenOrderDetailModal(order: IOrder){
@@ -21,6 +23,11 @@ export function OrdersPage(){
     }
     function handleCloseOrderDetailModal(){
         setOrderDetailModal(false);
+    }
+
+    function handleOpenEditOrderModal(order: IOrder){
+        setEditOrderModal(true);
+        setCurrentOrder(order);
     }
 
     return(
@@ -36,6 +43,7 @@ export function OrdersPage(){
                         <th>Cliente</th>
                         <th>Status</th>
                         <th>Total</th>
+                        <th>Editar</th>
                         <th>Visualizar</th>
                     </tr>
                 </thead>
@@ -48,10 +56,15 @@ export function OrdersPage(){
                                 <td>{order.client.first_name} {order.client.last_name}</td>
                                 <td>{STATUS_LABEL[order.status]}</td>
                                 <td>R$ {order.total}</td>
+                                <td className="table-icon">
+                                    <button className="edit-button" onClick={() => handleOpenEditOrderModal(order)}>
+                                        <FontAwesomeIcon icon={faPen}/>
+                                    </button>
+                                </td>
 
                                 <td className="table-icon">
                                     <button className="view-button" onClick={() => handleOpenOrderDetailModal(order)}>
-                                        <span>Visualizar</span> <FontAwesomeIcon icon={faEye}/>
+                                        <FontAwesomeIcon icon={faEye}/>
                                     </button>
                                 </td>
                             </tr>
@@ -63,6 +76,12 @@ export function OrdersPage(){
             <OrderDetailModal
                 isOpen={orderDetailModal}
                 onRequestClose={handleCloseOrderDetailModal}
+                order={currentOrder as any}
+            />
+
+            <EditOrderModal
+                isOpen={editOrderModal}
+                onRequestClose={() => setEditOrderModal(false)}
                 order={currentOrder as any}
             />
         </Container>

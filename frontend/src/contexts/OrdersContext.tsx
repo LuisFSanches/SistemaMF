@@ -4,7 +4,7 @@ import { IOrder } from "../interfaces/IOrder";
 
 interface OrdersContextType {
   orders: IOrder[];
-  loadAvailableClients: () => Promise<void>;
+  loadAvailableOrders: () => Promise<void>;
   addOrder: (client: IOrder) => void;
   editOrder: (client: IOrder) => void;
 }
@@ -14,7 +14,7 @@ const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 export const OrdersProvider: React.FC = ({ children }) => {
   const [orders, setOrders] = useState<IOrder[]>([]);
 
-  const loadAvailableClients = async () => {
+  const loadAvailableOrders = async () => {
     if (orders.length === 0) {
       const { data: { orders } } = await getAllOrders();
       setOrders(orders);
@@ -34,11 +34,11 @@ export const OrdersProvider: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    loadAvailableClients();
+    loadAvailableOrders();
   }, []);
 
   return (
-    <OrdersContext.Provider value={{ orders, addOrder, editOrder, loadAvailableClients }}>
+    <OrdersContext.Provider value={{ orders, addOrder, editOrder, loadAvailableOrders }}>
       {children}
     </OrdersContext.Provider>
   );
