@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "engines": {
-    "node": "18",
-    "npm": "9"
+    "node": "18.20",
+    "npm": "10.7"
   },
   "license": "MIT",
   "scripts": {
@@ -33,6 +33,7 @@
     "express-async-errors": "^3.1.1",
     "jsonwebtoken": "^9.0.2",
     "prisma": "^5.14.0",
+    "tsup": "^8.3.5",
     "zod": "^3.23.8"
   }
 }
