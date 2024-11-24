@@ -3,7 +3,7 @@ import { IOrder } from "../../interfaces/IOrder";
 import { Container } from "./style";
 import { PageHeader } from "../../styles/global";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faEye, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faPen } from "@fortawesome/free-solid-svg-icons";
 import { OrderDetailModal } from "../../components/OrderDetailModal";
 import { EditOrderModal } from "../../components/EditOrderModal";
 import { useOrders } from "../../contexts/OrdersContext";

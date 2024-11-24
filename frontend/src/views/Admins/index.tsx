@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Container } from "./style";
 import { AddButton, PageHeader } from "../../styles/global";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faEye, faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { AdminModal } from "../../components/AdminModal";
 

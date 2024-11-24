@@ -29,7 +29,6 @@ import { NewOrderProgressBar } from "../../components/NewOrderProgressBar";
 import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
-import { useAdminData } from "../../contexts/AuthContext";
 import { rawTelephone } from "../../utils";
 import { PAYMENT_METHODS } from "../../constants";
 
@@ -79,7 +78,7 @@ export function DashboardPage(){
         last_name: "",
         receiver_name: "",
         receiver_phone: "",
-        addressId: "",
+        addressId: addressId,
         street: "",
         street_number: "",
         complement: "",
@@ -233,6 +232,8 @@ export function DashboardPage(){
         fetchClientData();
     }, [phone_number, setValue, setError]);
 
+    const watchPhoneNumber = watch("phone_number");
+
     useEffect(() => {
         const phoneNumber = watch("phone_number") || "";
         const numericValue = rawTelephone(phoneNumber);
@@ -246,7 +247,9 @@ export function DashboardPage(){
         }, 800);
 
         return () => clearTimeout(timeout);
-    }, [watch("phone_number")]);
+    }, [watchPhoneNumber, watch, setMask]);
+
+    const watchReceiverPhone = watch("receiver_phone");
 
     useEffect(() => {
         const phoneNumber = watch("receiver_phone") || "";
@@ -261,7 +264,7 @@ export function DashboardPage(){
         }, 800);
 
         return () => clearTimeout(timeout);
-    }, [watch("receiver_phone")]);
+    }, [watchReceiverPhone, watch, setReceiverMask]);
 
     const handlePrint = () => {
         if (formRef.current) {

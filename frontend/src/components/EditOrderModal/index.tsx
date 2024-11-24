@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Modal from 'react-modal';
 import moment from "moment";
 import { IOrder } from "../../interfaces/IOrder";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
 	ModalContainer,
 	Form,
@@ -23,7 +23,7 @@ import { PAYMENT_METHODS, STATUS_LABEL } from "../../constants";
 import { updateOrder } from "../../services/orderService";
 
 
-interface EditOrderModal{
+interface IEditOrderModal{
 	isOpen: boolean;
     onRequestClose: ()=> void;
     order: IOrder
@@ -33,7 +33,7 @@ export function EditOrderModal({
     isOpen,
     onRequestClose,
     order
-}:EditOrderModal){
+}:IEditOrderModal){
     const { loadAvailableOrders, editOrder } = useOrders();
 	const [editAddress, setEditAddress] = useState(false);
     const {
@@ -113,7 +113,7 @@ export function EditOrderModal({
 		setValue("clientAddress.city", order.clientAddress.city);
 		setValue("clientAddress.state", order.clientAddress.state);
 		setValue("clientAddress.country", order.clientAddress.country);
-    }, [order]);
+    }, [order, setValue]);
 
 	if (!order) {
 		return null;

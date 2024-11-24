@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Container } from "./style";
 import { getOnGoingOrders, updateStatus } from "../../services/orderService";
 import { OrderCard } from "../../components/OrderCard";

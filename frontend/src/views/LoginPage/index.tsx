@@ -20,7 +20,6 @@ export function LoginPage(){
         register,
         handleSubmit,
         setError,
-        formState: { errors },
     } = useForm<ISignIn>();
 
     const handleLoginSubmit = async ({ username, password }: ISignIn) => {

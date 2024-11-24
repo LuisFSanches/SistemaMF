@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import Modal from 'react-modal';
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { ModalContainer, Form, Input, ErrorMessage } from '../../styles/global';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { createClient, updateClient } from "../../services/clientService";
 import { useClients } from "../../contexts/ClientsContext";
-import { clear } from "console";
 
 interface ClientModalProps{
     isOpen: boolean;
@@ -37,8 +36,6 @@ export function ClientModal({
         register,
         handleSubmit,
         setValue,
-        setError,
-        reset,
         watch,
         formState: { errors },
     } = useForm<IUsers>();
@@ -70,7 +67,9 @@ export function ClientModal({
         setValue("first_name", currentClient.first_name);
         setValue("last_name", currentClient.last_name);
         setValue("phone_number", currentClient.phone_number);
-    }, [currentClient]);
+    }, [currentClient, setValue]);
+
+    const watchPhone = watch("phone_number");
 
     useEffect(() => {
         const phoneNumber = watch("phone_number") || "";
@@ -82,11 +81,10 @@ export function ClientModal({
             } else {
                 setMask("(99) 99999-9999");
             }
-            console.log('CHAMOU')
         }, 1000);
 
         return () => clearTimeout(timeout);
-    }, [watch("phone_number")]);
+    }, [watchPhone, watch, setMask]);
 
     if (!currentClient) {
 		return null;

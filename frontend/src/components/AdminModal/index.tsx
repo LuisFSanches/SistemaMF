@@ -4,8 +4,6 @@ import { useForm } from "react-hook-form";
 import { ModalContainer, Form, Input, ErrorMessage, Label, CheckboxContainer, Checkbox } from '../../styles/global';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { createClient, updateClient } from "../../services/clientService";
-import { useClients } from "../../contexts/ClientsContext";
 import { IAdmin } from "../../interfaces/IAdmin";
 
 interface AdminModalProps{
@@ -23,7 +21,6 @@ export function AdminModal({
     action,
     currentAdmin
 }:AdminModalProps){
-    const { loadAvailableClients, editClient, addClient } = useClients();
     const [ changePassword, setChangePassword ] = useState(false);
 
     const {
@@ -40,7 +37,7 @@ export function AdminModal({
     useEffect(() => {
         setValue("name", currentAdmin.name);
         setValue("username", currentAdmin.username);
-    }, [currentAdmin]);
+    }, [currentAdmin, setValue]);
 
 	if (!currentAdmin) {
 		return null;

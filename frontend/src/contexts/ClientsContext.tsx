@@ -35,6 +35,7 @@ export const ClientsProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     loadAvailableClients();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

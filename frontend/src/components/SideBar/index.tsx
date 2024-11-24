@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { Container,SideBarItemContainer, SideBarButton, LogoContainer, CompanyInfoContainer, MinimizeButton } from "./style";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -8,7 +8,6 @@ import {
     faBars,
     faBasketShopping,
     faChartLine,
-    faGear,
     faHouse,
     faLayerGroup,
     faRightFromBracket,
@@ -37,8 +36,7 @@ export function SideBar(){
     
     const [isMinimized, setMinimized] = useState(false)
 
-    function handleActiveMenuButton(name:string){
-        console.log(name)
+    const handleActiveMenuButton = useCallback((name:string) => {
         switch(name){
             case 'dashboard':
                 setActive({...isActive, 
@@ -140,12 +138,13 @@ export function SideBar(){
                 })
             break;
         }
-    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     useEffect(() => {
         const url = window.location.pathname;
         handleActiveMenuButton(url.replace("/", ""));
-    }, [])
+    }, [handleActiveMenuButton])
 
     function handleMinimization(){
         setMinimized(!isMinimized)

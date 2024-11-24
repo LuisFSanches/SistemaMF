@@ -35,6 +35,7 @@ export const AdminsProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     loadAvailableAdmins();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
