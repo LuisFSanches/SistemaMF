@@ -28,10 +28,14 @@ export function OrderCard({
         setOrderDetailModal(false);
     }
 
+	if (!order) {
+		return <></>;
+	}
+
 	return (
     	<OrderCardContainer className={order?.status?.toLowerCase()}>
 			<div className="order-number">
-				<h2>Pedido #{order.code}</h2>
+				<h2>Pedido #{order?.code}</h2>
 			</div>
 			<div className="client-info">
 				<h3>Cliente: {order.client.first_name} {order.client.last_name}</h3>

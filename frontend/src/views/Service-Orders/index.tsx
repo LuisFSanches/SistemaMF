@@ -1,24 +1,27 @@
 import { useState, useEffect } from "react";
+import { IOrder } from "../../interfaces/IOrder";
 import { Container } from "./style";
-import { getOnGoingOrders, updateStatus } from "../../services/orderService";
+import { updateStatus } from "../../services/orderService";
 import { OrderCard } from "../../components/OrderCard";
+import { useOrders } from "../../contexts/OrdersContext";
 
 export function ServiceOrdersPage(){
-	const [openedOrders, setOpenedOrders] = useState([]);
-	const [inProgressOrders, setInProgressOrders] = useState([]);
-	const [inDeliveryOrders, setInDeliveryOrders] = useState([]);
+	const { onGoingOrders, editOrder } = useOrders();
+
+	const [openedOrders, setOpenedOrders] = useState<IOrder[]>([]);
+	const [inProgressOrders, setInProgressOrders] = useState<IOrder[]>([]);
+	const [inDeliveryOrders, setInDeliveryOrders] = useState<IOrder[]>([]);
 
 	const fetchOrders = async () => {
-		const response = await getOnGoingOrders();
-		const { data } = response;
-		setOpenedOrders(data.filter((order: any) => order.status === "OPENED"));
-		setInProgressOrders(data.filter((order: any) => order.status === "IN_PROGRESS"));
-		setInDeliveryOrders(data.filter((order: any) => order.status === "IN_DELIVERY"));
+		setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED"));
+		setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS"));
+		setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY"));
 	};
 
 	useEffect(() => {
 		fetchOrders();
-	}, []);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [onGoingOrders]);
 
 	const handlePrint = (orderCardId: string) => {
 		const orderCard = document.getElementById(orderCardId);
@@ -52,8 +55,9 @@ export function ServiceOrdersPage(){
 	};
 
 	const handleOrderStatus = async (id: string, status: string) => {
-		await updateStatus({ id, status });
-		await fetchOrders();
+		const response =await updateStatus({ id, status });
+		const { data: order } = response;
+		editOrder(order);
 	}
 
     return (
@@ -82,7 +86,7 @@ export function ServiceOrdersPage(){
 					Em produção
 				</header>
 				{inProgressOrders.map((order: any) => (
-          	<div key={order.id} id={`order-card-${order.id}`}>
+          			<div key={order.id} id={`order-card-${order.id}`}>
 						<OrderCard order={order}
 							handlePrint={handlePrint}
 							handleOrderStatus={handleOrderStatus}

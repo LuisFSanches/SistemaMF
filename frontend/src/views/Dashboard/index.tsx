@@ -31,6 +31,7 @@ import { getClientAddresses } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
 import { rawTelephone } from "../../utils";
 import { PAYMENT_METHODS } from "../../constants";
+import { useOrders } from "../../contexts/OrdersContext";
 
 interface INewOrder {
     phone_number: string;
@@ -59,13 +60,16 @@ interface INewOrder {
     has_card: boolean;
 }
 
-export function DashboardPage(){
+export function DashboardPage() {
+    const { addOrder } = useOrders();
+
     const formRef = useRef<HTMLDivElement>(null);
     const [step, setStep] = useState(1);
     const [client_id, setClientId] = useState("");
     const [addresses, setAddresses] = useState([]);
     const [addressId, setAddressId] = useState("");
     const [newAddress, setNewAddress] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState<any>({});
     const [differentReceiver, setDiferentReceiver] = useState(false);
     const [mask, setMask] = useState("(99) 99999-9999");
     const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
@@ -186,10 +190,12 @@ export function DashboardPage(){
         }
 
         if (step === 4) {
-            await createOrder({
+            const { data } = await createOrder({
                 clientId: client_id,
                 ...orderData,
             })
+
+            addOrder(data);
 
             navigate("/ordensDeServico");
         }
@@ -384,7 +390,7 @@ export function DashboardPage(){
                                         onChange={(e) => {
                                             const selectedAddressId = e.target.value;
                                             const selectedAddress: any = addresses.find((address: any) => address.id === selectedAddressId);
-                                            console.log(selectedAddress);
+                                            setSelectedAddress(selectedAddress);
                                             if (selectedAddress) {
                                                 setValue("postal_code", selectedAddress.postal_code);
                                                 setValue("street", selectedAddress.street);
@@ -408,7 +414,20 @@ export function DashboardPage(){
                                     </Select>
                                 </FormField>
                                 <CheckboxContainer>
-                                    <Checkbox type="checkbox" onChange={() => setNewAddress(!newAddress)} checked={newAddress}/>
+                                    <Checkbox type="checkbox" onChange={() => {
+                                        setNewAddress(!newAddress)
+
+                                        if (!newAddress) {
+                                            setAddressId("");
+                                            setValue("addressId", "");
+                                        }
+
+                                        if (newAddress) {
+                                            setAddressId(selectedAddress.id);
+                                            setValue("addressId", selectedAddress.id);
+                                        }
+                                        
+                                    }} checked={newAddress}/>
                                     <Label>Cadastrar novo endereço</Label>
                                 </CheckboxContainer>
                             </>
@@ -595,7 +614,7 @@ export function DashboardPage(){
                             <p>{order.street}, {order.street_number}</p>
                             <p>{order.neighborhood}, {order.city}</p>
                         </div>
-                        <button onClick={handlePrint}>
+                        <button type="button" onClick={handlePrint}>
                             <FontAwesomeIcon icon={faPrint} size="2x" />
                         </button>
                     </OrderSummary>

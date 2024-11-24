@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getAllOrders } from "../services/orderService";
+import { getAllOrders, getOnGoingOrders } from "../services/orderService";
 import { IOrder } from "../interfaces/IOrder";
 
 interface OrdersContextType {
@@ -7,12 +7,15 @@ interface OrdersContextType {
   loadAvailableOrders: () => Promise<void>;
   addOrder: (client: IOrder) => void;
   editOrder: (client: IOrder) => void;
+  onGoingOrders: IOrder[];
+  loadOnGoingOrders: () => Promise<void>
 }
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 
 export const OrdersProvider: React.FC = ({ children }) => {
   const [orders, setOrders] = useState<IOrder[]>([]);
+  const [onGoingOrders, setOnGoingOrders] = useState<IOrder[]>([]);
 
   const loadAvailableOrders = async () => {
     if (orders.length === 0) {
@@ -21,25 +24,55 @@ export const OrdersProvider: React.FC = ({ children }) => {
     }
   };
 
+  const loadOnGoingOrders = async () => {
+    if (onGoingOrders.length === 0) {
+      const response = await getOnGoingOrders();
+      const { data: orders } = response;
+
+      setOnGoingOrders(orders);
+    }
+  }
+
   const addOrder = (order: IOrder) => {
-    setOrders((prevClients) => [...prevClients, order]);
+    setOrders((prevOrders) => [...prevOrders, order]);
+    setOnGoingOrders((prevOrders) => [...prevOrders, order]);
   };
   
-  const editOrder = (updatedClient: IOrder) => {
-    setOrders((prevClients) =>
-      prevClients.map((order) =>
-        order.id === updatedClient.id ? updatedClient : order
+  const editOrder = (updatedOrder: IOrder) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === updatedOrder.id ? updatedOrder : order
       )
     );
+
+    if (updatedOrder.status !== "DONE") {
+      setOnGoingOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === updatedOrder.id ? updatedOrder : order
+        )
+      );
+    }
+
+    console.log('AQUIIIII', onGoingOrders);
+
   };
 
   useEffect(() => {
     loadAvailableOrders();
+    loadOnGoingOrders();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <OrdersContext.Provider value={{ orders, addOrder, editOrder, loadAvailableOrders }}>
+    <OrdersContext.Provider value={{
+        orders,
+        addOrder,
+        editOrder,
+        loadAvailableOrders,
+        onGoingOrders,
+        loadOnGoingOrders,
+
+      }}>
       {children}
     </OrdersContext.Provider>
   );
