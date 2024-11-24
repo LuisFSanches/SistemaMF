@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "ts-node-dev src/server.ts",
     "test": "vitest",
-    "buid": "tsup src",
+    "build": "tsup src",
     "start": "node dist/server.js"
   },
   "devDependencies": {
