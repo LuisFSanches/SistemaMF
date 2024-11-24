@@ -3,8 +3,8 @@ import { IOrder } from "../../interfaces/IOrder";
 import { ErrorCodes } from "../../exceptions/root";
 
 interface IOrderStatus {
-  id: string;
-  status: string;
+	id: string;
+	status: string;
 }
 
 class UpdateOrderStatusService{
@@ -16,10 +16,14 @@ class UpdateOrderStatusService{
 				},
 				data: {
 					status
+				},
+				include: {
+					client: true,
+          			clientAddress: true
 				}
 			})
 
-			return { order: updateOrder };
+			return updateOrder;
 
 		} catch(error: any) {
 			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }

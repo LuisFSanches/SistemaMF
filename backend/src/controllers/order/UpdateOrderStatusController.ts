@@ -7,13 +7,12 @@ class UpdateOrderStatusController{
 
     const updateOrderStatusService = new UpdateOrderStatusService();
 
-    const { order } = await updateOrderStatusService.execute({
+    const order = await updateOrderStatusService.execute({
       id,
       status,
     });
     
-
-    return res.json({ order })
+    return res.json(order);
   }
 }
 

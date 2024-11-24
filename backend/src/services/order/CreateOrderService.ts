@@ -41,6 +41,11 @@ class CreateOrderService{
 					updated_by,
 					status,
 					has_card
+				},
+
+				include: {
+					client: true,
+          			clientAddress: true
 				}
 		})
 
