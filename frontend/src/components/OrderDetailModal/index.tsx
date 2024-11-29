@@ -61,7 +61,7 @@ export function OrderDetailModal({
 					<p><strong>Cartão: </strong>
 						{HAS_CARD[order.has_card.toString() as keyof typeof HAS_CARD]}
 					</p>
-					<p><strong>Data de Entrega: </strong>{(moment(order.delivery_date).format("DD/MM/YYYY"))}</p>
+					<p><strong>Data de Entrega: </strong>{(moment(order.delivery_date).utc().format("DD/MM/YYYY"))}</p>
 					<p><strong>Método de pagamento: </strong>{
 						PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS]
 					}</p>

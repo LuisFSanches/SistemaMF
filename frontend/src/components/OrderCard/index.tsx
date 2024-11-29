@@ -39,7 +39,7 @@ export function OrderCard({
 			</div>
 			<div className="client-info">
 				<h3>Cliente: {order.client.first_name} {order.client.last_name}</h3>
-				<h3 className="delivery-date">Data de entrega: {moment(order.delivery_date).format("DD/MM/YYYY")}</h3>
+				<h3 className="delivery-date">Data de entrega: {moment(order.delivery_date).utc().format("DD/MM/YYYY")}</h3>
 			</div>
 			<div className="order-content">
 				<div className="order-items">
@@ -66,6 +66,7 @@ export function OrderCard({
 				<p><strong>Entregar para: </strong>
 					{order.receiver_name ? order.receiver_name : order.client.first_name}
 				</p>
+				<p><strong>Status Pagamento: </strong>{order.payment_received ? "Pago" : "Pendente"}</p>
 			</div>
 			<div className="order-actions">
 				{previousStatus &&

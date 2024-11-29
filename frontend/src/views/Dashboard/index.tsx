@@ -363,13 +363,6 @@ export function DashboardPage() {
                                         placeholder='Telefone'
                                         value={watch("receiver_phone") || ""}
                                         {...register("receiver_phone", { 
-                                            required: "Telefone inválido",
-                                            validate: (value) => {
-                                                if (value.replace(/[^0-9]/g, "").length < 10) {
-                                                    return "Telefone inválido";
-                                                }
-                                                return true;
-                                            }
                                         })}
                                     />
                                     {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
@@ -580,9 +573,7 @@ export function DashboardPage() {
                             <FormField>
                                 <Label>Taxa de entrega</Label>
                                 <Input type="number" placeholder="0.00" {...register("delivery_fee", {
-                                    required: "Taxa de entrega é obrigatório",
                                 })} />
-                                {errors.delivery_fee && <ErrorMessage>{errors.delivery_fee.message}</ErrorMessage>}
                             </FormField>
                         </InlineFormField>
                     </>

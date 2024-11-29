@@ -152,7 +152,7 @@ export function EditOrderModal({
 							<Input {...register("client.phone_number", {required: "Descrição inválida"})} disabled/>
 						</EditFormField>
 					</InlineFormField>
-					{ order.receiver_phone &&
+					{ (order.receiver_phone || order.receiver_name) &&
 						<InlineFormField>
 							<EditFormField isShortField>
 								<Label>Nome do Recebedor</Label>
