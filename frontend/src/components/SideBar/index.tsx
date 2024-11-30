@@ -15,12 +15,13 @@ import {
     faUtensils,
     faUserShield
 } from "@fortawesome/free-solid-svg-icons";
-
+import { useAdminData } from "../../contexts/AuthContext";
 import { NavLink} from 'react-router-dom'
 import logo from '../../assets/images/logo.png'
 
 export function SideBar(){
     const { handleSignOut } = useContext(AuthContext);
+    const { adminData } = useAdminData();
 
     const [isActive, setActive] = useState({
         dashboard:true,
@@ -243,30 +244,33 @@ export function SideBar(){
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
-
-            <NavLink to="/estatisticas">
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('statistics')}>
-                    <SideBarButton
-                        isActive={isActive['statistics']}
-                        isMinimizedActive={isMinimized}
-                    >
-                        <FontAwesomeIcon icon={faChartLine} className="Side-Bar-Icon"/>
-                        <span>Estatísticas</span>
-                    </SideBarButton>
-                </SideBarItemContainer>
-            </NavLink>
-
-            <NavLink to="/administradores" onClick={()=>handleActiveMenuButton('administradores')}>
-                <SideBarItemContainer>
-                    <SideBarButton
-                        isActive={isActive['administradores']}
-                        isMinimizedActive={isMinimized}
-                    >
-                        <FontAwesomeIcon icon={faUserShield} className="Side-Bar-Icon"/>
-                        <span>Administradores</span>
-                    </SideBarButton>
-                </SideBarItemContainer>
-            </NavLink>
+            {adminData && adminData.role === "SUPER_ADMIN" &&
+                <NavLink to="/estatisticas">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('statistics')}>
+                        <SideBarButton
+                            isActive={isActive['statistics']}
+                            isMinimizedActive={isMinimized}
+                        >
+                            <FontAwesomeIcon icon={faChartLine} className="Side-Bar-Icon"/>
+                            <span>Estatísticas</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
+            }
+            
+            {adminData && adminData.role === "SUPER_ADMIN" &&
+                <NavLink to="/administradores" onClick={()=>handleActiveMenuButton('administradores')}>
+                    <SideBarItemContainer>
+                        <SideBarButton
+                            isActive={isActive['administradores']}
+                            isMinimizedActive={isMinimized}
+                        >
+                            <FontAwesomeIcon icon={faUserShield} className="Side-Bar-Icon"/>
+                            <span>Administradores</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
+            }
 
             <CompanyInfoContainer
                 isMinimizedActive={isMinimized}

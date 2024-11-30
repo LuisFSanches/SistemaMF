@@ -8,8 +8,9 @@ interface IAuthContextData {
   isAuthenticated: boolean;
   loading: boolean;
   adminData: {
-    id: string;
     username: string;
+    name: string;
+    role: string;
   };
   handleLogin: (username: string, password: string) => Promise<any>;
   handleSignOut: () => void;
@@ -25,16 +26,24 @@ export function AuthProvider({ children }: IAuthProviderProps) {
   const [isAuthenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [adminData, setAdminData] = useState({
-    id: "",
     username: "",
+    role: "",
+    name: ""
   });
 
   const handleLogin = async (username: string, password: string) => {
     try {
       const response: any = await authenticateUser(username, password);
-      setAdminData(response.data.admin);
+      const admin = {
+        username: response.data.admin.username,
+        role: response.data.admin.role,
+        name: response.data.admin.name
+      }
+      setAdminData(admin);
+      localStorage.setItem("adminData", JSON.stringify(admin));
+
       const token = `${response.data.token}`;
-      localStorage.setItem("token", JSON.stringify(token));
+      localStorage.setItem("token", JSON.stringify(token));      
       api.defaults.headers.common.authorization = token;
 
       setAuthenticated(true);
@@ -54,10 +63,17 @@ export function AuthProvider({ children }: IAuthProviderProps) {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const storedAdminData = localStorage.getItem("adminData");
+
     if (token) {
       api.defaults.headers.common.authorization = `${JSON.parse(token)}`;
       setAuthenticated(true);
     }
+
+    if (storedAdminData) {
+      setAdminData(JSON.parse(storedAdminData));
+    }
+    
     setLoading(false);
   }, []);
 

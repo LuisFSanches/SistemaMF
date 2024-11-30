@@ -9,6 +9,7 @@ export interface IOrder {
   additional_information: string;
   client_id?: string;
   client_address_id?: string;
+  pickup_on_store: boolean;
   client: IClient;
   clientAddress: IAddress;
   receiver_name?: string;

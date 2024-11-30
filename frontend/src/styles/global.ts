@@ -424,6 +424,16 @@ export const Checkbox = styled.input`
     }
 `;
 
+export const PasswordContainer = styled.div`
+    position: relative;
+
+    svg {
+        position: absolute;
+        right: 25px;
+        top: 25px;
+    }
+`
+
 export const AddButton = styled.button`
     display: flex;
     padding: 0.5rem;

@@ -3,5 +3,6 @@ export interface IAdmin {
   name: string;
   username: string;
   password?: string;
-  password_confirmation?: string;
+  role: string;
+  super_admin_password?: string;
 }

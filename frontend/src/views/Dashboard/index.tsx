@@ -29,6 +29,7 @@ import { NewOrderProgressBar } from "../../components/NewOrderProgressBar";
 import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
+import { getPickupAddress } from "../../services/addressService";
 import { rawTelephone } from "../../utils";
 import { PAYMENT_METHODS } from "../../constants";
 import { useOrders } from "../../contexts/OrdersContext";
@@ -40,6 +41,7 @@ interface INewOrder {
     receiver_name: string;
     receiver_phone: string;
     addressId: string;
+    pickup_on_store: boolean;
     street: string;
     street_number: string;
     complement: string;
@@ -69,6 +71,7 @@ export function DashboardPage() {
     const [addresses, setAddresses] = useState([]);
     const [addressId, setAddressId] = useState("");
     const [newAddress, setNewAddress] = useState(false);
+    const [pickupOnStore, setPickupOnStore] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState<any>({});
     const [differentReceiver, setDiferentReceiver] = useState(false);
     const [mask, setMask] = useState("(99) 99999-9999");
@@ -83,6 +86,7 @@ export function DashboardPage() {
         receiver_name: "",
         receiver_phone: "",
         addressId: addressId,
+        pickup_on_store: pickupOnStore,
         street: "",
         street_number: "",
         complement: "",
@@ -136,6 +140,7 @@ export function DashboardPage() {
         receiver_name,
         receiver_phone,
         addressId,
+        pickup_on_store,
         street,
         street_number,
         complement,
@@ -157,6 +162,8 @@ export function DashboardPage() {
 
         const total = Number(products_value) + Number(delivery_fee);
 
+        console.log('addressId', pickup_on_store)
+
         const orderData = {
             phone_number: rawTelephone(phone_number),
             first_name,
@@ -164,6 +171,7 @@ export function DashboardPage() {
             receiver_name,
             receiver_phone: receiver_phone ? rawTelephone(receiver_phone) : "",
             addressId,
+            pickup_on_store,
             street,
             street_number,
             complement,
@@ -284,6 +292,21 @@ export function DashboardPage() {
         }
     };
 
+    const handlePickUpAddress = async (value: boolean) => {
+        if (value) {
+            const { data: pickUpAddress } = await getPickupAddress() as any;
+
+            setAddressId(pickUpAddress.id);
+            setValue("addressId", pickUpAddress.id);
+            setValue("pickup_on_store", true);
+        }
+
+        if (!value) {
+            setValue("addressId", "");
+            setValue("pickup_on_store", false);
+        }
+    }
+
     return(
         <Container>
             <NewOrderProgressBar currentStep={step}/>
@@ -376,140 +399,158 @@ export function DashboardPage() {
                     <>
                         {addresses.length > 0 && (
                             <>
-                                <FormField>
-                                    <Label>Selecione o Endereço</Label>
-                                    <Select
-                                        {...register("addressId")}
-                                        onChange={(e) => {
-                                            const selectedAddressId = e.target.value;
-                                            const selectedAddress: any = addresses.find((address: any) => address.id === selectedAddressId);
-                                            setSelectedAddress(selectedAddress);
-                                            if (selectedAddress) {
-                                                setValue("postal_code", selectedAddress.postal_code);
-                                                setValue("street", selectedAddress.street);
-                                                setValue("street_number", selectedAddress.street_number);
-                                                setValue("city", selectedAddress.city);
-                                                setValue("neighborhood", selectedAddress.neighborhood);
-                                                setValue("complement", selectedAddress.complement);
-                                                setValue("reference_point", selectedAddress.reference_point);
-                                                setValue("state", selectedAddress.state);
-                                                setValue("country", selectedAddress.country);
-                                                setAddressId(selectedAddressId);
+                                {!pickupOnStore &&
+                                    <FormField>
+                                        <Label>Selecione o Endereço</Label>
+                                        <Select
+                                            {...register("addressId")}
+                                            onChange={(e) => {
+                                                const selectedAddressId = e.target.value;
+                                                const selectedAddress: any = addresses.find((address: any) => address.id === selectedAddressId);
+                                                setSelectedAddress(selectedAddress);
+                                                if (selectedAddress) {
+                                                    setValue("postal_code", selectedAddress.postal_code);
+                                                    setValue("street", selectedAddress.street);
+                                                    setValue("street_number", selectedAddress.street_number);
+                                                    setValue("city", selectedAddress.city);
+                                                    setValue("neighborhood", selectedAddress.neighborhood);
+                                                    setValue("complement", selectedAddress.complement);
+                                                    setValue("reference_point", selectedAddress.reference_point);
+                                                    setValue("state", selectedAddress.state);
+                                                    setValue("country", selectedAddress.country);
+                                                    setAddressId(selectedAddressId);
+                                                }
+                                            }}
+                                        >
+                                            <option value="">Selecione um endereço</option>
+                                            {addresses.map((address: any) => (
+                                                <option key={address.id} value={address.id}>
+                                                    {address.street}, {address.number} - {address.city}
+                                                </option>
+                                            ))}
+                                        </Select>
+                                    </FormField>
+                                }
+                                
+                                <InlineFormField>
+                                    <CheckboxContainer>
+                                        <Checkbox type="checkbox" disabled={pickupOnStore} onChange={() => {
+                                            setNewAddress(!newAddress)
+
+                                            if (!newAddress) {
+                                                setAddressId("");
+                                                setValue("addressId", "");
                                             }
-                                        }}
-                                    >
-                                        <option value="">Selecione um endereço</option>
-                                        {addresses.map((address: any) => (
-                                            <option key={address.id} value={address.id}>
-                                                {address.street}, {address.number} - {address.city}
-                                            </option>
-                                        ))}
-                                    </Select>
-                                </FormField>
-                                <CheckboxContainer>
-                                    <Checkbox type="checkbox" onChange={() => {
-                                        setNewAddress(!newAddress)
 
-                                        if (!newAddress) {
-                                            setAddressId("");
-                                            setValue("addressId", "");
-                                        }
+                                            if (newAddress) {
+                                                setAddressId(selectedAddress.id);
+                                                setValue("addressId", selectedAddress.id);
+                                            }
+                                            
+                                        }} checked={newAddress}/>
+                                        <Label>Cadastrar novo endereço</Label>
+                                    </CheckboxContainer>
 
-                                        if (newAddress) {
-                                            setAddressId(selectedAddress.id);
-                                            setValue("addressId", selectedAddress.id);
-                                        }
-                                        
-                                    }} checked={newAddress}/>
-                                    <Label>Cadastrar novo endereço</Label>
-                                </CheckboxContainer>
+                                    <CheckboxContainer>
+                                        <Checkbox type="checkbox" onChange={(e) => {
+                                            setPickupOnStore(!pickupOnStore)
+                                            handlePickUpAddress(e.target.checked);
+                                            
+                                        }} checked={pickupOnStore}/>
+                                        <Label>Retirar no local</Label>
+                                    </CheckboxContainer>
+                                </InlineFormField>
                             </>
                         )}
-                        <InlineFormField>
-                            <FormField isShortField>
-                                <Label>CEP</Label>
-                                <Input type="tel" placeholder="CEP" {...register("postal_code", {
-                                    required: "CEP inválido",
-                                    })}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                                {errors.postal_code && <ErrorMessage>{errors.postal_code.message}</ErrorMessage>}
-                            </FormField>
-                            <FormField>
-                                <Label>Rua</Label>
-                                <Input type="text" placeholder="Rua" {...register("street", {
-                                    required: "Rua inválida",
-                                    })}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                                {errors.street && <ErrorMessage>{errors.street.message}</ErrorMessage>}
-                            </FormField>
-                        </InlineFormField>
-                        
-                        <InlineFormField>
-                            <FormField isShortField>
-                                <Label>Número</Label>
-                                <Input type="text" placeholder="Número" {...register("street_number", {
-                                    required: "Número inválido",
-                                    })}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                                {errors.street_number && <ErrorMessage>{errors.street_number.message}</ErrorMessage>}
-                            </FormField>
-                            <FormField>
-                                <Label>Complemento</Label>
-                                <Input type="text" placeholder="Complemento" {...register("complement")}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                            </FormField>
-                        </InlineFormField>
-                        <FormField>
-                                <Label>Ponto de referência</Label>
-                                <Input type="text" placeholder="Ponto de referência" {...register("reference_point")}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                        </FormField>
-                        <InlineFormField>
-                            <FormField>
-                                <Label>Bairro</Label>
-                                <Input type="text" placeholder="Bairro" {...register("neighborhood", {
-                                    required: "Bairro inválido",
-                                    })}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                                {errors.neighborhood && <ErrorMessage>{errors.neighborhood.message}</ErrorMessage>}
-                            </FormField>
-                            <FormField isShortField>
-                                <Label>País</Label>
-                                <Input type="text" placeholder="País" {...register("country", {
-                                    required: "País inválido",
-                                    })}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                                {errors.country && <ErrorMessage>{errors.country.message}</ErrorMessage>}
-                            </FormField>
-                        </InlineFormField>
+                        {!pickupOnStore &&
+                            <>
+                                <InlineFormField>
+                                    <FormField isShortField>
+                                        <Label>CEP</Label>
+                                        <Input type="tel" placeholder="CEP" {...register("postal_code", {
+                                            required: "CEP inválido",
+                                            })}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                        {errors.postal_code && <ErrorMessage>{errors.postal_code.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>Rua</Label>
+                                        <Input type="text" placeholder="Rua" {...register("street", {
+                                            required: "Rua inválida",
+                                            })}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                        {errors.street && <ErrorMessage>{errors.street.message}</ErrorMessage>}
+                                    </FormField>
+                                </InlineFormField>
+                                
+                                <InlineFormField>
+                                    <FormField isShortField>
+                                        <Label>Número</Label>
+                                        <Input type="text" placeholder="Número" {...register("street_number", {
+                                            required: "Número inválido",
+                                            })}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                        {errors.street_number && <ErrorMessage>{errors.street_number.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>Complemento</Label>
+                                        <Input type="text" placeholder="Complemento" {...register("complement")}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                    </FormField>
+                                </InlineFormField>
+                                <FormField>
+                                        <Label>Ponto de referência</Label>
+                                        <Input type="text" placeholder="Ponto de referência" {...register("reference_point")}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                </FormField>
+                                <InlineFormField>
+                                    <FormField>
+                                        <Label>Bairro</Label>
+                                        <Input type="text" placeholder="Bairro" {...register("neighborhood", {
+                                            required: "Bairro inválido",
+                                            })}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                        {errors.neighborhood && <ErrorMessage>{errors.neighborhood.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField isShortField>
+                                        <Label>País</Label>
+                                        <Input type="text" placeholder="País" {...register("country", {
+                                            required: "País inválido",
+                                            })}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                        {errors.country && <ErrorMessage>{errors.country.message}</ErrorMessage>}
+                                    </FormField>
+                                </InlineFormField>
 
-                        <InlineFormField>
-                            <FormField>
-                                <Label>Estado</Label>
-                                <Input type="text" placeholder="Estado" {...register("state", {
-                                    required: "Estado inválido",
-                                    })}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                                {errors.state && <ErrorMessage>{errors.state.message}</ErrorMessage>}
-                            </FormField>
-                            <FormField>
-                                <Label>Cidade</Label>
-                                <Input type="text" placeholder="Cidade" {...register("city", {
-                                    required: "Cidade inválido",
-                                    })}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                                {errors.city && <ErrorMessage>{errors.city.message}</ErrorMessage>}
-                            </FormField>
-                        </InlineFormField>
+                                <InlineFormField>
+                                    <FormField>
+                                        <Label>Estado</Label>
+                                        <Input type="text" placeholder="Estado" {...register("state", {
+                                            required: "Estado inválido",
+                                            })}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                        {errors.state && <ErrorMessage>{errors.state.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>Cidade</Label>
+                                        <Input type="text" placeholder="Cidade" {...register("city", {
+                                            required: "Cidade inválido",
+                                            })}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                        {errors.city && <ErrorMessage>{errors.city.message}</ErrorMessage>}
+                                    </FormField>
+                                </InlineFormField>
+                            </>
+                        }
                     </>
                 }
 

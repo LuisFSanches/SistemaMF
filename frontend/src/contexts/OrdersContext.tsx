@@ -45,16 +45,11 @@ export const OrdersProvider: React.FC = ({ children }) => {
       )
     );
 
-    if (updatedOrder.status !== "DONE") {
-      setOnGoingOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === updatedOrder.id ? updatedOrder : order
-        )
-      );
-    }
-
-    console.log('AQUIIIII', onGoingOrders);
-
+    setOnGoingOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === updatedOrder.id ? updatedOrder : order
+      )
+    );
   };
 
   useEffect(() => {

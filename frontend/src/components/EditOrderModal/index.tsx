@@ -21,6 +21,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { useOrders } from "../../contexts/OrdersContext";
 import { PAYMENT_METHODS, STATUS_LABEL } from "../../constants";
 import { updateOrder } from "../../services/orderService";
+import { getPickupAddress } from "../../services/addressService";
 
 
 interface IEditOrderModal{
@@ -36,6 +37,7 @@ export function EditOrderModal({
 }:IEditOrderModal){
     const { loadAvailableOrders, editOrder } = useOrders();
 	const [editAddress, setEditAddress] = useState(false);
+	const [pickupAddress, setPickupAddress] = useState(order?.pickup_on_store);
     const {
         register,
         handleSubmit,
@@ -113,7 +115,24 @@ export function EditOrderModal({
 		setValue("clientAddress.city", order.clientAddress.city);
 		setValue("clientAddress.state", order.clientAddress.state);
 		setValue("clientAddress.country", order.clientAddress.country);
+		setValue("pickup_on_store", order.pickup_on_store);
+		setPickupAddress(order.pickup_on_store);
     }, [order, setValue]);
+
+	const handlePickUpAddress = async (value: boolean) => {
+        if (value) {
+            const { data: pickUpAddress } = await getPickupAddress() as any;
+            setValue("client_address_id", pickUpAddress.id);
+            setValue("pickup_on_store", true);
+			setPickupAddress(true);
+        }
+
+        if (!value) {
+            setValue("client_address_id", order.client_address_id);
+            setValue("pickup_on_store", false);
+			setPickupAddress(false);
+        }
+    }
 
 	if (!order) {
 		return null;
@@ -225,14 +244,27 @@ export function EditOrderModal({
 						</EditFormField>						
 					</InlineFormField>
 
-					<EditFormField>
-						<CheckboxContainer>
-							<Checkbox type="checkbox" checked={editAddress}
-								onChange={() => setEditAddress(!editAddress)}
-							/>
-							<Label>Alterar endereço</Label>
-						</CheckboxContainer>
-					</EditFormField>
+					<InlineFormField>
+						<EditFormField>
+							<CheckboxContainer>
+								<Checkbox type="checkbox" disabled={pickupAddress} checked={editAddress}
+									onChange={() => setEditAddress(!editAddress)}
+								/>
+								<Label>Alterar endereço</Label>
+							</CheckboxContainer>
+						</EditFormField>
+
+						<EditFormField>
+							<CheckboxContainer>
+								<Checkbox type="checkbox" checked={pickupAddress}
+									onChange={(e) => handlePickUpAddress(e.target.checked)}
+								/>
+								<Label>Retirar no Local</Label>
+							</CheckboxContainer>
+						</EditFormField>
+					</InlineFormField>
+
+					
 
 					{ editAddress &&
 						<>
@@ -314,7 +346,7 @@ export function EditOrderModal({
 							</InlineFormField>
 						</>
 					}
-                    <button type="submit" className="create-button" onClick={() => console.log('OKOKOK')}>
+                    <button type="submit" className="create-button">
                         Editar
                     </button>
                 </Form>

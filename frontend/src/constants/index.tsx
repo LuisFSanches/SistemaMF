@@ -22,3 +22,8 @@ export const HAS_CARD = {
   "true": "Possui cartão",
   "false": "Não tem cartão"
 }
+
+export const ADMIN_ROLES = {
+  "ADMIN": "ADMIN",
+  "SUPER_ADMIN": "SUPER_ADMIN"
+}

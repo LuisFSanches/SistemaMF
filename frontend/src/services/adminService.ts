@@ -12,14 +12,18 @@ export const listAdmins = async () => {
 };
 
 export const createAdmin = async ({
-	first_name,
-	last_name,
-	phone_number,
+	name,
+	username,
+	password,
+	role,
+	super_admin_password
 	}: any) => {
 		const response = await api.post("/admin", {
-		first_name,
-		last_name,
-		phone_number,
+		name,
+		username,
+		password,
+		role,
+		super_admin_password,
 		headers: {
 			Authorization: `${token}`,
 		}
@@ -30,15 +34,19 @@ export const createAdmin = async ({
 
 export const updateAdmin = async({
 	id,
-	first_name,
-	last_name,
-	phone_number,
+	name,
+	username,
+	password,
+	role,
+	super_admin_password
 	}: any) => {
 		const response = await api.put(`/admin/${id}`, {
 		id,
-		first_name,
-		last_name,
-		phone_number,
+		name,
+		username,
+		password,
+		role,
+		super_admin_password,
 		headers: {
 			Authorization: `${token}`,
 		}

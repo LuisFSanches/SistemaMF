@@ -17,12 +17,13 @@ export function AdminsPage(){
         name: "",
         username: "",
         password: "",
+        role: ""
     });
 
-    function handleOpenAdminModal(action:string, client: any){
+    function handleOpenAdminModal(action:string, admin: any){
         setAdminModal(true)
         setAction(action)
-        setCurrentAdmin(client)
+        setCurrentAdmin(admin)
     }
     function handleCloseClientModal(){
         setAdminModal(false)
@@ -37,6 +38,7 @@ export function AdminsPage(){
                     id: "",
                     name: "",
                     username: "",
+                    role: ""
                 })}>
                     <FontAwesomeIcon icon={faPlus}/>
                     <p>Novo Admin</p>

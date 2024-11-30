@@ -23,6 +23,7 @@ function PrivateRoute({ children }: IPrivateRouteProps) {
     if (loading) {
         return null;
     }
+
     return isAuthenticated ? children : <Navigate to="/" />;
 }
 

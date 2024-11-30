@@ -32,6 +32,8 @@ export function OrderCard({
 		return <></>;
 	}
 
+	console.log(order);
+
 	return (
     	<OrderCardContainer className={order?.status?.toLowerCase()}>
 			<div className="order-number">
@@ -58,8 +60,16 @@ export function OrderCard({
 			</div>
 			<div className="address-container">
 				<p><strong>Endereço:</strong></p>
-				<p>{order.clientAddress.street}, {order.clientAddress.street_number}, {order.clientAddress.complement}</p>
-				<p>{order.clientAddress.neighborhood}, {order.clientAddress.city}</p>
+				{!order.pickup_on_store && 
+					<>
+						<p>{order.clientAddress.street}, {order.clientAddress.street_number}, {order.clientAddress.complement}</p>
+						<p>{order.clientAddress.neighborhood}, {order.clientAddress.city}</p>
+					</>
+				}
+
+				{order.pickup_on_store &&
+					<p>Retirar na loja</p>
+				}
 			</div>
 			<div className="address-container">
 				<p><strong>Ponto de referência: </strong>{order.clientAddress.reference_point}</p>
