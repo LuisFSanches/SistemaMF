@@ -86,10 +86,11 @@ export const ActionButtons = styled.div`
     margin: 20px 0;
 `
 
-export const CheckboxContainer = styled.div`
+export const CheckboxContainer = styled.div<{alignLeft?: boolean}>`
     display: flex;
     align-items: center;
     margin: 10px 0px;
+    align-self: ${({ alignLeft }) => alignLeft ? 'end' : 'flex-end'};
     
     label {
         margin: 0px 10px;

@@ -397,6 +397,16 @@ export function DashboardPage() {
 
                 {step === 2 &&
                     <>
+                        {addresses.length === 0 &&
+                            <CheckboxContainer alignLeft>
+                                <Checkbox type="checkbox" onChange={(e) => {
+                                    setPickupOnStore(!pickupOnStore)
+                                    handlePickUpAddress(e.target.checked);
+                                    
+                                }} checked={pickupOnStore}/>
+                                <Label>Retirar no local</Label>
+                            </CheckboxContainer>
+                        }
                         {addresses.length > 0 && (
                             <>
                                 {!pickupOnStore &&
