@@ -70,6 +70,7 @@ model Order {
   additional_information String?
   client_id         String
   client_address_id String
+  pickup_on_store Boolean    @default(false)
   receiver_name     String?
   receiver_phone    String?
   products_value    Float

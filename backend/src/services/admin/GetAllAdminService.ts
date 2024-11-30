@@ -5,13 +5,11 @@ class GetAllAdminService{
 	async execute() {
 		try {
 			const admins = await prismaClient.admin.findMany({
-				where: {
-					role: 'ADMIN'
-				},
 				select: {
 					id: true,
 					name: true,
-					username: true
+					username: true,
+					role: true
 				}
 			});
 

@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { BadRequestException } from "../../exceptions/bad-request";
-import { CreateAdminService } from '../../services/admin/CreateAdminService';
+import { UpdateAdminService } from '../../services/admin/UpdateAdminService';
 import { ValidateSuperAdminService } from '../../services/admin/ValidateSuperAdminService';
 import { IAdmin } from '../../interfaces/IAdmin';
 
-class CreateAdminController{
+class UpdateAdminController{
 	async handle(req: Request, res: Response, next: NextFunction) {
-		const { username, name, password, role, super_admin_password }: IAdmin = req.body;
+		const { id, username, name, password, role, super_admin_password }: IAdmin = req.body;
 
 		const validateSuperAdminService = new ValidateSuperAdminService();
 
@@ -26,9 +26,10 @@ class CreateAdminController{
 			return;
 		}
 
-		const createAdminService = new CreateAdminService();
+		const updateAdminService = new UpdateAdminService();
 
-		const admin = await createAdminService.execute({
+		const admin = await updateAdminService.execute({
+			id,
 			username,
 			name,
 			password,
@@ -46,4 +47,4 @@ class CreateAdminController{
 	}
 }
 
-export { CreateAdminController }
+export { UpdateAdminController }

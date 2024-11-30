@@ -7,7 +7,6 @@ import { IPayload } from "../interfaces/IPayload";
 
 const adminAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers.authorization as string;
-
   if (!token) {
     next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
   }
