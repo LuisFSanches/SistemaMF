@@ -29,6 +29,7 @@ export const createOrder = async ({
 	total,
 	status,
 	has_card,
+	created_by
 }: any) => {
 
 	const response = await api.post("/order", {
@@ -39,7 +40,7 @@ export const createOrder = async ({
 		receiver_name,
 		receiver_phone,
 		addressId,
-		pickup_on_store: true,
+		pickup_on_store,
 		street,
 		street_number,
 		complement,
@@ -59,7 +60,8 @@ export const createOrder = async ({
 		payment_received,
 		status,
 		has_card,
-
+		created_by,
+		
 		headers: {
 			Authorization: `${token}`,
 		}

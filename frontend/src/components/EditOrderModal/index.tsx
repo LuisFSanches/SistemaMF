@@ -22,6 +22,7 @@ import { useOrders } from "../../contexts/OrdersContext";
 import { PAYMENT_METHODS, STATUS_LABEL } from "../../constants";
 import { updateOrder } from "../../services/orderService";
 import { getPickupAddress } from "../../services/addressService";
+import { Loader } from "../Loader";
 
 
 interface IEditOrderModal{
@@ -44,8 +45,10 @@ export function EditOrderModal({
         setValue,
         formState: { errors },
     } = useForm<IOrder>();
+	const [showLoader, setShowLoader] = useState(false);
 
 	const handleOrder = async (formData: IOrder) => {
+		setShowLoader(true);
 		const data = {
             id: order.id,
 			code: order.code,
@@ -82,7 +85,7 @@ export function EditOrderModal({
 
 		editOrder(orderData);
 		loadAvailableOrders();
-
+		setShowLoader(false);
 		onRequestClose();
 	}
 
@@ -145,6 +148,7 @@ export function EditOrderModal({
             overlayClassName="react-modal-overlay"
             className="react-modal-content-edit-order"
         >
+			<Loader show={showLoader}/>
             <button type="button" onClick={onRequestClose} className="modal-close">
                 <FontAwesomeIcon icon={faXmark}/>
             </button>

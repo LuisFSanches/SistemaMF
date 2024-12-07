@@ -19,7 +19,5 @@ export const getPickupAddress = async () => {
     }
   });
   
-  console.log('response', response)
-
   return response;
 };

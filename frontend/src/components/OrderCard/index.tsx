@@ -32,8 +32,6 @@ export function OrderCard({
 		return <></>;
 	}
 
-	console.log(order);
-
 	return (
     	<OrderCardContainer className={order?.status?.toLowerCase()}>
 			<div className="order-number">
@@ -76,7 +74,12 @@ export function OrderCard({
 				<p><strong>Entregar para: </strong>
 					{order.receiver_name ? order.receiver_name : order.client.first_name}
 				</p>
+				<p><strong>Telefone do recebedor: </strong>
+					{order.receiver_name ? order.receiver_phone : order.client.phone_number}</p>
+			</div>
+			<div className="address-container">
 				<p><strong>Status Pagamento: </strong>{order.payment_received ? "Pago" : "Pendente"}</p>
+				<p><strong>Responsável pelo Pedido: </strong>{order.createdBy.name}</p>
 			</div>
 			<div className="order-actions">
 				{previousStatus &&

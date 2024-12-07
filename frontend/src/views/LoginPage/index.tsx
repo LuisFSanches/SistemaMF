@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Container, LoginForm, LoginImage } from "./style";
 
@@ -6,6 +6,7 @@ import LoginCover from '../../assets/images/login-image.jpeg'
 import logo from '../../assets/images/logo.png'
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
+import { Loader } from "../../components/Loader";
 
 interface ISignIn {
     username: string;
@@ -22,11 +23,16 @@ export function LoginPage(){
         setError,
     } = useForm<ISignIn>();
 
+    const [showLoader, setShowLoader] = useState(false);
+
+
     const handleLoginSubmit = async ({ username, password }: ISignIn) => {
+        setShowLoader(true);
         const response = await handleLogin(username, password);
 
         if (!response.data) {
             const { status } = response.response;
+            setShowLoader(false);
             if (status === 400) {
                 return setError("password", {
                     type: "custom",
@@ -40,11 +46,13 @@ export function LoginPage(){
                 });
             }
         }
+        setShowLoader(false);
         navigate("/dashboard");
     };
 
     return(
         <Container>
+            <Loader show={showLoader} />
             <LoginForm>
                 <div className="welcome-header">
                     <h1>Mirai Flores</h1>

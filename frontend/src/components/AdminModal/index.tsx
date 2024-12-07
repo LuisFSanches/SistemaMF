@@ -18,7 +18,7 @@ import { IAdmin } from "../../interfaces/IAdmin";
 import { ADMIN_ROLES } from "../../constants";
 import { createAdmin, updateAdmin } from "../../services/adminService";
 import { useAdmins } from "../../contexts/AdminsContext";
-
+import { Loader } from "../../components/Loader";
 
 interface AdminModalProps{
     isOpen: boolean;
@@ -45,8 +45,10 @@ export function AdminModal({
         setValue,
         formState: { errors },
     } = useForm<IAdmin>();
+    const [showLoader, setShowLoader] = useState(false);
 
 	const handleAdmin = async (formData: IAdmin) => {
+        setShowLoader(true);
         if (action === "create") {
             const { data: adminData } = await createAdmin({
                 name: formData.name,
@@ -73,6 +75,8 @@ export function AdminModal({
             loadAvailableAdmins();
             onRequestClose();
         }
+
+        setShowLoader(false);
 	}
 
     useEffect(() => {
@@ -94,6 +98,7 @@ export function AdminModal({
             overlayClassName="react-modal-overlay"
             className="react-modal-content"
         >
+            <Loader show={showLoader} />
             <button type="button" onClick={onRequestClose} className="modal-close">
                 <FontAwesomeIcon icon={faXmark}/>
             </button>

@@ -149,7 +149,7 @@ export const OrderSummary = styled.div`
 
     div {
         border-bottom: 1px dashed black;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
 
     p {

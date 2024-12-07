@@ -142,13 +142,14 @@ table{
         
     }
 
-    input {
+    input, select {
         width: 100%;
         padding: 12px;
         border-radius: 8px;
         border: 1px solid #e7b7c2;
         outline: none;
         font-size: 16px;
+        background: var(--white-background);
     }
 
 button{
@@ -253,6 +254,7 @@ button{
             filter: brightness(0.7);
         }
     }
+
 `
 
 export const PageContainer = styled.div`
@@ -452,6 +454,7 @@ export const AddButton = styled.button`
 export const PageHeader = styled.div`
     display: flex;
     justify-content: space-between;
+    margin-bottom: 1rem;
 `
 export const ErrorMessage = styled.span`
     color: red;

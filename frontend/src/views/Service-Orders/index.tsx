@@ -4,6 +4,7 @@ import { Container } from "./style";
 import { updateStatus } from "../../services/orderService";
 import { OrderCard } from "../../components/OrderCard";
 import { useOrders } from "../../contexts/OrdersContext";
+import { Loader } from "../../components/Loader";
 
 export function ServiceOrdersPage(){
 	const { onGoingOrders, editOrder } = useOrders();
@@ -11,11 +12,14 @@ export function ServiceOrdersPage(){
 	const [openedOrders, setOpenedOrders] = useState<IOrder[]>([]);
 	const [inProgressOrders, setInProgressOrders] = useState<IOrder[]>([]);
 	const [inDeliveryOrders, setInDeliveryOrders] = useState<IOrder[]>([]);
+	const [showLoader, setShowLoader] = useState(false);
 
 	const fetchOrders = async () => {
+		setShowLoader(true);
 		setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED"));
 		setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS"));
 		setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY"));
+		setShowLoader(false);
 	};
 
 	useEffect(() => {
@@ -55,13 +59,16 @@ export function ServiceOrdersPage(){
 	};
 
 	const handleOrderStatus = async (id: string, status: string) => {
+		setShowLoader(true);
 		const response =await updateStatus({ id, status });
 		const { data: order } = response;
 		editOrder(order);
+		setShowLoader(false);
 	}
 
     return (
 		<Container>
+			<Loader show={showLoader} />
 			<div className="order-container">
 				<header className="opened-order">
 					Ordem Aberta

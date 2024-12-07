@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { createClient, updateClient } from "../../services/clientService";
 import { useClients } from "../../contexts/ClientsContext";
+import { Loader } from "../../components/Loader";
 
 interface ClientModalProps{
     isOpen: boolean;
@@ -39,12 +40,14 @@ export function ClientModal({
         watch,
         formState: { errors },
     } = useForm<IUsers>();
+    const [showLoader, setShowLoader] = useState(false);
 
     const handleUser = async (formData: IUsers) => {
         const data = {
             ...formData,
             phone_number: formData.phone_number.replace(/[^0-9]/g, "")
         }
+        setShowLoader(true);
 
         if (action === "create") {
             const { data: clientData } = await createClient(data);
@@ -61,6 +64,8 @@ export function ClientModal({
             loadAvailableClients();
             onRequestClose();
         }
+
+        setShowLoader(false);
     }
 
     useEffect(() => {
@@ -97,6 +102,7 @@ export function ClientModal({
             overlayClassName="react-modal-overlay"
             className="react-modal-content"
         >
+            <Loader show={showLoader} />
             <button type="button" onClick={onRequestClose} className="modal-close">
                 <FontAwesomeIcon icon={faXmark}/>
             </button>

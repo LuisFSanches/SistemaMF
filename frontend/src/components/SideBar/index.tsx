@@ -13,8 +13,9 @@ import {
     faRightFromBracket,
     faUsers,
     faUtensils,
-    faUserShield
+    faUserShield,
 } from "@fortawesome/free-solid-svg-icons";
+import { faPix } from "@fortawesome/free-brands-svg-icons";
 import { useAdminData } from "../../contexts/AuthContext";
 import { NavLink} from 'react-router-dom'
 import logo from '../../assets/images/logo.png'
@@ -31,6 +32,7 @@ export function SideBar(){
         pedidos:false,
         clientes:false,
         statistics:false,
+        pix: false,
         configurations:false,
         administradores: false
     })
@@ -136,6 +138,20 @@ export function SideBar(){
                     'clientes':false,
                     'statistics':false,
                     "administradores": true
+                })
+            break;
+
+            case 'pix':
+                setActive({...isActive, 
+                    'dashboard':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': true
                 })
             break;
         }
@@ -244,6 +260,19 @@ export function SideBar(){
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
+
+            <NavLink to="/pix">
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('pix')}>
+                    <SideBarButton
+                        isActive={isActive['pix']}
+                        isMinimizedActive={isMinimized}
+                    >
+                        <FontAwesomeIcon icon={faPix} className="Side-Bar-Icon"/>
+                        <span>Gerenciar Pix</span>
+                    </SideBarButton>
+                </SideBarItemContainer>
+            </NavLink>
+
             {adminData && adminData.role === "SUPER_ADMIN" &&
                 <NavLink to="/estatisticas">
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('statistics')}>

@@ -26,6 +26,7 @@ import {
 } from "../../styles/global";
 
 import { NewOrderProgressBar } from "../../components/NewOrderProgressBar";
+import { Loader } from '../../components/Loader';
 import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
@@ -33,6 +34,7 @@ import { getPickupAddress } from "../../services/addressService";
 import { rawTelephone } from "../../utils";
 import { PAYMENT_METHODS } from "../../constants";
 import { useOrders } from "../../contexts/OrdersContext";
+import { useAdmins } from "../../contexts/AdminsContext";
 
 interface INewOrder {
     phone_number: string;
@@ -60,10 +62,12 @@ interface INewOrder {
     total: number;
     delivery_fee: number;
     has_card: boolean;
+    created_by: string;
 }
 
 export function DashboardPage() {
     const { addOrder } = useOrders();
+    const { admins } = useAdmins();
 
     const formRef = useRef<HTMLDivElement>(null);
     const [step, setStep] = useState(1);
@@ -76,6 +80,7 @@ export function DashboardPage() {
     const [differentReceiver, setDiferentReceiver] = useState(false);
     const [mask, setMask] = useState("(99) 99999-9999");
     const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
+    const [showLoader, setShowLoader] = useState(false);
 
     const navigate = useNavigate();
 
@@ -104,7 +109,8 @@ export function DashboardPage() {
         products_value: 0.00,
         total: 0.00,
         delivery_fee: 0.00,
-        has_card: false
+        has_card: false,
+        created_by: ""
     });
 
     const handleNextStep = () => {
@@ -157,12 +163,11 @@ export function DashboardPage() {
         payment_received,
         products_value,
         delivery_fee,
-        has_card
+        has_card,
+        created_by
     }: INewOrder) => {
 
         const total = Number(products_value) + Number(delivery_fee);
-
-        console.log('addressId', pickup_on_store)
 
         const orderData = {
             phone_number: rawTelephone(phone_number),
@@ -190,7 +195,8 @@ export function DashboardPage() {
             delivery_fee: Number(delivery_fee),
             total: Number(total),
             status: "OPENED",
-            has_card
+            has_card,
+            created_by
         }
 
         if (step === 3) {
@@ -202,6 +208,8 @@ export function DashboardPage() {
                 clientId: client_id,
                 ...orderData,
             })
+
+            setShowLoader(true);
 
             addOrder(data);
 
@@ -216,7 +224,6 @@ export function DashboardPage() {
     useEffect(() => {
         const fetchClientData = async () => {
             const phoneNumber = rawTelephone(phone_number);
-
 
             if (phoneNumber && phoneNumber.length > 7) {
                 try {
@@ -309,6 +316,7 @@ export function DashboardPage() {
 
     return(
         <Container>
+            <Loader show={showLoader} />
             <NewOrderProgressBar currentStep={step}/>
             <Form onSubmit={handleSubmit(onSubmitStep)} step={step} autoComplete="off">
                 <FormHeader>
@@ -392,6 +400,17 @@ export function DashboardPage() {
                                 </FormField>
                             </InlineFormField>
                         }
+
+                        <FormField>
+                            <Label>Administrador Responsável</Label>
+                            <Select {...register("created_by", { required: "Administrador Responsável inválido" })}>
+                                <option value="">Selecione um Administrador</option>
+                                {admins.map((admin: any) => (
+                                    <option key={admin.id} value={admin.id}>{admin.name}</option>
+                                ))}
+                            </Select>
+                            {errors.created_by && <ErrorMessage>{errors.created_by.message}</ErrorMessage>}
+                        </FormField>
                     </>
                 }
 
@@ -637,10 +656,8 @@ export function DashboardPage() {
                             <p>Realizado em {new Date().toLocaleString()}</p>
                         </div>
                         <div>
-                            <p><strong>Descrição do pedido:</strong></p>
-                            <p>{order.description}</p>
-                            <p>Observações:</p>
-                            <p>{order.additional_information}</p>
+                            <p><strong>Descrição do pedido: </strong>{order.description}</p>
+                            <p>Observações: {order.additional_information}</p>
                         </div>
                         <div>
                             <p><strong>Valor dos produtos:</strong> R$ {order.products_value}</p>
@@ -648,13 +665,28 @@ export function DashboardPage() {
                             <p><strong>Total:</strong> R$ {Number(order.products_value) + Number(order.delivery_fee)}</p>
                         </div>
                         <div>
-                            <p><strong>Cliente:</strong></p>
-                            <p>{order.first_name}</p>
+                            <p><strong>Cliente: </strong>{order.first_name}</p>
                         </div>
                         <div>
                             <p><strong>Endereço:</strong></p>
                             <p>{order.street}, {order.street_number}</p>
                             <p>{order.neighborhood}, {order.city}</p>
+                            <p><strong>Ponto de referência: </strong>{order.reference_point}</p>
+                        </div>
+                        <div>
+                            <p><strong>Entregar para: </strong>
+                                {order.receiver_name ? order.receiver_name : order.first_name}</p>
+                            <p><strong>Telefone do Recebedor: </strong>
+                                {order.receiver_name ? order.receiver_phone : order.phone_number}
+                            </p>
+                        </div>
+                        <div>
+                            <p><strong>Método de pagamento: </strong>
+                                {PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS]}
+                            </p>
+                            <p><strong>Status do pagamento: </strong>
+                                {order.payment_received ? "Recebido" : "Pendente"}
+                            </p>
                         </div>
                         <button type="button" onClick={handlePrint}>
                             <FontAwesomeIcon icon={faPrint} size="2x" />
