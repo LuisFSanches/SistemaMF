@@ -10,7 +10,8 @@ class GetOnGoingOrderService {
       },
       include: {
         client: true,
-        clientAddress: true
+        clientAddress: true,
+        createdBy: true
       }
     });
     

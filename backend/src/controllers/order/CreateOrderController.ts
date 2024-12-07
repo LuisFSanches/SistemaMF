@@ -38,6 +38,7 @@ class CreateOrderController{
 			delivery_date,
 			status,
 			has_card,
+			created_by
 		} = req.body;
 
 		const { id: admin_id }: any = req.admin;
@@ -105,8 +106,8 @@ class CreateOrderController{
 			payment_method,
 			payment_received,
 			delivery_date: new Date(`${delivery_date}T00:00:00Z`),
-			created_by: admin_id,
-			updated_by: admin_id,
+			created_by,
+			updated_by: created_by,
 			status,
 			has_card: has_card,
 		});

@@ -23,6 +23,8 @@ import { GetAllAdminController } from './controllers/admin/GetAllAdminController
 import { DeleteAdminController } from './controllers/admin/DeleteAdminController'
 import { UpdateAdminController } from './controllers/admin/UpdateAdminController';
 
+import { GetPixController } from './controllers/inter/GetPixController';
+
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 
@@ -54,6 +56,9 @@ router.get('/admins/admin', adminAuthMiddleware, new GetAdminController().handle
 router.get('/admins/all', superAdminAuthMiddleware, new GetAllAdminController().handle)
 router.delete('/admins/delete/:id', superAdminAuthMiddleware, new DeleteAdminController().handle)
 router.put('/admin/:id', superAdminAuthMiddleware, new UpdateAdminController().handle)
+
+//-- ROTAS PIX --
+router.get('/pix', new GetPixController().handle)
 
 
 export { router };

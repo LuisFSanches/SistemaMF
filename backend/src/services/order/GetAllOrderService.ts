@@ -7,7 +7,8 @@ import { ErrorCodes } from "../../exceptions/root";
         const orders = await prismaClient.order.findMany({
           include: {
             client: true,
-            clientAddress: true
+            clientAddress: true,
+            createdBy: true
           }
         });
 
