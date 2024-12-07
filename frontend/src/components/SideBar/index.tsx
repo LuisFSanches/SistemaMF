@@ -267,7 +267,7 @@ export function SideBar(){
                         isActive={isActive['pix']}
                         isMinimizedActive={isMinimized}
                     >
-                        <FontAwesomeIcon icon={faPix} className="Side-Bar-Icon"/>
+                        <FontAwesomeIcon icon={faPix as any} className="Side-Bar-Icon"/>
                         <span>Gerenciar Pix</span>
                     </SideBarButton>
                 </SideBarItemContainer>
