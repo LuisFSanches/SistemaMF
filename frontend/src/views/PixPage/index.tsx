@@ -5,6 +5,7 @@ import { PageHeader } from "../../styles/global";
 import { getPix } from"../../services/pixService";
 import { IPix } from "../../interfaces/IPix";
 import { Loader } from "../../components/Loader";
+import { convertMoney } from "../../utils";
 
 export function PixPage(){
     const [pixList, setPixList] = useState<IPix[]>([]);
@@ -50,7 +51,7 @@ export function PixPage(){
                     </div>
                     <div>
                         <label>Limite</label>
-                        <select value={limits[0]} onChange={(e) => setSelectedLimit(Number(e.target.value))}>
+                        <select value={selectedLimit} onChange={(e) => setSelectedLimit(Number(e.target.value))}>
                             {limits.map(limit => <option key={limit}>{limit}</option>)}
                         </select>
                     </div>
@@ -69,14 +70,12 @@ export function PixPage(){
                 <tbody>
                     {pixList?.map(pix => (
                         <tr key={pix.descricao}>
-                            <td>{moment(pix.dataEntrada).format("DD/MM/YYYY")}</td>
+                            <td>{moment(pix.dataInclusao).format("DD/MM/YYYY HH:mm")}</td>
                             <td>{pix.titulo}</td>
                             <td>
-                                {pix.descricao.includes("-") 
-                                    ? pix.descricao.split("-").pop()?.trim() || "Sem Cliente"
-                                    : "Sem Cliente"}
+                                {pix.descricao.replace(/[0-9]/g, '').replace(/\s+/g, ' ').trim()}
                             </td>
-                            <td>{pix.valor}</td>
+                            <td>{convertMoney(pix.valor)}</td>
                         </tr>
                     ))}
                 </tbody>

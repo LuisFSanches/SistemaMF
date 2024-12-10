@@ -71,6 +71,7 @@ export function OrderCard({
 			</div>
 			<div className="address-container">
 				<p><strong>Ponto de referência: </strong>{order.clientAddress.reference_point}</p>
+				<p><strong>Telefone do Cliente: </strong>{order.client.phone_number}</p>
 				<p><strong>Entregar para: </strong>
 					{order.receiver_name ? order.receiver_name : order.client.first_name}
 				</p>
