@@ -26,11 +26,13 @@ class GetPixService{
                 throw new Error("O campo 'transactions' não é um array.");
             }
 
+            const receivedTransactions = transactions.filter((transaction: any) => transaction.titulo === 'Pix recebido');
+
             if (limit) {
-                return transactions.slice(0, limit);
+                return receivedTransactions.slice(0, limit);
             }
 
-            return transactions;
+            return receivedTransactions;
         } catch(error: any) {
             console.log('DEU ERRRO', error);
         }
