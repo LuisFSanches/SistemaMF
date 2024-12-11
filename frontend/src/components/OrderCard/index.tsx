@@ -38,7 +38,10 @@ export function OrderCard({
 				<h2>Pedido #{order?.code}</h2>
 			</div>
 			<div className="client-info">
-				<h3>Cliente: {order.client.first_name} {order.client.last_name}</h3>
+				<div>
+					<h3>Cliente: {order.client.first_name} {order.client.last_name}</h3>
+					<p><strong>Telefone do Cliente: </strong>{order.client.phone_number}</p>
+				</div>
 				<h3 className="delivery-date">Data de entrega: {moment(order.delivery_date).utc().format("DD/MM/YYYY")}</h3>
 			</div>
 			<div className="order-content">
@@ -68,10 +71,14 @@ export function OrderCard({
 				{order.pickup_on_store &&
 					<p>Retirar na loja</p>
 				}
+				<p><strong>Ponto de referência: </strong>{order.clientAddress.reference_point}</p>
 			</div>
 			<div className="address-container">
-				<p><strong>Ponto de referência: </strong>{order.clientAddress.reference_point}</p>
-				<p><strong>Telefone do Cliente: </strong>{order.client.phone_number}</p>
+				<p><strong>Valor dos produtos: </strong>R$ {order.products_value}</p>
+				<p><strong>Taxa de entrega: </strong>R$ {order.delivery_fee}</p>
+				<p><strong>Total: </strong>R$ {order.total}</p>
+			</div>
+			<div className="address-container">
 				<p><strong>Entregar para: </strong>
 					{order.receiver_name ? order.receiver_name : order.client.first_name}
 				</p>
@@ -80,7 +87,7 @@ export function OrderCard({
 			</div>
 			<div className="address-container">
 				<p><strong>Status Pagamento: </strong>{order.payment_received ? "Pago" : "Pendente"}</p>
-				<p><strong>Responsável pelo Pedido: </strong>{order.createdBy.name}</p>
+				<p><strong>Responsável pelo Pedido: </strong>{order.createdBy?.name}</p>
 			</div>
 			<div className="order-actions">
 				{previousStatus &&
