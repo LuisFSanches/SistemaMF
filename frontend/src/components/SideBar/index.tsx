@@ -8,14 +8,14 @@ import {
     faBars,
     faBasketShopping,
     faChartLine,
-    faHouse,
+    faComputer,
     faLayerGroup,
     faRightFromBracket,
     faUsers,
     faUtensils,
     faUserShield,
 } from "@fortawesome/free-solid-svg-icons";
-import { faPix } from "@fortawesome/free-brands-svg-icons";
+import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useAdminData } from "../../contexts/AuthContext";
 import { NavLink} from 'react-router-dom'
 import logo from '../../assets/images/logo.png'
@@ -34,7 +34,8 @@ export function SideBar(){
         statistics:false,
         pix: false,
         configurations:false,
-        administradores: false
+        administradores: false,
+        pedidoOnline: false
     })
     
     const [isMinimized, setMinimized] = useState(false)
@@ -50,7 +51,8 @@ export function SideBar(){
                     'pedidos':false,
                     'clientes':false,
                     'statistics':false,
-                    "administradores": false
+                    "administradores": false,
+                    "pedidoOnline": false
                 })
             break;
             case 'ordensDeServico':
@@ -62,7 +64,8 @@ export function SideBar(){
                     'pedidos':false,
                     'clientes':false,
                     'statistics':false,
-                    "administradores": false
+                    "administradores": false,
+                    "pedidoOnline": false
                 })
             break;
             case 'produtos':
@@ -74,7 +77,8 @@ export function SideBar(){
                     'pedidos':false,
                     'clientes':false,
                     'statistics':false,
-                    "administradores": false
+                    "administradores": false,
+                    "pedidoOnline": false
                 })
             break;
             case 'statistics':
@@ -86,7 +90,8 @@ export function SideBar(){
                     'pedidos':false,
                     'clientes':false,
                     'statistics':true,
-                    "administradores": false
+                    "administradores": false,
+                    "pedidoOnline": false
                 })
             break;
             case 'categorias':
@@ -98,7 +103,8 @@ export function SideBar(){
                     'pedidos':false,
                     'clientes':false,
                     'statistics':false,
-                    "administradores": false
+                    "administradores": false,
+                    "pedidoOnline": false
                 })
             break;
 
@@ -111,7 +117,8 @@ export function SideBar(){
                     'pedidos':true,
                     'clientes':false,
                     'statistics':false,
-                    "administradores": false
+                    "administradores": false,
+                    "pedidoOnline": false
                 })
             break;
 
@@ -124,7 +131,8 @@ export function SideBar(){
                     'pedidos':false,
                     'clientes':true,
                     'statistics':false,
-                    "administradores": false
+                    "administradores": false,
+                    "pedidoOnline": false
                 })
             break;
 
@@ -137,7 +145,8 @@ export function SideBar(){
                     'pedidos':false,
                     'clientes':false,
                     'statistics':false,
-                    "administradores": true
+                    "administradores": true,
+                    "pedidoOnline": false
                 })
             break;
 
@@ -151,7 +160,23 @@ export function SideBar(){
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
-                    'pix': true
+                    'pix': true,
+                    "pedidoOnline": false
+                })
+            break;
+
+            case 'pedidoOnline':
+                setActive({...isActive, 
+                    'dashboard':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": true
                 })
             break;
         }
@@ -192,8 +217,20 @@ export function SideBar(){
                         isActive={isActive['dashboard']}
                         isMinimizedActive={isMinimized}
                     >
-                        <FontAwesomeIcon icon={faHouse} className="Side-Bar-Icon"/>
-                        <span>Ordem Balcão</span>
+                        <FontAwesomeIcon icon={faComputer} className="Side-Bar-Icon"/>
+                        <span>Pedido Balcão</span>
+                    </SideBarButton>
+                </SideBarItemContainer>
+            </NavLink>
+
+            <NavLink to="/pedidoOnline" style={{ 'display': 'none'}}>
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidoOnline')}>
+                    <SideBarButton
+                        isActive={isActive['pedidoOnline']}
+                        isMinimizedActive={isMinimized}
+                    >
+                        <FontAwesomeIcon icon={faWhatsapp as any} className="Side-Bar-Icon"/>
+                        <span>Pedido Online</span>
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
