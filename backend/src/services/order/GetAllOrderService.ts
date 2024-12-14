@@ -9,6 +9,9 @@ import { ErrorCodes } from "../../exceptions/root";
             client: true,
             clientAddress: true,
             createdBy: true
+          },
+          orderBy: {
+            code: 'desc'
           }
         });
 
