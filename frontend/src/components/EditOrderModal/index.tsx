@@ -24,7 +24,6 @@ import { updateOrder } from "../../services/orderService";
 import { getPickupAddress } from "../../services/addressService";
 import { Loader } from "../Loader";
 
-
 interface IEditOrderModal{
 	isOpen: boolean;
     onRequestClose: ()=> void;
@@ -43,6 +42,7 @@ export function EditOrderModal({
         register,
         handleSubmit,
         setValue,
+		watch,
         formState: { errors },
     } = useForm<IOrder>();
 	const [showLoader, setShowLoader] = useState(false);
@@ -58,9 +58,9 @@ export function EditOrderModal({
 			client_address_id: order.client_address_id,
 			receiver_name: formData.receiver_name,
 			receiver_phone: formData.receiver_phone,
-			products_value: formData.products_value,
-			delivery_fee: formData.delivery_fee,
-			total: formData.total,
+			products_value: Number(formData.products_value),
+			delivery_fee: Number(formData.delivery_fee),
+			total: Number(formData.products_value) + Number(formData.delivery_fee),
 			payment_method: formData.payment_method,
 			payment_received: formData.payment_received,
 			delivery_date: new Date(`${formData.delivery_date}T00:00:00Z`),
@@ -122,6 +122,11 @@ export function EditOrderModal({
 		setPickupAddress(order.pickup_on_store);
     }, [order, setValue]);
 
+	useEffect(() => {
+		setValue("total", Number(watch("products_value")) + Number(watch("delivery_fee")));
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [watch("products_value"), watch("delivery_fee")]);
+
 	const handlePickUpAddress = async (value: boolean) => {
         if (value) {
             const { data: pickUpAddress } = await getPickupAddress() as any;
@@ -165,7 +170,7 @@ export function EditOrderModal({
 						<Label>Informações Adicionais</Label>
 						<Textarea {...register("additional_information")}/>
 					</EditFormField>
-					<InlineFormField>
+					<InlineFormField fullWidth>
 						<EditFormField isShortField>
 							<Label>Nome do Cliente</Label>
 							<Input {...register("client.first_name", {required: "Descrição inválida"})} disabled/>
@@ -176,7 +181,7 @@ export function EditOrderModal({
 						</EditFormField>
 					</InlineFormField>
 					{ (order.receiver_phone || order.receiver_name) &&
-						<InlineFormField>
+						<InlineFormField fullWidth>
 							<EditFormField isShortField>
 								<Label>Nome do Recebedor</Label>
 								<Input {...register("receiver_name")}/>
@@ -188,25 +193,25 @@ export function EditOrderModal({
 						</InlineFormField>
 					}
 
-					<InlineFormField>
+					<InlineFormField fullWidth>
 						<EditFormField isShortField>
 							<Label>Valor dos Produtos</Label>
-							<Input type="number" {...register("products_value", {required: "Valor Inválido"})}/>
+							<Input type="number" step="0.01" {...register("products_value", {required: "Valor Inválido"})}/>
 							<ErrorMessage>{errors.products_value?.message}</ErrorMessage>
 						</EditFormField>
 						<EditFormField isShortField>
 							<Label>Taxa de Entrega</Label>
-							<Input type="number" {...register("delivery_fee", {required: "Valor Inválido"})}/>
+							<Input type="number" step="0.01" {...register("delivery_fee", {required: "Valor Inválido"})}/>
 							<ErrorMessage>{errors.delivery_fee?.message}</ErrorMessage>
 						</EditFormField>
 						<EditFormField isShortField>
 							<Label>Total</Label>
-							<Input type="number" {...register("total", {required: "Valor Inválido"})}/>
+							<Input type="number" step="0.01" {...register("total", {required: "Valor Inválido"})} disabled/>
 							<ErrorMessage>{errors.total?.message}</ErrorMessage>
 						</EditFormField>
 					</InlineFormField>
 
-					<InlineFormField>
+					<InlineFormField fullWidth>
 						<EditFormField isShortField>
 							<Label>Método de pagamento</Label>
 							<Select {...register("payment_method")} isEditField>
@@ -232,7 +237,7 @@ export function EditOrderModal({
 							{errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
 						</EditFormField>
 					</InlineFormField>
-					<InlineFormField>
+					<InlineFormField fullWidth>
 						<EditFormField isShortField>
 							<CheckboxContainer>
 								<Checkbox type="checkbox" {...register("payment_received")} />
@@ -248,7 +253,7 @@ export function EditOrderModal({
 						</EditFormField>						
 					</InlineFormField>
 
-					<InlineFormField>
+					<InlineFormField fullWidth>
 						<EditFormField>
 							<CheckboxContainer>
 								<Checkbox type="checkbox" disabled={pickupAddress} checked={editAddress}
@@ -272,7 +277,7 @@ export function EditOrderModal({
 
 					{ editAddress &&
 						<>
-							<InlineFormField>
+							<InlineFormField fullWidth>
 								<EditFormField isShortField>
 									<Label>CEP</Label>
 									<Input type="tel" placeholder="CEP" {...register("clientAddress.postal_code", {
@@ -291,7 +296,7 @@ export function EditOrderModal({
 								</EditFormField>
 							</InlineFormField>
 							
-							<InlineFormField>
+							<InlineFormField fullWidth>
 								<EditFormField isShortField>
 									<Label>Número</Label>
 									<Input type="text" placeholder="Número" {...register("clientAddress.street_number", {
@@ -311,7 +316,7 @@ export function EditOrderModal({
 									<Input type="text" placeholder="Ponto de referência" {...register("clientAddress.reference_point")}
 									/>
 							</EditFormField>
-							<InlineFormField>
+							<InlineFormField fullWidth>
 								<EditFormField>
 									<Label>Bairro</Label>
 									<Input type="text" placeholder="Bairro" {...register("clientAddress.neighborhood", {
@@ -330,7 +335,7 @@ export function EditOrderModal({
 								</EditFormField>
 							</InlineFormField>
 
-							<InlineFormField>
+							<InlineFormField fullWidth>
 								<EditFormField>
 									<Label>Estado</Label>
 									<Input type="text" placeholder="Estado" {...register("clientAddress.state", {

@@ -327,8 +327,8 @@ export const EditFormField = styled.div<{ isShortField?: boolean }>`
     margin-top: 20px;
 `;
 
-export const InlineFormField = styled.div`
-    width: 100%;
+export const InlineFormField = styled.div<{fullWidth?: boolean}>`
+    width: ${({ fullWidth }) => (fullWidth ? '100%' : '85%')};
     display: flex;
     justify-content: space-between;
 
@@ -425,6 +425,18 @@ export const Checkbox = styled.input`
         border-color: #d48a9b;
     }
 `;
+
+export const PrimaryButton = styled.button`
+    display: flex;
+    margin: 0 auto;
+    margin-top: 20px;
+    padding: 0.8rem;
+    border-radius: 0.8rem;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 600;
+`
 
 export const PasswordContainer = styled.div`
     position: relative;

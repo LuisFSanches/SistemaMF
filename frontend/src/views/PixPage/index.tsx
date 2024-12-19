@@ -12,9 +12,8 @@ export function PixPage(){
     const [initialDate, setInitialDate] = useState("");
     const [finalDate, setFinalDate] = useState("");
     const [showLoader, setShowLoader] = useState(false);
-    const limits = [10, 20, 30];
-    const [selectedLimit, setSelectedLimit] = useState(10);
-
+    const limits = [20, 40, 60];
+    const [selectedLimit, setSelectedLimit] = useState(20);
     useEffect(() => {
         setInitialDate(moment().subtract(15, "days").format("YYYY-MM-DD"));
         setFinalDate(moment().add(2, "days").format("YYYY-MM-DD"));

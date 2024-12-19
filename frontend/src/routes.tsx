@@ -14,6 +14,7 @@ import { SideBarLayout } from "./views/SideBarLayout";
 import { Statistics } from "./views/Statistics";
 import { AdminsPage } from "./views/Admins";
 import { PixPage } from "./views/PixPage";
+import { OnlineOrder } from "./views/OnlineOrder";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -55,6 +56,11 @@ export default function routes(){
                         <Route path="produtos" element={
                             <PrivateRoute>
                                 <ProductsPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="pedidoOnline" element={
+                            <PrivateRoute>
+                                <OnlineOrder/>
                             </PrivateRoute>
                         }/>
                         <Route path="categorias" element={

@@ -8,8 +8,6 @@ import {
     Container,
     FormHeader,
     Form,
-    InlineFormField,
-    StepButton,
     ActionButtons,
     ErrorMessage,
     CheckboxContainer,
@@ -23,6 +21,8 @@ import {
     Input,
     Select,
     Textarea,
+    InlineFormField,
+    PrimaryButton
 } from "../../styles/global";
 
 import { NewOrderProgressBar } from "../../components/NewOrderProgressBar";
@@ -635,14 +635,14 @@ export function DashboardPage() {
                         <InlineFormField>
                             <FormField>
                                 <Label>Valor total dos Produtos</Label>
-                                <Input type="number" placeholder="Total" {...register("products_value", {
+                                <Input type="number" step="0.01" placeholder="Total" {...register("products_value", {
                                     required: "Valor total é obrigatório",
                                 })} />
                                 {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
                             </FormField>
                             <FormField>
                                 <Label>Taxa de entrega</Label>
-                                <Input type="number" placeholder="0.00" {...register("delivery_fee", {
+                                <Input type="number" step="0.01" placeholder="0.00" {...register("delivery_fee", {
                                 })} />
                             </FormField>
                         </InlineFormField>
@@ -696,11 +696,12 @@ export function DashboardPage() {
                 
                 <ActionButtons>
                     {step > 1 && 
-                        <StepButton type="button" onClick={handlePreviousStep}>Voltar</StepButton>
+                        <PrimaryButton style={{marginRight: "20px"}} type="button"
+                            onClick={handlePreviousStep}>Voltar</PrimaryButton>
                     }
-                    <StepButton type="submit">
+                    <PrimaryButton type="submit">
                         {step < 4 ? "Continuar" : "Finalizar"}
-                    </StepButton>
+                    </PrimaryButton>
                 </ActionButtons>
             </Form>
         </Container>
