@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+// import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { PAYMENT_METHODS } from "../../constants";
 import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
@@ -34,10 +34,6 @@ export function OnlineOrder() {
 
     const {
         register,
-        handleSubmit,
-        watch,
-        setValue,
-        setError,
         formState: { errors },
     } = useForm<INewOrder>();
 
