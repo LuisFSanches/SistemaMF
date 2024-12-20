@@ -24,8 +24,8 @@ export const OrdersProvider: React.FC = ({ children }) => {
     }
   };
 
-  const loadOnGoingOrders = async () => {
-    if (onGoingOrders.length === 0) {
+  const loadOnGoingOrders = async (forceLoad = false) => {
+    if (onGoingOrders.length === 0 || forceLoad) {
       const response = await getOnGoingOrders();
       const { data: orders } = response;
 
@@ -36,6 +36,7 @@ export const OrdersProvider: React.FC = ({ children }) => {
   const addOrder = (order: IOrder) => {
     setOrders((prevOrders) => [...prevOrders, order]);
     setOnGoingOrders((prevOrders) => [...prevOrders, order]);
+    loadOnGoingOrders(true);
   };
   
   const editOrder = (updatedOrder: IOrder) => {

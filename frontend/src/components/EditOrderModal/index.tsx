@@ -66,6 +66,7 @@ export function EditOrderModal({
 			delivery_date: new Date(`${formData.delivery_date}T00:00:00Z`),
 			status: formData.status,
 			has_card: formData.has_card,
+			pickup_on_store: pickupAddress,
             editAddress,
 			clientAddress: {
 				id: order.clientAddress.id,
@@ -136,6 +137,7 @@ export function EditOrderModal({
         }
 
         if (!value) {
+			console.log('AQUIII')
             setValue("client_address_id", order.client_address_id);
             setValue("pickup_on_store", false);
 			setPickupAddress(false);
@@ -272,8 +274,6 @@ export function EditOrderModal({
 							</CheckboxContainer>
 						</EditFormField>
 					</InlineFormField>
-
-					
 
 					{ editAddress &&
 						<>

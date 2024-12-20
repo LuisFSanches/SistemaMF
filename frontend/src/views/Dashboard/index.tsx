@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
-import { faPrint, faNewspaper } from "@fortawesome/free-solid-svg-icons";
+import { faNewspaper } from "@fortawesome/free-solid-svg-icons";
 import {
     Container,
     FormHeader,
@@ -286,18 +286,6 @@ export function DashboardPage() {
 
         return () => clearTimeout(timeout);
     }, [watchReceiverPhone, watch, setReceiverMask]);
-
-    const handlePrint = () => {
-        if (formRef.current) {
-            const printWindow = window.open('', '', 'height=800,width=800');
-            printWindow?.document.write('<html><head><title>Imprimir Resumo do Pedido</title></head><body>');
-            printWindow?.document.write(formRef.current.innerHTML);
-            printWindow?.document.write('</body></html>');
-            printWindow?.document.close();
-            printWindow?.focus();
-            printWindow?.print();
-        }
-    };
 
     const handlePickUpAddress = async (value: boolean) => {
         if (value) {
@@ -669,9 +657,14 @@ export function DashboardPage() {
                         </div>
                         <div>
                             <p><strong>Endereço:</strong></p>
-                            <p>{order.street}, {order.street_number}</p>
-                            <p>{order.neighborhood}, {order.city}</p>
-                            <p><strong>Ponto de referência: </strong>{order.reference_point}</p>
+                            {order.pickup_on_store && <p>Retirar na loja</p>}
+                            {!order.pickup_on_store &&
+                                <>
+                                    <p>{order.street}, {order.street_number}</p>
+                                    <p>{order.neighborhood}, {order.city}</p>
+                                    <p><strong>Ponto de referência: </strong>{order.reference_point}</p>
+                                </>
+                            }
                         </div>
                         <div>
                             <p><strong>Entregar para: </strong>
@@ -688,9 +681,6 @@ export function DashboardPage() {
                                 {order.payment_received ? "Recebido" : "Pendente"}
                             </p>
                         </div>
-                        <button type="button" onClick={handlePrint}>
-                            <FontAwesomeIcon icon={faPrint} size="2x" />
-                        </button>
                     </OrderSummary>
                 }
                 
