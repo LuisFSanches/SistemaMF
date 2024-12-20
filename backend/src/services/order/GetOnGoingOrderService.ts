@@ -8,6 +8,9 @@ class GetOnGoingOrderService {
           notIn: ['FINISHED', 'CANCELED']
         }
       },
+      orderBy: {
+        code: 'desc'
+      },
       include: {
         client: true,
         clientAddress: true,
