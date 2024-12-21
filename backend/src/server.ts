@@ -6,6 +6,7 @@ import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { eventEmitter } from './controllers/inter/WebhookPixController';
 // import { orderEmitter } from './controllers/order/UpdateOrderController';
+import { getCertificatesForWebhook } from './utils/getCertificates';
 
 dotenv.config();
 
@@ -13,7 +14,8 @@ import { router } from './routes';
 import { errorMiddleware } from './middlewares/errors';
 
 const app = express();
-const httpServer = createServer(app);
+const httpsOptions = getCertificatesForWebhook() as any;
+const httpServer = createServer(httpsOptions, app);
 const io = new Server(httpServer, {
   cors: {
       origin: "*",
