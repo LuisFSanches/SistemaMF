@@ -5,7 +5,9 @@ const eventEmitter = new EventEmitter();
 
 class WebhookPixController {
     async handle(req: Request, res: Response) {
+        console.log('AQUII')
         try {
+            console.log('Notificação Pix recebida:', req.body);
             const notification = req.body;
             eventEmitter.emit("pixReceived", notification);
 
