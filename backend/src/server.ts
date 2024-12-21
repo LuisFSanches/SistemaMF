@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { eventEmitter } from './controllers/inter/WebhookPixController';
+// import { orderEmitter } from './controllers/order/UpdateOrderController';
 
 dotenv.config();
 
@@ -15,10 +16,10 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
+      origin: "*",
+      methods: ["GET", "POST"],
   },
-  transports: ["websocket"]
+  transports: ["websocket"],
 });
 
 io.on("connection", (socket) => {
@@ -37,6 +38,11 @@ eventEmitter.on("pixReceived", (data) => {
   console.log("Pix Recebido");
   io.emit("pixPaymentNotification", data); // Envia o evento para todos os clientes conectados
 });
+
+/*orderEmitter.on("orderUpdated", (data) => {
+  console.log("Evento recebido: orderUpdated");
+  io.emit("orderUpdateNotification", data); // Envia o evento para todos os clientes conectados
+});*/
 
 app.use(errorMiddleware);
 
