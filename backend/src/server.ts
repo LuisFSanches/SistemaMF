@@ -3,7 +3,7 @@ import 'express-async-errors';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
-import { createServer } from 'https';
+import { createServer } from 'http';
 import { eventEmitter } from './controllers/inter/WebhookPixController';
 // import { orderEmitter } from './controllers/order/UpdateOrderController';
 import { getCertificatesForWebhook } from './utils/getCertificates';
