@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { format, subDays } from 'date-fns'
+
 
 class GetPixService{
     async execute(token: string, httpsAgent: any, initial_date: any, final_date: any, limit: any) {
