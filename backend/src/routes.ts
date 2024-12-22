@@ -24,11 +24,12 @@ import { DeleteAdminController } from './controllers/admin/DeleteAdminController
 import { UpdateAdminController } from './controllers/admin/UpdateAdminController';
 
 import { GetPixController } from './controllers/inter/GetPixController';
-import { RegisterWebhookController } from './controllers/inter/RegisterWebhookController';
+// import { RegisterWebhookController } from './controllers/inter/RegisterWebhookController';
 import { WebhookPixController } from './controllers/inter/WebhookPixController';
 
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
+
 
 const router = Router();
 
@@ -62,6 +63,7 @@ router.put('/admin/:id', superAdminAuthMiddleware, new UpdateAdminController().h
 //-- ROTAS PIX --
 router.get('/pix', new GetPixController().handle)
 router.post('/webhook/pix', new WebhookPixController().handle)
+// router.put('/create/webhook', new RegisterWebhookController().handle)
 
 
 export { router };
