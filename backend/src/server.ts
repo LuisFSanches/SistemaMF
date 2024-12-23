@@ -1,5 +1,6 @@
 import express from 'express';
 import https from 'https';
+import http from 'http';
 import 'express-async-errors';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -24,3 +25,9 @@ const PORT = 3333;
 https.createServer(httpsOptions, app).listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
+
+if (process.env.IS_PRODUCTION === 'false') {
+  http.createServer(app).listen(3334, () => {
+    console.log(`Servidor rodando em http://localhost:3334`);
+  });
+}
