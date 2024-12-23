@@ -1,4 +1,8 @@
 import https from 'https';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const pathCerts =  path.join(__dirname,'..','certs');
 
 export const getCertificates = () => {
 
@@ -17,16 +21,16 @@ export const getCertificates = () => {
 
 export const getCertificatesForWebhook = () => {
 
-    const cert = process.env.BANCO_INTER_CERT_PEM_PATH!.replace(/(^"|"$)/g, '');
-    const key = process.env.BANCO_INTER_KEY_PEM_PATH!.replace(/(^"|"$)/g, '');
-    const ca = process.env.BANCO_INTER_CA_CERT_PATH!.replace(/(^"|"$)/g, '');
+    const cert = path.join(pathCerts, 'cert.pem');
+    const key = path.join(pathCerts, 'key.pem');
+    const ca = path.join(pathCerts, 'ca.crt');
 
     const httpsOptions = new https.Agent({
         requestCert: true,
         rejectUnauthorized: false,
-        key: Buffer.from(key, 'utf-8'),
-        cert: Buffer.from(cert, 'utf-8'),
-        ca: Buffer.from(ca, 'utf-8')
+        key: fs.readFileSync(key),
+        cert: fs.readFileSync(cert),
+        ca: fs.readFileSync(ca)
     })
     
     return httpsOptions;
