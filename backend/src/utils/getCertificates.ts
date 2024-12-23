@@ -25,7 +25,7 @@ export const getCertificatesForWebhook = () => {
         requestCert: true,
         rejectUnauthorized: false,
         key: Buffer.from(key, 'utf-8'),
-        cert: Buffer.from(key, 'utf-8'),
+        cert: Buffer.from(cert, 'utf-8'),
         ca: Buffer.from(ca, 'utf-8')
     })
     

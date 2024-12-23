@@ -136,7 +136,7 @@ export function AdminModal({
                     }
 
                     <PasswordContainer>
-                        <Input type={showAdminPassword ? "text" : "password"} placeholder="Sua senha de confirmação" {...register("super_admin_password",
+                        <Input type={showAdminPassword ? "text" : "password"} placeholder="Senha atual do super administrador" {...register("super_admin_password",
                             { required: "Confirmação de senha inválida" })}/>
                         <FontAwesomeIcon icon={showAdminPassword ? faEye : faEyeSlash}
                             onClick={() => setShowAdminPassword(!showAdminPassword)}/>
