@@ -24,9 +24,3 @@ const PORT = 3333;
 http.createServer(httpsOptions, app).listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
-
-if (process.env.IS_PRODUCTION === 'false') {
-  http.createServer(app).listen(3334, () => {
-    console.log(`Servidor rodando em http://localhost:3334`);
-  });
-}
