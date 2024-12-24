@@ -26,7 +26,7 @@ export const getCertificatesForWebhook = () => {
     const ca = path.join(pathCerts, 'ca.crt');
 
     const httpsOptions = {
-        requestCert: true,
+        requestCert: false,
         rejectUnauthorized: false,
         ca: fs.readFileSync(ca)
     };
