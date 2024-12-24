@@ -1,5 +1,4 @@
 import express from 'express';
-import https from 'https';
 import http from 'http';
 import 'express-async-errors';
 import cors from 'cors';
@@ -22,7 +21,7 @@ app.use(router);
 app.use(errorMiddleware);
 
 const PORT = 3333;
-https.createServer(httpsOptions, app).listen(PORT, () => {
+http.createServer(httpsOptions, app).listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
 
