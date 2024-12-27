@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "ts-node-dev src/server.ts",
     "test": "vitest",
-    "build": "tsup src",
+    "build": "tsup src --ignore '**/*.crt' '**/*.pem'",
     "start": "node dist/server.js"
   },
   "devDependencies": {
