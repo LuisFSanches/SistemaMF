@@ -47,6 +47,7 @@ export function AuthProvider({ children }: IAuthProviderProps) {
       api.defaults.headers.common.authorization = token;
 
       setAuthenticated(true);
+      window.location.reload();
 
       return response;
     } catch (error) {

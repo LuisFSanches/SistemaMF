@@ -16,6 +16,7 @@ const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 export const OrdersProvider: React.FC = ({ children }) => {
   const [orders, setOrders] = useState<IOrder[]>([]);
   const [onGoingOrders, setOnGoingOrders] = useState<IOrder[]>([]);
+  const token = localStorage.getItem("token");
 
   const loadAvailableOrders = async () => {
     if (orders.length === 0) {
@@ -54,8 +55,10 @@ export const OrdersProvider: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    loadAvailableOrders();
-    loadOnGoingOrders();
+    if (token) {
+      loadAvailableOrders();
+      loadOnGoingOrders();
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

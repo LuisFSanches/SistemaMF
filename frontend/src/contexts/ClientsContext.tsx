@@ -13,6 +13,7 @@ const ClientsContext = createContext<ClientsContextType | undefined>(undefined);
 
 export const ClientsProvider: React.FC = ({ children }) => {
   const [clients, setClients] = useState<IClient[]>([]);
+  const token = localStorage.getItem("token");
 
   const loadAvailableClients = async () => {
     if (clients.length === 0) {
@@ -34,7 +35,9 @@ export const ClientsProvider: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    loadAvailableClients();
+    if (token) {
+      loadAvailableClients();
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

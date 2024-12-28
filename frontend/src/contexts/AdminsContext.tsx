@@ -13,6 +13,8 @@ const AdminsContext = createContext<AdminsContextType | undefined>(undefined);
 
 export const AdminsProvider: React.FC = ({ children }) => {
   const [admins, setAdmins] = useState<IAdmin[]>([]);
+  const token = localStorage.getItem("token");
+
 
   const loadAvailableAdmins = async () => {
     if (admins.length === 0) {
@@ -34,7 +36,9 @@ export const AdminsProvider: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    loadAvailableAdmins();
+    if (token) {
+      loadAvailableAdmins();
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
