@@ -7,11 +7,10 @@
     "npm": "10.7"
   },
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "dev": "ts-node-dev src/server.ts",
     "test": "vitest",
-    "build": "tsup src",
+    "build": "rm -rf dist && tsup src",
     "start": "node dist/server.js"
   },
   "devDependencies": {
