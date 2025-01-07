@@ -24,6 +24,7 @@ export function LoginPage(){
     } = useForm<ISignIn>();
 
     const [showLoader, setShowLoader] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
 
     const handleLoginSubmit = async ({ username, password }: ISignIn) => {
@@ -50,19 +51,19 @@ export function LoginPage(){
         navigate("/dashboard");
     };
 
-    return(
+    return (
         <Container>
             <Loader show={showLoader} />
             <LoginForm>
                 <div className="welcome-header">
-                    <h1>Mirai Flores</h1>
                     <img src={logo} alt="" />
                 </div>
                 <form action="" onSubmit={handleSubmit(handleLoginSubmit)}>
-                    <h2>Faça seu Login</h2>
+                    <h3>Login</h3>
                     <div className="form-input">
                         <p>Usuário:</p>
-                        <input type="text"
+                        <input
+                            type="text"
                             {...register("username", {
                                 required: "Usuário ou senha inválidos",
                             })}
@@ -71,14 +72,30 @@ export function LoginPage(){
 
                     <div className="form-input">
                         <p>Senha:</p>
-                        <input type="password"
-                            {...register("password", {
-                                required: "Usuário ou senha inválidos",
-                            })}
-                        />
+                        <div style={{ position: "relative" }}>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                {...register("password", {
+                                    required: "Usuário ou senha inválidos",
+                                })}
+                            />
+                            <span
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{
+                                    position: "relative",
+                                    right: "30px",
+                                    top: "13%",
+                                    transform: "translateY(-50%)",
+                                    cursor: "pointer",
+                                    userSelect: "none",
+                                }}
+                            >
+                                {showPassword ? "🕶️" : "👓"}
+                            </span>
+                        </div>
                     </div>
 
-                    <button onClick={() => {}}>Entrar</button>
+                    <button onClick={() => { }}>Entrar</button>
                 </form>
                 <Link to="">
                     Esqueceu sua senha?
@@ -91,14 +108,12 @@ export function LoginPage(){
                         <path transform="translate(0, -20)" d="M0,10 c80,-22 240,0 350,18 c90,17 260,7.5 350,-20 v50 h-700" fill="#e4bfc7" />
                         <path d="M0,10 c80,-8 230,-12 350,7 c80,13 260,17 350,-5 v100 h-700z" fill="#e4bfc7" />
                     </svg>
-                </footer >
+                </footer>
             </LoginForm>
 
             <LoginImage>
                 <img src={LoginCover} alt="" />
             </LoginImage>
-
-            
         </Container>
-    )
+    );
 }

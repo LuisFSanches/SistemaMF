@@ -32,13 +32,26 @@ export const LoginForm = styled.div`
         }
 
         img{
-            width: 9rem;
-            margin-top: 1.5rem;
+            width: 16rem;
+            margin-top: 2rem;
         }
     }
     form{
         align-items: center;
 
+        h3{
+        
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            color: var(--sideBarBackground);
+        
+        }
+        
+        
         h2{
             width: 100%;
             display: flex;
@@ -66,6 +79,7 @@ export const LoginForm = styled.div`
             }
         }
         button{
+
             width: 100%;
             display: flex;
             justify-content: center;
@@ -74,12 +88,21 @@ export const LoginForm = styled.div`
             padding: 0.8rem;
             border-radius: 0.8rem;
             margin-top: 0.5rem;
-            background: var(--primary-color);
-            color: #fff;
+            background: var(--sideBarBackground);
+            color: #ffffffff;
             font-size: 1.3rem;
             font-weight: 600;
         } 
     }  
+        button:hover{
+
+            background:rgb(0, 88, 7);
+            color: #ffffffff;
+            transform: scale(1.0);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+
+        }
+        
     a{
         color: var(--sideBarBackground);
     }

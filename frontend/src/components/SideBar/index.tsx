@@ -14,11 +14,18 @@ import {
     faUsers,
     faUtensils,
     faUserShield,
+    faBagShopping,
+    faPersonDress,
+    faAddressCard,
+    faReorder,
+    faBorderStyle,
+    faReceipt,
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useAdminData } from "../../contexts/AuthContext";
 import { NavLink} from 'react-router-dom'
-import logo from '../../assets/images/logo.png'
+import logoFull from '../../assets/images/logo.png'
+import logoMini from '../../assets/images/logo-mini.png'
 
 export function SideBar(){
     const { handleSignOut } = useContext(AuthContext);
@@ -192,25 +199,32 @@ export function SideBar(){
         setMinimized(!isMinimized)
     }
 
+
+    
+    const chosenLogo = isMinimized ? logoMini : logoFull;
+
     return(
         <Container isMinimizedActive={isMinimized}>
-            <LogoContainer
-                isMinimizedActive={isMinimized}
-            >
+            <LogoContainer isMinimizedActive={isMinimized}>
                 <div className="logo-info">
-                    <img src={ logo } alt="logo garçom" />
+                    <img src={chosenLogo} alt="logo garçom" />
                 </div>
             </LogoContainer>
+
             <MinimizeButton>
-                {isMinimized
-                    ? <button className="close-side-bar-menu" onClick = {handleMinimization}>
-                        <FontAwesomeIcon  icon ={faArrowRight}/>
+                {isMinimized ? (
+                    <button className="close-side-bar-menu" onClick={handleMinimization}>
+                        <FontAwesomeIcon icon={faArrowRight}/>
                     </button>
-                    : <button className="close-side-bar-menu" onClick = {handleMinimization}>
-                        <FontAwesomeIcon  icon ={faArrowLeft}/>
+                ) : (
+                    <button className="close-side-bar-menu" onClick={handleMinimization}>
+                        <FontAwesomeIcon icon={faArrowLeft}/>
                     </button>
-                }
+                )}
             </MinimizeButton>
+
+
+
             <NavLink to="/dashboard">
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('dashboard')}>
                     <SideBarButton
@@ -218,7 +232,7 @@ export function SideBar(){
                         isMinimizedActive={isMinimized}
                     >
                         <FontAwesomeIcon icon={faComputer} className="Side-Bar-Icon"/>
-                        <span>Pedido Balcão</span>
+                        <span>Novo Pedido</span>
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
@@ -241,8 +255,8 @@ export function SideBar(){
                         isActive={isActive['ordensDeServico']}
                         isMinimizedActive={isMinimized}
                     >
-                        <FontAwesomeIcon icon={faBars} className="Side-Bar-Icon"/>
-                        <span>Ordens de Serviço</span>
+                        <FontAwesomeIcon icon={faReceipt} className="Side-Bar-Icon"/>
+                        <span>Pedidos em Aberto</span>
                     </SideBarButton>
                     
                 </SideBarItemContainer>
@@ -280,7 +294,7 @@ export function SideBar(){
                         isActive={isActive['pedidos']}
                         isMinimizedActive={isMinimized}
                     >
-                        <FontAwesomeIcon icon={faBasketShopping} className="Side-Bar-Icon"/>
+                        <FontAwesomeIcon icon={faBagShopping} className="Side-Bar-Icon"/>
                         <span>Pedidos</span>
                     </SideBarButton>
                 </SideBarItemContainer>
@@ -291,9 +305,9 @@ export function SideBar(){
                     <SideBarButton
                         isActive={isActive['clientes']}
                         isMinimizedActive={isMinimized}
-                    >
-                        <FontAwesomeIcon icon={faUsers} className="Side-Bar-Icon"/>
-                        <span>Clientes</span>
+                    >   
+                        <FontAwesomeIcon icon={faAddressCard} className="Side-Bar-Icon"/>
+                        <span>Lista de Clientes</span>
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
@@ -305,7 +319,7 @@ export function SideBar(){
                         isMinimizedActive={isMinimized}
                     >
                         <FontAwesomeIcon icon={faPix as any} className="Side-Bar-Icon"/>
-                        <span>Gerenciar Pix</span>
+                        <span>Pix Recebidos</span>
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
@@ -342,10 +356,10 @@ export function SideBar(){
                 isMinimizedActive={isMinimized}
             >
 
-                <button className="logout-button">
-                    <FontAwesomeIcon icon={faRightFromBracket} className="logout-icon"/>
-                    <button onClick={handleSignOut}>Sair</button>
-                </button>
+            <button className="custom-logout-button" onClick={handleSignOut}>
+                <FontAwesomeIcon icon={faRightFromBracket} className="custom-logout-icon" />
+                <span className="custom-logout-text">Sair</span>
+            </button>
             </CompanyInfoContainer>
 
         </Container>

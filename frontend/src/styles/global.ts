@@ -1,5 +1,6 @@
 import  styled, {createGlobalStyle,} from 'styled-components'
 
+
 export const GlobalStyle = createGlobalStyle`
 
 :root{
@@ -48,6 +49,10 @@ html{
 body, input, textarea, button{
     font-family: 'Poppins',sans-serif;
     font-weight: 500;
+}
+
+teste {
+        font-family: 'Montserrat', sans-serif;
 }
 
 h1,h2,h3,h4,h5, strong{
@@ -428,15 +433,33 @@ export const Checkbox = styled.input`
 
 export const PrimaryButton = styled.button`
     display: flex;
+    align-items: center; 
+    justify-content: center; 
     margin: 0 auto;
     margin-top: 20px;
-    padding: 0.8rem;
+    padding: 0.8rem 1.5rem; 
+    border: none; 
     border-radius: 0.8rem;
     background: var(--primary-color);
     color: #fff;
     font-size: 1.3rem;
     font-weight: 600;
-`
+    cursor: pointer; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        background: rgb(0, 88, 7);; 
+        transform: translateY(-2px); 
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); 
+    }
+
+    &:active {
+        transform: translateY(0); 
+        box-shadow: 0 3px 4px rgba(0, 0, 0, 0.2); 
+    }
+
+
+`;
 
 export const PasswordContainer = styled.div`
     position: relative;
