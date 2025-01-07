@@ -359,7 +359,7 @@ export function DashboardPage() {
                         <CheckboxContainer>
                             <Checkbox type="checkbox"
                                 onChange={() => setDiferentReceiver(!differentReceiver)} checked={differentReceiver}/>
-                            <Label>Recebedor é Diferente</Label>
+                            <Label>Pessoa diferente recebe</Label>
                         </CheckboxContainer>
                         
                         {differentReceiver &&
@@ -390,9 +390,9 @@ export function DashboardPage() {
                         }
 
                         <FormField>
-                            <Label>Administrador Responsável</Label>
+                            <Label>Colaborador:</Label>
                             <Select {...register("created_by", { required: "Administrador Responsável inválido" })}>
-                                <option value="">Selecione um Administrador</option>
+                                <option value="">Pedido Anotado por:</option>
                                 {admins.map((admin: any) => (
                                     <option key={admin.id} value={admin.id}>{admin.name}</option>
                                 ))}
@@ -520,20 +520,25 @@ export function DashboardPage() {
                                     </FormField>
                                 </InlineFormField>
                                 <FormField>
-                                        <Label>Ponto de referência</Label>
-                                        <Input type="text" placeholder="Ponto de referência" {...register("reference_point")}
-                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                        />
-                                </FormField>
-                                <InlineFormField>
-                                    <FormField>
-                                        <Label>Bairro</Label>
+
+                                <Label>Bairro</Label>
+                                
                                         <Input type="text" placeholder="Bairro" {...register("neighborhood", {
                                             required: "Bairro inválido",
                                             })}
                                             disabled={(addresses.length > 0 && !newAddress) ? true : false}
                                         />
                                         {errors.neighborhood && <ErrorMessage>{errors.neighborhood.message}</ErrorMessage>}
+                                     
+                                </FormField>
+                                <InlineFormField>
+                                    <FormField>
+                                        
+                                        <Label>Ponto de referência</Label>
+                                        <Input type="text" placeholder="Ponto de referência" {...register("reference_point")}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                    
                                     </FormField>
                                     <FormField isShortField>
                                         <Label>País</Label>
