@@ -5,20 +5,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faArrowLeft,
     faArrowRight,
-    faBars,
-    faBasketShopping,
+
     faChartLine,
     faComputer,
     faLayerGroup,
     faRightFromBracket,
-    faUsers,
     faUtensils,
     faUserShield,
     faBagShopping,
-    faPersonDress,
     faAddressCard,
-    faReorder,
-    faBorderStyle,
     faReceipt,
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
@@ -222,8 +217,6 @@ export function SideBar(){
                     </button>
                 )}
             </MinimizeButton>
-
-
 
             <NavLink to="/dashboard">
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('dashboard')}>
