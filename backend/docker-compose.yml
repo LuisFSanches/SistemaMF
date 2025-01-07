@@ -8,6 +8,8 @@ services:
       POSTGRES_DB: sistemamf
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin123
+      mem_limit: 512m
+      cpu_shares: 512
     ports:
       - '5432:5432'
     networks:
