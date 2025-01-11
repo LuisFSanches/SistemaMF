@@ -5,6 +5,7 @@ export const OrderCardContainer= styled.div`
     padding: 0.5rem 0.7rem;
     border-radius: 0.3rem;
     color: var(--text-body);
+    position: relative;
 
     h3 {
         font-size: 17px;
@@ -14,6 +15,13 @@ export const OrderCardContainer= styled.div`
         width: 100%;
         text-align: center;
         margin-bottom: 0.5rem;
+
+        svg {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            cursor: pointer;
+        }
     }
 
     .inline-container {

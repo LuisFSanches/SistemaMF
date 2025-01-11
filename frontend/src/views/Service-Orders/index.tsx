@@ -5,14 +5,24 @@ import { updateStatus } from "../../services/orderService";
 import { OrderCard } from "../../components/OrderCard";
 import { useOrders } from "../../contexts/OrdersContext";
 import { Loader } from "../../components/Loader";
+import { EditOrderModal } from "../../components/EditOrderModal";
 
 export function ServiceOrdersPage(){
-	const { onGoingOrders, editOrder } = useOrders();
+	const { onGoingOrders, editOrder, loadOnGoingOrders } = useOrders();
 
 	const [openedOrders, setOpenedOrders] = useState<IOrder[]>([]);
 	const [inProgressOrders, setInProgressOrders] = useState<IOrder[]>([]);
 	const [inDeliveryOrders, setInDeliveryOrders] = useState<IOrder[]>([]);
 	const [showLoader, setShowLoader] = useState(false);
+	const [requestOrders, setRequestOrders] = useState(false);
+    const [editOrderModal, setEditOrderModal] = useState(false);
+    const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
+
+
+    function handleOpenEditOrderModal(order: IOrder){
+        setEditOrderModal(true);
+        setCurrentOrder(order);
+    }
 
 	const fetchOrders = async () => {
 		setShowLoader(true);
@@ -24,6 +34,10 @@ export function ServiceOrdersPage(){
 
 	useEffect(() => {
 		fetchOrders();
+		if (onGoingOrders.length === 0 && !requestOrders) {
+			loadOnGoingOrders();
+			setRequestOrders(true);
+		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [onGoingOrders]);
 
@@ -84,6 +98,7 @@ export function ServiceOrdersPage(){
 							previousStatus={null}
 							nextAction="Em produção"
 							previousAction={null}
+							handleOpenEditOrderModal={handleOpenEditOrderModal}
 						/>
 					</div>
 				))}
@@ -103,6 +118,7 @@ export function ServiceOrdersPage(){
 							previousStatus="OPENED"
 							nextAction="Entrega"
 							previousAction="Em produção"
+							handleOpenEditOrderModal={handleOpenEditOrderModal}
 						/>
             		</div>
             	))}
@@ -122,10 +138,16 @@ export function ServiceOrdersPage(){
 							previousStatus="IN_PROGRESS"
 							nextAction="Finalizado"
 							previousAction="Entrega"
+							handleOpenEditOrderModal={handleOpenEditOrderModal}
 						/>
           			</div>
           		))}
 			</div>
+			<EditOrderModal
+                isOpen={editOrderModal}
+                onRequestClose={() => setEditOrderModal(false)}
+                order={currentOrder as any}
+            />
 		</Container>
 	)
 }

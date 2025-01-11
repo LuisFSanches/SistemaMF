@@ -5,7 +5,7 @@ import { OrderDetailModal } from "../../components/OrderDetailModal";
 import { OrderCardContainer } from "./style"
 import { HAS_CARD } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faAnglesRight, faAnglesLeft, faPrint, faEye } from "@fortawesome/free-solid-svg-icons";
+import { faAnglesRight, faAnglesLeft, faPrint, faEye, faPen } from "@fortawesome/free-solid-svg-icons";
 
 export function OrderCard({
 	order,
@@ -16,7 +16,8 @@ export function OrderCard({
 	nextStatus,
 	previousStatus,
 	nextAction,
-	previousAction
+	previousAction,
+	handleOpenEditOrderModal
 }: any) {
 
 	const [orderDetailModal, setOrderDetailModal] = useState(false);
@@ -36,6 +37,7 @@ export function OrderCard({
     	<OrderCardContainer className={order?.status?.toLowerCase()}>
 			<div className="order-number">
 				<h2>Pedido #{order?.code}</h2>
+				<FontAwesomeIcon icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
 			</div>
 			<div className="client-info">
 				<div>

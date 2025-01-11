@@ -36,7 +36,6 @@ class DailySalesService {
             };
 
             orders.forEach((order) => {
-                console.log(order)
                 const day = new Date(order.created_at).toLocaleString("pt-BR", {
                     weekday: "long",
                 });
