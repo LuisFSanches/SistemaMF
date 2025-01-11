@@ -1,23 +1,61 @@
-import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
-import { faUser, faCoins, faUtensils, faBasketShopping } from "@fortawesome/free-solid-svg-icons";
-import { BottomInfo, ChartArea, Container, HeaderCard, HeaderInfo } from "./style";
+import { useEffect, useState } from "react";
+import moment from "moment";
+// import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
+// import { faUser, faCoins, faUtensils, faBasketShopping } from "@fortawesome/free-solid-svg-icons";
+import { getTopClients, getDailySales } from"../../services/statistics";
+import {
+    //BottomInfo,
+    ChartArea,
+    Container,
+    //HeaderCard,
+    //HeaderInfo
+} from "./style";
 import { LineHomeChart } from "../../components/LineHomeChart";
 import { BarHomeChart } from "../../components/BarHomeChart";
-import { MostOrderedTable } from "../../components/MostOrderedTable";
-import { PaymentStatusTable } from "../../components/PaymentStatusTable";
+// import { TopClients } from "../../components/TopClients";
+// import { PaymentStatusTable } from "../../components/PaymentStatusTable";
 
 export function Statistics(){
-    const hasStatistic = false;
+    const [topClients, setTopClients] = useState([]);
+    const [topClientsLabel, setTopClientsLabel] = useState([]);
+    const [topClientsValue, setTopClientsValue] = useState([]);
+    const [dailySales, setDailySales] = useState([]);
 
-    if (!hasStatistic) {
-        return (
-            <>
-            </>
-        )
+    async function fetchTopClients() {
+        const initial_date = moment().subtract(30, "days").format("YYYY-MM-DD");
+        const final_date = moment().add(1, "days").format("YYYY-MM-DD");
+        const params = `?initial_date=${initial_date}&final_date=${final_date}&limit=5`;
+        const response = await getTopClients(params);
+        setTopClients(response);
+
+        const clientsName = response.filter((client: any) => client.first_name !== null).map((client: any) => 
+            `${client.first_name} ${client.last_name}`);
+        setTopClientsLabel(clientsName);
+
+        const clientsValue = response.filter((client: any) => client.first_name !== null).map((client: any) => 
+            client.totalOrders);
+        setTopClientsValue(clientsValue);
     }
+
+    async function fetchDailySales() {
+        const initial_date = moment().subtract(7, "days").format("YYYY-MM-DD");
+        const final_date = moment().add(1, "days").format("YYYY-MM-DD");
+        const params = `?initial_date=${initial_date}&final_date=${final_date}`;
+
+        const response = await getDailySales(params);
+        setDailySales(response);
+    }
+
+    useEffect(() => {
+        fetchTopClients();
+        fetchDailySales();
+    }, []);
+
+    console.log(dailySales);
 
     return(
         <Container>
+            {/*
             <HeaderInfo className="column">
                 <HeaderCard>
                     <div className="header-card-title">
@@ -74,17 +112,25 @@ export function Statistics(){
                         </svg>
                     </footer>
                 </HeaderCard>
-            </HeaderInfo>
+            </HeaderInfo>*/}
 
             <ChartArea className="column">
-                <LineHomeChart/>
-                <BarHomeChart/>
+                <LineHomeChart
+                    title="Venda Semanal" labels={Object.keys(dailySales)} values={Object.values(dailySales)}
+                />
+                <BarHomeChart
+                    title="Top 5 Clientes dos últimos 30 dias"
+                    data={topClients}
+                    labels={topClientsLabel}
+                    values={topClientsValue}
+                />
             </ChartArea>
-            
+            {/*
             <BottomInfo className="column">
-                <MostOrderedTable/>
+                <TopClients/>
                 <PaymentStatusTable/>
             </BottomInfo>
+            */}
         </Container>
     )
 }

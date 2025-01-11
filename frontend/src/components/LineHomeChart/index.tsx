@@ -2,15 +2,20 @@ import { Chart as ChartJS, registerables } from 'chart.js'
 import { Line } from "react-chartjs-2";
 import { Container } from "./style";
 
+type LineHomeChartProps = {
+	title: string;
+	labels: any;
+	values: any
+};
+
 ChartJS.register(...registerables)
 
-export function LineHomeChart(){
-  const labels = ['Segunda','Terça','Quarta','Quinta','Sexta',]
+export function LineHomeChart({ title, labels, values }: LineHomeChartProps){
   const data = {
     labels: labels,
     datasets: [{
       label: 'My First Dataset',
-      data: [5, 12, 25, 20, 30],
+      data: values,
       fill: false,
       borderColor: '#9ABB7A',
       tension: 0.1,
@@ -57,7 +62,7 @@ export function LineHomeChart(){
               title:{
                 display: true,
                 align:'center',
-                text:"Vendas Diárias",
+                text: title,
                 font: {
                   size: 25
                 }

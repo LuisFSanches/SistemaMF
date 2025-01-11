@@ -6,9 +6,10 @@ export const Container = styled.div`
     width: 800px; 
     background: var(--light-orange);
 
-    @media (max-width:1600px){
-        width: 610px;
+    @media (max-width:1500px){
+        width: 100%;
         height: 220px;
+        margin-top: 20px;
     }
     @media (max-width:800px){
         width: 350px;
