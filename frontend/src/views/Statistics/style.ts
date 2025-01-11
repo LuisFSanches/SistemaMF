@@ -107,7 +107,6 @@ export const HeaderCard = styled.div`
 `
 export const ChartArea = styled.div`
     display: flex;
-    height: 46vh;
     justify-content: space-around;
     padding: 1rem;
     margin-top: 1rem;
