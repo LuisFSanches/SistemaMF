@@ -27,6 +27,9 @@ import { GetPixController } from './controllers/inter/GetPixController';
 // import { RegisterWebhookController } from './controllers/inter/RegisterWebhookController';
 import { WebhookPixController } from './controllers/inter/WebhookPixController';
 
+import { TopClientsController } from './controllers/statistics/TopClientsController';
+import { DailySalesController } from './controllers/statistics/DailySalesController';
+
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 
@@ -64,6 +67,10 @@ router.put('/admin/:id', superAdminAuthMiddleware, new UpdateAdminController().h
 router.get('/pix', new GetPixController().handle)
 router.post('/webhook/pix', new WebhookPixController().handle)
 // router.put('/create/webhook', new RegisterWebhookController().handle)
+
+//-- ROTAS STATISTICS --
+router.get('/statistics/top-clients', new TopClientsController().handle);
+router.get('/statistics/daily-sales', new DailySalesController().handle);
 
 
 export { router };
