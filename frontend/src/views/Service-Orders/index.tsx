@@ -56,7 +56,7 @@ export function ServiceOrdersPage(){
 								margin: 0;
 								padding: 20px;
 
-								.order-actions {
+								.order-actions, .edit-icon {
 									display: none;
 								}
 							}

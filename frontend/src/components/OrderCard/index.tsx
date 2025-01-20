@@ -37,7 +37,7 @@ export function OrderCard({
     	<OrderCardContainer className={order?.status?.toLowerCase()}>
 			<div className="order-number">
 				<h2>Pedido #{order?.code}</h2>
-				<FontAwesomeIcon icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
+				<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
 			</div>
 			<div className="client-info">
 				<div>
