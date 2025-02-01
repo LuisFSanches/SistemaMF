@@ -17,7 +17,7 @@ export function LineHomeChart({ title, labels, values }: LineHomeChartProps){
       label: 'My First Dataset',
       data: values,
       fill: false,
-      borderColor: '#9ABB7A',
+      borderColor: '#e7b7c2',
       tension: 0.1,
     }]
   };

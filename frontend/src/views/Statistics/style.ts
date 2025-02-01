@@ -107,9 +107,13 @@ export const HeaderCard = styled.div`
 `
 export const ChartArea = styled.div`
     display: flex;
-    justify-content: space-around;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.5rem;
     padding: 1rem;
     margin-top: 1rem;
+    overflow-y: auto;
 
     @media (max-width:1500px){
         flex-direction: column;

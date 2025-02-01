@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import moment from "moment";
 // import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
 // import { faUser, faCoins, faUtensils, faBasketShopping } from "@fortawesome/free-solid-svg-icons";
-import { getTopClients, getDailySales } from"../../services/statistics";
+import { getTopClients, getDailySales, getTopAdmins } from"../../services/statistics";
 import {
     //BottomInfo,
     ChartArea,
@@ -16,9 +16,10 @@ import { BarHomeChart } from "../../components/BarHomeChart";
 // import { PaymentStatusTable } from "../../components/PaymentStatusTable";
 
 export function Statistics(){
-    const [topClients, setTopClients] = useState([]);
     const [topClientsLabel, setTopClientsLabel] = useState([]);
     const [topClientsValue, setTopClientsValue] = useState([]);
+    const [topAdminsLabel, setTopAdminsLabel] = useState([]);
+    const [topAdminsValue, setTopAdminsValue] = useState([]);
     const [dailySales, setDailySales] = useState([]);
 
     async function fetchTopClients() {
@@ -26,7 +27,6 @@ export function Statistics(){
         const final_date = moment().add(1, "days").format("YYYY-MM-DD");
         const params = `?initial_date=${initial_date}&final_date=${final_date}&limit=5`;
         const response = await getTopClients(params);
-        setTopClients(response);
 
         const clientsName = response.filter((client: any) => client.first_name !== null).map((client: any) => 
             `${client.first_name} ${client.last_name}`);
@@ -36,6 +36,22 @@ export function Statistics(){
             client.totalOrders);
         setTopClientsValue(clientsValue);
     }
+
+    async function fetchTopAdmins() {
+        const initial_date = moment().subtract(90, "days").format("YYYY-MM-DD");
+        const final_date = moment().add(1, "days").format("YYYY-MM-DD");
+        const params = `?initial_date=${initial_date}&final_date=${final_date}&limit=5`;
+        const response = await getTopAdmins(params);
+
+        const adminsName = response.filter((admin: any) => admin.username !== null).map((admin: any) => 
+            `${admin.name}`);
+        setTopAdminsLabel(adminsName);
+
+        const adminsValue = response.filter((admin: any) => admin.username !== null).map((admin: any) => 
+            admin.orders_count);
+        setTopAdminsValue(adminsValue);
+    }
+
 
     async function fetchDailySales() {
         const initial_date = moment().subtract(7, "days").format("YYYY-MM-DD");
@@ -49,6 +65,7 @@ export function Statistics(){
     useEffect(() => {
         fetchTopClients();
         fetchDailySales();
+        fetchTopAdmins();
     }, []);
 
     console.log(dailySales);
@@ -115,14 +132,20 @@ export function Statistics(){
             </HeaderInfo>*/}
 
             <ChartArea className="column">
+                <BarHomeChart
+                    title="Top Administradores"
+                    labels={topAdminsLabel}
+                    values={topAdminsValue}
+                    order={1}
+                />
                 <LineHomeChart
                     title="Venda Semanal" labels={Object.keys(dailySales)} values={Object.values(dailySales)}
                 />
                 <BarHomeChart
-                    title="Top 5 Clientes dos últimos 30 dias"
-                    data={topClients}
+                    title="Top 5 Clientes dos últimos 90 dias"
                     labels={topClientsLabel}
                     values={topClientsValue}
+                    order={2}
                 />
             </ChartArea>
             {/*

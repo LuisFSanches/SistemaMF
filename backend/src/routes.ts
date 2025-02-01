@@ -29,6 +29,7 @@ import { WebhookPixController } from './controllers/inter/WebhookPixController';
 
 import { TopClientsController } from './controllers/statistics/TopClientsController';
 import { DailySalesController } from './controllers/statistics/DailySalesController';
+import { TopAdminsController } from './controllers/statistics/TopAdminsController';
 
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
@@ -71,6 +72,7 @@ router.post('/webhook/pix', new WebhookPixController().handle)
 //-- ROTAS STATISTICS --
 router.get('/statistics/top-clients', new TopClientsController().handle);
 router.get('/statistics/daily-sales', new DailySalesController().handle);
+router.get('/statistics/top-admins', new TopAdminsController().handle);
 
 
 export { router };
