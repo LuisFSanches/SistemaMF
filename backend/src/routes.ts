@@ -73,5 +73,7 @@ router.post('/webhook/pix', new WebhookPixController().handle)
 router.get('/statistics/top-clients', new TopClientsController().handle);
 router.get('/statistics/daily-sales', new DailySalesController().handle);
 router.get('/statistics/top-admins', new TopAdminsController().handle);
+router.get('/statistics/top-teste', new TopAdminsController().handle);
+
 
 export { router };
