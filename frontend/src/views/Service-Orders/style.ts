@@ -7,22 +7,51 @@ export const Container = styled.div`
     padding: 1rem;
     grid-gap: 1.5rem;
 
-    .order-container{
+    .order-container {
         display: flex;
         flex-direction: column;
         height: 95vh;
         border: 1px solid var(--shadow-color);
         border-radius: 0.5rem;
-        background-color: #fff;
+        background-color: #fff !important;
         box-shadow: 0.3rem 0.3rem 0.2rem var(--shadow-color);
         overflow-y: auto;
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
     }
 
-    header{
+    .order-container.opened::-webkit-scrollbar-thumb {
+        background: #FFD700;
+    }
+
+    .order-container.in_progress::-webkit-scrollbar-thumb {
+        background: #1E90FF;
+    }
+
+    .order-container.in_delivery::-webkit-scrollbar-thumb {
+        background: #32CD32;
+    }
+
+    header {
         display: flex;
         justify-content: center;
         width: 100%;
-        padding: 1rem;
+        padding: 0.6rem;
         font-size: 1.3rem;
         font-weight: 600;
     }
@@ -50,10 +79,19 @@ export const Container = styled.div`
         box-shadow: 0.1rem 0.2rem var(--shadow-color);
     }
 
-    @media (max-width: 1200px){
-        grid-template-columns:1fr;
+    @media (max-width: 1250px){
+        grid-template-columns: 1fr 1fr;
+
+        .order-container {
+            height: 47vh;
+        }
+    }
+
+    @media (max-width: 1024px){
+        grid-template-columns: 1fr;
         grid-gap: 0.8rem;
         padding: 0.5rem;
+
         .order-container{
             height: 31.5vh;
         }

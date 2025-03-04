@@ -8,7 +8,7 @@ import { OrderDetailModal } from "../../components/OrderDetailModal";
 import { EditOrderModal } from "../../components/EditOrderModal";
 import { useOrders } from "../../contexts/OrdersContext";
 import { STATUS_LABEL } from "../../constants";
-
+import { formatTitleCase } from "../../utils";
 
 export function OrdersPage(){
     const { orders, loadAvailableOrders } = useOrders();
@@ -57,8 +57,8 @@ export function OrdersPage(){
                         <>
                             <tr key={order.id}>
                                 <td>#{order.code}</td>
-                                <td>{order.description}</td>
-                                <td>{order.client.first_name} {order.client.last_name}</td>
+                                <td>{formatTitleCase(order.description)}</td>
+                                <td>{formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}</td>
                                 <td>{STATUS_LABEL[order.status]}</td>
                                 <td>R$ {order.total}</td>
                                 <td className="table-icon">

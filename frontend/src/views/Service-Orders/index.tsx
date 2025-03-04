@@ -56,7 +56,7 @@ export function ServiceOrdersPage(){
 								margin: 0;
 								padding: 20px;
 
-								.order-actions, .edit-icon {
+								.order-actions, .edit-icon, .order-type {
 									display: none;
 								}
 							}
@@ -83,7 +83,7 @@ export function ServiceOrdersPage(){
     return (
 		<Container>
 			<Loader show={showLoader} />
-			<div className="order-container">
+			<div className="order-container opened">
 				<header className="opened-order">
 					Ordem Aberta
 				</header>
@@ -103,7 +103,7 @@ export function ServiceOrdersPage(){
 					</div>
 				))}
 			</div>
-			<div className="order-container ">
+			<div className="order-container in_progress">
 				<header className="in-progress-order">
 					Em produção
 				</header>
@@ -123,7 +123,7 @@ export function ServiceOrdersPage(){
             		</div>
             	))}
 			</div>
-			<div className="order-container">
+			<div className="order-container in_delivery">
 				<header className="finished-order">
 					Rota de Entrega
 				</header>

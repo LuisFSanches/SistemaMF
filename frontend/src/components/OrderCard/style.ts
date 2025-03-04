@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 export const OrderCardContainer= styled.div`
-    margin: 0.6rem;
+    margin-bottom: 20px;
     padding: 0.5rem 0.7rem;
     border-radius: 0.3rem;
     color: var(--text-body);
@@ -13,14 +13,24 @@ export const OrderCardContainer= styled.div`
 
     .order-number {
         width: 100%;
+        display: flex;
+        justify-content: space-between;
         text-align: center;
         margin-bottom: 0.5rem;
 
         svg {
-            position: absolute;
-            right: 20px;
-            top: 15px;
             cursor: pointer;
+        }
+
+        .order-type {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 10px;
+            background: #DA1421;
+            border-radius: 15px;
+            color: white;
+            font-weight: 700;
         }
     }
 
