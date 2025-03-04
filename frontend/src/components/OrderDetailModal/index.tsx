@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Container, OrderInfo } from "./style";
 import { HAS_CARD, PAYMENT_METHODS, PAYMENT_RECEIVED } from "../../constants";
+import { formatTitleCase } from "../../utils";
 
 interface OrderDetailModalProps{
     isOpen: boolean;
@@ -36,7 +37,7 @@ export function OrderDetailModal({
 				<OrderInfo>
 					<h2>Dados do Cliente</h2>
 					<p><strong>Cliente: </strong>
-						{order.client.first_name} {order.client.last_name}
+						{order.client.first_name} {formatTitleCase(order.client.last_name)}
 					</p>
 					<p><strong>Telefone: </strong> {order.client.phone_number}</p>
 				</OrderInfo>
@@ -44,7 +45,7 @@ export function OrderDetailModal({
 					<h2>Dados do Recebedor</h2>
 					{order.receiver_name &&
 						<>
-							<p><strong>Nome: </strong> {order.receiver_name}</p>
+							<p><strong>Nome: </strong> {formatTitleCase(order.receiver_name)}</p>
 							<p><strong>Telefone: </strong>{order.receiver_phone}</p>
 						</>
 					}
@@ -56,8 +57,8 @@ export function OrderDetailModal({
 
 				<OrderInfo>
 					<h2>Informações do Pedido</h2>
-					<p><strong>Descrição: </strong>{order.description}</p>
-					<p><strong>Observação: </strong>{order.additional_information}</p>
+					<p><strong>Descrição: </strong>{formatTitleCase(order.description)}</p>
+					<p><strong>Observação: </strong>{formatTitleCase(order.additional_information)}</p>
 					<p><strong>Cartão: </strong>
 						{HAS_CARD[order.has_card.toString() as keyof typeof HAS_CARD]}
 					</p>
@@ -79,8 +80,10 @@ export function OrderDetailModal({
 				<OrderInfo>
 					<h2>Endereço de entrega</h2>
 					<p>
-						{order.clientAddress.street}, {order.clientAddress.street_number}, {order.clientAddress.complement}, {order.clientAddress.neighborhood} - {order.clientAddress.city}</p>
-					<p><strong>Ponto de Referência: </strong>{order.clientAddress.reference_point}</p>
+						{formatTitleCase(order.clientAddress.street)},{order.clientAddress.street_number},
+						{formatTitleCase(order.clientAddress.complement)},
+						{formatTitleCase(order.clientAddress.neighborhood)} - {formatTitleCase(order.clientAddress.city)}</p>
+					<p><strong>Ponto de Referência: </strong>{formatTitleCase(order.clientAddress.reference_point as string)}</p>
 				</OrderInfo>
 			</Container>
 		</Modal>

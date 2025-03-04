@@ -54,7 +54,7 @@ export function OrderCard({
 				</div>
 				<div className="order-observation">
 					<h3>Observação: </h3>
-					<p>{order.additional_information}</p>
+					<p>{formatTitleCase(order.additional_information)}</p>
 				</div>
 			</div>
 			<div className="card-container">
