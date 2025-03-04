@@ -19,14 +19,11 @@ export const OrdersProvider: React.FC = ({ children }) => {
   const token = localStorage.getItem("token");
 
   const loadAvailableOrders = async () => {
-    if (orders.length === 0) {
-      const { data: { orders } } = await getAllOrders();
-      setOrders(orders);
-    }
+    const { data: { orders } } = await getAllOrders();
+    setOrders(orders);
   };
 
   const loadOnGoingOrders = async (forceLoad = false) => {
-    console.log('chamou')
     if (onGoingOrders.length === 0 || forceLoad) {
       const response = await getOnGoingOrders();
       const { data: orders } = response;
@@ -57,7 +54,6 @@ export const OrdersProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      loadAvailableOrders();
 
       if (!window.location.pathname.includes('ordensDeServico')) {
         loadOnGoingOrders();

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IOrder } from "../../interfaces/IOrder";
 import { Container } from "./style";
 import { PageHeader } from "../../styles/global";
@@ -11,7 +11,7 @@ import { STATUS_LABEL } from "../../constants";
 
 
 export function OrdersPage(){
-    const { orders } = useOrders();
+    const { orders, loadAvailableOrders } = useOrders();
 
     const [orderDetailModal, setOrderDetailModal] = useState(false);
     const [editOrderModal, setEditOrderModal] = useState(false);
@@ -29,6 +29,11 @@ export function OrdersPage(){
         setEditOrderModal(true);
         setCurrentOrder(order);
     }
+
+    useEffect(() => {
+        loadAvailableOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return(
         <Container>

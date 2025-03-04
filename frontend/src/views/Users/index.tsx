@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Container } from "./style";
 import { AddButton, PageHeader } from "../../styles/global";
@@ -8,7 +8,7 @@ import { ClientModal } from "../../components/ClientModal";
 import { useClients } from "../../contexts/ClientsContext";
 
 export function UsersPage(){
-    const { clients } = useClients();
+    const { clients, loadAvailableClients } = useClients();
 
     const [clientModalModal, setClientModal] = useState(false);
     const [action, setAction] = useState("");
@@ -27,6 +27,11 @@ export function UsersPage(){
     function handleCloseClientModal(){
         setClientModal(false)
     }
+
+    useEffect(() => {
+        loadAvailableClients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return(
         <Container>
