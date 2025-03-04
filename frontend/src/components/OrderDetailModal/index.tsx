@@ -37,7 +37,7 @@ export function OrderDetailModal({
 				<OrderInfo>
 					<h2>Dados do Cliente</h2>
 					<p><strong>Cliente: </strong>
-						{order.client.first_name} {formatTitleCase(order.client.last_name)}
+						{formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}
 					</p>
 					<p><strong>Telefone: </strong> {order.client.phone_number}</p>
 				</OrderInfo>

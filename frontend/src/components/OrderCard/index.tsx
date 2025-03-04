@@ -42,7 +42,7 @@ export function OrderCard({
 			</div>
 			<div className="client-info">
 				<div>
-					<h3>Cliente: {order.client.first_name} {order.client.last_name}</h3>
+					<h3>Cliente: {formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}</h3>
 					<p><strong>Telefone do Cliente: </strong>{order.client.phone_number}</p>
 				</div>
 				<h3 className="delivery-date">Data de entrega: {moment(order.delivery_date).utc().format("DD/MM/YYYY")}</h3>

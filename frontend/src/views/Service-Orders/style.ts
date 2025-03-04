@@ -5,7 +5,7 @@ export const Container = styled.div`
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     padding: 1rem;
-    grid-gap: 1.5rem;
+    grid-gap: 1.1rem;
 
     .order-container {
         display: flex;
