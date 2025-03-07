@@ -14,6 +14,10 @@ class GetPixController {
 
 		const accessToken = await getInterAuthService.execute({ httpsAgent });
 
+		if (!accessToken) {
+			throw new Error("Falha ao obter o token de acesso do Banco Inter.");
+		}		
+
 		const pix = await getPixService.execute(accessToken, httpsAgent, initial_date, final_date, limit);
 
 		return res.json(pix);
