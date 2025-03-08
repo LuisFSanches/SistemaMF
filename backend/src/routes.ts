@@ -65,8 +65,8 @@ router.delete('/admins/delete/:id', superAdminAuthMiddleware, new DeleteAdminCon
 router.put('/admin/:id', superAdminAuthMiddleware, new UpdateAdminController().handle)
 
 //-- ROTAS PIX --
-router.get('/pix', new GetPixController().handle)
-router.post('/webhook/pix', new WebhookPixController().handle)
+router.get('/pix', superAdminAuthMiddleware, new GetPixController().handle)
+router.post('/webhook/pix', superAdminAuthMiddleware,  new WebhookPixController().handle)
 // router.put('/create/webhook', new RegisterWebhookController().handle)
 
 //-- ROTAS STATISTICS --
