@@ -2,6 +2,9 @@ import {Request, Response, NextFunction} from 'express';
 import { UpdateOrderService } from '../../services/order/UpdateOrderService';
 import { UpdateAddressService } from '../../services/address/UpdateAddressService';
 import { BadRequestException } from '../../exceptions/bad-request';
+import { EventEmitter } from "events";
+
+const orderEmitter = new EventEmitter();
 
 class UpdateOrderController{
 	async handle(req: Request, res: Response, next: NextFunction) {
@@ -39,8 +42,10 @@ class UpdateOrderController{
 			return;
 		}
 
+		orderEmitter.emit("orderUpdated", { data });
+
 		return res.json(data)
 	}
 }
 
-export { UpdateOrderController }
+export { UpdateOrderController, orderEmitter }

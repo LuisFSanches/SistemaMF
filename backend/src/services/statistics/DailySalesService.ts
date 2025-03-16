@@ -1,5 +1,4 @@
 import prismaClient from '../../prisma';
-import { ErrorCodes } from "../../exceptions/root";
 
 class DailySalesService {
     async execute(initial_date: any, final_date: any) {

@@ -20,9 +20,10 @@ class CreateOrderService{
 		created_by,
 		updated_by,
 		status,
-		has_card
+		has_card,
+		online_order,
+		online_code
 	}: IOrder) {
-
 		try {
 			const order = await prismaClient.order.create({
 				data: {
@@ -42,7 +43,9 @@ class CreateOrderService{
 					created_by,
 					updated_by,
 					status,
-					has_card
+					has_card,
+					online_order,
+					online_code
 				},
 
 				include: {

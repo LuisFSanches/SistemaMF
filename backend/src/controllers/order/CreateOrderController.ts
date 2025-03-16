@@ -1,12 +1,11 @@
 import {Request, Response, NextFunction} from 'express'
-import { ErrorCodes } from "../../exceptions/root";
-import { UnauthorizedRequestException } from "../../exceptions/unauthorized";
 import { BadRequestException } from "../../exceptions/bad-request";
 import { CreateOrderService } from '../../services/order/CreateOrderService'
 import { CreateClientService } from '../../services/client/CreateClientService'
 import { CreateAddressService } from '../../services/address/CreateAddressService'
 import { DeleteAddressService } from '../../services/address/DeleteAddressService'
-import { GetAdminService } from '../../services/admin/GetAdminService'
+import { GetClientByPhoneNumberService } from '../../services/client/GetClientByPhoneNumberService'
+import { GetAllClientAddressService } from '../../services/address/GetAllClientAddressService'
 
 class CreateOrderController{
 	async handle(req: Request, res: Response, next: NextFunction) {
@@ -38,24 +37,16 @@ class CreateOrderController{
 			delivery_date,
 			status,
 			has_card,
-			created_by
+			created_by,
+			online_order,
+			online_code
 		} = req.body;
-
-		const { id: admin_id }: any = req.admin;
 
 		let client_id = clientId;
 		let address_id = addressId;
 		let newAddress = false;
 
-		const adminService = new GetAdminService();
-
-		const admin = await adminService.execute(admin_id);
-
-		if (!admin || 'error' in admin) {
-			throw next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
-		}
-
-		if (!client_id) {
+		if (!client_id && !online_order) {
 			const createClientService = new CreateClientService();
 
 			const client = await createClientService.execute({
@@ -69,7 +60,7 @@ class CreateOrderController{
 			}
 		}
 
-		if (!address_id) {
+		if (!address_id && !online_order) {
 			const createAddressService = new CreateAddressService();
 			const address = await createAddressService.execute({
 				client_id,
@@ -88,6 +79,17 @@ class CreateOrderController{
 				address_id = address.id;
 			}
 			newAddress = true;
+		}
+
+		if (online_order) {
+			const storePhoneNumber = "22997517940";
+			const getClientService = new GetClientByPhoneNumberService();
+			const getClient = await getClientService.execute(storePhoneNumber) as any;
+			client_id = getClient?.id;
+
+			const getClientAddressService = new GetAllClientAddressService();
+			let address = await getClientAddressService.execute(client_id) as any;
+			address_id = address[0]?.id;
 		}
 
 		const createOrderService = new CreateOrderService();
@@ -110,7 +112,9 @@ class CreateOrderController{
 			updated_by: created_by,
 			status,
 			has_card: has_card,
-		});
+			online_order,
+			online_code
+		}) as any;
 
 		if ('error' in order && order.error) {
 			next(new BadRequestException(
@@ -125,7 +129,14 @@ class CreateOrderController{
 			return;
 		}
 
-		return res.json(order);
+		if (online_order) {
+			return res.json({
+				order,
+			});
+		}
+		if (!online_order) {
+			return res.json(order);
+		}
 	}
 }
 

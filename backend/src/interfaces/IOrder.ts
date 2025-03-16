@@ -17,4 +17,6 @@ export interface IOrder {
   updated_by: string;
   status: string;
   has_card: boolean;
+  online_order: boolean;
+  online_code?: string;
 }

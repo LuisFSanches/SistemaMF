@@ -15,6 +15,9 @@ import { GetOnGoingOrderController } from './controllers/order/GetOnGoingOrderCo
 import { GetAllOrderController } from './controllers/order/GetAllOrderController';
 import { UpdateOrderController } from './controllers/order/UpdateOrderController';
 import { UpdateOrderStatusController } from './controllers/order/UpdateOrderStatusController';
+import { GetOrderController } from './controllers/order/GetOrderController';
+import { FinishOnlineOrderController } from './controllers/order/FinishOnlineOrderController';
+import { GetWaitingOnlineOrderController } from './controllers/order/GetWaitingOnlineOrderController';
 
 import { CreateAdminController } from './controllers/admin/CreateAdminController'
 import { LoginAdminController } from './controllers/admin/LoginAdminController'
@@ -50,11 +53,14 @@ router.get('/address/pickup', adminAuthMiddleware, new GetPickUpAddressControlle
 router.get('/address/:client_id', superAdminAuthMiddleware, new GetAllClientAddressController().handle)
 
 //-- ROTAS ORDER --
-router.post('/order', adminAuthMiddleware, new CreateOrderController().handle);
-router.put('/order/:id', adminAuthMiddleware, new UpdateOrderController().handle);
-router.patch('/order/:id', adminAuthMiddleware, new UpdateOrderStatusController().handle);
+router.get('/order/completedOrder/:id', new GetOrderController().handle);
 router.get('/order/ongoing', adminAuthMiddleware, new GetOnGoingOrderController().handle);
 router.get('/order/all', adminAuthMiddleware, new GetAllOrderController().handle);
+router.get('/order/waitingForClient', adminAuthMiddleware, new GetWaitingOnlineOrderController().handle);
+router.post('/order', adminAuthMiddleware, new CreateOrderController().handle);
+router.put('/order/:id', adminAuthMiddleware, new UpdateOrderController().handle);
+router.put('/order/finish/:id', new FinishOnlineOrderController().handle);
+router.patch('/order/:id', adminAuthMiddleware, new UpdateOrderStatusController().handle);
 
 //-- ROTAS ADMIN --
 router.post('/admin', superAdminAuthMiddleware, new CreateAdminController().handle)
