@@ -96,7 +96,7 @@ export function OnlineOrder() {
         const { data: response } = await createOrder(orderData);
         if (response.order.id) {
             setShowOrderDetail(true);
-            setOrderLink(`${baseUrl}/completarPedido/${response.order.id}`);
+            setOrderLink(`${baseUrl}completarPedido/${response.order.id}`);
             setOrderCode(response.order.online_code);
         }
 

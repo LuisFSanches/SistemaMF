@@ -23,7 +23,7 @@ import {
     ErrorMessage,
     PrimaryButton,
 } from "../../styles/global";
-import { TYPES_OF_DELIVERY } from "../../constants";
+import { TYPES_OF_DELIVERY, STATES } from "../../constants";
 import { rawTelephone } from "../../utils";
 
 import { Form, Container, FormHeader, CompletedOrder } from "./style";
@@ -551,11 +551,14 @@ export function CompleteOrder() {
                                         Estado
                                         <span>*</span>
                                     </Label>
-                                    <Input type="text" placeholder="Estado" {...register("state", {
+                                    <Select {...register("state", {
                                         required: "Estado inválido",
-                                        })}
-                                        disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                    />
+                                        })}>
+                                    <option value="">Selecionar:</option>
+                                        {Object.entries(STATES).map(([key, value]) => (
+                                            <option key={key} value={key}>{value}</option>
+                                        ))}
+                                    </Select>
                                     {errors.state && <ErrorMessage>{errors.state.message}</ErrorMessage>}
                                 </FormField>
                                 <FormField>

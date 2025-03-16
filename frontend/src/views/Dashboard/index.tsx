@@ -32,7 +32,7 @@ import { getClientAddresses } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
 import { getPickupAddress } from "../../services/addressService";
 import { rawTelephone } from "../../utils";
-import { PAYMENT_METHODS } from "../../constants";
+import { PAYMENT_METHODS, STATES } from "../../constants";
 import { useOrders } from "../../contexts/OrdersContext";
 import { useAdmins } from "../../contexts/AdminsContext";
 
@@ -554,11 +554,14 @@ export function DashboardPage() {
                                 <InlineFormField>
                                     <FormField>
                                         <Label>Estado</Label>
-                                        <Input type="text" placeholder="Estado" {...register("state", {
+                                        <Select {...register("state", {
                                             required: "Estado inválido",
-                                            })}
-                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                        />
+                                        })}>
+                                        <option value="">Selecionar:</option>
+                                            {Object.entries(STATES).map(([key, value]) => (
+                                                <option key={key} value={key}>{value}</option>
+                                            ))}
+                                        </Select>
                                         {errors.state && <ErrorMessage>{errors.state.message}</ErrorMessage>}
                                     </FormField>
                                     <FormField>
