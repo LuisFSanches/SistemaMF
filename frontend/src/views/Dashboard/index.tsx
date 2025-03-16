@@ -225,7 +225,7 @@ export function DashboardPage() {
         const fetchClientData = async () => {
             const phoneNumber = rawTelephone(phone_number);
 
-            if (phoneNumber && phoneNumber.length > 7) {
+            if (phoneNumber && phoneNumber.length >= 10) {
                 try {
                     const response = await getClientByPhone(phoneNumber);
                     const { data: client } = response;

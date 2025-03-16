@@ -256,7 +256,7 @@ export const CompanyInfoContainer = styled.div<SidebarProps>`
     transition: background-color 0.3s, transform 0.2s;
     
     &:hover {
-      background-color: rgb(0, 88, 7);
+      background-color: #f5b1c1;
       transform: scale(1.03);
     }
   }

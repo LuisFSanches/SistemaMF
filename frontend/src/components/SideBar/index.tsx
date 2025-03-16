@@ -5,12 +5,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faArrowLeft,
     faArrowRight,
-
     faChartLine,
     faComputer,
-    faLayerGroup,
     faRightFromBracket,
-    faUtensils,
+    faGlobe,
     faUserShield,
     faBagShopping,
     faAddressCard,
@@ -37,7 +35,8 @@ export function SideBar(){
         pix: false,
         configurations:false,
         administradores: false,
-        pedidoOnline: false
+        pedidoOnline: false,
+        aguardandoCliente: false
     })
     
     const [isMinimized, setMinimized] = useState(false)
@@ -54,7 +53,8 @@ export function SideBar(){
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
-                    "pedidoOnline": false
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false
                 })
             break;
             case 'ordensDeServico':
@@ -67,20 +67,8 @@ export function SideBar(){
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
-                    "pedidoOnline": false
-                })
-            break;
-            case 'produtos':
-                setActive({...isActive,
-                    'dashboard':false,
-                    'ordensDeServico':false,
-                    'produtos':true,
-                    'categorias':false,
-                    'pedidos':false,
-                    'clientes':false,
-                    'statistics':false,
-                    "administradores": false,
-                    "pedidoOnline": false
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false
                 })
             break;
             case 'statistics':
@@ -93,23 +81,10 @@ export function SideBar(){
                     'clientes':false,
                     'statistics':true,
                     "administradores": false,
-                    "pedidoOnline": false
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false
                 })
             break;
-            case 'categorias':
-                setActive({...isActive,
-                    'dashboard':false,
-                    'ordensDeServico':false,
-                    'produtos':false,
-                    'categorias':true,
-                    'pedidos':false,
-                    'clientes':false,
-                    'statistics':false,
-                    "administradores": false,
-                    "pedidoOnline": false
-                })
-            break;
-
             case 'pedidos':
                 setActive({...isActive,
                     'dashboard':false,
@@ -120,7 +95,8 @@ export function SideBar(){
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
-                    "pedidoOnline": false
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false
                 })
             break;
 
@@ -134,7 +110,8 @@ export function SideBar(){
                     'clientes':true,
                     'statistics':false,
                     "administradores": false,
-                    "pedidoOnline": false
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false
                 })
             break;
 
@@ -148,7 +125,8 @@ export function SideBar(){
                     'clientes':false,
                     'statistics':false,
                     "administradores": true,
-                    "pedidoOnline": false
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false
                 })
             break;
 
@@ -163,7 +141,8 @@ export function SideBar(){
                     'statistics':false,
                     "administradores": false,
                     'pix': true,
-                    "pedidoOnline": false
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false
                 })
             break;
 
@@ -178,7 +157,23 @@ export function SideBar(){
                     'statistics':false,
                     "administradores": false,
                     'pix': false,
-                    "pedidoOnline": true
+                    "pedidoOnline": true,
+                    "aguardandoCliente": false
+                })
+            break;
+            case 'aguardandoCliente':
+                setActive({...isActive, 
+                    'dashboard':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": true
                 })
             break;
         }
@@ -230,7 +225,7 @@ export function SideBar(){
                 </SideBarItemContainer>
             </NavLink>
 
-            <NavLink to="/pedidoOnline" style={{ 'display': 'none'}}>
+            <NavLink to="/pedidoOnline">
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidoOnline')}>
                     <SideBarButton
                         isActive={isActive['pedidoOnline']}
@@ -255,29 +250,15 @@ export function SideBar(){
                 </SideBarItemContainer>
             </NavLink>
 
-            <NavLink to="/produtos" style={{ 'display': 'none'}}>
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('produtos')}>
+            <NavLink to="/aguardandoCliente">
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('aguardandoCliente')}>
                     <SideBarButton
-                        isActive={isActive['produtos']}
+                        isActive={isActive['aguardandoCliente']}
                         isMinimizedActive={isMinimized}
                     >
-                        <FontAwesomeIcon icon={faUtensils} className="Side-Bar-Icon"/>
-                        <span>Produtos</span>
+                        <FontAwesomeIcon icon={faGlobe} className="Side-Bar-Icon"/>
+                        <span>Aguardando Cliente</span>
                     </SideBarButton>
-                
-                </SideBarItemContainer>
-            </NavLink>
-
-            <NavLink to="/categorias" style={{ 'display': 'none'}}>
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('categorias')}>
-                    <SideBarButton
-                        isActive={isActive['categorias']}
-                        isMinimizedActive={isMinimized}
-                    >
-                        <FontAwesomeIcon icon={faLayerGroup} className="Side-Bar-Icon"/>
-                        <span>Categorias</span>
-                    </SideBarButton>
-
                 </SideBarItemContainer>
             </NavLink>
 

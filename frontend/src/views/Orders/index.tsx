@@ -38,7 +38,7 @@ export function OrdersPage(){
     return(
         <Container>
             <PageHeader>
-            	<h1>Pedidos</h1>
+            	<h1>Todos os Pedidos</h1>
             </PageHeader>
             <table>
                 <thead className="head">

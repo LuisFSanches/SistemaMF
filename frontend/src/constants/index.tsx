@@ -2,6 +2,7 @@ import { Status } from "../interfaces/IStatus";
 
 export const STATUS_LABEL: Record<Status, string>= {
   "OPENED": "Aberto",
+  "WAITING_FOR_CLIENT": "Aguardando Cliente",
   "IN_PROGRESS": "Em andamento",
   "IN_DELIVERY": "Em entrega",
   "DONE": "Finalizado"
@@ -26,4 +27,10 @@ export const HAS_CARD = {
 export const ADMIN_ROLES = {
   "ADMIN": "ADMIN",
   "SUPER_ADMIN": "SUPER_ADMIN"
+}
+
+export const TYPES_OF_DELIVERY = {
+  "MY_GIFT": "É presente. Mas eu Mesmo vou receber",
+  "MY_PRODUCT": "Não é Presente. Eu mesmo que vou receber",
+  "SOMEONES_GIFT": "É Presente. Outra pessoa vai receber"
 }

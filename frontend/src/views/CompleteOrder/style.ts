@@ -48,7 +48,7 @@ export const Form = styled.form`
         background: #a1a1a1;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width:768px){
         width: 100%;
         height: 100%;
         margin-top: 0px;
@@ -59,48 +59,44 @@ export const Form = styled.form`
 export const FormHeader = styled.div`
     width: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: 20px;
-    color: #e7b7c2;
     font-size: 18px;
+    background: #e4bfc7;
 
-    h2 {
-        margin-left: 10px;
+    img {
+        width: 225px;
+        height: 80px;
+    }
+
+    h1 {
+        font-size: 23px;
+        margin-top: 25px;
+        margin-bottom: 25px;
+        text-align: center;
+        color: #505050;
     }
 `
-
-export const OrderDetail = styled.div`
+export const CompletedOrder = styled.div`
+    width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
+    font-size: 18px;
 
-    .order-detail-container {
-        padding: 20px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0.1rem 0.2rem 0.2rem var(--shadow-color);
+    img {
+        width: 225px;
+        height: 80px;
+    }
 
-        p {
-            font-size: 18px;
-            line-height: 24px;
-            margin: 15px 0;
-        }
-
-        button {
-            background: none;
-            margin-left: 10px;
-        }
-
-        .copied-message {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-
-        .instruction-message {
-            color: red;
-        }
+    h1, h2 {
+        font-size: 30px;
+        margin-top: 25px;
+        text-align: center;
+        color: pink;
+        font-family: "Pacifico", sans-serif;
     }
 `

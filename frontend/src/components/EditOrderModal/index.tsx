@@ -137,7 +137,6 @@ export function EditOrderModal({
         }
 
         if (!value) {
-			console.log('AQUIII')
             setValue("client_address_id", order.client_address_id);
             setValue("pickup_on_store", false);
 			setPickupAddress(false);

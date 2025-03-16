@@ -12,6 +12,10 @@ export const Container = styled.div`
     @media (max-width:1450px){
         overflow-y: scroll;
     }
+
+    @media (max-width: 768px) {
+        height: 100vh;
+    }
 `
 export const FormHeader = styled.div`
     width: 100%;
@@ -55,6 +59,13 @@ export const Form = styled.form<{ step?: number }>`
     ::-webkit-scrollbar-thumb:hover {
         background: #a1a1a1;
     }
+
+    @media (max-width: 768px) {
+        width: 100%;
+        height: 100%;
+        border-radius: 0px;
+        border-radius: 0px;
+    }
 `
 
 export const InlineFormField = styled.div`
@@ -64,6 +75,10 @@ export const InlineFormField = styled.div`
 
     div:first-child{
         margin-right: 10px;
+    }
+
+    @media(max-width: 768px){
+        width: 100%;
     }
 `
 
@@ -78,6 +93,10 @@ export const StepButton = styled.button `
     color: #fff;
     font-size: 1.3rem;
     font-weight: 600;
+
+    @media (max-width: 768px) {
+        margin-top: 0px;
+    }
 `
 
 export const ActionButtons = styled.div`

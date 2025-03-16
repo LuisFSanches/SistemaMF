@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getAllOrders, getOnGoingOrders } from "../services/orderService";
+import { getAllOrders, getOnGoingOrders, getWaitingOrders } from "../services/orderService";
 import { IOrder } from "../interfaces/IOrder";
 
 interface OrdersContextType {
@@ -8,7 +8,9 @@ interface OrdersContextType {
   addOrder: (client: IOrder) => void;
   editOrder: (client: IOrder) => void;
   onGoingOrders: IOrder[];
-  loadOnGoingOrders: () => Promise<void>
+  loadOnGoingOrders: () => Promise<void>;
+  loadWaitingOrders: () => Promise<void>;
+  waitingOrders: IOrder[]
 }
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
@@ -16,6 +18,7 @@ const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 export const OrdersProvider: React.FC = ({ children }) => {
   const [orders, setOrders] = useState<IOrder[]>([]);
   const [onGoingOrders, setOnGoingOrders] = useState<IOrder[]>([]);
+  const [waitingOrders, setWaitingOrders] = useState<IOrder[]>([]);
   const token = localStorage.getItem("token");
 
   const loadAvailableOrders = async () => {
@@ -30,6 +33,12 @@ export const OrdersProvider: React.FC = ({ children }) => {
 
       setOnGoingOrders(orders);
     }
+  }
+
+  const loadWaitingOrders = async () => {
+    const { data: { orders } } = await getWaitingOrders();
+    setOrders(orders);
+    setWaitingOrders(orders);
   }
 
   const addOrder = (order: IOrder) => {
@@ -70,7 +79,8 @@ export const OrdersProvider: React.FC = ({ children }) => {
         loadAvailableOrders,
         onGoingOrders,
         loadOnGoingOrders,
-
+        loadWaitingOrders,
+        waitingOrders
       }}>
       {children}
     </OrdersContext.Provider>

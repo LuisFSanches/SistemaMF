@@ -3,7 +3,7 @@ import { IOrder } from "../../interfaces/IOrder";
 import moment from "moment";
 import { OrderDetailModal } from "../../components/OrderDetailModal";
 import { OrderCardContainer } from "./style"
-import { HAS_CARD } from "../../constants";
+import { HAS_CARD, TYPES_OF_DELIVERY } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faAnglesRight, faAnglesLeft, faPrint, faEye, faPen } from "@fortawesome/free-solid-svg-icons";
 import { formatTitleCase } from "../../utils";
@@ -36,7 +36,9 @@ export function OrderCard({
 	return (
     	<OrderCardContainer className={order?.status?.toLowerCase()}>
 			<div className="order-number">
-				<span className="order-type">Balcão</span>
+				<span className={`order-type ${order.online_order ? "online" : "on_store"}`}>
+					{order.online_order ? "Online" : "Balcão"}
+				</span>
 				<h2>Pedido #{order?.code}</h2>
 				<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
 			</div>
@@ -77,7 +79,14 @@ export function OrderCard({
 					<p>Retirar na loja</p>
 				}
 				<p><strong>Ponto de referência: </strong>
-					{formatTitleCase(order.clientAddress.reference_point)}
+					{!order.pickup_on_store &&
+						formatTitleCase(order.clientAddress.reference_point)
+					}
+				</p>
+			</div>
+			<div className="address-container">
+				<p><strong>Tipo de Entrega: </strong>
+					{TYPES_OF_DELIVERY[order.type_of_delivery as keyof typeof TYPES_OF_DELIVERY]}
 				</p>
 			</div>
 			<div className="address-container">

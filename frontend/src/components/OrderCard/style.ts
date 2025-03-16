@@ -27,10 +27,17 @@ export const OrderCardContainer= styled.div`
             align-items: center;
             justify-content: center;
             padding: 5px 10px;
-            background: #DA1421;
             border-radius: 15px;
             color: white;
             font-weight: 700;
+
+            &.online {
+                background: #548E8E;
+            }
+
+            &.on_store {
+                background: #DA1421;
+            }
         }
     }
 

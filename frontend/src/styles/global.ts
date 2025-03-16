@@ -209,11 +209,18 @@ button{
 
 .react-modal-content{
     width: 100%;
+    max-height: 95vh;
+    overflow-y: auto;
     max-width: 576px;
     background: var(--background);
     padding: 3rem;
     position: relative;
     border-radius: 0.25rem;
+    outline: none;
+
+    @media (max-width: 768px){
+        padding: 2rem;
+    }
 }
 
 .react-modal-content-edit-order {
@@ -275,7 +282,7 @@ export const ModalContainer = styled.div`
     h2{
         color: var(--text-title);
         font-size: 1.5rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
     }
 
     input {
@@ -320,6 +327,11 @@ export const FormField = styled.div<{ isShortField?: boolean }>`
     margin: 0 auto;
     margin-bottom: 10px;
     margin-top: 20px;
+
+    @media (max-width:768px) {
+        width: ${({ isShortField }) => (isShortField ? '45%' : '100%')};
+        padding: 0 8px;
+    }
 `;
 
 export const EditFormField = styled.div<{ isShortField?: boolean }>`
@@ -340,6 +352,15 @@ export const InlineFormField = styled.div<{fullWidth?: boolean}>`
     div:first-child{
         margin-right: 10px;
     }
+
+    @media (max-width: 768px){
+        width: 100%;
+        align-items: center;
+        
+        div:first-child {
+            margin-right: 0px;
+        }
+    }
 `
 
 export const Label = styled.label`
@@ -347,6 +368,11 @@ export const Label = styled.label`
     color: #5B5B5B;
     font-weight: 600;
     margin-bottom: 8px;
+
+    span {
+        color: red;
+        margin-left: 5px;
+    }
 `;
 
 export const Input = styled.input`
@@ -386,13 +412,19 @@ export const Textarea = styled.textarea`
     }
 `;
 
-export const CheckboxContainer = styled.div`
+export const CheckboxContainer =styled.div<{alignLeft?: boolean}>`
     display: flex;
     align-items: center;
     margin: 10px 0px;
     
     label {
         margin: 0px 10px;
+    }
+
+    @media (max-width: 768px){
+        width: 100%;
+        justify-content: start;
+        margin-left: 20px;
     }
 `;
 
@@ -458,7 +490,11 @@ export const PrimaryButton = styled.button`
         box-shadow: 0 3px 4px rgba(0, 0, 0, 0.2); 
     }
 
-
+    
+    @media (max-width: 768px) {
+        margin-top: 0px;
+        margin-bottom: 10px;
+    }
 `;
 
 export const PasswordContainer = styled.div`

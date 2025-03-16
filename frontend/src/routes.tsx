@@ -2,19 +2,19 @@ import { useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthContext } from "./contexts/AuthContext";
 
-import { ProductsPage } from "./views/Products";
 import { DashboardPage } from "./views/Dashboard";
 import { GlobalStyle } from "./styles/global";
 import { ServiceOrdersPage } from "./views/Service-Orders";
 import { UsersPage } from "./views/Users";
 import { OrdersPage } from "./views/Orders";
-import { CategoriesPage } from "./views/Categories";
 import { LoginPage } from "./views/LoginPage";
 import { SideBarLayout } from "./views/SideBarLayout";
 import { Statistics } from "./views/Statistics";
 import { AdminsPage } from "./views/Admins";
 import { PixPage } from "./views/PixPage";
 import { OnlineOrder } from "./views/OnlineOrder";
+import { CompleteOrder } from "./views/CompleteOrder";
+import { WaitingClientOrders } from "./views/WaitingClientOrders";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -53,21 +53,16 @@ export default function routes(){
                                 <ServiceOrdersPage/>
                             </PrivateRoute>
                         }/>
-                        <Route path="produtos" element={
-                            <PrivateRoute>
-                                <ProductsPage/>
-                            </PrivateRoute>
-                        }/>
                         <Route path="pedidoOnline" element={
                             <PrivateRoute>
                                 <OnlineOrder/>
                             </PrivateRoute>
                         }/>
-                        <Route path="categorias" element={
+                        <Route path="aguardandoCliente" element={
                             <PrivateRoute>
-                                <CategoriesPage/>
+                                <WaitingClientOrders/>
                             </PrivateRoute>
-                        }/>  
+                        }/>
                         <Route path="clientes" element={
                             <PrivateRoute>
                                 <UsersPage/>
@@ -94,6 +89,9 @@ export default function routes(){
                             </PrivateRoute>
                         }/>
                     </Route>
+                    <Route path="completarPedido/:id" element={
+                        <CompleteOrder/>
+                    }/>
                     <Route path="/" element={
                         <IsAuthenticatedRoutes>
                             <LoginPage/>

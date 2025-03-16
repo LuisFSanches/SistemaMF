@@ -22,4 +22,6 @@ export interface IOrder {
   delivery_date: string;
   status: Status;
   has_card: false;
+  card_message?: string;
+  type_of_delivery?: string;
 }

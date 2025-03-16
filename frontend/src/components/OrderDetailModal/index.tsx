@@ -4,7 +4,7 @@ import { IOrder } from "../../interfaces/IOrder";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Container, OrderInfo } from "./style";
-import { HAS_CARD, PAYMENT_METHODS, PAYMENT_RECEIVED } from "../../constants";
+import { HAS_CARD, PAYMENT_METHODS, PAYMENT_RECEIVED, TYPES_OF_DELIVERY } from "../../constants";
 import { formatTitleCase } from "../../utils";
 
 interface OrderDetailModalProps{
@@ -62,6 +62,9 @@ export function OrderDetailModal({
 					<p><strong>Cartão: </strong>
 						{HAS_CARD[order.has_card.toString() as keyof typeof HAS_CARD]}
 					</p>
+					<p><strong>Mensagem Cartão: </strong>
+						{order.card_message}
+					</p>
 					<p><strong>Data de Entrega: </strong>{(moment(order.delivery_date).utc().format("DD/MM/YYYY"))}</p>
 					<p><strong>Método de pagamento: </strong>{
 						PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS]
@@ -76,6 +79,11 @@ export function OrderDetailModal({
 					<p><strong>Valor dos produtos: </strong>R$ {order.products_value}</p>
 					<p><strong>Taxa de entrega: </strong>R$ {order.delivery_fee}</p>
 					<p><strong>Total: </strong>R$ {order.total}</p>
+				</OrderInfo>
+				<OrderInfo>
+					<p><strong>Tipo de Entrega: </strong>
+						{TYPES_OF_DELIVERY[order.type_of_delivery as keyof typeof TYPES_OF_DELIVERY]}
+					</p>
 				</OrderInfo>
 				<OrderInfo>
 					<h2>Endereço de entrega</h2>

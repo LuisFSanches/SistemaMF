@@ -29,9 +29,10 @@ export const createOrder = async ({
 	total,
 	status,
 	has_card,
-	created_by
+	created_by,
+	online_order,
+	online_code
 }: any) => {
-
 	const response = await api.post("/order", {
 		clientId,
 		first_name,
@@ -61,7 +62,8 @@ export const createOrder = async ({
 		status,
 		has_card,
 		created_by,
-		
+		online_order,
+		online_code,
 		headers: {
 			Authorization: `${token}`,
 		}
@@ -70,11 +72,17 @@ export const createOrder = async ({
 	return response;
 };
 
+export const getOrder = async (id: string) => {
+	const response = api.get(`/order/completedOrder/${id}`);
+
+	return response;
+}
+
 export const getOnGoingOrders = async () => {
 	const response = await api.get("/order/ongoing", {
-	headers: {
-		Authorization: `${token}`,
-	}
+		headers: {
+			Authorization: `${token}`,
+		}
 	});
 
 	return response;
@@ -82,9 +90,19 @@ export const getOnGoingOrders = async () => {
 
 export const getAllOrders = async () => {
 	const response = await api.get("/order/all", {
-	headers: {
-		Authorization: `${token}`,
-	}
+		headers: {
+			Authorization: `${token}`,
+		}
+	});
+
+	return response;
+}
+
+export const getWaitingOrders = async () => {
+	const response = await api.get("/order/waitingForClient", {
+		headers: {
+			Authorization: `${token}`,
+		}
 	});
 
 	return response;
@@ -111,6 +129,14 @@ export const updateOrder = async(order: any) => {
 		headers: {
 			Authorization: `${token}`,
 		}
+	});
+
+	return response;
+};
+
+export const finishOnlineOrder = async(order: any) => {
+	const response = await api.put(`/order/finish/${order.id}`, {
+		order,
 	});
 
 	return response;
