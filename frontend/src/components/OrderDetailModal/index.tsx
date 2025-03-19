@@ -41,7 +41,7 @@ export function OrderDetailModal({
 					<h1>Pedido Online</h1>
 					<OrderInfo>
 						<h2>Link do pedido: </h2>
-						<p>{baseUrl}completarPedido/${order.id}</p>
+						<p>{baseUrl}/completarPedido/{order.id}</p>
 					</OrderInfo>
 					<OrderInfo>
 						<h2>Código: {order.online_code}</h2>
