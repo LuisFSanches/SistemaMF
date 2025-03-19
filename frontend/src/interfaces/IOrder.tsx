@@ -24,4 +24,5 @@ export interface IOrder {
   has_card: false;
   card_message?: string;
   type_of_delivery?: string;
+  online_code?: string;
 }
