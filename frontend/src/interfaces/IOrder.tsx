@@ -23,7 +23,6 @@ export interface IOrder {
   status: Status;
   has_card: false;
   card_message?: string;
-  online_order?: boolean;
   type_of_delivery?: string;
   online_code?: string;
 }

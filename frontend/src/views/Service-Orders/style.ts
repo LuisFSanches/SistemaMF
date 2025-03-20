@@ -1,49 +1,9 @@
 import styled from 'styled-components'
 
 export const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-
-    header {
-        display: flex;
-        margin-left: 15px;
-        margin-top: 10px;
-
-        button {
-            padding: 10px;
-            margin-right: 10px;
-            border-radius: 5px;
-            color: white;
-            font-weight: 600;
-
-            &.active {
-                border: 3px solid pink;
-            }
-        }
-
-        .all-orders {
-            background-color: #979795;
-        }
-
-        .counter-orders {
-            background-color: #71265D;
-        }
-
-        .online-orders {
-            background-color: #246D90;
-        }
-
-        select {
-            width: 25%;
-        }
-    }
-`
-
-export const Orders = styled.div`
-    display: flex;
-    flex-direction: column;
-    
+    flex: 5;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     padding: 1rem;
     grid-gap: 1.1rem;
 
@@ -51,7 +11,9 @@ export const Orders = styled.div`
         display: flex;
         flex-direction: column;
         height: 95vh;
+        border: 1px solid var(--shadow-color);
         border-radius: 0.5rem;
+        background-color: #fff !important;
         box-shadow: 0.3rem 0.3rem 0.2rem var(--shadow-color);
         overflow-y: auto;
 
@@ -83,6 +45,15 @@ export const Orders = styled.div`
 
     .order-container.in_delivery::-webkit-scrollbar-thumb {
         background: #32CD32;
+    }
+
+    header {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        padding: 0.6rem;
+        font-size: 1.3rem;
+        font-weight: 600;
     }
 
     .opened-order{
