@@ -84,6 +84,8 @@ model Order {
   status            String        @default("Opened")
   has_card          Boolean       @default(false)
   card_message      String?
+  card_from         String?
+  card_to           String?
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 

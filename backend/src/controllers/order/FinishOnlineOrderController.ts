@@ -28,8 +28,6 @@ class FinishOnlineOrderController{
             return res.status(400).json(orderFound);
         }
 
-        console.log(orderFound.online_code, order.online_code)
-        
         if (orderFound.online_code !== order.online_code) {
             return res.status(401).json({
                 error: true,
@@ -85,6 +83,8 @@ class FinishOnlineOrderController{
             delivery_date: new Date(`${order.delivery_date}T00:00:00Z`),
             pickup_on_store: order.pickup_on_store,
             has_card: order.has_card,
+            card_from: order.card_from,
+            card_to: order.card_to,
             card_message: order.card_message,
             online_code: order.online_code
         }
