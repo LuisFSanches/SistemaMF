@@ -85,7 +85,7 @@ export function EditOrderModal({
 		const { data: orderData } = await updateOrder(data);
 
 		editOrder(orderData);
-		loadAvailableOrders();
+		loadAvailableOrders(1, 25);
 		setShowLoader(false);
 		onRequestClose();
 	}

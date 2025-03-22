@@ -7,7 +7,8 @@ export const Container = styled.form`
     justify-content: center;
     align-items: center;
     position: fixed;
-    top: 5;
+    top: 0;
+    left: 0;
     background: rgba(229, 122, 122, 1);
     text-align: center;
     font-size: 16px;

@@ -1,11 +1,10 @@
 import styled from 'styled-components'
 
 export const Container = styled.div`
-    flex: 5;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    padding: 1rem;
-    grid-gap: 1.1rem;
+
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 
     .order-container {
         display: flex;
@@ -98,5 +97,41 @@ export const Container = styled.div`
         header{
             padding: 0.4rem;
         }
+    }
+`
+
+export const Orders = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 1rem;
+    grid-gap: 1.1rem;
+`
+export const Header = styled.div`
+    display: flex;
+    margin-left: 15px;
+    margin-top: 10px;
+
+    button {
+        padding: 10px;
+        margin-right: 10px;
+        border-radius: 5px;
+        color: white;
+        font-weight: 600;
+
+        &.active {
+            border: 3px solid pink;
+        }
+    }
+
+    .all-orders {
+        background-color: #979795;
+    }
+
+    .counter-orders {
+        background-color: #71265D;
+    }
+
+    .online-orders {
+        background-color: #246D90;
     }
 `

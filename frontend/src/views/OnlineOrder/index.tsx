@@ -1,4 +1,5 @@
 import { useState } from "react";
+import moment from "moment";
 import { useForm } from "react-hook-form";
 import { PAYMENT_METHODS } from "../../constants";
 import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
@@ -44,6 +45,8 @@ export function OnlineOrder() {
     const [showOrderDetail, setShowOrderDetail] = useState(false);
     const [orderLink, setOrderLink] = useState("");
     const [orderCode, setOrderCode] = useState("");
+    const mockedDeliveryDate = moment().add(2, "days").format("YYYY-MM-DD");
+    const mockedPaymentMethod = Object.entries(PAYMENT_METHODS)[0][0];
 
     const {
         register,
@@ -81,8 +84,8 @@ export function OnlineOrder() {
             country: "",
             description: data.description,
             additional_information: data.additional_information,
-            delivery_date: data.delivery_date,
-            payment_method: data.payment_method,
+            delivery_date: mockedDeliveryDate,
+            payment_method: mockedPaymentMethod,
             payment_received: data.payment_received,
             products_value: Number(data.products_value),
             delivery_fee: Number(data.delivery_fee),
@@ -167,23 +170,6 @@ export function OnlineOrder() {
                             </Select>
                             {errors.created_by && <ErrorMessage>{errors.created_by.message}</ErrorMessage>}
                         </FormField>
-                    </InlineFormField>
-                    <InlineFormField>
-                        <FormField>
-                            <Label>Data de Entrega</Label>
-                            <Input type="date" {...register("delivery_date", {
-                                required: "Data de entrega é obrigatória",
-                            })}/>
-                            {errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
-                        </FormField>
-                        <FormField>
-                            <Label>Método de pagamento</Label>
-                            <Select {...register("payment_method")}>
-                                {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
-                                    <option key={key} value={key}>{value}</option>
-                                ))}
-                            </Select>
-                        </FormField> 
                     </InlineFormField>
                     <InlineFormField>
                         <FormField>

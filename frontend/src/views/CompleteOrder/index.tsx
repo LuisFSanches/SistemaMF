@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
+import { IOrder } from "../../interfaces/IOrder";
 import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
 import { getPickupAddress } from "../../services/addressService";
@@ -23,10 +24,10 @@ import {
     ErrorMessage,
     PrimaryButton,
 } from "../../styles/global";
-import { TYPES_OF_DELIVERY, STATES } from "../../constants";
+import { TYPES_OF_DELIVERY, STATES, PAYMENT_METHODS } from "../../constants";
 import { rawTelephone } from "../../utils";
 
-import { Form, Container, FormHeader, CompletedOrder } from "./style";
+import { Form, Container, FormHeader, CompletedOrder, OrderReview } from "./style";
 
 interface INewOrder {
     first_name: string;
@@ -49,7 +50,10 @@ interface INewOrder {
     delivery_date: string;
     has_card: boolean;
     card_message: string;
+    card_from: string;
+    card_to: string;
     online_code: string;
+    payment_method: string;
 }
 
 export function CompleteOrder() {
@@ -66,6 +70,7 @@ export function CompleteOrder() {
     const [isWaitingForClienteOrder, setIsWaitingForClienteOrder] = useState(false);
     const [showWelcomeModal, setShowWelcomeModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 
     const url = window.location.href;
     const urlParts = url.split('/');
@@ -80,7 +85,6 @@ export function CompleteOrder() {
         formState: { errors },
     } = useForm<INewOrder>({
         defaultValues: {
-            state: "RJ",
             country: "Brasil"
         }
     });
@@ -113,8 +117,11 @@ export function CompleteOrder() {
             receiver_name: data.receiver_name,
             receiver_phone: data.receiver_phone,
             delivery_date: data.delivery_date,
+            payment_method: data.payment_method,
             has_card: data.has_card,
             card_message: data.card_message,
+            card_from: data.card_from,
+            card_to: data.card_to,
             status: 'OPENED',
             editAddress: true,
             online_code: data.online_code
@@ -152,6 +159,7 @@ export function CompleteOrder() {
             const { data: order } = await getOrder(orderId);
             if (order.status === "WAITING_FOR_CLIENT") {
                 setIsWaitingForClienteOrder(true);
+                setCurrentOrder(order);
             }
             setShowLoader(false);
         }
@@ -263,6 +271,13 @@ export function CompleteOrder() {
                         <img src={logoFull} alt="" />
                         <h1>Preencha as informações do seu pedido</h1>
                     </FormHeader>
+                    <OrderReview>
+                        <h1>Resumo do pedido</h1>
+                        <div>
+                            <p><strong>Descrição: </strong> {currentOrder?.description}</p>
+                            <p><strong>Observação:</strong> {currentOrder?.additional_information}</p>
+                        </div>
+                    </OrderReview>
                     <FormField>
                         <Label>
                             Código do Pedido
@@ -554,7 +569,7 @@ export function CompleteOrder() {
                                     <Select {...register("state", {
                                         required: "Estado inválido",
                                         })}>
-                                    <option value="">Selecionar:</option>
+                                        <option value="">Selecionar</option>
                                         {Object.entries(STATES).map(([key, value]) => (
                                             <option key={key} value={key}>{value}</option>
                                         ))}
@@ -587,18 +602,48 @@ export function CompleteOrder() {
                         {errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
                     </FormField>
                     <FormField>
+                        <Label>Método de pagamento</Label>
+                        <Select {...register("payment_method", {required: "Método de pagamento é obrigatório",})}>
+                            <option value="">Selecionar </option>
+                            {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
+                                <option key={key} value={key}>{value}</option>
+                            ))}
+                        </Select>
+                        {errors.payment_method && <ErrorMessage>{errors.payment_method.message}</ErrorMessage>}
+                    </FormField> 
+                    <FormField>
                         <CheckboxContainer>
                             <Checkbox type="checkbox" {...register("has_card")} />
                             <Label>Pedido Contém Cartão.</Label>
                         </CheckboxContainer>
                     </FormField>
                     {hasCard &&
-                        <FormField>
-                            <Label>Mensagem do cartão</Label>
-                            <Textarea {...register("card_message")}
-                            />
-                            {errors.card_message && <ErrorMessage>{errors.card_message.message}</ErrorMessage>}
-                        </FormField>
+                        <>
+                            <FormField>
+                                <Label>
+                                    De: <span>*</span>
+                                </Label>
+                                <Input {...register("card_from", {
+                                    required: "Remetente do cartão é obrigatório",
+                                })}/>
+                                {errors.card_from && <ErrorMessage>{errors.card_from.message}</ErrorMessage>}
+                            </FormField>
+                            <FormField>
+                                <Label>
+                                    Para: <span>*</span>
+                                </Label>
+                                <Input {...register("card_to", {
+                                    required: "Destinatário do cartão é obrigatório",
+                                })}/>
+                                {errors.card_to && <ErrorMessage>{errors.card_to.message}</ErrorMessage>}
+                            </FormField>
+                            <FormField>
+                                <Label>Mensagem do cartão <span>*</span></Label>
+                                <Textarea {...register("card_message", {required: "Mensagem do cartão é obrigatório",})}
+                                />
+                                {errors.card_message && <ErrorMessage>{errors.card_message.message}</ErrorMessage>}
+                            </FormField>
+                        </>
                     }
                     
                     <PrimaryButton type="submit">Finalizar Pedido</PrimaryButton>

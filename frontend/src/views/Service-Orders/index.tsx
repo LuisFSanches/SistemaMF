@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { IOrder } from "../../interfaces/IOrder";
-import { Container } from "./style";
+import { Container, Orders, Header } from "./style";
 import { updateStatus } from "../../services/orderService";
 import { OrderCard } from "../../components/OrderCard";
 import { useOrders } from "../../contexts/OrdersContext";
@@ -17,6 +17,7 @@ export function ServiceOrdersPage(){
 	const [requestOrders, setRequestOrders] = useState(false);
     const [editOrderModal, setEditOrderModal] = useState(false);
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
+	const [selectedOrderType, setSelectedOrderType] = useState("all-orders");
 
 
     function handleOpenEditOrderModal(order: IOrder){
@@ -80,69 +81,103 @@ export function ServiceOrdersPage(){
 		setShowLoader(false);
 	}
 
+	const filterOrdersByType = (orderType: string) => {
+		setSelectedOrderType(orderType);
+		if (orderType === "counter-orders") {
+			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && !order.online_order));
+			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && !order.online_order));
+			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && !order.online_order));
+		} else if (orderType === "online-orders") {
+			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && order.online_order));
+			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && order.online_order));
+			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && order.online_order));
+		} else {
+			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED"));
+			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS"));
+			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY"));
+		}
+	};
+
     return (
 		<Container>
 			<Loader show={showLoader} />
-			<div className="order-container opened">
-				<header className="opened-order">
-					Ordem Aberta
-				</header>
-				{openedOrders.map((order: any) => (
-					<div key={order.id} id={`order-card-${order.id}`}>
-						<OrderCard order={order}
-							handlePrint={handlePrint}
-							handleOrderStatus={handleOrderStatus}
-							buttonStatus="to-production"
-							previousButtonStatus={null}
-							nextStatus="IN_PROGRESS"
-							previousStatus={null}
-							nextAction="Em produção"
-							previousAction={null}
-							handleOpenEditOrderModal={handleOpenEditOrderModal}
-						/>
-					</div>
-				))}
-			</div>
-			<div className="order-container in_progress">
-				<header className="in-progress-order">
-					Em produção
-				</header>
-				{inProgressOrders.map((order: any) => (
-          			<div key={order.id} id={`order-card-${order.id}`}>
-						<OrderCard order={order}
-							handlePrint={handlePrint}
-							handleOrderStatus={handleOrderStatus}
-							buttonStatus="to-finished"
-							previousButtonStatus="to-production"
-							nextStatus="IN_DELIVERY"
-							previousStatus="OPENED"
-							nextAction="Entrega"
-							previousAction="Em produção"
-							handleOpenEditOrderModal={handleOpenEditOrderModal}
-						/>
-            		</div>
-            	))}
-			</div>
-			<div className="order-container in_delivery">
-				<header className="finished-order">
-					Rota de Entrega
-				</header>
-				{inDeliveryOrders.map((order: any) => (
-          			<div key={order.id} id={`order-card-${order.id}`}>
-						<OrderCard order={order}
-							handlePrint={handlePrint}
-							handleOrderStatus={handleOrderStatus}
-							buttonStatus="delivered"
-							previousButtonStatus="to-finished"
-							nextStatus="DONE"
-							previousStatus="IN_PROGRESS"
-							nextAction="Finalizado"
-							previousAction="Entrega"
-							handleOpenEditOrderModal={handleOpenEditOrderModal}
-						/>
-          			</div>
-          		))}
-			</div>
+			<Header>
+				<button className={`all-orders ${selectedOrderType === "all-orders" ? "active" : ""}`}
+					onClick={() => filterOrdersByType("all-orders")}>
+						Todos
+				</button>
+				<button className={`counter-orders ${selectedOrderType === "counter-orders" ? "active" : ""}`}
+					onClick={() => filterOrdersByType("counter-orders")}>
+						Ordens Balcão
+					</button>
+				<button className={`online-orders ${selectedOrderType === "online-orders" ? "active" : ""}`}
+					onClick={() => filterOrdersByType("online-orders")}>
+						Ordens Online
+				</button>
+ 			</Header>
+			<Orders>
+				<div className="order-container opened">
+					<header className="opened-order">
+						Ordem Aberta
+					</header>
+					{openedOrders.map((order: any) => (
+						<div key={order.id} id={`order-card-${order.id}`}>
+							<OrderCard order={order}
+								handlePrint={handlePrint}
+								handleOrderStatus={handleOrderStatus}
+								buttonStatus="to-production"
+								previousButtonStatus={null}
+								nextStatus="IN_PROGRESS"
+								previousStatus={null}
+								nextAction="Em produção"
+								previousAction={null}
+								handleOpenEditOrderModal={handleOpenEditOrderModal}
+							/>
+						</div>
+					))}
+				</div>
+				<div className="order-container in_progress">
+					<header className="in-progress-order">
+						Em produção
+					</header>
+					{inProgressOrders.map((order: any) => (
+						<div key={order.id} id={`order-card-${order.id}`}>
+							<OrderCard order={order}
+								handlePrint={handlePrint}
+								handleOrderStatus={handleOrderStatus}
+								buttonStatus="to-finished"
+								previousButtonStatus="to-production"
+								nextStatus="IN_DELIVERY"
+								previousStatus="OPENED"
+								nextAction="Entrega"
+								previousAction="Em produção"
+								handleOpenEditOrderModal={handleOpenEditOrderModal}
+							/>
+						</div>
+					))}
+				</div>
+				<div className="order-container in_delivery">
+					<header className="finished-order">
+						Rota de Entrega
+					</header>
+					{inDeliveryOrders.map((order: any) => (
+						<div key={order.id} id={`order-card-${order.id}`}>
+							<OrderCard order={order}
+								handlePrint={handlePrint}
+								handleOrderStatus={handleOrderStatus}
+								buttonStatus="delivered"
+								previousButtonStatus="to-finished"
+								nextStatus="DONE"
+								previousStatus="IN_PROGRESS"
+								nextAction="Finalizado"
+								previousAction="Entrega"
+								handleOpenEditOrderModal={handleOpenEditOrderModal}
+							/>
+						</div>
+					))}
+				</div>
+			</Orders>
+
 			<EditOrderModal
                 isOpen={editOrderModal}
                 onRequestClose={() => setEditOrderModal(false)}

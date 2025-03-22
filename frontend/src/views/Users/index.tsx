@@ -5,10 +5,11 @@ import { AddButton, PageHeader } from "../../styles/global";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faEye, faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
 import { ClientModal } from "../../components/ClientModal";
+import { Pagination } from "../../components/Pagination";
 import { useClients } from "../../contexts/ClientsContext";
 
 export function UsersPage(){
-    const { clients, loadAvailableClients } = useClients();
+    const { clients, loadAvailableClients, totalClients } = useClients();
 
     const [clientModalModal, setClientModal] = useState(false);
     const [action, setAction] = useState("");
@@ -18,6 +19,8 @@ export function UsersPage(){
         last_name: "",
         phone_number: ""
     });
+    const [page, setPage] = useState(1);
+    const pageSize = 15;
 
     function handleOpenClientModal(action:string, client: any){
         setClientModal(true)
@@ -29,14 +32,21 @@ export function UsersPage(){
     }
 
     useEffect(() => {
-        loadAvailableClients();
+        loadAvailableClients(page, pageSize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [page]);
 
     return(
         <Container>
             <PageHeader>
                 <h1>Clientes</h1>
+
+                <Pagination
+                    currentPage={page}
+                    total={totalClients}
+                    pageSize={pageSize as number}
+                    onPageChange={setPage}
+                />
 
                 <AddButton onClick={() =>handleOpenClientModal("create", {
                     id: "",

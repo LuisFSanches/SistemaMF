@@ -213,7 +213,7 @@ button{
     overflow-y: auto;
     max-width: 576px;
     background: var(--background);
-    padding: 3rem;
+    padding: 2rem;
     position: relative;
     border-radius: 0.25rem;
     outline: none;
@@ -469,6 +469,7 @@ export const PrimaryButton = styled.button`
     justify-content: center; 
     margin: 0 auto;
     margin-top: 20px;
+    margin-bottom: 20px;
     padding: 0.8rem 1.5rem; 
     border: none; 
     border-radius: 0.8rem;
@@ -526,6 +527,7 @@ export const PageHeader = styled.div`
     display: flex;
     justify-content: space-between;
     margin-bottom: 1rem;
+    align-items: center;
 `
 export const ErrorMessage = styled.span`
     color: red;

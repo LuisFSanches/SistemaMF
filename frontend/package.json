@@ -1,5 +1,5 @@
 {
-  "name": "cybergarcom",
+  "name": "sistemamf",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -7,6 +7,7 @@
     "@fortawesome/free-brands-svg-icons": "^6.7.1",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/react-fontawesome": "^0.1.18",
+    "@pdf-lib/fontkit": "^1.1.1",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
     "@testing-library/user-event": "^13.2.1",
@@ -19,6 +20,7 @@
     "axios": "^1.7.7",
     "chart.js": "^3.7.1",
     "moment": "^2.30.1",
+    "pdf-lib": "^1.17.1",
     "react": "^18.0.0",
     "react-chartjs-2": "^4.1.0",
     "react-dom": "^18.0.0",

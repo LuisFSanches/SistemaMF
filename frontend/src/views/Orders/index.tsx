@@ -6,16 +6,19 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faPen } from "@fortawesome/free-solid-svg-icons";
 import { OrderDetailModal } from "../../components/OrderDetailModal";
 import { EditOrderModal } from "../../components/EditOrderModal";
+import { Pagination } from "../../components/Pagination";
 import { useOrders } from "../../contexts/OrdersContext";
 import { STATUS_LABEL } from "../../constants";
 import { formatTitleCase } from "../../utils";
 
 export function OrdersPage(){
-    const { orders, loadAvailableOrders } = useOrders();
+    const { orders, loadAvailableOrders, totalOrders } = useOrders();
 
     const [orderDetailModal, setOrderDetailModal] = useState(false);
     const [editOrderModal, setEditOrderModal] = useState(false);
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
+    const [page, setPage] = useState(1);
+    const pageSize = 15;
 
     function handleOpenOrderDetailModal(order: IOrder){
         setOrderDetailModal(true);
@@ -31,14 +34,20 @@ export function OrdersPage(){
     }
 
     useEffect(() => {
-        loadAvailableOrders();
+        loadAvailableOrders(page, pageSize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [page]);
 
     return(
         <Container>
             <PageHeader>
             	<h1>Todos os Pedidos</h1>
+                <Pagination 
+                    currentPage={page}
+                    total={totalOrders}
+                    pageSize={pageSize}
+                    onPageChange={setPage}
+                />
             </PageHeader>
             <table>
                 <thead className="head">

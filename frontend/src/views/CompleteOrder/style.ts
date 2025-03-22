@@ -29,6 +29,7 @@ export const Form = styled.form`
     border-radius: 20px;
     box-shadow: 0.1rem 0.2rem 0.2rem var(--shadow-color);
     overflow-y: scroll;
+    overflow-x: hidden;
 
     ::-webkit-scrollbar {
         width: 8px;
@@ -71,9 +72,10 @@ export const FormHeader = styled.div`
     }
 
     h1 {
-        font-size: 23px;
-        margin-top: 25px;
-        margin-bottom: 25px;
+        font-size: 28px;
+        font-family: "Parisienne", sans-serif;
+        margin-top: 10px;
+        margin-bottom: 10px;
         text-align: center;
         color: #505050;
     }
@@ -98,5 +100,35 @@ export const CompletedOrder = styled.div`
         text-align: center;
         color: pink;
         font-family: "Pacifico", sans-serif;
+    }
+`
+
+export const OrderReview = styled.div`
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #E0DAD8;
+    padding: 10px;
+    background: rgba(247, 214, 218, 0.5);
+
+    div {
+        align-self: flex-start;
+    }
+
+    strong, p {
+        color: #6B6B6B;
+        font-size: 16px;
+    }
+
+    p {
+        margin-bottom: 5px;
+    }
+
+    h1 {
+        font-size: 26px;
+        font-family: "Parisienne", sans-serif;
+        color: #6B6B6B;
     }
 `

@@ -36,7 +36,7 @@ export const OrderCardContainer= styled.div`
             }
 
             &.on_store {
-                background: #DA1421;
+                background: #71265D;
             }
         }
     }
@@ -97,14 +97,15 @@ export const OrderCardContainer= styled.div`
         font-size: 1.1rem;
     }
 
-    button{
+    button {
         display: flex;
-        font-size: 1.1rem;
+        font-size: 15px;
         padding: 0.6rem;
         border-radius: 0.3rem;
 
-        p{
+        p {
             margin-left: 0.3rem;
+            font-size: 15px;
         }
     }
 

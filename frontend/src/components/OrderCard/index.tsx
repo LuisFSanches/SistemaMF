@@ -2,10 +2,11 @@ import { useState } from "react";
 import { IOrder } from "../../interfaces/IOrder";
 import moment from "moment";
 import { OrderDetailModal } from "../../components/OrderDetailModal";
+import { ViewCardMessage } from "../ViewCardMessage";
 import { OrderCardContainer } from "./style"
 import { HAS_CARD, TYPES_OF_DELIVERY } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faAnglesRight, faAnglesLeft, faPrint, faEye, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faAnglesRight, faAnglesLeft, faPrint, faEye, faPen, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { formatTitleCase } from "../../utils";
 export function OrderCard({
 	order,
@@ -21,6 +22,7 @@ export function OrderCard({
 }: any) {
 
 	const [orderDetailModal, setOrderDetailModal] = useState(false);
+	const [viewCardMessage, setViewCardMessage] = useState(false);
 
 	function handleOpenOrderDetailModal(order: IOrder){
         setOrderDetailModal(true);
@@ -28,6 +30,14 @@ export function OrderCard({
     function handleCloseOrderDetailModal(){
         setOrderDetailModal(false);
     }
+
+	function handleOpenViewCardMessage(order: IOrder){
+		setViewCardMessage(true);
+	}
+
+	function handleCloseViewCardMessage(){
+		setViewCardMessage(false);
+	}
 
 	if (!order) {
 		return <></>;
@@ -122,13 +132,26 @@ export function OrderCard({
 
 			<div className="order-actions">
 				<button className="view-button" onClick={() => handleOpenOrderDetailModal(order)}>
-					Ver Pedido <FontAwesomeIcon icon={faEye}/>
+					<FontAwesomeIcon icon={faEye}/>
+					Pedido
 				</button>
 				<button className="print" onClick={() => handlePrint(`order-card-${order.id}`)}> 
 					<FontAwesomeIcon icon={faPrint}/>
 					<p>Imprimir</p>
 				</button>
+				{order.has_card &&
+					<button className="view-button" onClick={() => handleOpenViewCardMessage(order)}> 
+						<FontAwesomeIcon icon={faEnvelope}/>
+						<p>Cartão</p>
+					</button>
+				}
 			</div>
+
+			<ViewCardMessage
+				isOpen={viewCardMessage}
+				onRequestClose={handleCloseViewCardMessage}
+				order={order}
+			/>
 
 			<OrderDetailModal
 				isOpen={orderDetailModal}
