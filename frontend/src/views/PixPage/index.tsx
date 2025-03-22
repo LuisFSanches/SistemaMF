@@ -32,8 +32,6 @@ export function PixPage(){
         }
     }, [initialDate, finalDate, selectedLimit]);
 
-    if (!pixList) return <></>;
-
     return(
         <Container>
             <Loader show={showLoader} />
@@ -56,29 +54,30 @@ export function PixPage(){
                     </div>
                 </DateContainer>
             </PageHeader>
-            
-            <table>
-                <thead className="head">
-                    <tr>
-                        <th>Recebimento</th>
-                        <th>Descrição</th>
-                        <th>Cliente</th>
-                        <th>Valor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {pixList?.map(pix => (
-                        <tr key={pix.descricao}>
-                            <td>{moment(pix.dataInclusao).format("DD/MM/YYYY HH:mm")}</td>
-                            <td>{pix.titulo}</td>
-                            <td>
-                                {pix.descricao.replace(/[0-9]/g, '').replace(/\s+/g, ' ').trim()}
-                            </td>
-                            <td>{convertMoney(pix.valor)}</td>
+            {pixList &&
+                <table>
+                    <thead className="head">
+                        <tr>
+                            <th>Recebimento</th>
+                            <th>Descrição</th>
+                            <th>Cliente</th>
+                            <th>Valor</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {pixList?.map(pix => (
+                            <tr key={pix.descricao}>
+                                <td>{moment(pix.dataInclusao).format("DD/MM/YYYY HH:mm")}</td>
+                                <td>{pix.titulo}</td>
+                                <td>
+                                    {pix.descricao.replace(/[0-9]/g, '').replace(/\s+/g, ' ').trim()}
+                                </td>
+                                <td>{convertMoney(pix.valor)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            }
         </Container>
     )
 }

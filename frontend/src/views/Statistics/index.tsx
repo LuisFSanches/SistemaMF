@@ -68,8 +68,6 @@ export function Statistics(){
         fetchTopAdmins();
     }, []);
 
-    console.log(dailySales);
-
     return(
         <Container>
             {/*

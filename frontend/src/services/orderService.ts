@@ -88,8 +88,8 @@ export const getOnGoingOrders = async () => {
 	return response;
 };
 
-export const getAllOrders = async () => {
-	const response = await api.get("/order/all", {
+export const getAllOrders = async (page: number, pageSize: number) => {
+	const response = await api.get(`/order/all?page=${page}&pageSize=${pageSize}`, {
 		headers: {
 			Authorization: `${token}`,
 		}
