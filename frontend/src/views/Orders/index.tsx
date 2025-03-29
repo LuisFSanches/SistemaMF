@@ -45,7 +45,7 @@ export function OrdersPage(){
                 <Pagination 
                     currentPage={page}
                     total={totalOrders}
-                    pageSize={pageSize}
+                    pageSize={pageSize as number}
                     onPageChange={setPage}
                 />
             </PageHeader>

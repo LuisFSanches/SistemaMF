@@ -52,7 +52,6 @@ interface INewOrder {
     card_message: string;
     card_from: string;
     card_to: string;
-    online_code: string;
     payment_method: string;
 }
 
@@ -85,7 +84,10 @@ export function CompleteOrder() {
         formState: { errors },
     } = useForm<INewOrder>({
         defaultValues: {
-            country: "Brasil"
+            country: "Brasil",
+            state: "RJ",
+            city: "Itaperuna",
+            postal_code: "28300-000",
         }
     });
 
@@ -124,7 +126,6 @@ export function CompleteOrder() {
             card_to: data.card_to,
             status: 'OPENED',
             editAddress: true,
-            online_code: data.online_code
         }
 
         try {
@@ -237,7 +238,6 @@ export function CompleteOrder() {
     const handlePickUpAddress = async (value: boolean) => {
         if (value) {
             const { data: pickUpAddress } = await getPickupAddress() as any;
-
             setAddressId(pickUpAddress.id);
             setValue("addressId", pickUpAddress.id);
             setValue("pickup_on_store", true);
@@ -269,27 +269,19 @@ export function CompleteOrder() {
                 <Form onSubmit={handleSubmit(submitOrder)}>
                     <FormHeader>
                         <img src={logoFull} alt="" />
-                        <h1>Preencha as informações do seu pedido</h1>
                     </FormHeader>
                     <OrderReview>
                         <h1>Resumo do pedido</h1>
                         <div>
                             <p><strong>Descrição: </strong> {currentOrder?.description}</p>
                             <p><strong>Observação:</strong> {currentOrder?.additional_information}</p>
+                            <p><strong>Valor dos Produtos: </strong> {currentOrder?.products_value}</p>
+                            <p><strong>Taxa de entrega: </strong> {currentOrder?.delivery_fee}</p>
+                            <p><strong>Valor Total: </strong> {
+                                (Number(currentOrder?.products_value) + Number(currentOrder?.delivery_fee)).toFixed(2)
+                            }</p>
                         </div>
                     </OrderReview>
-                    <FormField>
-                        <Label>
-                            Código do Pedido
-                            <span>*</span>
-                        </Label>
-                        <Input type="text" autoComplete="off" placeholder="Digite seu nome"
-                                {...register("online_code", {
-                                    required: "Código inválido",
-                                })}
-                            />
-                        {errors.online_code && <ErrorMessage>{errors.online_code.message}</ErrorMessage>}
-                    </FormField>
                     <FormField>
                         <Label>
                             Seu telefone
@@ -477,33 +469,18 @@ export function CompleteOrder() {
                     )}
                     {!pickupOnStore &&
                         <>
-                            <InlineFormField>
-                                <FormField isShortField>
-                                    <Label>
-                                        CEP
-                                        <span>*</span>
-                                    </Label>
-                                    <Input type="tel" placeholder="CEP" {...register("postal_code", {
-                                        required: "CEP inválido",
-                                        })}
-                                        disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                    />
-                                    {errors.postal_code && <ErrorMessage>{errors.postal_code.message}</ErrorMessage>}
-                                </FormField>
-                                <FormField>
-                                    <Label>
-                                        Rua
-                                        <span>*</span>
-                                    </Label>
-                                    <Input type="text" placeholder="Rua" {...register("street", {
-                                        required: "Rua inválida",
-                                        })}
-                                        disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                    />
-                                    {errors.street && <ErrorMessage>{errors.street.message}</ErrorMessage>}
-                                </FormField>
-                            </InlineFormField>
-                            
+                            <FormField>
+                                <Label>
+                                    Rua
+                                    <span>*</span>
+                                </Label>
+                                <Input type="text" placeholder="Rua" {...register("street", {
+                                    required: "Rua inválida",
+                                    })}
+                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                />
+                                {errors.street && <ErrorMessage>{errors.street.message}</ErrorMessage>}
+                            </FormField>
                             <InlineFormField>
                                 <FormField isShortField>
                                     <Label>
@@ -539,26 +516,12 @@ export function CompleteOrder() {
                                 />
                                 {errors.neighborhood && <ErrorMessage>{errors.neighborhood.message}</ErrorMessage>}
                             </FormField>
-                            <InlineFormField>
-                                <FormField>
-                                    <Label>Ponto de referência</Label>
-                                    <Input type="text" placeholder="Ponto de referência" {...register("reference_point")}
-                                        disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                    />
-                                </FormField>
-                                <FormField isShortField>
-                                    <Label>
-                                        País
-                                        <span>*</span>
-                                    </Label>
-                                    <Input type="text" placeholder="País" {...register("country", {
-                                        required: "País inválido",
-                                        })}
-                                        disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                    />
-                                    {errors.country && <ErrorMessage>{errors.country.message}</ErrorMessage>}
-                                </FormField>
-                            </InlineFormField>
+                            <FormField>
+                                <Label>Ponto de referência</Label>
+                                <Input type="text" placeholder="Ponto de referência" {...register("reference_point")}
+                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                />
+                            </FormField>
 
                             <InlineFormField>
                                 <FormField>

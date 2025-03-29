@@ -64,11 +64,11 @@ export const FormHeader = styled.div`
     align-items: center;
     justify-content: center;
     font-size: 18px;
-    background: #e4bfc7;
+    background: rgba(247,214,218,0.5);
 
     img {
-        width: 225px;
-        height: 80px;
+        width: 150px;
+        height: 50px;
     }
 
     h1 {

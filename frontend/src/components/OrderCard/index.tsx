@@ -139,7 +139,7 @@ export function OrderCard({
 					<FontAwesomeIcon icon={faPrint}/>
 					<p>Imprimir</p>
 				</button>
-				{order.has_card &&
+				{(order.has_card && order.online_order) &&
 					<button className="view-button" onClick={() => handleOpenViewCardMessage(order)}> 
 						<FontAwesomeIcon icon={faEnvelope}/>
 						<p>Cartão</p>

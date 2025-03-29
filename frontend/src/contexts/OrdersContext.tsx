@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getAllOrders, getOnGoingOrders, getWaitingOrders } from "../services/orderService";
+import { useOrderSocket } from '../hooks/useOrderSocket';
 import { IOrder } from "../interfaces/IOrder";
 
 interface OrdersContextType {
@@ -24,9 +25,9 @@ export const OrdersProvider: React.FC = ({ children }) => {
   const token = localStorage.getItem("token");
 
   const loadAvailableOrders = async (page: number, pageSize: number) => {
-    const { data: { orders, totalPages } } = await getAllOrders(page, pageSize);
+    const { data: { orders, total } } = await getAllOrders(page, pageSize);
     setOrders(orders);
-    setTotalOrders(totalPages);
+    setTotalOrders(total);
   };
 
   const loadOnGoingOrders = async (forceLoad = false) => {
@@ -63,6 +64,19 @@ export const OrdersProvider: React.FC = ({ children }) => {
       )
     );
   };
+
+    useOrderSocket((data: any) => {
+      if (!window.location.href.includes('completarPedido')) {
+          window.dispatchEvent(new CustomEvent('new-order', {
+            detail: {
+              message: '💐 Novo pedido recebido!',
+              orderCode: `#${data.code}`,
+              clientName: `${data.client.first_name} ${data.client.last_name}`,
+            }
+        }));
+        loadOnGoingOrders(true);
+      }
+    })
 
   useEffect(() => {
     if (token) {

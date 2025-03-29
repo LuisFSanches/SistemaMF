@@ -1,13 +1,11 @@
 import {Request, Response, NextFunction} from 'express';
-import { EventEmitter } from "events";
-import { ErrorCodes } from "../../exceptions/root";
 import { GetOrderService } from '../../services/order/GetOrderService'
 import { CreateClientService } from '../../services/client/CreateClientService'
 import { CreateAddressService } from '../../services/address/CreateAddressService'
 import { FinishOnlineOrderService } from '../../services/order/FinishOnlineOrderService';
 import { BadRequestException } from "../../exceptions/bad-request";
 
-const orderEmitter = new EventEmitter();
+import { orderEmitter, OrderEvents } from '../../events/orderEvents';
 
 class FinishOnlineOrderController{
 	async handle(req: Request, res: Response, next: NextFunction) {
@@ -17,7 +15,7 @@ class FinishOnlineOrderController{
         const last_name = order.last_name;
         const phone_number = order.phone_number;
         let client_id = order.client_id;
-        let client_address_id = order.address_id;
+        let client_address_id = order.clientAddress.id;
         let newAddress = order.newAddress;
 
         const getOrder = new GetOrderService();
@@ -26,14 +24,6 @@ class FinishOnlineOrderController{
 
         if ('error' in orderFound) {
             return res.status(400).json(orderFound);
-        }
-
-        if (orderFound.online_code !== order.online_code) {
-            return res.status(401).json({
-                error: true,
-                message: 'Invalid order code',
-                code: ErrorCodes.UNAUTHORIZED
-            });
         }
 
         if (!order.client_id) {
@@ -50,7 +40,7 @@ class FinishOnlineOrderController{
 			}
 		}
 
-        if (!client_address_id) {
+        if (!client_address_id || client_address_id === "") {
 			const createAddressService = new CreateAddressService();
 			const address = await createAddressService.execute({
 				client_id,
@@ -99,6 +89,7 @@ class FinishOnlineOrderController{
             
             return;
         }
+        orderEmitter.emit(OrderEvents.OnlineOrderReceived, data);
 
         return res.json({ status: "Order successfully updated", order: data });
     }

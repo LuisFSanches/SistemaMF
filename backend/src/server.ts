@@ -5,13 +5,19 @@ import 'express-async-errors';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import { orderEmitter, OrderEvents } from './events/orderEvents';
 
+import { Server } from 'socket.io';
 import { getCertificatesForWebhook } from './utils/getCertificates';
 
 dotenv.config();
 
 import { router } from './routes';
 import { errorMiddleware } from './middlewares/errors';
+
+orderEmitter.on(OrderEvents.OnlineOrderReceived, (data) => {
+  io.emit(OrderEvents.OnlineOrderReceived, data);
+});
 
 const app = express();
 const httpsOptions = getCertificatesForWebhook() as any;
@@ -27,24 +33,41 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
-
 app.use(express.json());
 app.use(cors());
 app.use(router);
-
 app.use(errorMiddleware);
 
 const PORT = 3333;
 const TIMEOUT = 6000;
+const isProduction = process.env.IS_PRODUCTION === 'true';
 
-const httpsServer = https.createServer(httpsOptions, app).listen(PORT, () => {
-  console.log(`Servidor rodando em https://localhost:${PORT}`);
-});
-httpsServer.setTimeout(TIMEOUT);
+const httpsServer = https.createServer(httpsOptions, app);
 
-if (process.env.IS_PRODUCTION === 'false') {
-  const httpServer = http.createServer(app).listen(3334, () => {
+let server;
+
+if (isProduction) {
+  server = httpsServer;
+} else {
+  server = http.createServer(app).listen(3334, () => {
     console.log(`Servidor rodando em http://localhost:3334`);
   });
-  httpServer.setTimeout(TIMEOUT);
+  server.setTimeout(TIMEOUT);
 }
+
+export const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
+
+io.on('connection', (socket) => {
+  console.log('Novo cliente conectado:', socket.id);
+});
+
+httpsServer.listen(PORT, () => {
+  console.log(`Servidor rodando em https://localhost:${PORT}`);
+});
+
+httpsServer.setTimeout(TIMEOUT);

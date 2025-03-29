@@ -93,6 +93,12 @@ export const PrintCardMessage = ({ card_message, card_from, card_to, order_code 
         return lines;
     }
 
+    function wrapMultilineText(text: string, maxLineLength: number): string[] {
+        const rawLines = text.split('\n');
+        const wrappedLines = rawLines.flatMap(line => wrapText(line.trim(), maxLineLength));
+        return wrappedLines;
+    }    
+
     const generatePDF = async () => {
         try {
             setShowLoader(true);
@@ -125,9 +131,9 @@ export const PrintCardMessage = ({ card_message, card_from, card_to, order_code 
                 write(true, firstPage, regularFont, emojiFont, line, 165, (658 - (index * lineHeight)), 14);
             });
 
-            const message_formatted = wrapText(card_message, 65);
+            const message_formatted = wrapMultilineText(card_message, 65);
             message_formatted.forEach((line, index) => {
-                write(true, firstPage, regularFont, emojiFont, line, 120, (610 - (index * lineHeight)), 14);
+                write(true, firstPage, regularFont, emojiFont, line, 120, (620 - (index * lineHeight)), 14);
             });
 
             const order_code_message = `Pedido #${order_code}`;
