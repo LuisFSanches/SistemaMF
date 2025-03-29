@@ -12,6 +12,7 @@ import { Loader } from '../../components/Loader';
 import { WelcomeBackModal } from "../../components/WelcomeBackModal";
 import { ErrorAlert } from "../../components/ErrorAlert";
 import logoFull from '../../assets/images/logo.png'
+import { convertMoney } from "../../utils";
 import {
     FormField,
     Label,
@@ -275,10 +276,17 @@ export function CompleteOrder() {
                         <div>
                             <p><strong>Descrição: </strong> {currentOrder?.description}</p>
                             <p><strong>Observação:</strong> {currentOrder?.additional_information}</p>
-                            <p><strong>Valor dos Produtos: </strong> {currentOrder?.products_value}</p>
-                            <p><strong>Taxa de entrega: </strong> {currentOrder?.delivery_fee}</p>
+                            <p><strong>Valor dos Produtos: </strong> {
+                                currentOrder?.products_value  &&
+                                convertMoney(currentOrder?.products_value as number)
+                            }</p>
+                            <p><strong>Taxa de entrega: </strong> {
+                                currentOrder?.delivery_fee &&
+                                convertMoney(currentOrder?.delivery_fee as number)
+                            }</p>
                             <p><strong>Valor Total: </strong> {
-                                (Number(currentOrder?.products_value) + Number(currentOrder?.delivery_fee)).toFixed(2)
+                                currentOrder?.total &&
+                                convertMoney(currentOrder?.total as number)
                             }</p>
                         </div>
                     </OrderReview>

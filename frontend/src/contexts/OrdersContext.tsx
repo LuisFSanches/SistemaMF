@@ -69,7 +69,7 @@ export const OrdersProvider: React.FC = ({ children }) => {
       if (!window.location.href.includes('completarPedido')) {
           window.dispatchEvent(new CustomEvent('new-order', {
             detail: {
-              message: '💐 Novo pedido recebido!',
+              message: '💐 Pedido online recebido!',
               orderCode: `#${data.code}`,
               clientName: `${data.client.first_name} ${data.client.last_name}`,
             }
