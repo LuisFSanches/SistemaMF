@@ -123,11 +123,7 @@ export function OnlineOrder() {
                                 <strong>Link do pedido: </strong>
                                 {orderLink}
                             </p>
-                            <p><strong>Código do pedido:</strong> {orderCode}</p>
                         </div>
-                        <span className="instruction-message">
-                            Obs: O código do pedido deverá ser inserido pelo cliente no formulário
-                        </span>
                     </div>
                 </OrderDetail>
             }

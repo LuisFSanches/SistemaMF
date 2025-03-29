@@ -139,12 +139,6 @@ export function Statistics(){
                 <LineHomeChart
                     title="Venda Semanal" labels={Object.keys(dailySales)} values={Object.values(dailySales)}
                 />
-                <BarHomeChart
-                    title="Top 5 Clientes dos últimos 90 dias"
-                    labels={topClientsLabel}
-                    values={topClientsValue}
-                    order={2}
-                />
             </ChartArea>
             {/*
             <BottomInfo className="column">
