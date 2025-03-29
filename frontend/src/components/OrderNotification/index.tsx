@@ -19,7 +19,7 @@ export const OrderNotification = () => {
 
         setTimeout(() => {
             setNotifications((prev) => prev.filter((n) => n.id !== id));
-        }, 350000);
+        }, 8000);
     };
 
     useEffect(() => {

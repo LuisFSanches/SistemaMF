@@ -10,12 +10,9 @@ const socket = io(baseUrl, {
 export const useOrderSocket = (onOrderReceived: (data: any) => void) => {
     useEffect(() => {
         try {
-            socket.on('connect', () => {
-                console.log('🔌 Conectado ao WebSocket:', socket.id);
-            });
+            socket.on('connect', () => {});
     
             socket.on('onlineOrderReceived', (data) => {
-                console.log('📦 Novo pedido recebido!', data);
                 onOrderReceived(data);
             });
         } catch (error) {
