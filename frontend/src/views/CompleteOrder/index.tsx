@@ -174,14 +174,9 @@ export function CompleteOrder() {
             const phoneNumber = rawTelephone(phone_number);
 
             if (phoneNumber && phoneNumber.length >= 10) {
+                try {
                     setShowLoader(true);
                     const response = await getClientByPhone(phoneNumber);
-                    
-                    if (response.status === 401) {
-                        setClientId("");
-                        setShowLoader(false);
-                    }
-
                     const { data: client } = response;
 
                     if (!client) {
@@ -200,6 +195,10 @@ export function CompleteOrder() {
                         }
                         setShowLoader(false);
                         setShowWelcomeModal(true);
+                    }
+                } catch (error) {
+                    setClientId("");
+                    setShowLoader(false);
                 }
             }
         };
