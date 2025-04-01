@@ -176,6 +176,12 @@ export function CompleteOrder() {
             if (phoneNumber && phoneNumber.length >= 10) {
                     setShowLoader(true);
                     const response = await getClientByPhone(phoneNumber);
+                    
+                    if (response.status === 401) {
+                        setClientId("");
+                        setShowLoader(false);
+                    }
+
                     const { data: client } = response;
 
                     if (!client) {
