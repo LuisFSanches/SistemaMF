@@ -174,7 +174,6 @@ export function CompleteOrder() {
             const phoneNumber = rawTelephone(phone_number);
 
             if (phoneNumber && phoneNumber.length >= 10) {
-                try {
                     setShowLoader(true);
                     const response = await getClientByPhone(phoneNumber);
                     const { data: client } = response;
@@ -195,10 +194,6 @@ export function CompleteOrder() {
                         }
                         setShowLoader(false);
                         setShowWelcomeModal(true);
-                    }
-                } catch (error) {
-                    setError("phone_number", { message: "Usuário não encontrado." });
-                    setShowLoader(false);
                 }
             }
         };
