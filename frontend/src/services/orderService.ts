@@ -141,3 +141,13 @@ export const finishOnlineOrder = async(order: any) => {
 
 	return response;
 };
+
+export const deleteOrder = async(id: string) => {
+	const response = await api.delete(`/order/${id}`, {
+		headers: {
+			Authorization: `${token}`,
+		}
+	});
+
+	return response;
+};

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import moment from "moment";
+import InputMask from "react-input-mask";
 import { useForm } from "react-hook-form";
 import { PAYMENT_METHODS } from "../../constants";
 import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
@@ -8,6 +9,7 @@ import { createOrder } from "../../services/orderService";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { useOrders } from "../../contexts/OrdersContext";
 import { Loader } from '../../components/Loader';
+import { rawTelephone } from "../../utils";
 import {
     FormField,
     Label,
@@ -35,7 +37,8 @@ interface INewOrder {
     delivery_fee: number;
     total: number;
     created_by: string;
-    online_code: string
+    online_code: string;
+    receiver_phone: string;
 }
 
 export function OnlineOrder() {
@@ -44,15 +47,18 @@ export function OnlineOrder() {
     const [showLoader, setShowLoader] = useState(false);
     const [showOrderDetail, setShowOrderDetail] = useState(false);
     const [orderLink, setOrderLink] = useState("");
-    const [orderCode, setOrderCode] = useState("");
     const mockedDeliveryDate = moment().add(2, "days").format("YYYY-MM-DD");
     const mockedPaymentMethod = Object.entries(PAYMENT_METHODS)[0][0];
+    const [mask, setMask] = useState("(99) 99999-9999");
 
     const {
         register,
         handleSubmit,
         formState: { errors },
+        watch
     } = useForm<INewOrder>();
+
+    const receiver_phone = watch("receiver_phone");
 
     function generateOnlineCode() {
         const numerosAleatorios = Array.from({ length: 4 }, () => Math.floor(Math.random() * 10)).join('');
@@ -70,7 +76,7 @@ export function OnlineOrder() {
             first_name: "",
             last_name: "",
             receiver_name: "",
-            receiver_phone: "",
+            receiver_phone: rawTelephone(receiver_phone),
             addressId: "",
             pickup_on_store: false,
             street: "",
@@ -100,13 +106,28 @@ export function OnlineOrder() {
         if (response.order.id) {
             setShowOrderDetail(true);
             setOrderLink(`${baseUrl}completarPedido/${response.order.id}`);
-            setOrderCode(response.order.online_code);
         }
 
         addOrder(response);
 
         setShowLoader(false);
     }
+
+    useEffect(() => {
+        console.log('AAAA')
+        const receiver_phone = watch("receiver_phone") || "";
+        const numericValue = rawTelephone(receiver_phone);
+    
+        const timeout = setTimeout(() => {
+            if (numericValue.length === 10) {
+                setMask("(99) 9999-9999");
+            } else {
+                setMask("(99) 99999-9999");
+            }
+        }, 800);
+
+        return () => clearTimeout(timeout);
+    }, [receiver_phone, watch, setMask]);
 
     return (
         <Container>
@@ -148,6 +169,29 @@ export function OnlineOrder() {
                         <Label>Observações</Label>
                         <Textarea placeholder="Observações" {...register("additional_information")}
                         />
+                    </FormField>
+                    <FormField>
+                        <Label>
+                            Telefone do cliente
+                            <span>*</span>
+                        </Label>
+                        <InputMask
+                            autoComplete="off"
+                            mask={mask}
+                            alwaysShowMask={false}
+                            placeholder='Telefone'
+                            value={watch("receiver_phone") || ""}
+                            {...register("receiver_phone", { 
+                                required: "Telefone inválido",
+                                validate: (value) => {
+                                    if (value.replace(/[^0-9]/g, "").length < 10) {
+                                        return "Telefone inválido";
+                                    }
+                                    return true;
+                                }
+                            })}
+                        />
+                        {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
                     </FormField>
                     <InlineFormField>
                         <FormField>

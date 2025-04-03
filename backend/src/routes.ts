@@ -18,6 +18,7 @@ import { UpdateOrderStatusController } from './controllers/order/UpdateOrderStat
 import { GetOrderController } from './controllers/order/GetOrderController';
 import { FinishOnlineOrderController } from './controllers/order/FinishOnlineOrderController';
 import { GetWaitingOnlineOrderController } from './controllers/order/GetWaitingOnlineOrderController';
+import { DeleteOrderController } from './controllers/order/DeleteOrderController';
 
 import { CreateAdminController } from './controllers/admin/CreateAdminController'
 import { LoginAdminController } from './controllers/admin/LoginAdminController'
@@ -61,6 +62,7 @@ router.post('/order', adminAuthMiddleware, new CreateOrderController().handle);
 router.put('/order/:id', adminAuthMiddleware, new UpdateOrderController().handle);
 router.put('/order/finish/:id', new FinishOnlineOrderController().handle);
 router.patch('/order/:id', adminAuthMiddleware, new UpdateOrderStatusController().handle);
+router.delete('/order/:id', adminAuthMiddleware, new DeleteOrderController().handle);
 
 //-- ROTAS ADMIN --
 router.post('/admin', superAdminAuthMiddleware, new CreateAdminController().handle)

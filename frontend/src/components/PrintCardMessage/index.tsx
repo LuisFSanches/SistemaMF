@@ -97,7 +97,15 @@ export const PrintCardMessage = ({ card_message, card_from, card_to, order_code 
         const rawLines = text.split('\n');
         const wrappedLines = rawLines.flatMap(line => wrapText(line.trim(), maxLineLength));
         return wrappedLines;
-    }    
+    }
+
+    function sanitizeText(text: string) {
+        return text
+          .replace(/[\u2028\u2029\u2060\uFEFF]/g, '')
+          .replace(/\u00A0/g, ' ')
+          .replace(/\r\n|\r|\n/g, '\n')
+          .trim();
+    }
 
     const generatePDF = async () => {
         try {
@@ -130,8 +138,8 @@ export const PrintCardMessage = ({ card_message, card_from, card_to, order_code 
             card_to_formatted.forEach((line, index) => {
                 write(true, firstPage, regularFont, emojiFont, line, 165, (658 - (index * lineHeight)), 14);
             });
-
-            const message_formatted = wrapMultilineText(card_message, 65);
+            const sanitizedCardMessage = sanitizeText(card_message);
+            const message_formatted = wrapMultilineText(sanitizedCardMessage, 65);
             message_formatted.forEach((line, index) => {
                 write(true, firstPage, regularFont, emojiFont, line, 120, (620 - (index * lineHeight)), 14);
             });

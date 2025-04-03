@@ -67,7 +67,11 @@ export function OrdersPage(){
                             <tr key={order.id}>
                                 <td>#{order.code}</td>
                                 <td>{formatTitleCase(order.description)}</td>
-                                <td>{formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}</td>
+                                <td>
+                                    {order.status !== "WAITING_FOR_CLIENT"
+                                        ? `${formatTitleCase(order.client.first_name)} ${formatTitleCase(order.client.last_name)}`
+                                        : "Pendente"}
+                                </td>
                                 <td>{STATUS_LABEL[order.status]}</td>
                                 <td>R$ {order.total}</td>
                                 <td className="table-icon">

@@ -118,7 +118,7 @@ export function CompleteOrder() {
                 country: data.country,
             },
             receiver_name: data.receiver_name,
-            receiver_phone: data.receiver_phone,
+            receiver_phone: data.receiver_phone ? rawTelephone(data.receiver_phone) : data.receiver_phone,
             delivery_date: data.delivery_date,
             payment_method: data.payment_method,
             has_card: data.has_card,
