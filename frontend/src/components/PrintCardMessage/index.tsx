@@ -99,12 +99,12 @@ export const PrintCardMessage = ({ card_message, card_from, card_to, order_code 
         return wrappedLines;
     }
 
-    function sanitizeText(text: string) {
-        return text
-          .replace(/[\u2028\u2029\u2060\uFEFF]/g, '')
-          .replace(/\u00A0/g, ' ')
-          .replace(/\r\n|\r|\n/g, '\n')
-          .trim();
+    function sanitizeText(input: string) {
+        return input
+            .replace(/[\u2028\u2029\u2060\uFEFF\uFE0F]/g, '')
+            .replace(/\u00A0/g, ' ')
+            .replace(/\r\n|\r|\n/g, '\n')
+            .trim();
     }
 
     const generatePDF = async () => {
