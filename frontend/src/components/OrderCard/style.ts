@@ -58,8 +58,14 @@ export const OrderCardContainer= styled.div`
     }
     .client-info{
         display: flex;
+        flex-direction: column;
+        align-items: flex-start;
         justify-content: space-between;
         margin-bottom: 0.6rem;
+
+        .delivery-date {
+            margin-top:10px;
+        }
     }
 
     .delivery-date {

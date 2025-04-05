@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { IOrder } from "../../interfaces/IOrder";
 import moment from "moment";
+import 'moment/locale/pt-br';
 import { OrderDetailModal } from "../../components/OrderDetailModal";
 import { ViewCardMessage } from "../ViewCardMessage";
 import { OrderCardContainer } from "./style"
@@ -8,6 +9,7 @@ import { HAS_CARD, TYPES_OF_DELIVERY } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faAnglesRight, faAnglesLeft, faPrint, faEye, faPen, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { formatTitleCase } from "../../utils";
+import { PAYMENT_METHODS } from "../../constants";
 export function OrderCard({
 	order,
 	handlePrint,
@@ -57,7 +59,12 @@ export function OrderCard({
 					<h3>Cliente: {formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}</h3>
 					<p><strong>Telefone do Cliente: </strong>{order.client.phone_number}</p>
 				</div>
-				<h3 className="delivery-date">Data de entrega: {moment(order.delivery_date).utc().format("DD/MM/YYYY")}</h3>
+				<p className="delivery-date"><strong>Data de entrega: </strong> 
+				  {moment(order.delivery_date)
+					.locale('pt-br')
+					.utc()
+					.format("D [de] MMMM [de] YYYY [(]dddd[)]")}
+				</p>
 			</div>
 			<div className="order-content">
 				<div className="order-items">
@@ -111,6 +118,11 @@ export function OrderCard({
 				</p>
 				<p><strong>Telefone do recebedor: </strong>
 					{order.receiver_name ? order.receiver_phone : order.client.phone_number}</p>
+			</div>
+			<div className="address-container">
+				<p><strong>Método de pagamento: </strong>
+					{PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS]}
+				</p>
 			</div>
 			<div className="address-container">
 				<p><strong>Status Pagamento: </strong>{order.payment_received ? "Pago" : "Pendente"}</p>
