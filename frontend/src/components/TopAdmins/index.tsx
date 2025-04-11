@@ -16,9 +16,9 @@ export function TopAdmins({ admins }: { admins: any[] }) {
                 <AdminItem key={admin.id}>
                     <strong>
                         {admin.name}
-                        {medals[admins.indexOf(admin)]}
-                    </strong> <br />
-                    Pedidos: {admin.orders_count}
+                    </strong>
+                    - {admin.orders_count} pedido(s)
+                    {medals[admins.indexOf(admin)]}
                 </AdminItem>
             ))}
         </Container>
