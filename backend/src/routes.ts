@@ -29,8 +29,6 @@ import { GetAllAdminController } from './controllers/admin/GetAllAdminController
 import { DeleteAdminController } from './controllers/admin/DeleteAdminController'
 import { UpdateAdminController } from './controllers/admin/UpdateAdminController';
 
-import { CreateProductController } from './controllers/product/CreateProductController';
-
 import { GetPixController } from './controllers/inter/GetPixController';
 // import { RegisterWebhookController } from './controllers/inter/RegisterWebhookController';
 import { WebhookPixController } from './controllers/inter/WebhookPixController';
@@ -72,7 +70,6 @@ router.patch('/order/:id', adminAuthMiddleware, new UpdateOrderStatusController(
 router.delete('/order/:id', adminAuthMiddleware, new DeleteOrderController().handle);
 
 //-- ROTAS PRODUCT --
-router.post('/product', adminAuthMiddleware, new CreateProductController().handle)
 
 //-- ROTAS ADMIN --
 router.post('/admin', superAdminAuthMiddleware, new CreateAdminController().handle)
