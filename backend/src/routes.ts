@@ -1,5 +1,7 @@
 import { Router } from 'express';
 
+import { DashboardController } from './controllers/dashboard/DashboardController';
+
 import { GetAllClientController } from './controllers/client/GetAllClientController'
 import { GetClientController } from './controllers/client/GetClientController'
 import { GetClientByPhoneNumbeController } from './controllers/client/GetClientByPhoneNumbeController'
@@ -27,6 +29,8 @@ import { GetAllAdminController } from './controllers/admin/GetAllAdminController
 import { DeleteAdminController } from './controllers/admin/DeleteAdminController'
 import { UpdateAdminController } from './controllers/admin/UpdateAdminController';
 
+import { CreateProductController } from './controllers/product/CreateProductController';
+
 import { GetPixController } from './controllers/inter/GetPixController';
 // import { RegisterWebhookController } from './controllers/inter/RegisterWebhookController';
 import { WebhookPixController } from './controllers/inter/WebhookPixController';
@@ -40,6 +44,9 @@ import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 
 
 const router = Router();
+
+//-- ROTAS DASHBOARD --
+router.get('/dashboard', adminAuthMiddleware, new DashboardController().handle);
 
 //-- ROTAS CLIENT --
 router.post('/client', adminAuthMiddleware, new CreateClientController().handle)
@@ -63,6 +70,9 @@ router.put('/order/:id', adminAuthMiddleware, new UpdateOrderController().handle
 router.put('/order/finish/:id', new FinishOnlineOrderController().handle);
 router.patch('/order/:id', adminAuthMiddleware, new UpdateOrderStatusController().handle);
 router.delete('/order/:id', adminAuthMiddleware, new DeleteOrderController().handle);
+
+//-- ROTAS PRODUCT --
+router.post('/product', adminAuthMiddleware, new CreateProductController().handle)
 
 //-- ROTAS ADMIN --
 router.post('/admin', superAdminAuthMiddleware, new CreateAdminController().handle)

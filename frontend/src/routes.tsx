@@ -2,7 +2,8 @@ import { useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthContext } from "./contexts/AuthContext";
 
-import { DashboardPage } from "./views/Dashboard";
+import { Dashboard } from "./views/Dashboard";
+import { OnStoreOrder } from "./views/OnStoreOrder";
 import { GlobalStyle } from "./styles/global";
 import { ServiceOrdersPage } from "./views/Service-Orders";
 import { UsersPage } from "./views/Users";
@@ -15,6 +16,7 @@ import { PixPage } from "./views/PixPage";
 import { OnlineOrder } from "./views/OnlineOrder";
 import { CompleteOrder } from "./views/CompleteOrder";
 import { WaitingClientOrders } from "./views/WaitingClientOrders";
+import { ProductsPage } from "./views/Products";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -34,7 +36,7 @@ function IsAuthenticatedRoutes({ children }: IPrivateRouteProps) {
     if (loading) {
         return null;
     }
-    return isAuthenticated ? <Navigate to="/dashboard" /> : children;
+    return isAuthenticated ? <Navigate to="/pedidoBalcao" /> : children;
 }
 
 export default function routes(){
@@ -45,7 +47,12 @@ export default function routes(){
                     <Route element={<SideBarLayout/>}>
                         <Route path ="/dashboard" element={
                             <PrivateRoute>
-                                <DashboardPage/>
+                                <Dashboard/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path ="/pedidoBalcao" element={
+                            <PrivateRoute>
+                                <OnStoreOrder/>
                             </PrivateRoute>
                         }/>
                         <Route path="ordensDeServico" element={
@@ -61,6 +68,11 @@ export default function routes(){
                         <Route path="aguardandoCliente" element={
                             <PrivateRoute>
                                 <WaitingClientOrders/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="produtos" element={
+                            <PrivateRoute>
+                                <ProductsPage/>
                             </PrivateRoute>
                         }/>
                         <Route path="clientes" element={

@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faArrowLeft,
     faArrowRight,
-    faChartLine,
     faComputer,
     faRightFromBracket,
     faGlobe,
@@ -13,6 +12,8 @@ import {
     faBagShopping,
     faAddressCard,
     faReceipt,
+    faPlantWilt,
+    faHome
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useAdminData } from "../../contexts/AuthContext";
@@ -26,6 +27,7 @@ export function SideBar(){
 
     const [isActive, setActive] = useState({
         dashboard:true,
+        pedidoBalcao:false,
         ordensDeServico:false,
         produtos:false,
         categorias:false,
@@ -46,6 +48,22 @@ export function SideBar(){
             case 'dashboard':
                 setActive({...isActive, 
                     'dashboard':true,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false
+                })
+            break;
+            case 'pedidoBalcao':
+                setActive({...isActive, 
+                    'dashboard':false,
+                    'pedidoBalcao':true,
                     'ordensDeServico':false,
                     'produtos':false,
                     'categorias':false,
@@ -60,6 +78,7 @@ export function SideBar(){
             case 'ordensDeServico':
                 setActive({...isActive,
                     'dashboard':false,
+                    'pedidoBalcao':false,
                     'ordensDeServico':true,
                     'produtos':false,
                     'categorias':false,
@@ -74,6 +93,7 @@ export function SideBar(){
             case 'statistics':
                 setActive({...isActive, 
                     'dashboard':false,
+                    'pedidoBalcao':false,
                     'ordensDeServico':false,
                     'produtos':false,
                     'categorias':false,
@@ -88,6 +108,7 @@ export function SideBar(){
             case 'pedidos':
                 setActive({...isActive,
                     'dashboard':false,
+                    'pedidoBalcao':false,
                     'ordensDeServico':false,
                     'produtos':false,
                     'categorias':false,
@@ -103,6 +124,7 @@ export function SideBar(){
             case 'clientes':
                 setActive({...isActive,
                     'dashboard':false,
+                    'pedidoBalcao':false,
                     'ordensDeServico':false,
                     'produtos':false,
                     'categorias':false,
@@ -118,6 +140,7 @@ export function SideBar(){
             case 'administradores':
                 setActive({...isActive,
                     'dashboard':false,
+                    'pedidoBalcao':false,
                     'ordensDeServico':false,
                     'produtos':false,
                     'categorias':false,
@@ -133,6 +156,7 @@ export function SideBar(){
             case 'pix':
                 setActive({...isActive, 
                     'dashboard':false,
+                    'pedidoBalcao':false,
                     'ordensDeServico':false,
                     'produtos':false,
                     'categorias':false,
@@ -149,6 +173,7 @@ export function SideBar(){
             case 'pedidoOnline':
                 setActive({...isActive, 
                     'dashboard':false,
+                    'pedidoBalcao':false,
                     'ordensDeServico':false,
                     'produtos':false,
                     'categorias':false,
@@ -164,6 +189,7 @@ export function SideBar(){
             case 'aguardandoCliente':
                 setActive({...isActive, 
                     'dashboard':false,
+                    'pedidoBalcao':false,
                     'ordensDeServico':false,
                     'produtos':false,
                     'categorias':false,
@@ -174,6 +200,23 @@ export function SideBar(){
                     'pix': false,
                     "pedidoOnline": false,
                     "aguardandoCliente": true
+                })
+            break;
+
+            case 'produtos':
+                setActive({...isActive, 
+                    'dashboard':false,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':true,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false
                 })
             break;
         }
@@ -213,10 +256,22 @@ export function SideBar(){
                 )}
             </MinimizeButton>
 
-            <NavLink to="/dashboard">
+            <NavLink to="/dashboard" style={{ display: 'none' }}>
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('dashboard')}>
                     <SideBarButton
                         isActive={isActive['dashboard']}
+                        isMinimizedActive={isMinimized}
+                    >
+                        <FontAwesomeIcon icon={faHome} className="Side-Bar-Icon"/>
+                        <span>Dashboard</span>
+                    </SideBarButton>
+                </SideBarItemContainer>
+            </NavLink>
+
+            <NavLink to="/pedidoBalcao">
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidoBalcao')}>
+                    <SideBarButton
+                        isActive={isActive['pedidoBalcao']}
                         isMinimizedActive={isMinimized}
                     >
                         <FontAwesomeIcon icon={faComputer} className="Side-Bar-Icon"/>
@@ -274,6 +329,18 @@ export function SideBar(){
                 </SideBarItemContainer>
             </NavLink>
 
+            <NavLink to="/produtos" style={{ display: 'none' }}>
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('produtos')}>
+                    <SideBarButton
+                        isActive={isActive['produtos']}
+                        isMinimizedActive={isMinimized}
+                    >
+                        <FontAwesomeIcon icon={faPlantWilt} className="Side-Bar-Icon"/>
+                        <span>Produtos</span>
+                    </SideBarButton>
+                </SideBarItemContainer>
+            </NavLink>
+
             <NavLink to="/clientes">
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('clientes')}>
                     <SideBarButton
@@ -297,20 +364,6 @@ export function SideBar(){
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
-
-            {adminData && adminData.role === "SUPER_ADMIN" &&
-                <NavLink to="/estatisticas">
-                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('statistics')}>
-                        <SideBarButton
-                            isActive={isActive['statistics']}
-                            isMinimizedActive={isMinimized}
-                        >
-                            <FontAwesomeIcon icon={faChartLine} className="Side-Bar-Icon"/>
-                            <span>Estatísticas</span>
-                        </SideBarButton>
-                    </SideBarItemContainer>
-                </NavLink>
-            }
             
             {adminData && adminData.role === "SUPER_ADMIN" &&
                 <NavLink to="/administradores" onClick={()=>handleActiveMenuButton('administradores')}>
