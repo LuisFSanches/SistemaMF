@@ -256,7 +256,7 @@ export function SideBar(){
                 )}
             </MinimizeButton>
 
-            <NavLink to="/dashboard" style={{ display: 'none' }}>
+            <NavLink to="/dashboard">
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('dashboard')}>
                     <SideBarButton
                         isActive={isActive['dashboard']}

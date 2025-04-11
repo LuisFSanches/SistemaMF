@@ -11,7 +11,7 @@ const medals: Record<number, ReactNode> = {
 export function TopAdmins({ admins }: { admins: any[] }) {
     return (
         <Container>
-            <h3>Administradores</h3>
+            <h3>Top Vendedores</h3>
             {admins.map((admin) => (
                 <AdminItem key={admin.id}>
                     <strong>
