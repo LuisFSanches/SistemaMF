@@ -50,6 +50,7 @@ export function OnlineOrder() {
     const mockedDeliveryDate = moment().add(2, "days").format("YYYY-MM-DD");
     const mockedPaymentMethod = Object.entries(PAYMENT_METHODS)[0][0];
     const [mask, setMask] = useState("(99) 99999-9999");
+    const [copied, setCopied] = useState(false);
 
     const {
         register,
@@ -59,6 +60,16 @@ export function OnlineOrder() {
     } = useForm<INewOrder>();
 
     const receiver_phone = watch("receiver_phone");
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(orderLink).then(() => {
+            setCopied(true);
+            setTimeout(() => {
+                setCopied(false);
+            }, 2000);
+        });
+    };
+
 
     function generateOnlineCode() {
         const numerosAleatorios = Array.from({ length: 4 }, () => Math.floor(Math.random() * 10)).join('');
@@ -144,6 +155,26 @@ export function OnlineOrder() {
                                 <strong>Link do pedido: </strong>
                                 {orderLink}
                             </p>
+                            <button
+                                type="button"
+                                onClick={handleCopy}
+                                style={{
+                                    padding: "4px 8px",
+                                    backgroundColor: "#e7b7c2",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                    color: 'white',
+                                    fontSize: '15px'
+                                }}
+                            >
+                                Copiar link
+                            </button>
+                            {copied && (
+                                <span style={{ color: "gray", fontWeight: "300", marginLeft: '10px' }}>
+                                    Link copiado!
+                                </span>
+                            )}
                         </div>
                     </div>
                 </OrderDetail>

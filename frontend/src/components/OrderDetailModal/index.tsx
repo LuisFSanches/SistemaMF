@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Modal from 'react-modal';
 import moment from 'moment';
 import { IOrder } from "../../interfaces/IOrder";
@@ -22,9 +23,21 @@ export function OrderDetailModal({
     onRequestClose,
 	isOnlineOrder
 }: OrderDetailModalProps) {
+	const [copied, setCopied] = useState(false);
+
 	if (!order) {
 		return null;
 	}
+
+	const handleCopy = (orderLink: string) => {
+        navigator.clipboard.writeText(orderLink).then(() => {
+            setCopied(true);
+            setTimeout(() => {
+                setCopied(false);
+            }, 2000);
+        });
+    };
+
 	return (
 		<Modal
 			isOpen={isOpen}
@@ -42,9 +55,26 @@ export function OrderDetailModal({
 					<OrderInfo>
 						<h2>Link do pedido: </h2>
 						<p>{baseUrl}completarPedido/{order.id}</p>
-					</OrderInfo>
-					<OrderInfo>
-						<h2>Código: {order.online_code}</h2>
+						<button
+							type="button"
+							onClick={()=>handleCopy(`${baseUrl}completarPedido/${order.id}`)}
+							style={{
+								padding: "4px 8px",
+								backgroundColor: "#e7b7c2",
+								border: "none",
+								borderRadius: "5px",
+								cursor: "pointer",
+								color: 'white',
+								fontSize: '15px'
+							}}
+						>
+							Copiar link
+						</button>
+						{copied && (
+							<span style={{ color: "gray", fontWeight: "300", marginLeft: '10px' }}>
+								Link copiado!
+							</span>
+						)}
 					</OrderInfo>
 				</Container>
 			}

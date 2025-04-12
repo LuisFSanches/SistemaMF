@@ -82,7 +82,7 @@ export function CompleteOrder() {
         watch,
         setValue,
         setError,
-        formState: { errors },
+        formState: { errors, submitCount },
     } = useForm<INewOrder>({
         defaultValues: {
             country: "Brasil",
@@ -93,6 +93,7 @@ export function CompleteOrder() {
     });
 
     const submitOrder = async (data: INewOrder) => {
+        console.log('AAAA')
         setShowLoader(true);
         const orderData = {
             id: orderId,
@@ -235,6 +236,30 @@ export function CompleteOrder() {
     
             return () => clearTimeout(timeout);
         }, [watchPhoneNumber, watch, setMask]);
+
+        useEffect(() => {
+            if (Object.keys(errors).length > 0) {
+                console.log(errors);
+                let errorMessage = "";
+        
+                Object.values(errors).forEach((error, index) => {
+                    if (error?.message) {
+                        errorMessage += index < 1 ? `${error.message}\n - ` : `${error.message}\n - `;
+                    }
+                });
+
+                setErrorMessage(errorMessage);
+
+                setTimeout(() => {
+                    setErrorMessage("");
+                }, 5000);
+        
+            } else {
+                setErrorMessage("");
+            }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [submitCount]);
+        
 
     const handlePickUpAddress = async (value: boolean) => {
         if (value) {
@@ -505,7 +530,6 @@ export function CompleteOrder() {
                                 <FormField>
                                     <Label>
                                         Complemento
-                                        <span>*</span>
                                     </Label>
                                     <Input type="text" placeholder="Complemento" {...register("complement")}
                                         disabled={(addresses.length > 0 && !newAddress) ? true : false}
@@ -573,7 +597,10 @@ export function CompleteOrder() {
                         {errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
                     </FormField>
                     <FormField>
-                        <Label>Método de pagamento</Label>
+                        <Label>
+                            Método de pagamento
+                            <span>*</span>
+                        </Label>
                         <Select {...register("payment_method", {required: "Método de pagamento é obrigatório",})}>
                             <option value="">Selecionar </option>
                             {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
