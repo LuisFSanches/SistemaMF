@@ -58,7 +58,7 @@ export class DashboardService {
         const topAdmins = await prismaClient.order.groupBy({
             by: ['created_by'],
             where: {
-                delivery_date: {
+                created_at: {
                     gte: startDate,
                     lte: now,
                 },
