@@ -1,5 +1,5 @@
 import prismaClient from '../../prisma';
-import { startOfDay, startOfWeek, startOfMonth, startOfYear } from 'date-fns'
+import { startOfDay, startOfWeek, startOfMonth, startOfYear, subHours } from 'date-fns'
 
 type Period = 'day' | 'week' | 'month' | 'year'
 
@@ -26,7 +26,7 @@ export class DashboardService {
 
         const orders = await prismaClient.order.findMany({
             where: {
-                delivery_date: {
+                created_at: {
                 gte: startDate,
                 lte: now,
                 },
