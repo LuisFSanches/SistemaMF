@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { IOrder } from "../../interfaces/IOrder";
@@ -10,6 +10,8 @@ import { getOrder } from "../../services/orderService";
 import { useOrders } from "../../contexts/OrdersContext";
 import { Loader } from '../../components/Loader';
 import { WelcomeBackModal } from "../../components/WelcomeBackModal";
+import { RememberCardModal } from "../../components/RememberCardModal";
+
 import { ErrorAlert } from "../../components/ErrorAlert";
 import logoFull from '../../assets/images/logo.png'
 import { convertMoney } from "../../utils";
@@ -25,7 +27,7 @@ import {
     ErrorMessage,
     PrimaryButton,
 } from "../../styles/global";
-import { TYPES_OF_DELIVERY, STATES, PAYMENT_METHODS } from "../../constants";
+import { TYPES_OF_DELIVERY, STATES } from "../../constants";
 import { rawTelephone } from "../../utils";
 
 import { Form, Container, FormHeader, CompletedOrder, OrderReview } from "./style";
@@ -53,7 +55,6 @@ interface INewOrder {
     card_message: string;
     card_from: string;
     card_to: string;
-    payment_method: string;
 }
 
 export function CompleteOrder() {
@@ -69,6 +70,10 @@ export function CompleteOrder() {
     const [newAddress, setNewAddress] = useState(false);
     const [isWaitingForClienteOrder, setIsWaitingForClienteOrder] = useState(false);
     const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+    const [showRememberCardModal, setShowRememberCardModal] = useState(false);
+    const [cardModalShowed, setCardModalShowed] = useState(false);
+    const cardSectionRef = useRef<HTMLDivElement>(null);
+
     const [errorMessage, setErrorMessage] = useState("");
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 
@@ -93,7 +98,11 @@ export function CompleteOrder() {
     });
 
     const submitOrder = async (data: INewOrder) => {
-        console.log('AAAA')
+        if (!data.has_card && data.type_of_delivery.includes("GIFT") && !cardModalShowed) {
+            setCardModalShowed(true);
+            setShowRememberCardModal(true);
+            return;
+        }
         setShowLoader(true);
         const orderData = {
             id: orderId,
@@ -121,7 +130,6 @@ export function CompleteOrder() {
             receiver_name: data.receiver_name,
             receiver_phone: data.receiver_phone ? rawTelephone(data.receiver_phone) : data.receiver_phone,
             delivery_date: data.delivery_date,
-            payment_method: data.payment_method,
             has_card: data.has_card,
             card_message: data.card_message,
             card_from: data.card_from,
@@ -222,44 +230,43 @@ export function CompleteOrder() {
         return () => clearTimeout(timeout);
     }, [watchReceiverPhone, watch, setReceiverMask]);
 
-        useEffect(() => {
-            const phoneNumber = watch("phone_number") || "";
-            const numericValue = rawTelephone(phoneNumber);
-        
-            const timeout = setTimeout(() => {
-                if (numericValue.length === 10) {
-                    setMask("(99) 9999-9999");
-                } else {
-                    setMask("(99) 99999-9999");
-                }
-            }, 800);
+    useEffect(() => {
+        const phoneNumber = watch("phone_number") || "";
+        const numericValue = rawTelephone(phoneNumber);
     
-            return () => clearTimeout(timeout);
-        }, [watchPhoneNumber, watch, setMask]);
-
-        useEffect(() => {
-            if (Object.keys(errors).length > 0) {
-                console.log(errors);
-                let errorMessage = "";
-        
-                Object.values(errors).forEach((error, index) => {
-                    if (error?.message) {
-                        errorMessage += index < 1 ? `${error.message}\n - ` : `${error.message}\n - `;
-                    }
-                });
-
-                setErrorMessage(errorMessage);
-
-                setTimeout(() => {
-                    setErrorMessage("");
-                }, 5000);
-        
+        const timeout = setTimeout(() => {
+            if (numericValue.length === 10) {
+                setMask("(99) 9999-9999");
             } else {
-                setErrorMessage("");
+                setMask("(99) 99999-9999");
             }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [submitCount]);
-        
+        }, 800);
+
+        return () => clearTimeout(timeout);
+    }, [watchPhoneNumber, watch, setMask]);
+
+    useEffect(() => {
+        if (Object.keys(errors).length > 0) {
+            console.log(errors);
+            let errorMessage = "";
+    
+            Object.values(errors).forEach((error, index) => {
+                if (error?.message) {
+                    errorMessage += index < 1 ? `${error.message}\n - ` : `${error.message}\n - `;
+                }
+            });
+
+            setErrorMessage(errorMessage);
+
+            setTimeout(() => {
+                setErrorMessage("");
+            }, 5000);
+    
+        } else {
+            setErrorMessage("");
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [submitCount]);
 
     const handlePickUpAddress = async (value: boolean) => {
         if (value) {
@@ -275,12 +282,32 @@ export function CompleteOrder() {
         }
     }
 
+    const handleWriteMessageClick = () => {
+        setValue("has_card", true);
+        setShowRememberCardModal(false);
+    
+        setTimeout(() => {
+            cardSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+    };
+
+    const handleNoMessageClick = () => {
+        setShowRememberCardModal(false);
+        handleSubmit(submitOrder)();
+    };
+
     return (
         <Container>
             <WelcomeBackModal
                 isOpen={showWelcomeModal}
                 onRequestClose={() => setShowWelcomeModal(false)}
                 name={`${watch("first_name")} ${watch("last_name")}`}
+            />
+            <RememberCardModal
+                isOpen={showRememberCardModal}
+                onRequestClose={() => setShowRememberCardModal(false)}
+                handleWriteMessageClick={handleWriteMessageClick}
+                handleNoMessageClick={handleNoMessageClick}
             />
             <Loader show={showLoader} />
             {errorMessage && <ErrorAlert message={errorMessage} />}
@@ -402,7 +429,8 @@ export function CompleteOrder() {
                                     alwaysShowMask={false}
                                     placeholder='Telefone'
                                     value={watch("receiver_phone") || ""}
-                                    {...register("receiver_phone", { 
+                                    {...register("receiver_phone", {
+                                        required: "Telefone inválido"
                                     })}
                                 />
                                 {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
@@ -597,19 +625,6 @@ export function CompleteOrder() {
                         {errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
                     </FormField>
                     <FormField>
-                        <Label>
-                            Método de pagamento
-                            <span>*</span>
-                        </Label>
-                        <Select {...register("payment_method", {required: "Método de pagamento é obrigatório",})}>
-                            <option value="">Selecionar </option>
-                            {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
-                                <option key={key} value={key}>{value}</option>
-                            ))}
-                        </Select>
-                        {errors.payment_method && <ErrorMessage>{errors.payment_method.message}</ErrorMessage>}
-                    </FormField> 
-                    <FormField>
                         <CheckboxContainer>
                             <Checkbox type="checkbox" {...register("has_card")} />
                             <Label>Pedido Contém Cartão.</Label>
@@ -617,7 +632,7 @@ export function CompleteOrder() {
                     </FormField>
                     {hasCard &&
                         <>
-                            <FormField>
+                            <FormField ref={cardSectionRef}>
                                 <Label>
                                     De: <span>*</span>
                                 </Label>

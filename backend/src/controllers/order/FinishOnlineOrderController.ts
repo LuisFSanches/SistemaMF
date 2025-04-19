@@ -82,11 +82,11 @@ class FinishOnlineOrderController{
         const data = await finishOrderService.execute(orderData);
 
         if ('error' in data && data.error) {
+            console.log("[FinishOnlineOrderController] Starting order finalization", data.error);
             next(new BadRequestException(
                 data.message,
                 data.code
             ));
-            
             return;
         }
         orderEmitter.emit(OrderEvents.OnlineOrderReceived, data);

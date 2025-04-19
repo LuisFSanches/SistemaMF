@@ -20,7 +20,7 @@ class FinishOnlineOrderService{
 			return updatedOrder;
 
 		} catch(error: any) {
-            console.log(error.message)
+            console.log('Failed when finishing online order', error.message)
 			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
 		}
 	}

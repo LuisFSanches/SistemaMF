@@ -48,7 +48,6 @@ export function OnlineOrder() {
     const [showOrderDetail, setShowOrderDetail] = useState(false);
     const [orderLink, setOrderLink] = useState("");
     const mockedDeliveryDate = moment().add(2, "days").format("YYYY-MM-DD");
-    const mockedPaymentMethod = Object.entries(PAYMENT_METHODS)[0][0];
     const [mask, setMask] = useState("(99) 99999-9999");
     const [copied, setCopied] = useState(false);
 
@@ -102,7 +101,7 @@ export function OnlineOrder() {
             description: data.description,
             additional_information: data.additional_information,
             delivery_date: mockedDeliveryDate,
-            payment_method: mockedPaymentMethod,
+            payment_method: data.payment_method,
             payment_received: data.payment_received,
             products_value: Number(data.products_value),
             delivery_fee: Number(data.delivery_fee),
@@ -198,7 +197,7 @@ export function OnlineOrder() {
                     </FormField>
                     <FormField>
                         <Label>Observações</Label>
-                        <Textarea placeholder="Observações" {...register("additional_information")}
+                        <Textarea style={{ minHeight: "100px" }} placeholder="Observações" {...register("additional_information")}
                         />
                     </FormField>
                     <FormField>
@@ -224,24 +223,37 @@ export function OnlineOrder() {
                         />
                         {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
                     </FormField>
-                    <InlineFormField>
+                    <InlineFormField style={{ alignItems: "center" }}>
+                        <FormField style={{ marginRight: "20px" }}>
+                            <Label>
+                                Método de pagamento
+                                <span>*</span>
+                            </Label>
+                            <Select {...register("payment_method", { required: "Método de pagamento inválido" })}>
+                                <option value="">Selecione um método</option>
+                                {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
+                                    <option key={key} value={key}>{value}</option>
+                                ))}
+                            </Select>
+                            {errors.payment_method && <ErrorMessage>{errors.payment_method.message}</ErrorMessage>}
+                        </FormField>
                         <FormField>
                             <CheckboxContainer>
                                 <Checkbox type="checkbox" {...register("payment_received")} />
                                 <Label>Pagamento Recebido</Label>
                             </CheckboxContainer>
                         </FormField>
-                        <FormField>
-                            <Label>Administrador Responsável</Label>
-                            <Select {...register("created_by", { required: "Administrador Responsável inválido" })}>
-                                <option value="">Selecione um Administrador</option>
-                                {admins.map((admin: any) => (
-                                    <option key={admin.id} value={admin.id}>{admin.name}</option>
-                                ))}
-                            </Select>
-                            {errors.created_by && <ErrorMessage>{errors.created_by.message}</ErrorMessage>}
-                        </FormField>
                     </InlineFormField>
+                    <FormField>
+                        <Label>Administrador Responsável</Label>
+                        <Select {...register("created_by", { required: "Administrador Responsável inválido" })}>
+                            <option value="">Selecione um Administrador</option>
+                            {admins.map((admin: any) => (
+                                <option key={admin.id} value={admin.id}>{admin.name}</option>
+                            ))}
+                        </Select>
+                        {errors.created_by && <ErrorMessage>{errors.created_by.message}</ErrorMessage>}
+                    </FormField>
                     <InlineFormField>
                         <FormField>
                             <Label>Valor total dos Produtos</Label>
