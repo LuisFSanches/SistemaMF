@@ -6,6 +6,7 @@ import { OrdersProvider } from './contexts/OrdersContext';
 
 import Routes from "./routes";
 import { AdminsProvider } from './contexts/AdminsContext';
+import { ProductsProvider } from './contexts/ProductsContext';
 
 ReactDOM.render(
 	<React.StrictMode>
@@ -13,7 +14,9 @@ ReactDOM.render(
 			<AdminsProvider>
 				<ClientsProvider>
 					<OrdersProvider>
-						<Routes/>
+						<ProductsProvider>
+							<Routes/>
+						</ProductsProvider>
 					</OrdersProvider>
 				</ClientsProvider>
 			</AdminsProvider>

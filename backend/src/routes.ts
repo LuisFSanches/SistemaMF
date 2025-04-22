@@ -8,6 +8,10 @@ import { GetClientByPhoneNumbeController } from './controllers/client/GetClientB
 import { CreateClientController } from './controllers/client/CreateClientController'
 import { UpdateClientController } from './controllers/client/UpdateClientController';
 
+import { CreateProductController } from './controllers/product/CreateProductController';
+import { GetAllProductController } from './controllers/product/GetAllProductController';
+import { UpdateProductController } from './controllers/product/UpdateProductController';
+
 import { CreateAddressController } from './controllers/address/CreateAddressController';
 import { GetAllClientAddressController } from './controllers/address/GetAllClientAddressController';
 import { GetPickUpAddressController } from './controllers/address/GetPickUpAddressController';
@@ -70,6 +74,9 @@ router.patch('/order/:id', adminAuthMiddleware, new UpdateOrderStatusController(
 router.delete('/order/:id', adminAuthMiddleware, new DeleteOrderController().handle);
 
 //-- ROTAS PRODUCT --
+router.post('/product', adminAuthMiddleware, new CreateProductController().handle)
+router.put('/product/:id', superAdminAuthMiddleware, new UpdateProductController().handle)
+router.get('/product/all', superAdminAuthMiddleware, new GetAllProductController().handle)
 
 //-- ROTAS ADMIN --
 router.post('/admin', superAdminAuthMiddleware, new CreateAdminController().handle)

@@ -63,6 +63,35 @@ model Address {
   @@map("addresses")
 }
 
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  price       Float
+  unity       String
+  stock       Float
+  enabled     Boolean
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@map("products")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  order_id  String
+  product_id String
+  quantity  Int
+  price     Float  // preço unitário no momento do pedido (evita inconsistência se o preço mudar depois)
+
+  order     Order   @relation(fields: [order_id], references: [id])
+  product   Product @relation(fields: [product_id], references: [id])
+
+  @@map("order_items")
+}
+
+
 model Order {
   id                String        @id @default(uuid())
   code              Int           @default(autoincrement())
@@ -97,6 +126,8 @@ model Order {
   online_order      Boolean       @default(false)
   online_code       String?
   type_of_delivery  String?
+
+  orderItems OrderItem[]
 
   @@map("orders")
 }

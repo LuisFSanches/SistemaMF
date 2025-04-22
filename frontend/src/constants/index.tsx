@@ -64,3 +64,10 @@ export const STATES = {
   "SE": "Sergipe",
   "TO": "Tocantins"
 }
+
+export const UNITIES = {
+  "UN": "Unidade",
+  "KG": "Quilograma",
+  "L": "Litro",
+  "M": "Metro"
+}

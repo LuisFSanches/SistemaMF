@@ -533,3 +533,44 @@ export const ErrorMessage = styled.span`
     color: red;
     margin-bottom: 5px;
 `
+export const Switch = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    span {
+        min-width: 81px;
+        font-size: 1rem;
+        color: #333;
+        text-align: center;
+    }
+
+    input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+`;
+
+export const StyledSwitch = styled.label<{ $checked: boolean }>`
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+    background-color: ${({ $checked }) => ($checked ? "#4caf50" : "#ccc")};
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &::after {
+        content: "";
+        position: absolute;
+        left: ${({ $checked }) => ($checked ? "24px" : "4px")};
+        top: 4px;
+        width: 16px;
+        height: 16px;
+        background: white;
+        border-radius: 50%;
+        transition: left 0.3s;
+    }
+`;

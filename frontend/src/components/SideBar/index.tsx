@@ -329,7 +329,7 @@ export function SideBar(){
                 </SideBarItemContainer>
             </NavLink>
 
-            <NavLink to="/produtos" style={{ display: 'none' }}>
+            <NavLink to="/produtos">
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('produtos')}>
                     <SideBarButton
                         isActive={isActive['produtos']}
