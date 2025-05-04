@@ -372,7 +372,7 @@ export function OnStoreOrder() {
             setSelectedProduct(null);
             setQuery('');
             setPrice(0);
-            setQuantity(0);
+            setQuantity(1);
             setShowSuggestions(false);
         } else {
             setShowProductError(true);
