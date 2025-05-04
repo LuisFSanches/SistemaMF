@@ -11,7 +11,12 @@ class GetAllOrderService {
                     include: {
                         client: true,
                         clientAddress: true,
-                        createdBy: true
+                        createdBy: true,
+                        orderItems: {
+                            include: {
+                                product: true
+                            }
+                        }
                     },
                     orderBy: {
                         code: 'desc'

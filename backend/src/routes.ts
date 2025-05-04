@@ -11,6 +11,7 @@ import { UpdateClientController } from './controllers/client/UpdateClientControl
 import { CreateProductController } from './controllers/product/CreateProductController';
 import { GetAllProductController } from './controllers/product/GetAllProductController';
 import { UpdateProductController } from './controllers/product/UpdateProductController';
+import { SearchProductsController } from './controllers/product/SearchProductsController';
 
 import { CreateAddressController } from './controllers/address/CreateAddressController';
 import { GetAllClientAddressController } from './controllers/address/GetAllClientAddressController';
@@ -77,6 +78,7 @@ router.delete('/order/:id', adminAuthMiddleware, new DeleteOrderController().han
 router.post('/product', adminAuthMiddleware, new CreateProductController().handle)
 router.put('/product/:id', superAdminAuthMiddleware, new UpdateProductController().handle)
 router.get('/product/all', superAdminAuthMiddleware, new GetAllProductController().handle)
+router.get('/product/search', superAdminAuthMiddleware, new SearchProductsController().handle)
 
 //-- ROTAS ADMIN --
 router.post('/admin', superAdminAuthMiddleware, new CreateAdminController().handle)

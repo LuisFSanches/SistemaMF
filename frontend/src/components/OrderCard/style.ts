@@ -7,6 +7,10 @@ export const OrderCardContainer= styled.div`
     color: var(--text-body);
     position: relative;
 
+    .order-header {
+        display: none;
+    }
+
     h3 {
         font-size: 17px;
     }

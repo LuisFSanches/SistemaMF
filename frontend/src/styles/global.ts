@@ -574,3 +574,142 @@ export const StyledSwitch = styled.label<{ $checked: boolean }>`
         transition: left 0.3s;
     }
 `;
+
+export const ProductContainer = styled.div<{ isEditModal: boolean }>`
+    display: flex;
+    width: ${({ isEditModal }) => (isEditModal ? '100%' : '85%')};
+    margin: 0 auto;
+    flex-direction: column;
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border-color: #e7b7c2;
+    margin-top: 20px;
+
+    .product-data {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+
+        div {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+
+    .suggestion-box {
+        position: absolute;
+        top: 69px;
+        left: 0;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #e7b7c2;
+        border-radius: 10px;
+        z-index: 10;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .suggestion-box li {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .suggestion-box li:hover {
+        background: #f5f5f5;
+    }
+
+    .product-actions {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 10px;
+    }
+
+    button {
+        min-width: ${isEditModal => (isEditModal ? '50px' : '100px')};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 15px;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        background: #e7b7c2;
+        color: white;
+        cursor: pointer;
+        align-self: center;
+
+        &.add-button {
+            background: var(--green);
+        }
+
+        &.delete-button {
+            background: red;
+        }
+
+        &.update-button {
+            background: var(--blue);
+        }
+    }
+`;
+
+export const DescriptionArea = styled.div`
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e7b7c2;
+    padding: 10px 15px;
+    border-radius: 10px;
+    min-height: 100px;
+    background: white;
+
+    p {
+        margin-bottom: 5px;
+
+        button {
+            margin-left: 10px;
+            background: none;
+
+            svg {
+                color: red;
+                font-size: 18px;
+            }
+        }
+    }
+`;
+
+export const NewOrderContainer = styled.div`
+    width: 700px;
+    background: white;
+    overflow-y: scroll;
+    overflow-x: hidden;
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #fcc5d0;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+
+    @media (max-width: 768px) {
+        width: 100%;
+        height: 100%;
+        margin-top: 0px;
+        border-radius: 0px;
+    }
+`;

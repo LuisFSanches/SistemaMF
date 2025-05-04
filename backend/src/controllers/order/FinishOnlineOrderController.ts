@@ -38,6 +38,10 @@ class FinishOnlineOrderController{
 			if ('id' in client) {
 				client_id = client.id;
 			}
+
+            if ('error' in client) {
+                return res.status(400).json(client);
+            }
 		}
 
         if (!client_address_id || client_address_id === "") {

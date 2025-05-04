@@ -20,40 +20,12 @@ export const Container = styled.div`
 
 export const Form = styled.form`
     width: 700px;
-    height: 800px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 30px;
     background: white;
     border-radius: 20px;
     box-shadow: 0.1rem 0.2rem 0.2rem var(--shadow-color);
-    overflow-y: scroll;
-
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: #fcc5d0;
-        border-radius: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #a1a1a1;
-    }
-
-    @media (max-width: 768px) {
-        width: 100%;
-        height: 100%;
-        margin-top: 0px;
-        border-radius: 0px;
-    }
 `
 
 export const FormHeader = styled.div`

@@ -129,12 +129,14 @@ export const PrintCardMessage = ({ card_message, card_from, card_to, order_code 
             const pages = pdfDoc.getPages();
             const firstPage = pages[0];
 
-            const card_from_formatted = wrapText(card_from, maxLineLength);
+            const sanitized_card_from = sanitizeText(card_from);
+            const card_from_formatted = wrapText(sanitized_card_from, maxLineLength);
             card_from_formatted.forEach((line, index) => {
                 write(true, firstPage, regularFont, emojiFont, line, 160, (692 - (index * lineHeight)), 14);
             });
 
-            const card_to_formatted = wrapText(card_to, maxLineLength);
+            const sanitized_card_to = sanitizeText(card_to);
+            const card_to_formatted = wrapText(sanitized_card_to, maxLineLength);
             card_to_formatted.forEach((line, index) => {
                 write(true, firstPage, regularFont, emojiFont, line, 165, (658 - (index * lineHeight)), 14);
             });

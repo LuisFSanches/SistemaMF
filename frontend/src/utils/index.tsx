@@ -21,3 +21,15 @@ export const formatTitleCase = (text: string) => {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
 };
+
+export const formatDescription = (description: string|undefined): string[] => {
+    if (!description) return [];
+
+    return description
+        .split('\n')
+        .map(line => {
+            const clean = line.replace(/\s*-\s*R\$\s*\d+(\.\d{1,2})?/, '');
+            return clean.trim();
+        })
+        .filter(Boolean);
+};

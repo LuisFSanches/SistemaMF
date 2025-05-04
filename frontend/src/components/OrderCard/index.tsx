@@ -8,8 +8,9 @@ import { OrderCardContainer } from "./style"
 import { HAS_CARD, TYPES_OF_DELIVERY } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faAnglesRight, faAnglesLeft, faPrint, faEye, faPen, faEnvelope } from "@fortawesome/free-solid-svg-icons";
-import { formatTitleCase } from "../../utils";
+import { formatTitleCase, formatDescription } from "../../utils";
 import { PAYMENT_METHODS } from "../../constants";
+
 export function OrderCard({
 	order,
 	handlePrint,
@@ -47,16 +48,21 @@ export function OrderCard({
 
 	return (
     	<OrderCardContainer className={order?.status?.toLowerCase()}>
+			<div className="order-header">
+				<h1 className="store-title">MIRAI FLORES</h1>
+				<p>CNPJ: 33.861.078/0001-50</p>
+				<p>Tel: (22) 99746-1792 | Itaperuna/RJ</p>
+			</div>
 			<div className="order-number">
 				<span className={`order-type ${order.online_order ? "online" : "on_store"}`}>
 					{order.online_order ? "Online" : "Balcão"}
 				</span>
-				<h2>Pedido #{order?.code}</h2>
+				<h2>*** Pedido #{order?.code} ***</h2>
 				<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
 			</div>
 			<div className="client-info">
 				<div>
-					<h3>Cliente: {formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}</h3>
+					<p><strong>Cliente:</strong> {formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}</p>
 					<p><strong>Telefone do Cliente: </strong>{order.client.phone_number}</p>
 				</div>
 				<p className="delivery-date"><strong>Data de entrega: </strong> 
@@ -69,20 +75,17 @@ export function OrderCard({
 			<div className="order-content">
 				<div className="order-items">
 					<h3>Descrição do pedido:</h3>
-					<p>{formatTitleCase(order.description)}</p>
+					{formatDescription(order.description).map((line, idx) => (
+						<p key={idx}>{line}</p>
+					))}
 				</div>
 				<div className="order-observation">
 					<h3>Observação: </h3>
 					<p>{formatTitleCase(order.additional_information)}</p>
 				</div>
 			</div>
-			<div className="card-container">
-				<p><strong>Cartão: </strong>
-					{HAS_CARD[order.has_card.toString() as keyof typeof HAS_CARD]}
-				</p>
-			</div>
 			<div className="address-container">
-				<p><strong>Endereço:</strong></p>
+				<h3><strong>Endereço de entrega:</strong></h3>
 				{!order.pickup_on_store && 
 					<>
 						<p>{formatTitleCase(order.clientAddress.street)}, {order.clientAddress.street_number},
@@ -95,7 +98,7 @@ export function OrderCard({
 				{order.pickup_on_store &&
 					<p>Retirar na loja</p>
 				}
-				<p><strong>Ponto de referência: </strong>
+				<p>Ponto de referência:
 					{!order.pickup_on_store &&
 						formatTitleCase(order.clientAddress.reference_point)
 					}
@@ -107,11 +110,6 @@ export function OrderCard({
 				</p>
 			</div>
 			<div className="address-container">
-				<p><strong>Valor dos produtos: </strong>R$ {order.products_value}</p>
-				<p><strong>Taxa de entrega: </strong>R$ {order.delivery_fee}</p>
-				<p><strong>Total: </strong>R$ {order.total}</p>
-			</div>
-			<div className="address-container">
 				<p><strong>Entregar para: </strong>
 					{order.receiver_name ? formatTitleCase(order.receiver_name)
 						: formatTitleCase(order.client.first_name)}
@@ -119,12 +117,23 @@ export function OrderCard({
 				<p><strong>Telefone do recebedor: </strong>
 					{order.receiver_name ? order.receiver_phone : order.client.phone_number}</p>
 			</div>
+			<div className="card-container">
+				<p><strong>Cartão: </strong>
+					{HAS_CARD[order.has_card.toString() as keyof typeof HAS_CARD]}
+				</p>
+			</div>
+			<div className="address-container order-values">
+				<h3><strong>Valores do pedido: </strong></h3>
+				<p><strong>Valor dos produtos: </strong>R$ {order.products_value}</p>
+				<p><strong>Taxa de entrega: </strong>R$ {order.delivery_fee}</p>
+				<p><strong>Total: </strong>R$ {order.total}</p>
+			</div>
 			<div className="address-container">
 				<p><strong>Método de pagamento: </strong>
 					{PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS]}
 				</p>
 			</div>
-			<div className="address-container">
+			<div className="address-container order-admin">
 				<p><strong>Status Pagamento: </strong>{order.payment_received ? "Pago" : "Pendente"}</p>
 				<p><strong>Responsável pelo Pedido: </strong>{order.createdBy?.name}</p>
 			</div>

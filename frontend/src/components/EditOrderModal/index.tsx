@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Modal from 'react-modal';
 import moment from "moment";
 import { IOrder } from "../../interfaces/IOrder";
@@ -15,19 +15,22 @@ import {
 	InlineFormField,
 	CheckboxContainer,
 	Checkbox,
+	DescriptionArea,
+	ProductContainer
 } from '../../styles/global';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { useOrders } from "../../contexts/OrdersContext";
 import { PAYMENT_METHODS, STATUS_LABEL } from "../../constants";
 import { updateOrder } from "../../services/orderService";
+import { searchProducts } from "../../services/productService";
 import { getPickupAddress } from "../../services/addressService";
 import { Loader } from "../Loader";
 
 interface IEditOrderModal{
 	isOpen: boolean;
     onRequestClose: ()=> void;
-    order: IOrder
+    order: IOrder;
 }
 
 export function EditOrderModal({
@@ -46,6 +49,12 @@ export function EditOrderModal({
         formState: { errors },
     } = useForm<IOrder>();
 	const [showLoader, setShowLoader] = useState(false);
+	const [products, setProducts] = useState<any[]>([]);
+	const [productSuggestions, setProductSuggestions] = useState([]);
+	const [showSuggestions, setShowSuggestions] = useState(false);
+	const [queries, setQueries] = useState<{ [key: number]: string }>({});
+	const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+	const [showProductError, setShowProductError] = useState(false);
 
 	const handleOrder = async (formData: IOrder) => {
 		setShowLoader(true);
@@ -79,7 +88,8 @@ export function EditOrderModal({
 				city: formData.clientAddress.city,
 				state: formData.clientAddress.state,
 				country: formData.clientAddress.country
-			}
+			},
+			products
         }
 
 		const { data: orderData } = await updateOrder(data);
@@ -121,6 +131,7 @@ export function EditOrderModal({
 		setValue("clientAddress.country", order.clientAddress.country);
 		setValue("pickup_on_store", order.pickup_on_store);
 		setPickupAddress(order.pickup_on_store);
+		setProducts(order.orderItems);
     }, [order, setValue]);
 
 	useEffect(() => {
@@ -143,6 +154,109 @@ export function EditOrderModal({
         }
     }
 
+	const updateProducts = (index: number, param: string, value: any) => {
+		setProducts((prev: any[]) => {
+			const updated = [...prev];
+				updated[index] = {
+				...updated[index],
+				[param]: value,
+			};
+		
+			const total = updated.reduce((sum, p) => {
+				return sum + Number(p.quantity) * Number(p.price);
+			}, 0);
+		
+			setValue("products_value", total);
+		
+			return updated;
+		});
+	};
+
+	const handleSearchProducts = async (index: number, text: string) => {
+		setQueries(prev => ({ ...prev, [index]: text }));
+
+		if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+        }
+
+		debounceTimeout.current = setTimeout(async () => {
+			if (text.length >= 3) {
+				const response = await searchProducts(text);
+				setProductSuggestions(response.data as any);
+				setShowSuggestions(true);
+			}
+		}, 700);
+	};
+
+	const handleSelectProduct = (index: number, product: any) => {
+		updateProducts(index, "product", product);
+		updateProducts(index, "price", product.price);
+		updateProducts(index, "product_id", product.id);
+		setShowSuggestions(false);
+
+		// Atualiza o texto do input também
+		setQueries(prev => ({ ...prev, [index]: product.name }));
+	};
+
+	const addProduct = () => {
+		setProducts((prev: any[]) => [
+			...prev,
+			{
+				id: null,
+				order_id: order.id,
+				product_id: "",
+				quantity: 1,
+				price: 0,
+				product: {
+					name: '',
+					price: 0,
+					unity: 'UN',
+					stock: 0,
+					enabled: true,
+					created_at: new Date().toISOString(),
+					updated_at: new Date().toISOString(),
+				},
+			}
+		]);
+		
+		setQueries(prev => ({
+			...prev,
+			[products.length]: ''
+		}));
+	};
+
+	const removeProduct = (index: number) => {
+		setProducts((prev: any[]) => prev.filter((_, i) => i !== index));
+		
+		setQueries((prev) => {
+			const updated = { ...prev };
+			delete updated[index];
+			return updated;
+		});
+	};
+
+	const description = products
+			?.map((p) => `${p.quantity}x ${p.product.name} - R$ ${p.price}`)
+			.join('\n');
+	
+	useEffect(() => {
+		if (order?.orderItems?.length > 0) {
+			setValue('description', description);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [description]);
+
+	useEffect(() => {
+		console.log(products);
+		const hasInvalidProduct = products.some(p => {
+			return !p.quantity || !p.price;
+		});
+
+		console.log(hasInvalidProduct);
+	
+		setShowProductError(hasInvalidProduct);
+	}, [products]);
+
 	if (!order) {
 		return null;
 	}
@@ -161,12 +275,93 @@ export function EditOrderModal({
 
             <ModalContainer>
                 <Form onSubmit={handleSubmit(handleOrder)}>
-                    <h2>Editar Pedido #{order.code}</h2>
-					<EditFormField>
-						<Label>Descrição</Label>
-						<Textarea {...register("description", {required: "Descrição inválida"})}/>
-						<ErrorMessage>{errors.description?.message}</ErrorMessage>
-					</EditFormField>
+                    <h2>Editar Pedido #{order?.code}</h2>
+					{order?.orderItems?.length > 0 &&
+						<EditFormField>
+							<Label>Produtos do pedido</Label>
+							<ProductContainer isEditModal>
+								{products?.map((p: any, index: number) => (
+									<>
+										<div className="product-data" key={index}>
+											<div>
+												<Label>Quantidade</Label>
+												<Input
+													type="number"
+													placeholder="0"
+													value={p.quantity}
+													onChange={(e) => updateProducts(index, 'quantity', Number(e.target.value))}/>
+											</div>
+									
+											<div key={p.id} style={{ position: 'relative', width: '100%' }}>
+												<Label>Produto</Label>
+												<Input
+													placeholder="Produto"
+													value={queries[index] ?? p.product.name}
+													onChange={(e) => handleSearchProducts(index, e.target.value)}
+													onFocus={() => (queries[index] || p.product.name) && setShowSuggestions(true)}
+												/>
+
+												{showSuggestions && productSuggestions.length > 0 && (queries[index]?.length ?? 0) >= 3 && (
+													<ul className="suggestion-box">
+														{productSuggestions?.map((product: any) => (
+														<li key={product.id} onClick={() => handleSelectProduct(index, product)}>
+															{product.name} - R$ {product.price}
+														</li>
+														))}
+													</ul>
+												)}
+											</div>
+											<div>
+												<Label>Valor</Label>
+												<Input
+													placeholder="Valor"
+													type="number"
+													value={p.price}
+													step="0.1"
+													onChange={(e) => updateProducts(index, 'price', Number(e.target.value))}
+												/>
+											</div>
+											<div>
+												<button
+													type="button"
+													className="delete-button"
+													onClick={() => removeProduct(index)}
+												><FontAwesomeIcon icon={faXmark}/></button>
+											</div>
+										</div>
+									</>
+								))}
+								<div className="product-actions">
+									<button type="button" className="add-button" onClick={addProduct}>Incluir Produto</button>
+								</div>
+							</ProductContainer>
+						</EditFormField>
+					}
+
+					{products?.length > 0 &&
+						<EditFormField>
+							<Label>Descrição</Label>
+							<DescriptionArea>
+								{products?.map((p, index) => (
+									<p key={index}>
+										{p.quantity}x - {p.product.name} - R$ {p.price}
+									</p>
+								))}
+							</DescriptionArea>
+							{errors.description && (
+								<ErrorMessage>{errors.description.message}</ErrorMessage>
+							)}
+						</EditFormField>
+					}
+
+					{order?.orderItems?.length === 0 &&
+						<EditFormField>
+							<Label>Descrição</Label>
+							<Textarea {...register("description", {required: "Descrição inválida"})}/>
+							<ErrorMessage>{errors.description?.message}</ErrorMessage>
+						</EditFormField>
+					}
+					
 					<EditFormField>
 						<Label>Informações Adicionais</Label>
 						<Textarea {...register("additional_information")}/>
@@ -181,7 +376,7 @@ export function EditOrderModal({
 							<Input {...register("client.phone_number", {required: "Descrição inválida"})} disabled/>
 						</EditFormField>
 					</InlineFormField>
-					{ (order.receiver_phone || order.receiver_name) &&
+					{ (order?.receiver_phone || order?.receiver_name) &&
 						<InlineFormField fullWidth>
 							<EditFormField isShortField>
 								<Label>Nome do Recebedor</Label>
@@ -197,7 +392,8 @@ export function EditOrderModal({
 					<InlineFormField fullWidth>
 						<EditFormField isShortField>
 							<Label>Valor dos Produtos</Label>
-							<Input type="number" step="0.01" {...register("products_value", {required: "Valor Inválido"})}/>
+							<Input type="number" step="0.01" disabled={products?.length > 0}
+								{...register("products_value", {required: "Valor Inválido"})}/>
 							<ErrorMessage>{errors.products_value?.message}</ErrorMessage>
 						</EditFormField>
 						<EditFormField isShortField>
@@ -354,9 +550,13 @@ export function EditOrderModal({
 							</InlineFormField>
 						</>
 					}
-                    <button type="submit" className="create-button">
+                    <button type="submit" className="create-button" disabled={showProductError}>
                         Editar
                     </button>
+					{showProductError &&
+						<ErrorMessage style={{ textAlign: 'center', marginTop: '10px' }}>
+							Verifique os produtos
+						</ErrorMessage>}
                 </Form>
             </ModalContainer>
         </Modal>

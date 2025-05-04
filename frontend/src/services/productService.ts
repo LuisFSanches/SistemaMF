@@ -11,6 +11,16 @@ export const listProducts = async (page: number, pageSize: number) => {
     return response;
 };
 
+export const searchProducts = async (query: string) => {
+    const response = await api.get(`/product/search?q=${query}`, {
+        headers: {
+            Authorization: `${token}`,
+        }
+    });
+    
+    return response;
+}
+
 export const createProduct = async (product: any) => {
     const response = await api.post("/product", {
         name: product.name,

@@ -28,4 +28,5 @@ export interface IOrder {
   type_of_delivery?: string;
   online_order?: boolean;
   online_code?: string;
+  orderItems?: any;
 }

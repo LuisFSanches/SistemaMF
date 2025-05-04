@@ -27,6 +27,9 @@ class CreateClientService{
       return newClient;
 
     } catch(error: any) {
+      console.log('data', { first_name, last_name, phone_number })
+      console.log("[FinishOnlineOrderController] Failed to create client on order finalization", error.message);
+
       return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
     }
   }

@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { useNavigate } from "react-router-dom";
-import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { faNewspaper } from "@fortawesome/free-solid-svg-icons";
 import {
     Container,
@@ -22,14 +23,18 @@ import {
     Select,
     Textarea,
     InlineFormField,
-    PrimaryButton
+    PrimaryButton,
+    ProductContainer,
+    DescriptionArea,
 } from "../../styles/global";
 
 import { NewOrderProgressBar } from "../../components/NewOrderProgressBar";
+import { ProductModal } from "../../components/ProductModal";
 import { Loader } from '../../components/Loader';
 import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
+import { searchProducts } from "../../services/productService";
 import { getPickupAddress } from "../../services/addressService";
 import { rawTelephone } from "../../utils";
 import { PAYMENT_METHODS, STATES } from "../../constants";
@@ -65,6 +70,13 @@ interface INewOrder {
     created_by: string;
 }
 
+interface IProduct {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+}
+
 export function OnStoreOrder() {
     const { addOrder } = useOrders();
     const { admins } = useAdmins();
@@ -81,7 +93,17 @@ export function OnStoreOrder() {
     const [mask, setMask] = useState("(99) 99999-9999");
     const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
     const [showLoader, setShowLoader] = useState(false);
+    const [query, setQuery] = useState('');
+    const [productSuggestions, setProductSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
+    const [quantity, setQuantity] = useState<number>(1);
+    const [price, setPrice] = useState<number>(0);
+    const [products, setProducts] = useState<IProduct[]>([]);
+    const [productModal, setProductModal] = useState(false);
+    const [showProductError, setShowProductError] = useState(false);
 
+    const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
     const navigate = useNavigate();
 
     const [order, setOrder] = useState<INewOrder>({
@@ -196,7 +218,8 @@ export function OnStoreOrder() {
             total: Number(total),
             status: "OPENED",
             has_card,
-            created_by
+            created_by,
+            products
         }
 
         if (step === 3) {
@@ -302,8 +325,110 @@ export function OnStoreOrder() {
         }
     }
 
+    const handleSearchProducts = (text: string) => {
+        setQuery(text);
+
+        if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+        }
+        
+        debounceTimeout.current = setTimeout(async () => {
+            if (text.length >= 3) {
+                const response = await searchProducts(text);
+                setProductSuggestions(response.data as any);
+                setShowSuggestions(true);
+            }
+        }, 700);
+    };
+
+
+    const handleSelectProduct = (product: any) => {
+        setSelectedProduct(product);
+        setPrice(product.price);
+        setQuantity(quantity);
+        setQuery(product.name);
+        setShowSuggestions(false);
+    };
+
+    const addProduct = () => {
+        if (quantity > 0 && query !== '' && price > 0) {
+            setProducts((prev: any) => {
+                const updated = [
+                    ...prev,
+                    {
+                        ...selectedProduct,
+                        quantity,
+                        price: Number(price),
+                    },
+                ];
+                
+                const total = updated.reduce((sum, p) => {
+                  return sum + Number(p.quantity) * Number(p.price);
+                }, 0);
+                setValue("products_value", total);
+                return updated;
+            });
+
+            setSelectedProduct(null);
+            setQuery('');
+            setPrice(0);
+            setQuantity(0);
+            setShowSuggestions(false);
+        } else {
+            setShowProductError(true);
+            setTimeout(() => {
+                setShowProductError(false);
+            }, 2000);
+        }
+    }
+
+    const removeProduct = (product: any) => {
+        setProducts((prev: any) => {
+            const updated = prev.filter((p: any) => p.id !== product.id);
+        
+            // recalcula o valor total dos produtos
+            const total = updated.reduce((sum: any, p: any) => {
+            return sum + Number(p.quantity) * Number(p.price);
+            }, 0);
+        
+            setValue("products_value", total);
+        
+            return updated;
+        });
+    };
+
+    function handleOpenProductModal(product: any){
+            setProductModal(true)
+        }
+    function handleCloseProductModal(){
+        setProductModal(false)
+    }
+
+    const description = products
+        .map((p) => `${p.quantity}x ${p.name} - R$ ${p.price}`)
+        .join('\n');
+
+    useEffect(() => {
+        setValue('description', description);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [description]);
+    
     return(
         <Container>
+            <ProductModal 
+                isOpen={productModal}
+                onRequestClose={handleCloseProductModal}
+                loadData={() => {}}
+                action={"create"}
+                currentProduct={{
+                    id: "",
+                    name: "",
+                    price: 0,
+                    unity: "",
+                    stock: 0,
+                    enabled: false
+                }}
+            />
             <Loader show={showLoader} />
             <NewOrderProgressBar currentStep={step}/>
             <Form onSubmit={handleSubmit(onSubmitStep)} step={step} autoComplete="off">
@@ -581,15 +706,73 @@ export function OnStoreOrder() {
 
                 {step === 3 &&
                     <>
+                        <ProductContainer isEditModal={false}>
+                            <Label>Adicionar Produtos</Label>
+                            <div className="product-data">
+                                <div>
+                                    <Label>Quantidade</Label>
+                                    <Input
+                                        type="number"
+                                        placeholder="0"
+                                        value={quantity}
+                                        onChange={(e) => setQuantity(e.target.value as any)}/>
+                                </div>
+                                
+                                <div style={{ position: 'relative', width: '100%' }}>
+                                    <Label>Produto</Label>
+                                    <Input
+                                        placeholder="Produto"
+                                        value={query}
+                                        onChange={(e) => handleSearchProducts(e.target.value)}
+                                        onFocus={() => query && setShowSuggestions(true)}
+                                    />
+
+                                    {showSuggestions && productSuggestions.length > 0 && query.length >= 3 && (
+                                        <ul className="suggestion-box">
+                                        {productSuggestions.map((product: any) => (
+                                            <li key={product.id} onClick={() => handleSelectProduct(product)}>
+                                            {product.name} - R$ {product.price}
+                                            </li>
+                                        ))}
+                                        </ul>
+                                    )}
+                                </div>
+                                <div>
+                                    <Label>Valor</Label>
+                                    <Input
+                                        placeholder="Valor"
+                                        type="number"
+                                        value={price}
+                                        onChange={(e) => setPrice(e.target.value as any)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="product-actions">
+                                <button type="button" className="add-button" onClick={addProduct}>Adicionar</button>
+                                <button type="button" onClick={handleOpenProductModal}>Novo produto</button>
+                            </div>
+                            {showProductError && <ErrorMessage style={{ textAlign: 'center', marginTop: '10px' }}>
+                                Preencha todos os campos
+                                </ErrorMessage>}
+                        </ProductContainer>
                         <FormField>
-                            <Label>Descrição do Pedido</Label>
-                            <Textarea placeholder=" 1x Bouquet de rosas
-                            1x cartao
-                            1x caixa de bombom" {...register("description", {
-                                required: "Descrição do pedido é obrigatória",
-                            })}
-                            />
-                            {errors.description && <ErrorMessage>{errors.description.message}</ErrorMessage>}
+                            <Label>Descrição</Label>
+                            <DescriptionArea>
+                                {products.map((p, index) => (
+                                    <p key={index}>
+                                        {p.quantity}x {p.name} - R$ {p.price}
+                                        <button type="button" onClick={() => removeProduct(p)}>
+                                            <FontAwesomeIcon icon={faXmark}/>
+                                        </button>
+                                    </p>
+                                ))}
+                            </DescriptionArea>
+                            <Input {...register("description", { required: "Descrição obrigatória" })}
+                                style={{ display: 'none'}} value={watch("description")}/>
+
+                            {errors.description && (
+                                <ErrorMessage>{errors.description.message}</ErrorMessage>
+                            )}
                         </FormField>
                         <FormField>
                             <Label>Observações</Label>

@@ -60,6 +60,77 @@ export function ServiceOrdersPage(){
 								.order-actions, .edit-icon, .order-type, .message-content {
 									display: none;
 								}
+
+								.opened, .in_progress, .in_delivery {
+									display: flex;
+									flex-direction: column;
+								}
+
+								.order-header {
+									display: flex;
+									flex-direction: column;
+									border-bottom: 1px dashed #ccc;
+									padding-bottom: 5px;
+
+									h1 {
+										font-family: monospace;
+									}
+
+									h1, p {
+										text-align: center;
+										margin: 3px 0;
+									}
+								}
+
+								.order-number {
+									padding-top: 8px;
+									h3, h2 {
+										margin: 0;
+										text-align: center;
+									}
+								}
+
+								.client-info {
+									border-bottom: 1px dashed #ccc;
+									padding-bottom: 5px;
+
+									h3, p {
+										margin: 3px 0;
+									}
+								}
+
+								.order-items, .order-observation {
+									margin-bottom: 8px;
+
+									h3, p {
+										margin: 3px 0;
+									}
+								}
+
+								.order-observation {
+									border-bottom: 1px dashed #ccc;
+								}
+
+								.address-container, .card-container {
+									p, h3 {
+										margin: 3px;
+									}
+								}
+
+								.order-admin {
+									border-bottom: 1px dashed #ccc;
+									padding-bottom: 8px;
+								}
+
+								.order-values {
+									border-top: 1px dashed #ccc;
+									border-bottom: 1px dashed #ccc;
+									padding: 5px 0;
+								}
+
+								p {
+									margin: 10px 0;
+								}
 							}
 						</style>
 					</head>

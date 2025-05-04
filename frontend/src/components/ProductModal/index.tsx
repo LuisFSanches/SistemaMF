@@ -80,7 +80,7 @@ export function ProductModal({
 
     useEffect(() => {
         setValue("name", currentProduct.name);
-        setValue("price", currentProduct.price);
+        setValue("price", currentProduct.price || null);
         setValue("unity", currentProduct.unity);
         setValue("stock", currentProduct.stock);
         setValue("enabled", currentProduct.enabled);

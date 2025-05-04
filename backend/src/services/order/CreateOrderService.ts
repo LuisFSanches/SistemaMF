@@ -22,7 +22,8 @@ class CreateOrderService{
 		status,
 		has_card,
 		online_order,
-		online_code
+		online_code,
+		products
 	}: IOrder) {
 		try {
 			const order = await prismaClient.order.create({
@@ -45,7 +46,15 @@ class CreateOrderService{
 					status,
 					has_card,
 					online_order,
-					online_code
+					online_code,
+
+					orderItems: {
+					create: products.map((product: any) => ({
+						product_id: product.id,
+						quantity: Number(product.quantity),
+						price: Number(product.price),
+					})),
+					},
 				},
 
 				include: {

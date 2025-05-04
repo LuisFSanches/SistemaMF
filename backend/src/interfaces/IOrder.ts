@@ -19,4 +19,5 @@ export interface IOrder {
   has_card: boolean;
   online_order: boolean;
   online_code?: string;
+  products?: any
 }

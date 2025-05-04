@@ -39,7 +39,8 @@ class CreateOrderController{
 			has_card,
 			created_by,
 			online_order,
-			online_code
+			online_code,
+			products
 		} = req.body;
 
 		let client_id = clientId;
@@ -113,7 +114,8 @@ class CreateOrderController{
 			status,
 			has_card: has_card,
 			online_order,
-			online_code
+			online_code,
+			products
 		}) as any;
 
 		if ('error' in order && order.error) {

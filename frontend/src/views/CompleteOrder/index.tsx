@@ -11,7 +11,7 @@ import { useOrders } from "../../contexts/OrdersContext";
 import { Loader } from '../../components/Loader';
 import { WelcomeBackModal } from "../../components/WelcomeBackModal";
 import { RememberCardModal } from "../../components/RememberCardModal";
-
+import { formatDescription } from "../../utils";
 import { ErrorAlert } from "../../components/ErrorAlert";
 import logoFull from '../../assets/images/logo.png'
 import { convertMoney } from "../../utils";
@@ -326,7 +326,11 @@ export function CompleteOrder() {
                     <OrderReview>
                         <h1>Resumo do pedido</h1>
                         <div>
-                            <p><strong>Descrição: </strong> {currentOrder?.description}</p>
+                            <p><strong>Descrição: </strong>
+                                {formatDescription(currentOrder?.description).map((line, idx) => (
+                                    <p key={idx}>{line}</p>
+                                ))}
+                            </p>
                             <p><strong>Observação:</strong> {currentOrder?.additional_information}</p>
                             <p><strong>Valor dos Produtos: </strong> {
                                 currentOrder?.products_value  &&
