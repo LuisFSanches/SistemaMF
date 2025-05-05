@@ -51,7 +51,7 @@ export function OrderCard({
 			<div className="order-header">
 				<h1 className="store-title">MIRAI FLORES</h1>
 				<p>CNPJ: 33.861.078/0001-50</p>
-				<p>Tel: (22) 99746-1792 | Itaperuna/RJ</p>
+				<p>Tel: (22) 99751-7940 | Itaperuna/RJ</p>
 			</div>
 			<div className="order-number">
 				<span className={`order-type ${order.online_order ? "online" : "on_store"}`}>
