@@ -180,7 +180,7 @@ export function EditOrderModal({
         }
 
 		debounceTimeout.current = setTimeout(async () => {
-			if (text.length >= 3) {
+			if (text.length >= 2) {
 				const response = await searchProducts(text);
 				setProductSuggestions(response.data as any);
 				setShowSuggestions(true);
