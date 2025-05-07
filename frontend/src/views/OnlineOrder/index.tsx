@@ -332,7 +332,7 @@ export function OnlineOrder() {
                                     onFocus={() => query && setShowSuggestions(true)}
                                 />
 
-                                {showSuggestions && productSuggestions.length > 0 && query.length >= 3 && (
+                                {showSuggestions && productSuggestions.length > 0 && query.length >= 2 && (
                                     <ul className="suggestion-box">
                                     {productSuggestions.map((product: any) => (
                                         <li key={product.id} onClick={() => handleSelectProduct(product)}>
