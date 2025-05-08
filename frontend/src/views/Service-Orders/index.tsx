@@ -205,15 +205,14 @@ export function ServiceOrdersPage(){
 				order.status === "IN_DELIVERY" && moment(order.delivery_date).isSame(moment(), "week")
 			));
 		} else if (type === "today") {
-			const today = moment().format("YYYY-MM-DD");
 			setOpenedOrders(onGoingOrders.filter(order =>
-				order.status === "OPENED" && order.delivery_date === today
+				order.status === "OPENED" && moment(order.delivery_date).isSame(moment(), "day")
 			));
 			setInProgressOrders(onGoingOrders.filter(order =>
-				order.status === "IN_PROGRESS" && order.delivery_date === today
+				order.status === "IN_PROGRESS" && moment(order.delivery_date).isSame(moment(), "day")
 			));
 			setInDeliveryOrders(onGoingOrders.filter(order =>
-				order.status === "IN_DELIVERY" && order.delivery_date === today
+				order.status === "IN_DELIVERY" && moment(order.delivery_date).isSame(moment(), "day")
 			));
 		}
 	};
