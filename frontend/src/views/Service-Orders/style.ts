@@ -134,4 +134,9 @@ export const Header = styled.div`
     .online-orders {
         background-color: #246D90;
     }
+
+    input {
+        max-width: 250px;
+        margin-left: 15px;
+    }
 `
