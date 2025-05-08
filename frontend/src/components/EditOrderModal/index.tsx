@@ -50,10 +50,11 @@ export function EditOrderModal({
     } = useForm<IOrder>();
 	const [showLoader, setShowLoader] = useState(false);
 	const [products, setProducts] = useState<any[]>([]);
-	const [productSuggestions, setProductSuggestions] = useState([]);
-	const [showSuggestions, setShowSuggestions] = useState(false);
+	const [productSuggestions, setProductSuggestions] = useState<Record<number, any[]>>({});
+	const [showSuggestions, setShowSuggestions] = useState<Record<number, boolean>>({});	
 	const [queries, setQueries] = useState<{ [key: number]: string }>({});
 	const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+	const productRefs = useRef<Record<number, HTMLDivElement | null>>({});
 	const [showProductError, setShowProductError] = useState(false);
 
 	const handleOrder = async (formData: IOrder) => {
@@ -174,25 +175,34 @@ export function EditOrderModal({
 
 	const handleSearchProducts = async (index: number, text: string) => {
 		setQueries(prev => ({ ...prev, [index]: text }));
-
+	
 		if (debounceTimeout.current) {
-            clearTimeout(debounceTimeout.current);
-        }
-
+			clearTimeout(debounceTimeout.current);
+		}
+	
 		debounceTimeout.current = setTimeout(async () => {
 			if (text.length >= 2) {
 				const response = await searchProducts(text);
-				setProductSuggestions(response.data as any);
-				setShowSuggestions(true);
+	
+				setProductSuggestions(prev => ({
+					...prev,
+					[index]: response.data,
+				}));
+	
+				setShowSuggestions(prev => ({
+					...prev,
+					[index]: true,
+				}));
 			}
 		}, 700);
 	};
+	
 
 	const handleSelectProduct = (index: number, product: any) => {
 		updateProducts(index, "product", product);
 		updateProducts(index, "price", product.price);
 		updateProducts(index, "product_id", product.id);
-		setShowSuggestions(false);
+		setShowSuggestions({});
 
 		// Atualiza o texto do input também
 		setQueries(prev => ({ ...prev, [index]: product.name }));
@@ -257,6 +267,24 @@ export function EditOrderModal({
 		setShowProductError(hasInvalidProduct);
 	}, [products]);
 
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			Object.entries(productRefs.current).forEach(([index, ref]) => {
+				if (ref && !ref.contains(event.target as Node)) {
+					setShowSuggestions(prev => ({
+						...prev,
+						[Number(index)]: false,
+					}));
+				}
+			});
+		};
+	
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, []);
+
 	if (!order) {
 		return null;
 	}
@@ -292,25 +320,32 @@ export function EditOrderModal({
 													onChange={(e) => updateProducts(index, 'quantity', Number(e.target.value))}/>
 											</div>
 									
-											<div key={p.id} style={{ position: 'relative', width: '100%' }}>
+											<div
+												key={p.id}
+												style={{ position: 'relative', width: '100%' }}
+												ref={(el) => (productRefs.current[index] = el)}
+											>
 												<Label>Produto</Label>
 												<Input
 													placeholder="Produto"
 													value={queries[index] ?? p.product.name}
 													onChange={(e) => handleSearchProducts(index, e.target.value)}
-													onFocus={() => (queries[index] || p.product.name) && setShowSuggestions(true)}
+													onFocus={() => (queries[index] || p.product.name) &&
+														setShowSuggestions(prev => ({ ...prev, [index]: true }))}
 												/>
 
-												{showSuggestions && productSuggestions.length > 0 && (queries[index]?.length ?? 0) >= 3 && (
+												{showSuggestions[index] && productSuggestions[index]?.length > 0 &&
+													(queries[index]?.length ?? 0) >= 3 && (
 													<ul className="suggestion-box">
-														{productSuggestions?.map((product: any) => (
-														<li key={product.id} onClick={() => handleSelectProduct(index, product)}>
-															{product.name} - R$ {product.price}
-														</li>
+														{productSuggestions[index].map((product: any) => (
+															<li key={product.id} onClick={() => handleSelectProduct(index, product)}>
+																{product.name} - R$ {product.price}
+															</li>
 														))}
 													</ul>
 												)}
 											</div>
+
 											<div>
 												<Label>Valor</Label>
 												<Input

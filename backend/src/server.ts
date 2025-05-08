@@ -62,9 +62,7 @@ export const io = new Server(server, {
   },
 });
 
-io.on('connection', (socket) => {
-  console.log('Novo cliente conectado:', socket.id);
-});
+io.on('connection', (socket) => {});
 
 httpsServer.listen(PORT, () => {
   console.log(`Servidor rodando em https://localhost:${PORT}`);
