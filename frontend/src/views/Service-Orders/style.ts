@@ -108,8 +108,22 @@ export const Orders = styled.div`
 `
 export const Header = styled.div`
     display: flex;
+    justify-content: space-between;
     margin-left: 15px;
     margin-top: 10px;
+
+    div {
+        display: flex;
+    }
+
+    .type-filters {
+        flex: 1;
+    }
+
+    .date-filters {
+        display: flex;
+        justify-content: flex-end;
+    }
 
     button {
         padding: 10px;
@@ -120,6 +134,12 @@ export const Header = styled.div`
 
         &.active {
             border: 3px solid pink;
+        }
+
+        &.active-date {
+            border: 1px solid white;
+            background-color: #e7b7c2;
+            color: white;
         }
     }
 
@@ -138,5 +158,10 @@ export const Header = styled.div`
     input {
         max-width: 250px;
         margin-left: 15px;
+    }
+
+    .all-dates {
+        background-color: #F4E5E8;
+        color: #000000;
     }
 `

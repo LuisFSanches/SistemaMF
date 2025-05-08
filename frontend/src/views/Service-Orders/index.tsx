@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import moment from "moment";
 import { IOrder } from "../../interfaces/IOrder";
 import { Container, Orders, Header } from "./style";
 import { updateStatus } from "../../services/orderService";
@@ -18,6 +19,7 @@ export function ServiceOrdersPage(){
     const [editOrderModal, setEditOrderModal] = useState(false);
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 	const [selectedOrderType, setSelectedOrderType] = useState("all-orders");
+	const [selectedDate, setSelectedDate] = useState("all-dates");
 
 
     function handleOpenEditOrderModal(order: IOrder){
@@ -184,27 +186,75 @@ export function ServiceOrdersPage(){
 		setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && matches(order)));
 		setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && matches(order)));
 	};
+
+	const filterOrdersByDate = (type: string) => {
+		setSelectedDate(type);
+	
+		if (type === "all-dates") {
+			setOpenedOrders(onGoingOrders.filter(order => order.status === "OPENED"));
+			setInProgressOrders(onGoingOrders.filter(order => order.status === "IN_PROGRESS"));
+			setInDeliveryOrders(onGoingOrders.filter(order => order.status === "IN_DELIVERY"));
+		} else if (type === "week") {
+			setOpenedOrders(onGoingOrders.filter(order =>
+				order.status === "OPENED" && moment(order.delivery_date).isSame(moment(), "week")
+			));
+			setInProgressOrders(onGoingOrders.filter(order =>
+				order.status === "IN_PROGRESS" && moment(order.delivery_date).isSame(moment(), "week")
+			));
+			setInDeliveryOrders(onGoingOrders.filter(order =>
+				order.status === "IN_DELIVERY" && moment(order.delivery_date).isSame(moment(), "week")
+			));
+		} else if (type === "today") {
+			const today = moment().format("YYYY-MM-DD");
+			setOpenedOrders(onGoingOrders.filter(order =>
+				order.status === "OPENED" && order.delivery_date === today
+			));
+			setInProgressOrders(onGoingOrders.filter(order =>
+				order.status === "IN_PROGRESS" && order.delivery_date === today
+			));
+			setInDeliveryOrders(onGoingOrders.filter(order =>
+				order.status === "IN_DELIVERY" && order.delivery_date === today
+			));
+		}
+	};
+	
 	
     return (
 		<Container>
 			<Loader show={showLoader} />
 			<Header>
-				<button className={`all-orders ${selectedOrderType === "all-orders" ? "active" : ""}`}
-					onClick={() => filterOrdersByType("all-orders")}>
-						Todos
-				</button>
-				<button className={`counter-orders ${selectedOrderType === "counter-orders" ? "active" : ""}`}
-					onClick={() => filterOrdersByType("counter-orders")}>
-						Ordens Balcão
+				<div className="type-filters">
+					<button className={`all-orders ${selectedOrderType === "all-orders" ? "active" : ""}`}
+						onClick={() => filterOrdersByType("all-orders")}>
+							Todos
 					</button>
-				<button className={`online-orders ${selectedOrderType === "online-orders" ? "active" : ""}`}
-					onClick={() => filterOrdersByType("online-orders")}>
-						Ordens Online
-				</button>
-				<input
-					type="text"
-					placeholder="Buscar pedido"
-					onChange={(e) => filterOrdersByNameOrPhone(e.target.value)} />
+					<button className={`counter-orders ${selectedOrderType === "counter-orders" ? "active" : ""}`}
+						onClick={() => filterOrdersByType("counter-orders")}>
+							Ordens Balcão
+						</button>
+					<button className={`online-orders ${selectedOrderType === "online-orders" ? "active" : ""}`}
+						onClick={() => filterOrdersByType("online-orders")}>
+							Ordens Online
+					</button>
+					<input
+						type="text"
+						placeholder="Buscar por nome ou telefone"
+						onChange={(e) => filterOrdersByNameOrPhone(e.target.value)} />
+				</div>
+				<div className="date-filters">
+					<button className={`all-dates ${selectedDate === "all-dates" ? "active-date" : ""}`}
+						onClick={() => filterOrdersByDate("all-dates")}>
+							Qualquer data
+					</button>
+					<button className={`all-dates ${selectedDate === "today" ? "active-date" : ""}`}
+						onClick={() => filterOrdersByDate("today")}>
+							Hoje
+					</button>
+					<button className={`all-dates ${selectedDate === "week" ? "active-date" : ""}`}
+						onClick={() => filterOrdersByDate("week")}>
+							Essa semana
+					</button>
+				</div>
  			</Header>
 			<Orders>
 				<div className="order-container opened">
