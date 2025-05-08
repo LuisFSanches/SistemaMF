@@ -169,6 +169,22 @@ export function ServiceOrdersPage(){
 		}
 	};
 
+	const filterOrdersByNameOrPhone = (text: string) => {
+		const lowerText = text.toLowerCase();
+	
+		const matches = (order: IOrder) => {
+			return (
+				order.client.first_name.toLowerCase().includes(lowerText) ||
+				order.client.last_name.toLowerCase().includes(lowerText) ||
+				order.client.phone_number.toLowerCase().includes(lowerText)
+			);
+		};
+	
+		setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && matches(order)));
+		setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && matches(order)));
+		setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && matches(order)));
+	};
+	
     return (
 		<Container>
 			<Loader show={showLoader} />
@@ -185,6 +201,10 @@ export function ServiceOrdersPage(){
 					onClick={() => filterOrdersByType("online-orders")}>
 						Ordens Online
 				</button>
+				<input
+					type="text"
+					placeholder="Buscar pedido"
+					onChange={(e) => filterOrdersByNameOrPhone(e.target.value)} />
  			</Header>
 			<Orders>
 				<div className="order-container opened">
