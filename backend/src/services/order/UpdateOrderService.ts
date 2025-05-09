@@ -1,6 +1,7 @@
 import prismaClient from '../../prisma';
 import { IOrder } from "../../interfaces/IOrder";
 import { ErrorCodes } from "../../exceptions/root";
+import moment from 'moment-timezone';
 
 class UpdateOrderService{
 	async execute(data: IOrder) {
@@ -11,12 +12,18 @@ class UpdateOrderService{
 		delete order.products;
 
 		try {
+			const formattedDeliveryDate = moment.utc(order.delivery_date)
+				.tz('America/Sao_Paulo', true)
+				.set({ hour: 12, minute: 0, second: 0 })
+				.toDate();
+
 			const updatedOrder = await prismaClient.order.update({
 				where: {
 					id: data.id
 				},
 				data: {
 					...order,
+					delivery_date: formattedDeliveryDate,
 					orderItems: {
 						update: data.products
 						.filter((product: any) => product.id)

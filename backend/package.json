@@ -36,6 +36,7 @@
     "express-async-errors": "^3.1.1",
     "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.2",
+    "moment-timezone": "^0.5.48",
     "prisma": "^5.14.0",
     "socket.io": "^4.8.1",
     "tsup": "^8.3.5",

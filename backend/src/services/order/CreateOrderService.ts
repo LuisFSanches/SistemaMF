@@ -1,6 +1,7 @@
 import { IOrder } from "../../interfaces/IOrder";
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import moment from 'moment-timezone';
 
 class CreateOrderService{
 	async execute({
@@ -26,6 +27,12 @@ class CreateOrderService{
 		products
 	}: IOrder) {
 		try {
+		
+			const formattedDeliveryDate = moment.utc(delivery_date)
+				.tz('America/Sao_Paulo', true)
+				.set({ hour: 12, minute: 0, second: 0 })
+				.toDate();
+
 			const order = await prismaClient.order.create({
 				data: {
 					description,
@@ -40,7 +47,7 @@ class CreateOrderService{
 					total,
 					payment_method,
 					payment_received,
-					delivery_date,
+					delivery_date: formattedDeliveryDate,
 					created_by,
 					updated_by,
 					status,
