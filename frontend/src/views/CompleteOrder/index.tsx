@@ -301,7 +301,7 @@ export function CompleteOrder() {
     };
 
     const handleCreateUser = async () => {
-        const phoneNumber =watch('phone_number');
+        const phoneNumber = watch('phone_number');
         const firstName = watch('first_name');
         const lastName = watch('last_name');
 
@@ -311,19 +311,43 @@ export function CompleteOrder() {
             setError("last_name", { message: "Preencha todos os campos" });
             return;
         }
+
         setError("phone_number", { message: "" });
         setError("first_name", { message: "" });
         setError("last_name", { message: "" });
 
         setShowLoader(true);
-        const { data: clientData } = await createClient({
-            first_name: firstName,
-            last_name: lastName,
-            phone_number: rawTelephone(phoneNumber),
-        });
-        setClientId(clientData.id);
-        setShowLoader(false);
-    }
+
+        let timeoutReached = false;
+
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => {
+                timeoutReached = true;
+                reject(new Error("Tempo de requisição excedido. Tente novamente."));
+            }, 3500)
+        );
+
+        try {
+            const clientPromise = createClient({
+                first_name: firstName,
+                last_name: lastName,
+                phone_number: rawTelephone(phoneNumber),
+            });
+
+            const result = await Promise.race([clientPromise, timeoutPromise]) as any;
+            const clientData = result.data;
+
+            if (!timeoutReached) {
+                setClientId(clientData.id);
+            }
+
+        } catch (error: any) {
+            console.error(error);
+            alert(error.message || "Erro ao criar cliente. Tente novamente.");
+        } finally {
+            setShowLoader(false);
+        }
+    };
 
     return (
         <Container>
