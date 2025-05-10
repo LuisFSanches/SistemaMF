@@ -12,7 +12,7 @@ export interface IOrder {
   total: number;
   payment_method: string;
   payment_received: boolean;
-  delivery_date: Date;
+  delivery_date: string;
   created_by: string;
   updated_by: string;
   status: string;

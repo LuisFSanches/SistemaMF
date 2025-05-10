@@ -108,7 +108,7 @@ class CreateOrderController{
 			total,
 			payment_method,
 			payment_received,
-			delivery_date: new Date(`${delivery_date}T00:00:00Z`),
+			delivery_date,
 			created_by,
 			updated_by: created_by,
 			status,

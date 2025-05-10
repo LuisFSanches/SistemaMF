@@ -334,6 +334,30 @@ export const FormField = styled.div<{ isShortField?: boolean }>`
     }
 `;
 
+export const FormFieldTitle = styled.div`
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    padding-bottom: 5px;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    font-weight: 600;
+`;
+
+export const FormFieldsContainer = styled.div`
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-top: 20px;
+
+    div {
+        width: 100% !important;
+    }
+`;
+
 export const EditFormField = styled.div<{ isShortField?: boolean }>`
     width: 100% !important;
     width: ${({ isShortField }) => (isShortField ? '35%' : '85%')};
@@ -479,6 +503,10 @@ export const PrimaryButton = styled.button`
     font-weight: 600;
     cursor: pointer; 
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    &.next-button {
+        margin-top: 20px;
+    }
 
     &:hover {
         background: #f5b1c1; 

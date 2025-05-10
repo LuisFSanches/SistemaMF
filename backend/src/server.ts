@@ -22,17 +22,6 @@ orderEmitter.on(OrderEvents.OnlineOrderReceived, (data) => {
 const app = express();
 const httpsOptions = getCertificatesForWebhook() as any;
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 120,
-  message: {
-    error: "Too many requests, please try again later.",
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-app.use(limiter);
 app.use(express.json());
 app.use(cors());
 app.use(router);

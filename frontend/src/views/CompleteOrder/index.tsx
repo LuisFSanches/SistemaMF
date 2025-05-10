@@ -26,9 +26,12 @@ import {
     Checkbox,
     ErrorMessage,
     PrimaryButton,
+    FormFieldTitle,
+    FormFieldsContainer
 } from "../../styles/global";
 import { TYPES_OF_DELIVERY, STATES } from "../../constants";
 import { rawTelephone } from "../../utils";
+import { createClient } from "../../services/clientService";
 
 import { Form, Container, FormHeader, CompletedOrder, OrderReview } from "./style";
 
@@ -213,6 +216,7 @@ export function CompleteOrder() {
         };
         
         fetchClientData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [phone_number, setValue, setError]);
 
     useEffect(() => {
@@ -296,6 +300,31 @@ export function CompleteOrder() {
         handleSubmit(submitOrder)();
     };
 
+    const handleCreateUser = async () => {
+        const phoneNumber =watch('phone_number');
+        const firstName = watch('first_name');
+        const lastName = watch('last_name');
+
+        if (!firstName || !lastName || !phoneNumber) {
+            setError("phone_number", { message: "Preencha todos os campos" });
+            setError("first_name", { message: "Preencha todos os campos" });
+            setError("last_name", { message: "Preencha todos os campos" });
+            return;
+        }
+        setError("phone_number", { message: "" });
+        setError("first_name", { message: "" });
+        setError("last_name", { message: "" });
+
+        setShowLoader(true);
+        const { data: clientData } = await createClient({
+            first_name: firstName,
+            last_name: lastName,
+            phone_number: rawTelephone(phoneNumber),
+        });
+        setClientId(clientData.id);
+        setShowLoader(false);
+    }
+
     return (
         <Container>
             <WelcomeBackModal
@@ -346,324 +375,337 @@ export function CompleteOrder() {
                             }</p>
                         </div>
                     </OrderReview>
-                    <FormField>
-                        <Label>
-                            Seu telefone
-                            <span>*</span>
-                        </Label>
-                        <InputMask
-                            autoComplete="off"
-                            mask={mask}
-                            alwaysShowMask={false}
-                            placeholder='Telefone'
-                            value={watch("phone_number") || ""}
-                            {...register("phone_number", { 
-                                required: "Telefone inválido",
-                                validate: (value) => {
-                                    if (value.replace(/[^0-9]/g, "").length < 10) {
-                                        return "Telefone inválido";
+                    <FormFieldsContainer>
+                        <FormFieldTitle>Dados do Comprador</FormFieldTitle>
+                        <FormField>
+                            <Label>
+                                Seu telefone
+                                <span>*</span>
+                            </Label>
+                            <InputMask
+                                autoComplete="off"
+                                mask={mask}
+                                alwaysShowMask={false}
+                                placeholder='Telefone'
+                                value={watch("phone_number") || ""}
+                                {...register("phone_number", { 
+                                    required: "Telefone inválido",
+                                    validate: (value) => {
+                                        if (value.replace(/[^0-9]/g, "").length < 10) {
+                                            return "Telefone inválido";
+                                        }
+                                        return true;
                                     }
-                                    return true;
-                                }
-                            })}
-                        />
-                        {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
-                    </FormField>
-                    <InlineFormField>
-                        <FormField>
-                            <Label>
-                                Seu nome
-                                <span>*</span>
-                            </Label>
-                            <Input type="text" autoComplete="off" placeholder="Digite seu nome"
-                                {...register("first_name", {
-                                    required: "Nome inválido",
                                 })}
                             />
-                            {errors.first_name && <ErrorMessage>{errors.first_name.message}</ErrorMessage>}
+                            {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
                         </FormField>
-                        <FormField>
-                            <Label>
-                                Seu sobrenome
-                                <span>*</span>
-                            </Label>
-                            <Input type="text" placeholder="Digite seu sobrenome" 
-                                {...register("last_name", {
-                                    required: "Sobrenome inválido",
-                                })}
-                            />
-                            {errors.last_name && <ErrorMessage>{errors.last_name.message}</ErrorMessage>}
-                        </FormField>
-                    </InlineFormField>
-                    <FormField>
-                        <Label>
-                            Informe sobre a entrega
-                            <span>*</span>
-                        </Label>
-                        <Select {...register("type_of_delivery", { required: "Administrador Responsável inválido" })}>
-                            <option value="">Escolher:</option>
-                            {Object.entries(TYPES_OF_DELIVERY).map(([key, value]) => (
-                                <option key={key} value={key}>{value}</option>
-                            ))}
-                        </Select>
-                        {errors.type_of_delivery && <ErrorMessage>{errors.type_of_delivery.message}</ErrorMessage>}
-                    </FormField>
-                    {typeOfDelivery === "SOMEONES_GIFT" &&
                         <InlineFormField>
                             <FormField>
                                 <Label>
-                                    Recebedor
+                                    Seu nome
                                     <span>*</span>
                                 </Label>
-                                <Input type="text" placeholder="Recebedor"
-                                    {...register("receiver_name", {
+                                <Input type="text" autoComplete="off" placeholder="Digite seu nome"
+                                    {...register("first_name", {
                                         required: "Nome inválido",
                                     })}
                                 />
-                                {errors.receiver_name && <ErrorMessage>{errors.receiver_name.message}</ErrorMessage>}
+                                {errors.first_name && <ErrorMessage>{errors.first_name.message}</ErrorMessage>}
                             </FormField>
                             <FormField>
                                 <Label>
-                                    Telefone do recebedor
+                                    Seu sobrenome
                                     <span>*</span>
                                 </Label>
-                                <InputMask
-                                    autoComplete="off"
-                                    mask={receiverMask}
-                                    alwaysShowMask={false}
-                                    placeholder='Telefone'
-                                    value={watch("receiver_phone") || ""}
-                                    {...register("receiver_phone", {
-                                        required: "Telefone inválido"
+                                <Input type="text" placeholder="Digite seu sobrenome" 
+                                    {...register("last_name", {
+                                        required: "Sobrenome inválido",
                                     })}
                                 />
-                                {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
+                                {errors.last_name && <ErrorMessage>{errors.last_name.message}</ErrorMessage>}
                             </FormField>
                         </InlineFormField>
-                    }
-                    {addresses.length === 0 &&
-                        <CheckboxContainer alignLeft>
-                            <Checkbox type="checkbox" onChange={(e) => {
-                                setPickupOnStore(!pickupOnStore)
-                                handlePickUpAddress(e.target.checked);
-                                
-                            }} checked={pickupOnStore}/>
-                            <Label>Retirar Pedido na loja</Label>
-                        </CheckboxContainer>
-                    }
-                    {addresses.length > 0 && (
+                        {!client_id &&
+                            <PrimaryButton className="next-button" type="button" onClick={handleCreateUser}>
+                                Continuar
+                            </PrimaryButton>
+                        }
+                    </FormFieldsContainer>
+
+                    {client_id &&
                         <>
-                            {!pickupOnStore &&
-                                <FormField>
-                                    <Label>
-                                        Selecione o Endereço (Ou cadastre um novo)
-                                        <span>*</span>
-                                    </Label>
-                                    <Select
-                                        {...register("addressId")}
-                                        onChange={(e) => {
-                                            const selectedAddressId = e.target.value;
-                                            const selectedAddress: any = addresses.find((address: any) => address.id === selectedAddressId);
-                                            setSelectedAddress(selectedAddress);
-                                            if (selectedAddress) {
-                                                setValue("postal_code", selectedAddress.postal_code);
-                                                setValue("street", selectedAddress.street);
-                                                setValue("street_number", selectedAddress.street_number);
-                                                setValue("city", selectedAddress.city);
-                                                setValue("neighborhood", selectedAddress.neighborhood);
-                                                setValue("complement", selectedAddress.complement);
-                                                setValue("reference_point", selectedAddress.reference_point);
-                                                setValue("state", selectedAddress.state);
-                                                setValue("country", selectedAddress.country);
-                                                setAddressId(selectedAddressId);
-                                            }
-
-                                            if (!selectedAddress) {
-                                                setValue("postal_code", "");
-                                                setValue("street", "");
-                                                setValue("street_number", "");
-                                                setValue("city", "");
-                                                setValue("neighborhood", "");
-                                                setValue("complement", "");
-                                                setValue("reference_point", "");
-                                                setValue("state", "");
-                                                setValue("country", "");
-                                                setAddressId("");
-                                            }
-                                        }}
-                                    >
-                                        <option value="">Selecione um endereço</option>
-                                        {addresses.map((address: any) => (
-                                            <option key={address.id} value={address.id}>
-                                                {address.street}, {address.number} - {address.city}
-                                            </option>
-                                        ))}
-                                    </Select>
-                                </FormField>
+                            <FormField>
+                                <Label>
+                                    Informe sobre a entrega
+                                    <span>*</span>
+                                </Label>
+                                <Select {...register("type_of_delivery", { required: "Administrador Responsável inválido" })}>
+                                    <option value="">Escolher:</option>
+                                    {Object.entries(TYPES_OF_DELIVERY).map(([key, value]) => (
+                                        <option key={key} value={key}>{value}</option>
+                                    ))}
+                                </Select>
+                                {errors.type_of_delivery && <ErrorMessage>{errors.type_of_delivery.message}</ErrorMessage>}
+                            </FormField>
+                            {typeOfDelivery === "SOMEONES_GIFT" &&
+                                <InlineFormField>
+                                    <FormField>
+                                        <Label>
+                                            Recebedor
+                                            <span>*</span>
+                                        </Label>
+                                        <Input type="text" placeholder="Recebedor"
+                                            {...register("receiver_name", {
+                                                required: "Nome inválido",
+                                            })}
+                                        />
+                                        {errors.receiver_name && <ErrorMessage>{errors.receiver_name.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>
+                                            Telefone do recebedor
+                                            <span>*</span>
+                                        </Label>
+                                        <InputMask
+                                            autoComplete="off"
+                                            mask={receiverMask}
+                                            alwaysShowMask={false}
+                                            placeholder='Telefone'
+                                            value={watch("receiver_phone") || ""}
+                                            {...register("receiver_phone", {
+                                                required: "Telefone inválido"
+                                            })}
+                                        />
+                                        {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
+                                    </FormField>
+                                </InlineFormField>
                             }
-                            
-                            <InlineFormField>
-                                <CheckboxContainer>
-                                    <Checkbox type="checkbox" disabled={pickupOnStore} onChange={() => {
-                                        setNewAddress(!newAddress)
-
-                                        if (!newAddress) {
-                                            setAddressId("");
-                                            setValue("addressId", "");
-                                        }
-
-                                        if (newAddress) {
-                                            setAddressId(selectedAddress.id);
-                                            setValue("addressId", selectedAddress.id);
-                                        }
-                                        
-                                    }} checked={newAddress}/>
-                                    <Label>Cadastrar novo endereço</Label>
-                                </CheckboxContainer>
-
-                                <CheckboxContainer>
+                            {addresses.length === 0 &&
+                                <CheckboxContainer alignLeft>
                                     <Checkbox type="checkbox" onChange={(e) => {
                                         setPickupOnStore(!pickupOnStore)
                                         handlePickUpAddress(e.target.checked);
                                         
                                     }} checked={pickupOnStore}/>
-                                    <Label>Retirar na Loja</Label>
+                                    <Label>Retirar Pedido na loja</Label>
                                 </CheckboxContainer>
-                            </InlineFormField>
-                        </>
-                    )}
-                    {!pickupOnStore &&
-                        <>
-                            <FormField>
-                                <Label>
-                                    Rua
-                                    <span>*</span>
-                                </Label>
-                                <Input type="text" placeholder="Rua" {...register("street", {
-                                    required: "Rua inválida",
-                                    })}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                                {errors.street && <ErrorMessage>{errors.street.message}</ErrorMessage>}
-                            </FormField>
-                            <InlineFormField>
-                                <FormField isShortField>
-                                    <Label>
-                                        Número
-                                        <span>*</span>
-                                    </Label>
-                                    <Input type="text" placeholder="Número" {...register("street_number", {
-                                        required: "Número inválido",
-                                        })}
-                                        disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                    />
-                                    {errors.street_number && <ErrorMessage>{errors.street_number.message}</ErrorMessage>}
-                                </FormField>
-                                <FormField>
-                                    <Label>
-                                        Complemento
-                                    </Label>
-                                    <Input type="text" placeholder="Complemento" {...register("complement")}
-                                        disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                    />
-                                </FormField>
-                            </InlineFormField>
-                            <FormField>
-                                <Label>
-                                    Bairro
-                                    <span>*</span>
-                                </Label>
-                                <Input type="text" placeholder="Bairro" {...register("neighborhood", {
-                                    required: "Bairro inválido",
-                                    })}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                                {errors.neighborhood && <ErrorMessage>{errors.neighborhood.message}</ErrorMessage>}
-                            </FormField>
-                            <FormField>
-                                <Label>Ponto de referência</Label>
-                                <Input type="text" placeholder="Ponto de referência" {...register("reference_point")}
-                                    disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                />
-                            </FormField>
+                            }
+                            {addresses.length > 0 && (
+                                <>
+                                    {!pickupOnStore &&
+                                        <FormField>
+                                            <Label>
+                                                Selecione o Endereço (Ou cadastre um novo)
+                                                <span>*</span>
+                                            </Label>
+                                            <Select
+                                                {...register("addressId")}
+                                                onChange={(e) => {
+                                                    const selectedAddressId = e.target.value;
+                                                    const selectedAddress: any = addresses.find((address: any) => address.id === selectedAddressId);
+                                                    setSelectedAddress(selectedAddress);
+                                                    if (selectedAddress) {
+                                                        setValue("postal_code", selectedAddress.postal_code);
+                                                        setValue("street", selectedAddress.street);
+                                                        setValue("street_number", selectedAddress.street_number);
+                                                        setValue("city", selectedAddress.city);
+                                                        setValue("neighborhood", selectedAddress.neighborhood);
+                                                        setValue("complement", selectedAddress.complement);
+                                                        setValue("reference_point", selectedAddress.reference_point);
+                                                        setValue("state", selectedAddress.state);
+                                                        setValue("country", selectedAddress.country);
+                                                        setAddressId(selectedAddressId);
+                                                    }
 
-                            <InlineFormField>
-                                <FormField>
-                                    <Label>
-                                        Estado
-                                        <span>*</span>
-                                    </Label>
-                                    <Select {...register("state", {
-                                        required: "Estado inválido",
-                                        })}>
-                                        <option value="">Selecionar</option>
-                                        {Object.entries(STATES).map(([key, value]) => (
-                                            <option key={key} value={key}>{value}</option>
-                                        ))}
-                                    </Select>
-                                    {errors.state && <ErrorMessage>{errors.state.message}</ErrorMessage>}
-                                </FormField>
-                                <FormField>
-                                    <Label>
-                                        Cidade
-                                        <span>*</span>
-                                    </Label>
-                                    <Input type="text" placeholder="Cidade" {...register("city", {
-                                        required: "Cidade inválido",
-                                        })}
-                                        disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                    />
-                                    {errors.city && <ErrorMessage>{errors.city.message}</ErrorMessage>}
-                                </FormField>
-                            </InlineFormField>
-                        </>
-                    }
-                    <FormField>
-                        <Label>
-                            Data de Entrega
-                            <span>*</span>
-                        </Label>
-                        <Input type="date" {...register("delivery_date", {
-                            required: "Data de entrega é obrigatória",
-                        })}/>
-                        {errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
-                    </FormField>
-                    <FormField>
-                        <CheckboxContainer>
-                            <Checkbox type="checkbox" {...register("has_card")} />
-                            <Label>Pedido Contém Cartão.</Label>
-                        </CheckboxContainer>
-                    </FormField>
-                    {hasCard &&
-                        <>
-                            <FormField ref={cardSectionRef}>
-                                <Label>
-                                    De: <span>*</span>
-                                </Label>
-                                <Input {...register("card_from", {
-                                    required: "Remetente do cartão é obrigatório",
-                                })}/>
-                                {errors.card_from && <ErrorMessage>{errors.card_from.message}</ErrorMessage>}
-                            </FormField>
+                                                    if (!selectedAddress) {
+                                                        setValue("postal_code", "");
+                                                        setValue("street", "");
+                                                        setValue("street_number", "");
+                                                        setValue("city", "");
+                                                        setValue("neighborhood", "");
+                                                        setValue("complement", "");
+                                                        setValue("reference_point", "");
+                                                        setValue("state", "");
+                                                        setValue("country", "");
+                                                        setAddressId("");
+                                                    }
+                                                }}
+                                            >
+                                                <option value="">Selecione um endereço</option>
+                                                {addresses.map((address: any) => (
+                                                    <option key={address.id} value={address.id}>
+                                                        {address.street}, {address.number} - {address.city}
+                                                    </option>
+                                                ))}
+                                            </Select>
+                                        </FormField>
+                                    }
+                                    
+                                    <InlineFormField>
+                                        <CheckboxContainer>
+                                            <Checkbox type="checkbox" disabled={pickupOnStore} onChange={() => {
+                                                setNewAddress(!newAddress)
+
+                                                if (!newAddress) {
+                                                    setAddressId("");
+                                                    setValue("addressId", "");
+                                                }
+
+                                                if (newAddress) {
+                                                    setAddressId(selectedAddress.id);
+                                                    setValue("addressId", selectedAddress.id);
+                                                }
+                                                
+                                            }} checked={newAddress}/>
+                                            <Label>Cadastrar novo endereço</Label>
+                                        </CheckboxContainer>
+
+                                        <CheckboxContainer>
+                                            <Checkbox type="checkbox" onChange={(e) => {
+                                                setPickupOnStore(!pickupOnStore)
+                                                handlePickUpAddress(e.target.checked);
+                                                
+                                            }} checked={pickupOnStore}/>
+                                            <Label>Retirar na Loja</Label>
+                                        </CheckboxContainer>
+                                    </InlineFormField>
+                                </>
+                            )}
+                            {!pickupOnStore &&
+                                <>
+                                    <FormField>
+                                        <Label>
+                                            Rua
+                                            <span>*</span>
+                                        </Label>
+                                        <Input type="text" placeholder="Rua" {...register("street", {
+                                            required: "Rua inválida",
+                                            })}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                        {errors.street && <ErrorMessage>{errors.street.message}</ErrorMessage>}
+                                    </FormField>
+                                    <InlineFormField>
+                                        <FormField isShortField>
+                                            <Label>
+                                                Número
+                                                <span>*</span>
+                                            </Label>
+                                            <Input type="text" placeholder="Número" {...register("street_number", {
+                                                required: "Número inválido",
+                                                })}
+                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                            />
+                                            {errors.street_number && <ErrorMessage>{errors.street_number.message}</ErrorMessage>}
+                                        </FormField>
+                                        <FormField>
+                                            <Label>
+                                                Complemento
+                                            </Label>
+                                            <Input type="text" placeholder="Complemento" {...register("complement")}
+                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                            />
+                                        </FormField>
+                                    </InlineFormField>
+                                    <FormField>
+                                        <Label>
+                                            Bairro
+                                            <span>*</span>
+                                        </Label>
+                                        <Input type="text" placeholder="Bairro" {...register("neighborhood", {
+                                            required: "Bairro inválido",
+                                            })}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                        {errors.neighborhood && <ErrorMessage>{errors.neighborhood.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>Ponto de referência</Label>
+                                        <Input type="text" placeholder="Ponto de referência" {...register("reference_point")}
+                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                        />
+                                    </FormField>
+
+                                    <InlineFormField>
+                                        <FormField>
+                                            <Label>
+                                                Estado
+                                                <span>*</span>
+                                            </Label>
+                                            <Select {...register("state", {
+                                                required: "Estado inválido",
+                                                })}>
+                                                <option value="">Selecionar</option>
+                                                {Object.entries(STATES).map(([key, value]) => (
+                                                    <option key={key} value={key}>{value}</option>
+                                                ))}
+                                            </Select>
+                                            {errors.state && <ErrorMessage>{errors.state.message}</ErrorMessage>}
+                                        </FormField>
+                                        <FormField>
+                                            <Label>
+                                                Cidade
+                                                <span>*</span>
+                                            </Label>
+                                            <Input type="text" placeholder="Cidade" {...register("city", {
+                                                required: "Cidade inválido",
+                                                })}
+                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                            />
+                                            {errors.city && <ErrorMessage>{errors.city.message}</ErrorMessage>}
+                                        </FormField>
+                                    </InlineFormField>
+                                </>
+                            }
                             <FormField>
                                 <Label>
-                                    Para: <span>*</span>
+                                    Data de Entrega
+                                    <span>*</span>
                                 </Label>
-                                <Input {...register("card_to", {
-                                    required: "Destinatário do cartão é obrigatório",
+                                <Input type="date" {...register("delivery_date", {
+                                    required: "Data de entrega é obrigatória",
                                 })}/>
-                                {errors.card_to && <ErrorMessage>{errors.card_to.message}</ErrorMessage>}
+                                {errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
                             </FormField>
                             <FormField>
-                                <Label>Mensagem do cartão <span>*</span></Label>
-                                <Textarea {...register("card_message", {required: "Mensagem do cartão é obrigatório",})}
-                                />
-                                {errors.card_message && <ErrorMessage>{errors.card_message.message}</ErrorMessage>}
+                                <CheckboxContainer>
+                                    <Checkbox type="checkbox" {...register("has_card")} />
+                                    <Label>Pedido Contém Cartão.</Label>
+                                </CheckboxContainer>
                             </FormField>
+                            {hasCard &&
+                                <>
+                                    <FormField ref={cardSectionRef}>
+                                        <Label>
+                                            De: <span>*</span>
+                                        </Label>
+                                        <Input {...register("card_from", {
+                                            required: "Remetente do cartão é obrigatório",
+                                        })}/>
+                                        {errors.card_from && <ErrorMessage>{errors.card_from.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>
+                                            Para: <span>*</span>
+                                        </Label>
+                                        <Input {...register("card_to", {
+                                            required: "Destinatário do cartão é obrigatório",
+                                        })}/>
+                                        {errors.card_to && <ErrorMessage>{errors.card_to.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>Mensagem do cartão <span>*</span></Label>
+                                        <Textarea {...register("card_message", {required: "Mensagem do cartão é obrigatório",})}
+                                        />
+                                        {errors.card_message && <ErrorMessage>{errors.card_message.message}</ErrorMessage>}
+                                    </FormField>
+                                </>
+                            }
+                            
+                            <PrimaryButton type="submit">Finalizar Pedido</PrimaryButton>
                         </>
                     }
-                    
-                    <PrimaryButton type="submit">Finalizar Pedido</PrimaryButton>
                 </Form>
             }
         </Container>

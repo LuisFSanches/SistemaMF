@@ -27,7 +27,6 @@ class CreateOrderService{
 		products
 	}: IOrder) {
 		try {
-		
 			const formattedDeliveryDate = moment.utc(delivery_date)
 				.tz('America/Sao_Paulo', true)
 				.set({ hour: 12, minute: 0, second: 0 })

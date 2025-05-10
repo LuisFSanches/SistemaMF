@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from 'express';
 import { GetOrderService } from '../../services/order/GetOrderService'
-import { CreateClientService } from '../../services/client/CreateClientService'
 import { CreateAddressService } from '../../services/address/CreateAddressService'
+import { UpdateClientService } from '../../services/client/UpdateClientService';
 import { FinishOnlineOrderService } from '../../services/order/FinishOnlineOrderService';
 import { BadRequestException } from "../../exceptions/bad-request";
 
@@ -11,12 +11,8 @@ class FinishOnlineOrderController{
 	async handle(req: Request, res: Response, next: NextFunction) {
 		const { order }: any = req.body;
 
-        const first_name = order.first_name;
-        const last_name = order.last_name;
-        const phone_number = order.phone_number;
         let client_id = order.client_id;
         let client_address_id = order.clientAddress.id;
-        let newAddress = order.newAddress;
 
         const getOrder = new GetOrderService();
 
@@ -25,24 +21,6 @@ class FinishOnlineOrderController{
         if ('error' in orderFound) {
             return res.status(400).json(orderFound);
         }
-
-        if (!order.client_id) {
-			const createClientService = new CreateClientService();
-
-			const client = await createClientService.execute({
-				first_name,
-				last_name,
-				phone_number
-			});
-
-			if ('id' in client) {
-				client_id = client.id;
-			}
-
-            if ('error' in client) {
-                return res.status(400).json(client);
-            }
-		}
 
         if (!client_address_id || client_address_id === "") {
 			const createAddressService = new CreateAddressService();
@@ -62,7 +40,6 @@ class FinishOnlineOrderController{
 			if ('id' in address) {
 				client_address_id = address.id;
 			}
-			newAddress = true;
 		}
 
         const finishOrderService = new FinishOnlineOrderService();
@@ -74,7 +51,7 @@ class FinishOnlineOrderController{
             client_address_id,
             status: order.status,
             type_of_delivery: order.type_of_delivery,
-            delivery_date: new Date(`${order.delivery_date}T00:00:00Z`),
+            delivery_date: order.delivery_date,
             pickup_on_store: order.pickup_on_store,
             has_card: order.has_card,
             card_from: order.card_from,
@@ -93,6 +70,15 @@ class FinishOnlineOrderController{
             ));
             return;
         }
+
+        const updateClientService = new UpdateClientService();
+        await updateClientService.execute({
+            id: client_id,
+            first_name: order.first_name,
+            last_name: order.last_name,
+            phone_number: order.phone_number
+        });
+
         orderEmitter.emit(OrderEvents.OnlineOrderReceived, data);
 
         return res.json({ status: "Order successfully updated", order: data });
