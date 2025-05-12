@@ -18,6 +18,7 @@ export function OrdersPage(){
     const [editOrderModal, setEditOrderModal] = useState(false);
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
     const [page, setPage] = useState(1);
+    const [query, setQuery] = useState('');
     const pageSize = 15;
 
     function handleOpenOrderDetailModal(order: IOrder){
@@ -33,8 +34,22 @@ export function OrdersPage(){
         setCurrentOrder(order);
     }
 
+    const searchOrders = (query: string) => {
+        setQuery(query);
+        setPage(1);
+        loadAvailableOrders(page, pageSize, query);
+    }
+
+    const resetSearch = (query: string) => {
+        if (query === '') {
+            setQuery('');
+            setPage(1);
+            loadAvailableOrders(page, pageSize, '');
+        }
+    }
+
     useEffect(() => {
-        loadAvailableOrders(page, pageSize);
+        loadAvailableOrders(page, pageSize, query);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
 
@@ -42,6 +57,19 @@ export function OrdersPage(){
         <Container>
             <PageHeader>
             	<h1>Todos os Pedidos</h1>
+                <div>
+                    <input
+                        style={{width: '250px'}}
+                        type="text"
+                        placeholder="Buscar por Nome ou Telefone"
+                        onKeyDown={(e: any) => {
+                            if (e.key === 'Enter') {
+                                searchOrders(e.target.value);
+                            }
+                        }}
+                        onChange={(e) => resetSearch(e.target.value)}
+                    />
+                </div>
                 <Pagination 
                     currentPage={page}
                     total={totalOrders}

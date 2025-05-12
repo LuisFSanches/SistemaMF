@@ -324,7 +324,7 @@ export function CompleteOrder() {
             setTimeout(() => {
                 timeoutReached = true;
                 reject(new Error("Tempo de requisição excedido. Tente novamente."));
-            }, 3500)
+            }, 3000)
         );
 
         try {
@@ -343,7 +343,8 @@ export function CompleteOrder() {
 
         } catch (error: any) {
             console.error(error);
-            alert(error.message || "Erro ao criar cliente. Tente novamente.");
+            setErrorMessage('Algo deu errado, por favor tente novamente');
+            setTimeout(()=>{setErrorMessage('')}, 1500);
         } finally {
             setShowLoader(false);
         }

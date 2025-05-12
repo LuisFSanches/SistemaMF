@@ -96,7 +96,7 @@ export function EditOrderModal({
 		const { data: orderData } = await updateOrder(data);
 
 		editOrder(orderData);
-		loadAvailableOrders(1, 25);
+		loadAvailableOrders(1, 25, '');
 		setShowLoader(false);
 		onRequestClose();
 	}

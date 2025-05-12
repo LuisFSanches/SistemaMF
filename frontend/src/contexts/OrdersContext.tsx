@@ -6,7 +6,7 @@ import { IOrder } from "../interfaces/IOrder";
 interface OrdersContextType {
   orders: IOrder[];
   totalOrders: number;
-  loadAvailableOrders: (page: number, pageSize: number) => Promise<void>;
+  loadAvailableOrders: (page: number, pageSize: number, query: string) => Promise<void>;
   addOrder: (client: IOrder) => void;
   editOrder: (client: IOrder) => void;
   onGoingOrders: IOrder[];
@@ -24,8 +24,8 @@ export const OrdersProvider: React.FC = ({ children }) => {
   const [waitingOrders, setWaitingOrders] = useState<IOrder[]>([]);
   const token = localStorage.getItem("token");
 
-  const loadAvailableOrders = async (page: number, pageSize: number) => {
-    const { data: { orders, total } } = await getAllOrders(page, pageSize);
+  const loadAvailableOrders = async (page: number, pageSize: number, query: string) => {
+    const { data: { orders, total } } = await getAllOrders(page, pageSize, query);
     setOrders(orders);
     setTotalOrders(total);
   };
