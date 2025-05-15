@@ -31,7 +31,7 @@ import {
 } from "../../styles/global";
 import { TYPES_OF_DELIVERY, STATES } from "../../constants";
 import { rawTelephone } from "../../utils";
-import { createClient } from "../../services/clientService";
+import { createClientOnline } from "../../services/clientService";
 
 import { Form, Container, FormHeader, CompletedOrder, OrderReview } from "./style";
 
@@ -328,7 +328,7 @@ export function CompleteOrder() {
         );
 
         try {
-            const clientPromise = createClient({
+            const clientPromise = createClientOnline({
                 first_name: firstName,
                 last_name: lastName,
                 phone_number: rawTelephone(phoneNumber),

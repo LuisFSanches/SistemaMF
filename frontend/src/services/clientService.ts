@@ -39,6 +39,23 @@ export const createClient = async ({
   return response;
 };
 
+export const createClientOnline = async ({
+  first_name,
+  last_name,
+  phone_number,
+}: any) => {
+  const response = await api.post("/client/new/online", {
+    first_name,
+    last_name,
+    phone_number,
+    headers: {
+      Authorization: `${token}`,
+    }
+  });
+  
+  return response;
+}
+
 export const updateClient = async({
   id,
   first_name,

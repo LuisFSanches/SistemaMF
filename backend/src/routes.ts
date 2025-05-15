@@ -53,6 +53,7 @@ router.get('/dashboard', adminAuthMiddleware, new DashboardController().handle);
 
 //-- ROTAS CLIENT --
 router.post('/client', adminAuthMiddleware, new CreateClientController().handle)
+router.post('/client/new/online', new CreateClientController().handle)
 router.get('/clients/all', adminAuthMiddleware, new GetAllClientController().handle)
 router.get('/client/phone_number', superAdminAuthMiddleware, new GetClientByPhoneNumbeController().handle)
 router.get('/client/:id', superAdminAuthMiddleware, new GetClientController().handle)
