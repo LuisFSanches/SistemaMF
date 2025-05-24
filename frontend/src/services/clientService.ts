@@ -48,9 +48,6 @@ export const createClientOnline = async ({
     first_name,
     last_name,
     phone_number,
-    headers: {
-      Authorization: `${token}`,
-    }
   });
   
   return response;

@@ -324,7 +324,7 @@ export function CompleteOrder() {
             setTimeout(() => {
                 timeoutReached = true;
                 reject(new Error("Tempo de requisição excedido. Tente novamente."));
-            }, 3000)
+            }, 4000)
         );
 
         try {

@@ -1,13 +1,11 @@
 import express from 'express';
 import http from 'http';
-import https from 'https';
 import 'express-async-errors';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { orderEmitter, OrderEvents } from './events/orderEvents';
 
 import { Server } from 'socket.io';
-import { getCertificatesForWebhook } from './utils/getCertificates';
 
 dotenv.config();
 
@@ -21,8 +19,13 @@ orderEmitter.on(OrderEvents.OnlineOrderReceived, (data) => {
 const app = express();
 // const httpsOptions = getCertificatesForWebhook() as any;
 
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+}));
+
 app.use(express.json());
-app.use(cors());
+
 app.use(router);
 app.use(errorMiddleware);
 
@@ -44,7 +47,7 @@ if (isProduction) {
 export const io = new Server(server, {
   cors: {
     origin: '*',
-    methods: ['GET', 'POST', 'PUT'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   },
 });
 
