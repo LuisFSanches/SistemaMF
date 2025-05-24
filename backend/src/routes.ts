@@ -62,7 +62,7 @@ router.put('/client/:id', adminAuthMiddleware, new UpdateClientController().hand
 //-- ROTAS ADDRESS --
 router.post('/address', adminAuthMiddleware, new CreateAddressController().handle)
 router.get('/address/pickup', adminAuthMiddleware, new GetPickUpAddressController().handle)
-router.get('/address/:client_id', superAdminAuthMiddleware, new GetAllClientAddressController().handle)
+router.get('/address/:client_id', new GetAllClientAddressController().handle)
 
 //-- ROTAS ORDER --
 router.get('/order/completedOrder/:id', new GetOrderController().handle);
