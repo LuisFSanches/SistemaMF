@@ -2,11 +2,7 @@ import { api } from "./api";
 const token = localStorage.getItem("token")?.replace(/"/g, '');
 
 export const getClientByPhone = async (params = "") => {
-  const response = await api.get(`/client/phone_number?phone_number=${params}`, {
-    headers: {
-      Authorization: `${token}`,
-    }
-  });
+  const response = await api.get(`/client/phone_number?phone_number=${params}`);
   
   return response;
 };
