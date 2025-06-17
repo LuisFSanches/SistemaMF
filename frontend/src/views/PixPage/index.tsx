@@ -70,7 +70,7 @@ export function PixPage(){
                                 <td>{moment(pix.dataInclusao).format("DD/MM/YYYY HH:mm")}</td>
                                 <td>{pix.titulo}</td>
                                 <td>
-                                    {pix.descricao.replace(/[0-9]/g, '').replace(/\s+/g, ' ').trim()}
+                                    {pix.descricao}
                                 </td>
                                 <td>{convertMoney(pix.valor)}</td>
                             </tr>
