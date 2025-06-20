@@ -16,7 +16,9 @@ import { BarHomeChart } from "../../components/BarHomeChart";
 // import { PaymentStatusTable } from "../../components/PaymentStatusTable";
 
 export function Statistics(){
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [topClientsLabel, setTopClientsLabel] = useState([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [topClientsValue, setTopClientsValue] = useState([]);
     const [topAdminsLabel, setTopAdminsLabel] = useState([]);
     const [topAdminsValue, setTopAdminsValue] = useState([]);

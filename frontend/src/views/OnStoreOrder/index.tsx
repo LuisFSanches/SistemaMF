@@ -398,8 +398,8 @@ export function OnStoreOrder() {
     };
 
     function handleOpenProductModal(product: any){
-            setProductModal(true)
-        }
+        setProductModal(true)
+    }
     function handleCloseProductModal(){
         setProductModal(false)
     }
@@ -515,8 +515,8 @@ export function OnStoreOrder() {
                         }
 
                         <FormField>
-                            <Label>Colaborador:</Label>
-                            <Select {...register("created_by", { required: "Administrador Responsável inválido" })}>
+                            <Label>Vendedor:</Label>
+                            <Select {...register("created_by", { required: "Vendedor Responsável inválido" })}>
                                 <option value="">Pedido Anotado por:</option>
                                 {admins.map((admin: any) => (
                                     <option key={admin.id} value={admin.id}>{admin.name}</option>

@@ -42,6 +42,10 @@ import { TopClientsController } from './controllers/statistics/TopClientsControl
 import { DailySalesController } from './controllers/statistics/DailySalesController';
 import { TopAdminsController } from './controllers/statistics/TopAdminsController';
 
+import { CreateStockTransactionController } from './controllers/stockTransaction/CreateStockTransactionController';
+import { GetAllStockTransactionsController } from './controllers/stockTransaction/GetAllStockTransactionsController';
+import { DeleteStockTransactionController } from './controllers/stockTransaction/DeleteStockTransactionController';
+
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 
@@ -98,5 +102,10 @@ router.post('/webhook/pix', superAdminAuthMiddleware,  new WebhookPixController(
 router.get('/statistics/top-clients', superAdminAuthMiddleware, new TopClientsController().handle);
 router.get('/statistics/daily-sales', superAdminAuthMiddleware, new DailySalesController().handle);
 router.get('/statistics/top-admins', superAdminAuthMiddleware, new TopAdminsController().handle);
+
+//-- ROTAS STOCK TRANSACTION --
+router.get('/stockTransaction/all', adminAuthMiddleware, new GetAllStockTransactionsController().handle);
+router.post('/stockTransaction', adminAuthMiddleware, new CreateStockTransactionController().handle);
+router.delete('/stockTransaction/:id', adminAuthMiddleware, new DeleteStockTransactionController().handle);
 
 export { router };

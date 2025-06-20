@@ -433,9 +433,9 @@ export function OnlineOrder() {
                             </FormField>
                         </InlineFormField>
                         <FormField>
-                            <Label>Administrador Responsável</Label>
-                            <Select {...register("created_by", { required: "Administrador Responsável inválido" })}>
-                                <option value="">Selecione um Administrador</option>
+                            <Label>Vendedor Responsável</Label>
+                            <Select {...register("created_by", { required: "Vendedor Responsável inválido" })}>
+                                <option value="">Selecione um Vendedor</option>
                                 {admins.map((admin: any) => (
                                     <option key={admin.id} value={admin.id}>{admin.name}</option>
                                 ))}

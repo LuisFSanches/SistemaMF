@@ -80,10 +80,6 @@ export const Container = styled.div`
 
     @media (max-width: 1250px){
         grid-template-columns: 1fr 1fr;
-
-        .order-container {
-            height: 47vh;
-        }
     }
 
     @media (max-width: 1024px){

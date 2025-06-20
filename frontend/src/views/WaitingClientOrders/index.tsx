@@ -92,6 +92,7 @@ export function WaitingClientOrders(){
             <ConfirmPopUp isOpen={deleteOrderModal}
                 onRequestClose={() => setDeleteOrderModal(false)}
                 handleAction={handleDeleteOrder}
+                label="Remove Pedido"
             />
         </Container>
     )

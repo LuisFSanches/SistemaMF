@@ -12,6 +12,7 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, total, page
     const handlePrev = () => onPageChange(currentPage - 1);
     const handleNext = () => onPageChange(currentPage + 1);
     const totalPages = Math.ceil(total / pageSize);
+    console.log('totalPages', total);
 
     const renderPageNumbers = () => {
         const pages = [];

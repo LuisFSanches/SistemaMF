@@ -13,7 +13,8 @@ import {
     faAddressCard,
     faReceipt,
     faPlantWilt,
-    faHome
+    faHome,
+    faWarehouse
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useAdminData } from "../../contexts/AuthContext";
@@ -38,7 +39,8 @@ export function SideBar(){
         configurations:false,
         administradores: false,
         pedidoOnline: false,
-        aguardandoCliente: false
+        aguardandoCliente: false,
+        estoque: false
     })
     
     const [isMinimized, setMinimized] = useState(false)
@@ -57,7 +59,8 @@ export function SideBar(){
                     'statistics':false,
                     "administradores": false,
                     "pedidoOnline": false,
-                    "aguardandoCliente": false
+                    "aguardandoCliente": false,
+                    "estoque": false
                 })
             break;
             case 'pedidoBalcao':
@@ -72,7 +75,8 @@ export function SideBar(){
                     'statistics':false,
                     "administradores": false,
                     "pedidoOnline": false,
-                    "aguardandoCliente": false
+                    "aguardandoCliente": false,
+                    "estoque": false
                 })
             break;
             case 'ordensDeServico':
@@ -87,7 +91,8 @@ export function SideBar(){
                     'statistics':false,
                     "administradores": false,
                     "pedidoOnline": false,
-                    "aguardandoCliente": false
+                    "aguardandoCliente": false,
+                    "estoque": false
                 })
             break;
             case 'statistics':
@@ -102,7 +107,8 @@ export function SideBar(){
                     'statistics':true,
                     "administradores": false,
                     "pedidoOnline": false,
-                    "aguardandoCliente": false
+                    "aguardandoCliente": false,
+                    "estoque": false
                 })
             break;
             case 'pedidos':
@@ -117,7 +123,8 @@ export function SideBar(){
                     'statistics':false,
                     "administradores": false,
                     "pedidoOnline": false,
-                    "aguardandoCliente": false
+                    "aguardandoCliente": false,
+                    "estoque": false
                 })
             break;
 
@@ -133,7 +140,8 @@ export function SideBar(){
                     'statistics':false,
                     "administradores": false,
                     "pedidoOnline": false,
-                    "aguardandoCliente": false
+                    "aguardandoCliente": false,
+                    "estoque": false
                 })
             break;
 
@@ -149,7 +157,8 @@ export function SideBar(){
                     'statistics':false,
                     "administradores": true,
                     "pedidoOnline": false,
-                    "aguardandoCliente": false
+                    "aguardandoCliente": false,
+                    "estoque": false
                 })
             break;
 
@@ -166,7 +175,8 @@ export function SideBar(){
                     "administradores": false,
                     'pix': true,
                     "pedidoOnline": false,
-                    "aguardandoCliente": false
+                    "aguardandoCliente": false,
+                    "estoque": false
                 })
             break;
 
@@ -183,7 +193,8 @@ export function SideBar(){
                     "administradores": false,
                     'pix': false,
                     "pedidoOnline": true,
-                    "aguardandoCliente": false
+                    "aguardandoCliente": false,
+                    "estoque": false
                 })
             break;
             case 'aguardandoCliente':
@@ -199,7 +210,8 @@ export function SideBar(){
                     "administradores": false,
                     'pix': false,
                     "pedidoOnline": false,
-                    "aguardandoCliente": true
+                    "aguardandoCliente": true,
+                    "estoque": false
                 })
             break;
 
@@ -209,6 +221,25 @@ export function SideBar(){
                     'pedidoBalcao':false,
                     'ordensDeServico':false,
                     'produtos':true,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false,
+                    "estoque": false
+                })
+            break;
+
+            case 'estoque':
+                setActive({...isActive,
+                    'estoque':true,
+                    'dashboard':false,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
                     'categorias':false,
                     'pedidos':false,
                     'clientes':false,
@@ -256,7 +287,7 @@ export function SideBar(){
                 )}
             </MinimizeButton>
 
-            <NavLink to="/dashboard">
+            <NavLink to="/dashboard" style={{display: 'none'}}>
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('dashboard')}>
                     <SideBarButton
                         isActive={isActive['dashboard']}
@@ -337,6 +368,19 @@ export function SideBar(){
                     >
                         <FontAwesomeIcon icon={faPlantWilt} className="Side-Bar-Icon"/>
                         <span>Produtos</span>
+                    </SideBarButton>
+                </SideBarItemContainer>
+            </NavLink>
+
+            
+            <NavLink to="/estoque">
+                <SideBarItemContainer onClick={()=>handleActiveMenuButton('estoque')}>
+                    <SideBarButton
+                        isActive={isActive['estoque']}
+                        isMinimizedActive={isMinimized}
+                    >
+                        <FontAwesomeIcon icon={faWarehouse} className="Side-Bar-Icon"/>
+                        <span>Estoque</span>
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>

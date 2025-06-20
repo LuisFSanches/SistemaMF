@@ -465,7 +465,7 @@ export function CompleteOrder() {
                                     Informe sobre a entrega
                                     <span>*</span>
                                 </Label>
-                                <Select {...register("type_of_delivery", { required: "Administrador Responsável inválido" })}>
+                                <Select {...register("type_of_delivery", { required: "Vendedor Responsável inválido" })}>
                                     <option value="">Escolher:</option>
                                     {Object.entries(TYPES_OF_DELIVERY).map(([key, value]) => (
                                         <option key={key} value={key}>{value}</option>

@@ -79,7 +79,7 @@ table{
         th{
             text-align: center;
             color: var(--text-title);
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 600;
         }
 
@@ -111,10 +111,27 @@ table{
             background-color: var(--tbody-background);
         }
         
-        td{
-            font-size: 1.15rem;
+        td {
+            font-size: 1.1rem;
             text-align: center;
+
+            a {
+                color: #EC4899;
+                text-decoration: none;
+                font-weight: 700;
+            }
         }
+
+        .delete-icon {
+            button {
+                background: none;
+
+                svg {
+                    color: red;
+                }
+            }
+        }
+
         button{
             border: none;
             padding:0.5rem 0.5rem;
@@ -125,6 +142,12 @@ table{
         img{
             width: 4rem;
             height: 4rem;
+        }
+
+        @media (max-width: 1100px){
+            th,td{
+                font-size: 1rem;
+            }
         }
         
         @media (max-width: 750px){
@@ -289,7 +312,11 @@ export const ModalContainer = styled.div`
         padding: 0 1.5rem;
         height: 4rem;
         border-radius: 0.25rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    select {
+        margin-bottom: 0.5rem;
     }
 
     input[type="checkbox"] {
@@ -317,6 +344,39 @@ export const ModalContainer = styled.div`
 export const Form = styled.form`
     display: flex;
     flex-direction: column;
+
+    .suggestion-box {
+        position: absolute;
+        top: 69px;
+        left: 0;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #e7b7c2;
+        z-index: 10;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .suggestion-box li {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .suggestion-box li:hover {
+        background: #f5f5f5;
+    }
+
+    .new-product-button {
+        background: none;
+        text-align: left;
+        color: var(--sideBarBackground);
+        font-weight: 700;
+        font-size: 15px;
+        margin-left: 5px;
+    }
 `
 
 export const FormField = styled.div<{ isShortField?: boolean }>`
@@ -556,6 +616,21 @@ export const PageHeader = styled.div`
     justify-content: space-between;
     margin-bottom: 1rem;
     align-items: center;
+
+    @media (max-width: 1100px) {
+        flex-direction: column;
+
+        div {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+
+            input {
+                width: 90% !important;
+            }
+        }
+    }
 `
 export const ErrorMessage = styled.span`
     color: red;
