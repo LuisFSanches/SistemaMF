@@ -136,7 +136,7 @@ export function StockTransactionModal({
             setValue("box_unities", 0);
         } else if (watch("box_unities") > 0 && watch("box_value") > 0 && watch("unity") === "CX") {
             setValue("total_price", watch("quantity") * watch("box_value"));
-            setValue("unity_price", watch("box_value") / watch("box_unities"))
+            setValue("unity_price",   Number((watch("box_value") / watch("box_unities")).toFixed(2)))
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [watch("quantity"), watch("unity_price"), watch("box_unities"), watch("box_value")],);
