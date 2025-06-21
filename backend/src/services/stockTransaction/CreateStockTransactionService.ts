@@ -9,12 +9,12 @@ interface IStockTransaction {
     quantity: number;
     unity_price: number;
     purchased_date: Date;
+    total_price: number;
 }
 
 class CreateStockTransactionService {
-    async execute({ product_id, supplier, unity, quantity, unity_price, purchased_date }: IStockTransaction) {
+    async execute({ product_id, supplier, unity, quantity, unity_price, purchased_date, total_price }: IStockTransaction) {
         try {
-            const total_price = quantity * unity_price;
             const formattedPurchasedDate = moment.utc(purchased_date)
                 .tz('America/Sao_Paulo', true)
                 .set({ hour: 12, minute: 0, second: 0 })

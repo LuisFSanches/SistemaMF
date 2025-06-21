@@ -4,7 +4,7 @@ import { BadRequestException } from "../../exceptions/bad-request";
 
 class CreateStockTransactionController {
     async handle(req: Request, res: Response, next: NextFunction) {
-        const { product_id, supplier, unity, quantity, unity_price, purchased_date } = req.body;
+        const { product_id, supplier, unity, quantity, unity_price, purchased_date, total_price } = req.body;
 
         const createStockTransactionService = new CreateStockTransactionService();
 
@@ -15,6 +15,7 @@ class CreateStockTransactionController {
             quantity,
             unity_price,
             purchased_date,
+            total_price
         });
 
         if ('error' in transaction && transaction.error) {
