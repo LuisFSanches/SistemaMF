@@ -66,9 +66,9 @@ export const STATES = {
 }
 
 export const UNITIES = {
+  "CX": "Caixa",
   "UN": "Unidade",
   "KG": "Quilograma",
   "L": "Litro",
   "M": "Metro",
-  "CX": "Caixa"
 }

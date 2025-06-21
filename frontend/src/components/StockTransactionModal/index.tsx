@@ -24,6 +24,8 @@ interface IStockTransaction {
     unity_price: number;
     total_price: number;
     purchased_date: string;
+    box_value: number;
+    box_unities: number;
 }
 export function StockTransactionModal({
     isOpen,
@@ -122,15 +124,22 @@ export function StockTransactionModal({
         setValue("purchased_date", "");
         setSelectedProduct(null);
         setQuery('');
+        setValue("box_value", 0);
+        setValue("box_unities", 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen])
 
     useEffect(() => {
-        if (watch("quantity") > 0 && watch("unity_price") > 0) {
+        if (watch("quantity") > 0 && watch("unity_price") > 0 && watch("unity") !== "CX") {
             setValue("total_price", watch("quantity") * watch("unity_price"));
+            setValue("box_value", 0);
+            setValue("box_unities", 0);
+        } else if (watch("box_unities") > 0 && watch("box_value") > 0 && watch("unity") === "CX") {
+            setValue("total_price", watch("quantity") * watch("box_value"));
+            setValue("unity_price", watch("box_value") / watch("box_unities"))
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [watch("quantity"), watch("unity_price")]);
+    }, [watch("quantity"), watch("unity_price"), watch("box_unities"), watch("box_value")],);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -205,6 +214,22 @@ export function StockTransactionModal({
                             {errors.quantity && <ErrorMessage>{errors.quantity.message}</ErrorMessage>}
                         </EditFormField>
                     </InlineFormField>
+                    {watch("unity") === "CX" && 
+                        <InlineFormField fullWidth>
+                            <EditFormField>
+                                <Label>Preço por caixa<span>*</span></Label>
+                                <input type="number" step={0.01}
+                                    {...register("box_value", { required: "Preço por caixa é obrigatório" })}/>
+                                {errors.unity_price && <ErrorMessage>{errors.unity_price.message}</ErrorMessage>}
+                            </EditFormField>
+                            <EditFormField>
+                                <Label>Unidades por caixa<span>*</span></Label>
+                                <input type="number" step={0.01}
+                                    {...register("box_unities", { required: "Unidades por caixa é obrigatório" })}/>
+                                {errors.total_price && <ErrorMessage>{errors.total_price.message}</ErrorMessage>}
+                            </EditFormField>
+                        </InlineFormField>
+                    }
                     <InlineFormField fullWidth>
                         <EditFormField>
                             <Label>Preço por unidade<span>*</span></Label>
