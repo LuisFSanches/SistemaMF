@@ -7,9 +7,10 @@ export class SearchProductsService {
         const products = await prismaClient.$queryRawUnsafe(
             `
                 SELECT * FROM "products"
-                WHERE unaccent(lower(name)) LIKE '%' || unaccent(lower($1)) || '%'
+                WHERE enabled = true
+                AND unaccent(lower(name)) LIKE '%' || unaccent(lower($1)) || '%'
                 ORDER BY name
-                LIMIT 10
+                LIMIT 50
             `,
             query
         );
