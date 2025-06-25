@@ -33,7 +33,7 @@ class GetAllStockTransactionsService {
                         product: true,
                     },
                     orderBy: {
-                        created_at: 'desc'
+                        purchased_date: 'desc'
                     },
                     skip,
                     take: pageSize
