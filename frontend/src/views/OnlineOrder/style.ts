@@ -2,24 +2,62 @@ import styled from "styled-components";
 
 export const Container = styled.div`
     width: 100%;
-    height: 98vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow-y: hidden;
     overflow-x: hidden;
+    margin-top: 10px;
 
     @media (max-width:1450px){
         overflow-y: scroll;
     }
-
-    @media (max-width: 768px) {
-        height: 100vh;
-    }
 `
 
+export const NewOrderContainer = styled.div`
+    width: 100%;
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+
+    @media (max-width: 850px) {
+        flex-direction: column;
+    }
+`;
+
+export const OrderInformation = styled.div`
+
+`;
+
+export const ProductList = styled.div`
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+
+    @media (max-width: 1820px) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media (max-width: 1580px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 1350px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 1000px) {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    @media (max-width: 850px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+`;
+
 export const Form = styled.form`
-    width: 700px;
+    width: 530px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -27,19 +65,38 @@ export const Form = styled.form`
     border-radius: 20px;
     box-shadow: 0.1rem 0.2rem 0.2rem var(--shadow-color);
 `
-
-export const FormHeader = styled.div`
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+export const ProductContainer = styled.div`
+    max-height: 850px;
     margin-top: 20px;
-    color: #e7b7c2;
-    font-size: 18px;
+    margin-left: 15px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 
-    h2 {
-        margin-left: 10px;
+    ::-webkit-scrollbar {
+        width: 5px;
     }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #fcc5d0;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+`
+
+export const NewProductButton = styled.button`
+    padding: 10px;
+    border-radius: 10px;
+    background: #EC4899 !important;
+    color: white !important;
+    font-weight: bold;
 `
 
 export const OrderDetail = styled.div`

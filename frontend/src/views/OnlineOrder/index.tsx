@@ -1,18 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import moment from "moment";
 import InputMask from "react-input-mask";
 import { useForm } from "react-hook-form";
+import { ProductCard} from "../../components/ProductCard";
+import { Pagination } from "../../components/Pagination";
 import { PAYMENT_METHODS } from "../../constants";
 import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { createOrder } from "../../services/orderService";
-import { searchProducts } from "../../services/productService";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { useOrders } from "../../contexts/OrdersContext";
 import { ProductModal } from "../../components/ProductModal";
 import { Loader } from '../../components/Loader';
 import { rawTelephone } from "../../utils";
+import { useProducts } from "../../contexts/ProductsContext";
 import {
     FormField,
     Label,
@@ -24,12 +26,21 @@ import {
     Checkbox,
     ErrorMessage,
     PrimaryButton,
-    ProductContainer,
     DescriptionArea,
-    NewOrderContainer
+    PageHeader,
 } from "../../styles/global";
 
-import { Form, Container, FormHeader, OrderDetail } from "./style";
+import {
+    Form,
+    Container,
+    OrderDetail,
+    NewOrderContainer,
+    ProductList,
+    ProductContainer,
+    NewProductButton
+} from "./style";
+
+import placeholder_products from '../../assets/images/placeholder_products.png';
 
 interface INewOrder {
     id: string;
@@ -55,6 +66,8 @@ interface IProduct {
 }
 
 export function OnlineOrder() {
+    const { products: availableProducts, loadAvailableProducts, totalProducts } = useProducts();
+
     const { admins } = useAdmins();
     const { addOrder } = useOrders();
     const [showLoader, setShowLoader] = useState(false);
@@ -64,16 +77,10 @@ export function OnlineOrder() {
     const [mask, setMask] = useState("(99) 99999-9999");
     const [copied, setCopied] = useState(false);
     const [query, setQuery] = useState('');
-    const [productSuggestions, setProductSuggestions] = useState([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
-    const [quantity, setQuantity] = useState<number>(1);
-    const [price, setPrice] = useState<number>(0);
     const [products, setProducts] = useState<IProduct[]>([]);
     const [productModal, setProductModal] = useState(false);
-    const [showProductError, setShowProductError] = useState(false);
-
-    const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(8);
 
     const {
         register,
@@ -168,67 +175,56 @@ export function OnlineOrder() {
 
     const handleSearchProducts = (text: string) => {
         setQuery(text);
-
-        if (debounceTimeout.current) {
-            clearTimeout(debounceTimeout.current);
-        }
-        
-        debounceTimeout.current = setTimeout(async () => {
-            if (text.length >= 2) {
-                const response = await searchProducts(text);
-                setProductSuggestions(response.data as any);
-                setShowSuggestions(true);
-            }
-        }, 700);
+        setPage(1);
     };
 
-    const handleSelectProduct = (product: any) => {
-        setSelectedProduct(product);
-        setPrice(product.price);
-        setQuantity(quantity);
-        setQuery(product.name);
-        setShowSuggestions(false);
-    };
+    const handleAddProduct = (product: IProduct, quantity: number, price: number) => {
+        setProducts((prev: IProduct[]) => {
+            const existingIndex = prev.findIndex((p) => p.id === product.id);
+            let updated;
 
-    const addProduct = () => {
-        if (quantity > 0 && query !== '' && price > 0) {
-            setProducts((prev: any) => {
-                const updated = [
+            if (existingIndex !== -1) {
+                const existing = prev[existingIndex];
+                const newQuantity = existing.quantity + quantity;
+
+                // Recalcula o preço médio ponderado
+                const newPrice = (
+                    (existing.quantity * existing.price + quantity * price) /
+                    newQuantity
+                );
+
+                updated = [...prev];
+                updated[existingIndex] = {
+                    ...existing,
+                    quantity: newQuantity,
+                    price: Number(newPrice.toFixed(2)),
+                };
+            } else {
+                updated = [
                     ...prev,
                     {
-                        ...selectedProduct,
+                        ...product,
                         quantity,
                         price: Number(price),
                     },
                 ];
-                
-                const total = updated.reduce((sum, p) => {
-                  return sum + Number(p.quantity) * Number(p.price);
-                }, 0);
-                setValue("products_value", total);
-                return updated;
-            });
+            }
 
-            setSelectedProduct(null);
-            setQuery('');
-            setPrice(0);
-            setQuantity(1);
-            setShowSuggestions(false);
-        } else {
-            setShowProductError(true);
-            setTimeout(() => {
-                setShowProductError(false);
-            }, 2000);
-        }
-    }
+            const total = updated.reduce((sum, p) => {
+                return sum + Number(p.quantity) * Number(p.price);
+            }, 0);
+
+            setValue("products_value", total);
+            return updated;
+        });
+    };
 
     const removeProduct = (product: any) => {
         setProducts((prev: any) => {
             const updated = prev.filter((p: any) => p.id !== product.id);
         
-            // recalcula o valor total dos produtos
             const total = updated.reduce((sum: any, p: any) => {
-            return sum + Number(p.quantity) * Number(p.price);
+                return sum + Number(p.quantity) * Number(p.price);
             }, 0);
         
             setValue("products_value", total);
@@ -253,6 +249,34 @@ export function OnlineOrder() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [description]);
 
+    useEffect(() => {
+        console.log('query', query)
+        loadAvailableProducts(page, pageSize, query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page, pageSize, query]);
+
+    useEffect(() => {
+        function handleResize() {
+            const width = window.innerWidth;
+            if (width < 800) {
+                setPageSize(1);
+            } else if (width < 1300) {
+                setPageSize(4);
+            } 
+            else if (width < 1600) {
+                setPageSize(6);
+            }
+            else if (width < 1830) {
+                setPageSize(8);
+            } else {
+                setPageSize(10);
+            }
+        }
+
+        // Executa ao montar
+        handleResize();
+    }, []);
+
     return (
         <Container>
             <ProductModal 
@@ -263,6 +287,7 @@ export function OnlineOrder() {
                 currentProduct={{
                     id: "",
                     name: "",
+                    image: "",
                     price: 0,
                     unity: "",
                     stock: 0,
@@ -309,60 +334,46 @@ export function OnlineOrder() {
             <Loader show={showLoader} />
             {!showOrderDetail &&
                 <NewOrderContainer>
-                    <FormHeader>
-                        <FontAwesomeIcon icon={faWhatsapp as any} size="3x"/>
-                        <h2>Novo Pedido</h2>
-                    </FormHeader>
-                    <ProductContainer isEditModal={false}>
-                        <Label>Adicionar Produtos</Label>
+                    <ProductContainer>
+                        <PageHeader>
+                            <div className="title">
+                                <FontAwesomeIcon icon={faWhatsapp as any} />
+                                <span>Pedido Online</span>
+                            </div>
+                            <NewProductButton type="button" onClick={handleOpenProductModal}>
+                                Novo Produto
+                            </NewProductButton>
+                        </PageHeader>
                         <div className="product-data">
-                            <div>
-                                <Label>Quantidade</Label>
-                                <Input
-                                    type="number"
-                                    placeholder="0"
-                                    value={quantity}
-                                    onChange={(e) => setQuantity(e.target.value as any)}/>
-                            </div>
-                            
                             <div style={{ position: 'relative', width: '100%' }}>
-                                <Label>Produto</Label>
                                 <Input
-                                    placeholder="Produto"
-                                    value={query}
-                                    onChange={(e) => handleSearchProducts(e.target.value)}
-                                    onFocus={() => query && setShowSuggestions(true)}
+                                    placeholder="Buscar Produtos"
+                                    onKeyDown={(e: any) => {
+                                        if (e.key === 'Enter') {
+                                            handleSearchProducts(e.target.value);
+                                        }
+                                    }}
                                 />
+                            </div>
+                        </div>
+                        <ProductList>
+                            {availableProducts.map((product: any) => (
+                                <ProductCard
+                                    key={product.id}
+                                    product={product}
+                                    image={product.image ? product.image : placeholder_products}
+                                    onAdd={handleAddProduct}
+                                />
+                            ))}
 
-                                {showSuggestions && productSuggestions.length > 0 && query.length >= 2 && (
-                                    <ul className="suggestion-box">
-                                    {productSuggestions.map((product: any) => (
-                                        <li key={product.id} onClick={() => handleSelectProduct(product)}>
-                                        {product.name} - R$ {product.price}
-                                        </li>
-                                    ))}
-                                    </ul>
-                                )}
-                            </div>
-                            <div>
-                                <Label>Valor</Label>
-                                <Input
-                                    placeholder="Valor"
-                                    type="number"
-                                    value={price}
-                                    onChange={(e) => setPrice(e.target.value as any)}
-                                />
-                            </div>
-                        </div>
-                        <div className="product-actions">
-                            <button className="add-button" onClick={addProduct}>Adicionar</button>
-                            <button onClick={handleOpenProductModal}>Novo produto</button>
-                        </div>
-                        {showProductError && <ErrorMessage style={{ textAlign: 'center', marginTop: '10px' }}>
-                            Preencha todos os campos
-                            </ErrorMessage>}
+                        </ProductList>
+                        <Pagination
+                            currentPage={page}
+                            total={totalProducts}
+                            pageSize={pageSize as number}
+                            onPageChange={setPage}
+                        />
                     </ProductContainer>
-
                     <Form onSubmit={handleSubmit(submitOrder)}>
                         <FormField>
                             <Label>Descrição</Label>

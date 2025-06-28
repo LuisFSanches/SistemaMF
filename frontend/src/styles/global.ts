@@ -295,12 +295,22 @@ button{
 export const PageContainer = styled.div`
     max-width: 100vw;
     display: flex;
+    flex-direction: column;
     justify-content: start;
 `
+
+export const BodyContainer = styled.div`
+    max-width: 100vw;
+    display: flex;
+`;
 
 export const ModalContainer = styled.div`
     display: flex;
     flex-direction: column;
+
+    h1 {
+        font-size: 1.5rem;
+    }
 
     h2{
         color: var(--text-title);
@@ -554,12 +564,12 @@ export const PrimaryButton = styled.button`
     margin: 0 auto;
     margin-top: 20px;
     margin-bottom: 20px;
-    padding: 0.8rem 1.5rem; 
+    padding: 12px; 
     border: none; 
     border-radius: 0.8rem;
-    background: var(--primary-color);
+    background: #EC4899;
     color: #fff;
-    font-size: 1.3rem;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer; 
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -616,6 +626,16 @@ export const PageHeader = styled.div`
     justify-content: space-between;
     margin-bottom: 1rem;
     align-items: center;
+
+    .title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text-title);
+
+        svg {
+            margin-right: 0.5rem;
+        }
+    }
 
     @media (max-width: 1100px) {
         flex-direction: column;
@@ -683,10 +703,7 @@ export const ProductContainer = styled.div<{ isEditModal: boolean }>`
     width: ${({ isEditModal }) => (isEditModal ? '100%' : '85%')};
     margin: 0 auto;
     flex-direction: column;
-    border: 1px solid #ccc;
     padding: 10px 15px;
-    border-radius: 10px;
-    border-color: #e7b7c2;
     margin-top: 20px;
 
     .product-data {
@@ -782,37 +799,5 @@ export const DescriptionArea = styled.div`
                 font-size: 18px;
             }
         }
-    }
-`;
-
-export const NewOrderContainer = styled.div`
-    width: 700px;
-    background: white;
-    overflow-y: scroll;
-    overflow-x: hidden;
-
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: #fcc5d0;
-        border-radius: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #a1a1a1;
-    }
-
-    @media (max-width: 768px) {
-        width: 100%;
-        height: 100%;
-        margin-top: 0px;
-        border-radius: 0px;
     }
 `;

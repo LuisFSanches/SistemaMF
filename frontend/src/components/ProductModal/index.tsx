@@ -51,13 +51,14 @@ export function ProductModal({
         if (action === "create") {
             const { data: adminData } = await createProduct({
                 name: formData.name,
+                image: formData.image,
                 price: formData.price,
                 unity: formData.unity,
                 stock: formData.stock,
                 enabled: formData.enabled,
             });
             addProduct(adminData);
-            loadAvailableProducts();
+            loadAvailableProducts(1, 400, "");
             onRequestClose();
         }
 
@@ -65,13 +66,14 @@ export function ProductModal({
             const { data: adminData } = await updateProduct({
                 id: currentProduct.id,
                 name: formData.name,
+                image: formData.image,
                 price: formData.price,
                 unity: formData.unity,
                 stock: formData.stock,
                 enabled: formData.enabled
             });
             editProduct(adminData);
-            loadAvailableProducts();
+            loadAvailableProducts(1, 400, "");
             onRequestClose();
         }
 
@@ -80,6 +82,7 @@ export function ProductModal({
 
     useEffect(() => {
         setValue("name", currentProduct.name);
+        setValue("image", currentProduct.image);
         setValue("price", currentProduct.price || null);
         setValue("unity", currentProduct.unity);
         setValue("stock", currentProduct.stock);
@@ -107,7 +110,7 @@ export function ProductModal({
                     <h2>{action === "create" ? "Novo" : "Editar"} Produto</h2>
                     <Input placeholder='Nome' {...register("name", {required: "Nome inválido"})}/>
                     {errors.name && <ErrorMessage>{errors.name.message}</ErrorMessage>}
-                    <Input type="number" placeholder='Preço' {...register("price", { required: "Preço inválido" })}/>
+                    <Input type="number" step="0.01" placeholder='Preço' {...register("price", { required: "Preço inválido" })}/>
                     {errors.price && <ErrorMessage>{errors.price.message}</ErrorMessage>}
                     <InlineFormField fullWidth>
                         <FormField style={{ marginTop: "0px"}}>
@@ -128,6 +131,7 @@ export function ProductModal({
                             {errors.stock && <ErrorMessage>{errors.stock.message}</ErrorMessage>}
                         </FormField>
                     </InlineFormField>
+                    <Input type="text" placeholder="Url da imagem" {...register("image")}/>
 
                     <Switch>
                         <span>

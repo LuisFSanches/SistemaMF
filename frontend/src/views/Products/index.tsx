@@ -15,6 +15,7 @@ export function ProductsPage(){
     const [currentProduct, setCurrentProduct] = useState({
         id: "",
         name: "",
+        image: "",
         price: 0,
         unity: "",
         stock: 0,
@@ -32,7 +33,7 @@ export function ProductsPage(){
 
     useEffect(() => {
         if (window.location.pathname === "/produtos") {
-            loadAvailableProducts();
+            loadAvailableProducts(1, 500, '');
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

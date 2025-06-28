@@ -1,8 +1,8 @@
 import { api } from "./api";
 const token = localStorage.getItem("token")?.replace(/"/g, '');
 
-export const listProducts = async (page: number, pageSize: number) => {
-    const response = await api.get(`/product/all?page=${page}&pageSize=${pageSize}`, {
+export const listProducts = async (page: number, pageSize: number, query: string) => {
+    const response = await api.get(`/product/all?page=${page}&pageSize=${pageSize}&query=${query}`, {
         headers: {
             Authorization: `${token}`,
         }

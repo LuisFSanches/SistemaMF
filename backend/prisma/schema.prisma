@@ -70,6 +70,7 @@ model Product {
   unity       String
   stock       Float
   enabled     Boolean
+  image       String?
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 

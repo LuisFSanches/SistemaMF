@@ -22,11 +22,11 @@ export const Container = styled.div<SidebarProps>`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  background: var(--sideBarBackground);
+  background: white;
   width: ${getSidebarWidth};
 
   border-right: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 1px 8px rgba(0, 0, 0, 0.1);
 
 
   transition: width 0.2s ease-in-out;
@@ -133,6 +133,7 @@ export const SideBarButton = styled.button<SidebarButtonProps>`
   .Side-Bar-Icon {
     font-size: 1.6rem;
     transition: transform 0.2s;
+    color: ${({ isActive }) => (isActive ? '#EC4899' : 'var(--text-body)')};
   }
 
   span {
@@ -175,7 +176,6 @@ export const CompanyInfoContainer = styled.div<SidebarProps>`
   justify-content: space-around;
   align-items: center; /* Para ficar melhor centralizado em vários tamanhos */
   padding: 0.5rem 1rem;
-  background: var(--primary-color);
 
   transition: flex-direction 0.3s;
 
@@ -245,8 +245,7 @@ export const CompanyInfoContainer = styled.div<SidebarProps>`
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    background-color: #FF5733; 
-    color: var(--white-background); 
+    color: var(--text-body); 
     border: none; 
     border-radius: 5px; 
     padding: 8px 15px; 
@@ -256,7 +255,7 @@ export const CompanyInfoContainer = styled.div<SidebarProps>`
     transition: background-color 0.3s, transform 0.2s;
     
     &:hover {
-      background-color: #f5b1c1;
+      background-color:#EC4899;
       transform: scale(1.03);
     }
   }

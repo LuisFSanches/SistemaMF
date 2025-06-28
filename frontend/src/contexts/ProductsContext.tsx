@@ -5,7 +5,8 @@ import { IProduct } from "../interfaces/IProduct";
 
 interface ProductsContextType {
     products: IProduct[];
-    loadAvailableProducts: () => Promise<void>;
+    loadAvailableProducts: (page: number, pageSize: number, query: string) => Promise<void>;
+    totalProducts: number;
     addProduct: (product: IProduct) => void;
     editProduct: (product: IProduct) => void;
 }
@@ -14,12 +15,14 @@ const ProductsContext = createContext<ProductsContextType | undefined>(undefined
 
 export const ProductsProvider: React.FC = ({ children }) => {
     const [products, setProducts] = useState<IProduct[]>([]);
+    const [totalProducts, setTotalProducts] = useState(0);
     const token = localStorage.getItem("token");
 
-    const loadAvailableProducts = async () => {
-        if (window.location.pathname === "/produtos") {
-        const { data: { products } } = await listProducts(1,100);
-        setProducts(products);
+    const loadAvailableProducts = async (page: number, pageSize: number, query: string) => {
+        if (true) {
+        const { data: { products, total } } = await listProducts(page, pageSize, query);
+            setProducts(products);
+            setTotalProducts(total);
         }
     };
 
@@ -37,13 +40,19 @@ export const ProductsProvider: React.FC = ({ children }) => {
 
     useEffect(() => {
         if (token) {
-            loadAvailableProducts();
+            loadAvailableProducts(1, 10, "");
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
-        <ProductsContext.Provider value={{ products, addProduct, editProduct, loadAvailableProducts }}>
+        <ProductsContext.Provider value={{
+            products,
+            totalProducts,
+            addProduct,
+            editProduct,
+            loadAvailableProducts
+        }}>
         {children}
         </ProductsContext.Provider>
     );

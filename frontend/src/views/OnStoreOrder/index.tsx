@@ -423,6 +423,7 @@ export function OnStoreOrder() {
                 currentProduct={{
                     id: "",
                     name: "",
+                    image: "",
                     price: 0,
                     unity: "",
                     stock: 0,

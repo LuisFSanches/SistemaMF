@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState, useCallback } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
-import { Container,SideBarItemContainer, SideBarButton, LogoContainer, CompanyInfoContainer, MinimizeButton } from "./style";
+import { Container,SideBarItemContainer, SideBarButton, CompanyInfoContainer, MinimizeButton } from "./style";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faArrowLeft,
@@ -19,8 +19,6 @@ import {
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useAdminData } from "../../contexts/AuthContext";
 import { NavLink} from 'react-router-dom'
-import logoFull from '../../assets/images/logo.png'
-import logoMini from '../../assets/images/logo-mini.png'
 
 export function SideBar(){
     const { handleSignOut } = useContext(AuthContext);
@@ -43,7 +41,7 @@ export function SideBar(){
         estoque: false
     })
     
-    const [isMinimized, setMinimized] = useState(false)
+    const [isMinimized, setMinimized] = useState(true)
 
     const handleActiveMenuButton = useCallback((name:string) => {
         switch(name){
@@ -263,18 +261,10 @@ export function SideBar(){
         setMinimized(!isMinimized)
     }
 
-
-    
-    const chosenLogo = isMinimized ? logoMini : logoFull;
+    // const chosenLogo = isMinimized ? logoMini : logoFull;
 
     return(
         <Container isMinimizedActive={isMinimized}>
-            <LogoContainer isMinimizedActive={isMinimized}>
-                <div className="logo-info">
-                    <img src={chosenLogo} alt="logo garçom" />
-                </div>
-            </LogoContainer>
-
             <MinimizeButton>
                 {isMinimized ? (
                     <button className="close-side-bar-menu" onClick={handleMinimization}>
@@ -304,6 +294,7 @@ export function SideBar(){
                     <SideBarButton
                         isActive={isActive['pedidoBalcao']}
                         isMinimizedActive={isMinimized}
+                        title="Novo Pedido"
                     >
                         <FontAwesomeIcon icon={faComputer} className="Side-Bar-Icon"/>
                         <span>Novo Pedido</span>
@@ -316,6 +307,7 @@ export function SideBar(){
                     <SideBarButton
                         isActive={isActive['pedidoOnline']}
                         isMinimizedActive={isMinimized}
+                        title="Pedido Online"
                     >
                         <FontAwesomeIcon icon={faWhatsapp as any} className="Side-Bar-Icon"/>
                         <span>Pedido Online</span>
@@ -328,6 +320,7 @@ export function SideBar(){
                     <SideBarButton
                         isActive={isActive['ordensDeServico']}
                         isMinimizedActive={isMinimized}
+                        title="Pedidos em Aberto"
                     >
                         <FontAwesomeIcon icon={faReceipt} className="Side-Bar-Icon"/>
                         <span>Pedidos em Aberto</span>
@@ -341,6 +334,7 @@ export function SideBar(){
                     <SideBarButton
                         isActive={isActive['aguardandoCliente']}
                         isMinimizedActive={isMinimized}
+                        title="Aguardando Cliente"
                     >
                         <FontAwesomeIcon icon={faGlobe} className="Side-Bar-Icon"/>
                         <span>Aguardando Cliente</span>
@@ -353,6 +347,7 @@ export function SideBar(){
                     <SideBarButton
                         isActive={isActive['pedidos']}
                         isMinimizedActive={isMinimized}
+                        title="Pedidos"
                     >
                         <FontAwesomeIcon icon={faBagShopping} className="Side-Bar-Icon"/>
                         <span>Pedidos</span>
@@ -365,6 +360,7 @@ export function SideBar(){
                     <SideBarButton
                         isActive={isActive['produtos']}
                         isMinimizedActive={isMinimized}
+                        title="Produtos"
                     >
                         <FontAwesomeIcon icon={faPlantWilt} className="Side-Bar-Icon"/>
                         <span>Produtos</span>
@@ -378,6 +374,7 @@ export function SideBar(){
                     <SideBarButton
                         isActive={isActive['estoque']}
                         isMinimizedActive={isMinimized}
+                        title="Estoque"
                     >
                         <FontAwesomeIcon icon={faWarehouse} className="Side-Bar-Icon"/>
                         <span>Estoque</span>
@@ -390,6 +387,7 @@ export function SideBar(){
                     <SideBarButton
                         isActive={isActive['clientes']}
                         isMinimizedActive={isMinimized}
+                        title="Clientes"
                     >   
                         <FontAwesomeIcon icon={faAddressCard} className="Side-Bar-Icon"/>
                         <span>Lista de Clientes</span>
@@ -402,6 +400,7 @@ export function SideBar(){
                     <SideBarButton
                         isActive={isActive['pix']}
                         isMinimizedActive={isMinimized}
+                        title="Pix Recebidos"
                     >
                         <FontAwesomeIcon icon={faPix as any} className="Side-Bar-Icon"/>
                         <span>Pix Recebidos</span>
@@ -415,6 +414,7 @@ export function SideBar(){
                         <SideBarButton
                             isActive={isActive['administradores']}
                             isMinimizedActive={isMinimized}
+                            title="Administradores"
                         >
                             <FontAwesomeIcon icon={faUserShield} className="Side-Bar-Icon"/>
                             <span>Administradores</span>
