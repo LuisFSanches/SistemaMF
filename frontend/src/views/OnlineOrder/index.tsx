@@ -250,7 +250,6 @@ export function OnlineOrder() {
     }, [description]);
 
     useEffect(() => {
-        console.log('query', query)
         loadAvailableProducts(page, pageSize, query);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, pageSize, query]);

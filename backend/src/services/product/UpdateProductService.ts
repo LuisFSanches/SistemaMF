@@ -3,7 +3,7 @@ import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
 
 class UpdateProductService{
-	async execute({ id, name, price, unity, stock, enabled }: IProduct) {	
+	async execute({ id, name, price, unity, stock, enabled, image }: IProduct) {	
         console.log('id', id)	
 		try {
 			let data = {
@@ -11,7 +11,8 @@ class UpdateProductService{
 				price,
 				unity,
                 stock,
-                enabled
+                enabled,
+				image
 			} as any;
 			
 			const updatedProduct =await prismaClient.product.update({

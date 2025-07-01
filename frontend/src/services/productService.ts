@@ -43,6 +43,7 @@ export const updateProduct = async(product: any) => {
         unity: product.unity,
         stock: parseFloat(product.stock),
         enabled: product.enabled,
+        image: product.image,
         headers: {
             Authorization: `${token}`,
         }

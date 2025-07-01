@@ -4,7 +4,7 @@ import { UpdateProductService } from '../../services/product/UpdateProductServic
 
 class UpdateProductController{
 	async handle(req: Request, res: Response, next: NextFunction) {
-        const { name, price, unity, stock, enabled } = req.body;
+        const { name, price, unity, stock, enabled, image } = req.body;
         const id = req.params.id
 
 		const updateProductService = new UpdateProductService();
@@ -15,7 +15,8 @@ class UpdateProductController{
 			price,
 			unity,
 			stock,
-            enabled
+            enabled,
+			image
 		});
 
 		if ('error' in admin && admin.error) {

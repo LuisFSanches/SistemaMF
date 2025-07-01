@@ -5,7 +5,7 @@ import { IClient } from "../interfaces/IClient";
 interface ClientsContextType {
   clients: IClient[];
   totalClients: number
-  loadAvailableClients: (page: number, pageSize: number) => Promise<void>;
+  loadAvailableClients: (page: number, pageSize: number, query: string) => Promise<void>;
   addClient: (client: IClient) => void;
   editClient: (client: IClient) => void;
 }
@@ -16,8 +16,8 @@ export const ClientsProvider: React.FC = ({ children }) => {
   const [clients, setClients] = useState<IClient[]>([]);
   const [totalClients, setTotalClients] = useState(0);
 
-  const loadAvailableClients = async (page: number, pageSize: number) => {
-    const { data: { users, total } } = await listClients(page, pageSize);
+  const loadAvailableClients = async (page: number, pageSize: number, query: string) => {
+    const { data: { users, total } } = await listClients(page, pageSize, query);
     setClients(users);
     setTotalClients(total);
   };

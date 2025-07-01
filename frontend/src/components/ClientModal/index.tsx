@@ -52,7 +52,7 @@ export function ClientModal({
         if (action === "create") {
             const { data: clientData } = await createClient(data);
             addClient(clientData);
-            loadAvailableClients(1, 15);
+            loadAvailableClients(1, 15, '');
             onRequestClose();
         } else if (action === "edit") {
             const { data: clientData } = await updateClient({
@@ -61,7 +61,7 @@ export function ClientModal({
             });
 
             editClient(clientData);
-            loadAvailableClients(1, 15);
+            loadAvailableClients(1, 15, '');
             onRequestClose();
         }
 

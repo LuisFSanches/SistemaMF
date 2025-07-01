@@ -8,8 +8,8 @@ export const getClientByPhone = async (params = "") => {
 };
 
 
-export const listClients = async (page: number, pageSize: number) => {
-  const response = await api.get(`/clients/all?page=${page}&pageSize=${pageSize}`, {
+export const listClients = async (page: number, pageSize: number, query: string) => {
+  const response = await api.get(`/clients/all?page=${page}&pageSize=${pageSize}&query=${query}`, {
     headers: {
       Authorization: `${token}`,
     }

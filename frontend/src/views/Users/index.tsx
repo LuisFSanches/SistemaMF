@@ -20,6 +20,7 @@ export function UsersPage(){
         phone_number: ""
     });
     const [page, setPage] = useState(1);
+    const [query, setQuery] = useState('');
     const pageSize = 15;
 
     function handleOpenClientModal(action:string, client: any){
@@ -31,16 +32,32 @@ export function UsersPage(){
         setClientModal(false)
     }
 
+    const searchClients = (text: string) => {
+        setQuery(text);
+        setPage(1);
+    }
+
     useEffect(() => {
-        loadAvailableClients(page, pageSize);
+        loadAvailableClients(page, pageSize, query);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page]);
+    }, [page, pageSize, query]);
 
     return(
         <Container>
             <PageHeader>
                 <h1>Clientes</h1>
-
+                <div>
+                    <input
+                        style={{width: '250px'}}
+                        type="text"
+                        placeholder="Buscar por Produto/Fornecedor"
+                        onKeyDown={(e: any) => {
+                            if (e.key === 'Enter') {
+                                searchClients(e.target.value);
+                            }
+                        }}
+                    />
+                </div>
                 <Pagination
                     currentPage={page}
                     total={totalClients}
