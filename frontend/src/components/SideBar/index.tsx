@@ -12,7 +12,6 @@ import {
     faBagShopping,
     faAddressCard,
     faReceipt,
-    faPlantWilt,
     faHome,
     faWarehouse
 } from "@fortawesome/free-solid-svg-icons";
@@ -323,7 +322,7 @@ export function SideBar(){
                         title="Pedidos em Aberto"
                     >
                         <FontAwesomeIcon icon={faReceipt} className="Side-Bar-Icon"/>
-                        <span>Pedidos em Aberto</span>
+                        <span>Pedidos atuais</span>
                     </SideBarButton>
                     
                 </SideBarItemContainer>
@@ -350,7 +349,7 @@ export function SideBar(){
                         title="Pedidos"
                     >
                         <FontAwesomeIcon icon={faBagShopping} className="Side-Bar-Icon"/>
-                        <span>Pedidos</span>
+                        <span>Pedidos finalizados</span>
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
@@ -362,7 +361,7 @@ export function SideBar(){
                         isMinimizedActive={isMinimized}
                         title="Produtos"
                     >
-                        <FontAwesomeIcon icon={faPlantWilt} className="Side-Bar-Icon"/>
+                        <i className="material-icons">local_florist</i>
                         <span>Produtos</span>
                     </SideBarButton>
                 </SideBarItemContainer>
@@ -377,7 +376,7 @@ export function SideBar(){
                         title="Estoque"
                     >
                         <FontAwesomeIcon icon={faWarehouse} className="Side-Bar-Icon"/>
-                        <span>Estoque</span>
+                        <span>Compras Efetuadas</span>
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
@@ -414,10 +413,10 @@ export function SideBar(){
                         <SideBarButton
                             isActive={isActive['administradores']}
                             isMinimizedActive={isMinimized}
-                            title="Administradores"
+                            title="Vendedores"
                         >
                             <FontAwesomeIcon icon={faUserShield} className="Side-Bar-Icon"/>
-                            <span>Administradores</span>
+                            <span>Vendedores</span>
                         </SideBarButton>
                     </SideBarItemContainer>
                 </NavLink>

@@ -12,15 +12,13 @@ interface SidebarButtonProps extends SidebarProps {
  * Helper: Define a largura do Sidebar de acordo com o estado de minimização
  */
 const getSidebarWidth = ({ isMinimizedActive }: SidebarProps) =>
-  isMinimizedActive ? '4rem' : '30rem';
+  isMinimizedActive ? '4.5rem' : '30rem';
 
 export const Container = styled.div<SidebarProps>`
   flex: 0;
   max-height: 100%;
-  height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: center;
   background: white;
   width: ${getSidebarWidth};
@@ -121,9 +119,9 @@ export const SideBarButton = styled.button<SidebarButtonProps>`
   width: ${({ isMinimizedActive }) => (isMinimizedActive ? '3rem' : '15rem')};
   display: flex;
   align-items: center;
-  justify-content: ${({ isMinimizedActive }) => (isMinimizedActive ? 'center' : 'flex-start')};
+  flex-direction: column;
   color: var(--text-body);
-  padding: 1rem 0.4rem;
+  padding: 0.2rem 0.4rem;
   border-radius: 0.4rem;
   border: none;
   cursor: pointer;
@@ -136,11 +134,19 @@ export const SideBarButton = styled.button<SidebarButtonProps>`
     color: ${({ isActive }) => (isActive ? '#EC4899' : 'var(--text-body)')};
   }
 
+  i {
+    font-size: 1.8rem;
+    transition: transform 0.2s;
+    color: ${({ isActive }) => (isActive ? '#EC4899' : 'var(--text-body)')};
+  }
+
   span {
-    font-size: 1.1rem;
-    margin-left: 0.6rem;
+    font-size: 11px;
     font-weight: 600;
-    display: ${({ isMinimizedActive }) => (isMinimizedActive ? 'none' : 'flex')};
+    text-align: center;
+    margin-top: 0.2rem;
+    color: ${({ isActive }) => (isActive ? '#EC4899' : 'var(--text-body)')};
+    line-height: 14px;
   }
 
   &:hover {
