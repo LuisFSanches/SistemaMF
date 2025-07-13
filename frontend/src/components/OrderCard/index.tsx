@@ -54,22 +54,34 @@ export function OrderCard({
 				<p>Tel: (22) 99751-7940 | Itaperuna/RJ</p>
 			</div>
 			<div className="order-number">
-				<span className={`order-type ${order.online_order ? "online" : "on_store"}`}>
-					{order.online_order ? "Online" : "Balcão"}
-				</span>
+				{order.is_delivery &&
+					<span className={`order-type ${order.online_order ? "online" : "on_store"}`}>
+						{order.online_order ? "Online" : "Balcão"}
+					</span>
+				}
+
+				{!order.is_delivery &&
+					<span className={`order-type pdv`}>
+						PDV
+					</span> 
+				}
+
 				<h2>*** Pedido #{order?.code} ***</h2>
 				<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
 			</div>
 			<div className="client-info">
 				<div>
 					<p><strong>Cliente:</strong> {formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}</p>
-					<p><strong>Telefone do Cliente: </strong>{order.client.phone_number}</p>
+					{order.is_delivery &&
+						<p><strong>Telefone do Cliente: </strong>{order.client.phone_number}</p>
+					}
 				</div>
 				<p className="delivery-date"><strong>Data de entrega: </strong> 
-				  {moment(order.delivery_date)
-					.locale('pt-br')
-					.utc()
-					.format("D [de] MMMM [de] YYYY [(]dddd[)]")}
+					{moment(order.delivery_date)
+						.locale('pt-br')
+						.utc()
+						.format("D [de] MMMM [de] YYYY [(]dddd[)]")
+					}
 				</p>
 			</div>
 			<div className="order-content">
@@ -84,39 +96,44 @@ export function OrderCard({
 					<p>{formatTitleCase(order.additional_information)}</p>
 				</div>
 			</div>
-			<div className="address-container">
-				<h3><strong>Endereço de entrega:</strong></h3>
-				{!order.pickup_on_store && 
-					<>
-						<p>{formatTitleCase(order.clientAddress.street)}, {order.clientAddress.street_number},
-							{formatTitleCase(order.clientAddress.complement)}
-						</p>
-						<p>{formatTitleCase(order.clientAddress.neighborhood)}, {formatTitleCase(order.clientAddress.city)}</p>
-					</>
-				}
-
-				{order.pickup_on_store &&
-					<p>Retirar na loja</p>
-				}
-				<p>Ponto de referência:
-					{!order.pickup_on_store &&
-						formatTitleCase(order.clientAddress.reference_point)
+			{order.is_delivery &&
+				<div className="address-container">
+					<h3><strong>Endereço de entrega:</strong></h3>
+					{!order.pickup_on_store && 
+						<>
+							<p>{formatTitleCase(order.clientAddress.street)}, {order.clientAddress.street_number},
+								{formatTitleCase(order.clientAddress.complement)}
+							</p>
+							<p>{formatTitleCase(order.clientAddress.neighborhood)}, {formatTitleCase(order.clientAddress.city)}</p>
+						</>
 					}
-				</p>
-			</div>
+
+					{order.pickup_on_store &&
+						<p>Retirar na loja</p>
+					}
+					<p>Ponto de referência:
+						{!order.pickup_on_store &&
+							formatTitleCase(order.clientAddress.reference_point)
+						}
+					</p>
+				</div>
+			}
 			<div className="address-container">
 				<p><strong>Tipo de Entrega: </strong>
 					{TYPES_OF_DELIVERY[order.type_of_delivery as keyof typeof TYPES_OF_DELIVERY]}
 				</p>
 			</div>
-			<div className="address-container">
-				<p><strong>Entregar para: </strong>
-					{order.receiver_name ? formatTitleCase(order.receiver_name)
-						: formatTitleCase(order.client.first_name)}
-				</p>
-				<p><strong>Telefone do recebedor: </strong>
-					{order.receiver_name ? order.receiver_phone : order.client.phone_number}</p>
-			</div>
+			{order.is_delivery &&
+				<div className="address-container">
+					<p><strong>Entregar para: </strong>
+						{order.receiver_name ? formatTitleCase(order.receiver_name)
+							: formatTitleCase(order.client.first_name)}
+					</p>
+					<p><strong>Telefone do recebedor: </strong>
+						{order.receiver_name ? order.receiver_phone : order.client.phone_number}</p>
+				</div>
+			}
+
 			<div className="card-container">
 				<p><strong>Cartão: </strong>
 					{HAS_CARD[order.has_card.toString() as keyof typeof HAS_CARD]}
@@ -179,7 +196,6 @@ export function OrderCard({
 				onRequestClose={handleCloseOrderDetailModal}
 				order={order}
 			/>
-
 		</OrderCardContainer>
 	)
 }

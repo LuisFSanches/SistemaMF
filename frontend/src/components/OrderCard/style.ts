@@ -42,6 +42,10 @@ export const OrderCardContainer= styled.div`
             &.on_store {
                 background: #71265D;
             }
+
+            &.pdv {
+                background: #EC4899;
+            }
         }
     }
 

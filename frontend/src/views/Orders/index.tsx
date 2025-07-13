@@ -59,9 +59,9 @@ export function OrdersPage(){
             	<h1>Todos os Pedidos</h1>
                 <div>
                     <input
-                        style={{width: '250px'}}
+                        style={{width: '310px'}}
                         type="text"
-                        placeholder="Buscar por Nome ou Telefone"
+                        placeholder="Buscar por Nome, Telefone ou Código"
                         onKeyDown={(e: any) => {
                             if (e.key === 'Enter') {
                                 searchOrders(e.target.value);

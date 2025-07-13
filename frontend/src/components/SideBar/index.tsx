@@ -1,10 +1,9 @@
 import { useContext, useEffect, useState, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
-import { Container,SideBarItemContainer, SideBarButton, CompanyInfoContainer, MinimizeButton } from "./style";
+import { Container,SideBarItemContainer, SideBarButton, CompanyInfoContainer } from "./style";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-    faArrowLeft,
-    faArrowRight,
     faComputer,
     faRightFromBracket,
     faGlobe,
@@ -22,6 +21,7 @@ import { NavLink} from 'react-router-dom'
 export function SideBar(){
     const { handleSignOut } = useContext(AuthContext);
     const { adminData } = useAdminData();
+    const location = useLocation();
 
     const [isActive, setActive] = useState({
         dashboard:true,
@@ -40,8 +40,6 @@ export function SideBar(){
         estoque: false
     })
     
-    const [isMinimized, setMinimized] = useState(true)
-
     const handleActiveMenuButton = useCallback((name:string) => {
         switch(name){
             case 'dashboard':
@@ -254,33 +252,16 @@ export function SideBar(){
     useEffect(() => {
         const url = window.location.pathname;
         handleActiveMenuButton(url.replace("/", ""));
-    }, [handleActiveMenuButton])
-
-    function handleMinimization(){
-        setMinimized(!isMinimized)
-    }
-
+    }, [location.pathname, handleActiveMenuButton])
     // const chosenLogo = isMinimized ? logoMini : logoFull;
 
     return(
-        <Container isMinimizedActive={isMinimized}>
-            <MinimizeButton>
-                {isMinimized ? (
-                    <button className="close-side-bar-menu" onClick={handleMinimization}>
-                        <FontAwesomeIcon icon={faArrowRight}/>
-                    </button>
-                ) : (
-                    <button className="close-side-bar-menu" onClick={handleMinimization}>
-                        <FontAwesomeIcon icon={faArrowLeft}/>
-                    </button>
-                )}
-            </MinimizeButton>
-
+        <Container isMinimizedActive={true}>
             <NavLink to="/dashboard" style={{display: 'none'}}>
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('dashboard')}>
                     <SideBarButton
                         isActive={isActive['dashboard']}
-                        isMinimizedActive={isMinimized}
+                        isMinimizedActive
                     >
                         <FontAwesomeIcon icon={faHome} className="Side-Bar-Icon"/>
                         <span>Dashboard</span>
@@ -292,7 +273,7 @@ export function SideBar(){
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidoBalcao')}>
                     <SideBarButton
                         isActive={isActive['pedidoBalcao']}
-                        isMinimizedActive={isMinimized}
+                        isMinimizedActive
                         title="Novo Pedido"
                     >
                         <FontAwesomeIcon icon={faComputer} className="Side-Bar-Icon"/>
@@ -305,7 +286,7 @@ export function SideBar(){
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidoOnline')}>
                     <SideBarButton
                         isActive={isActive['pedidoOnline']}
-                        isMinimizedActive={isMinimized}
+                        isMinimizedActive
                         title="Pedido Online"
                     >
                         <FontAwesomeIcon icon={faWhatsapp as any} className="Side-Bar-Icon"/>
@@ -318,7 +299,7 @@ export function SideBar(){
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('ordensDeServico')}>
                     <SideBarButton
                         isActive={isActive['ordensDeServico']}
-                        isMinimizedActive={isMinimized}
+                        isMinimizedActive
                         title="Pedidos em Aberto"
                     >
                         <FontAwesomeIcon icon={faReceipt} className="Side-Bar-Icon"/>
@@ -332,7 +313,7 @@ export function SideBar(){
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('aguardandoCliente')}>
                     <SideBarButton
                         isActive={isActive['aguardandoCliente']}
-                        isMinimizedActive={isMinimized}
+                        isMinimizedActive
                         title="Aguardando Cliente"
                     >
                         <FontAwesomeIcon icon={faGlobe} className="Side-Bar-Icon"/>
@@ -345,7 +326,7 @@ export function SideBar(){
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidos')}>
                     <SideBarButton
                         isActive={isActive['pedidos']}
-                        isMinimizedActive={isMinimized}
+                        isMinimizedActive
                         title="Pedidos"
                     >
                         <FontAwesomeIcon icon={faBagShopping} className="Side-Bar-Icon"/>
@@ -358,7 +339,7 @@ export function SideBar(){
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('produtos')}>
                     <SideBarButton
                         isActive={isActive['produtos']}
-                        isMinimizedActive={isMinimized}
+                        isMinimizedActive
                         title="Produtos"
                     >
                         <i className="material-icons">local_florist</i>
@@ -372,7 +353,7 @@ export function SideBar(){
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('estoque')}>
                     <SideBarButton
                         isActive={isActive['estoque']}
-                        isMinimizedActive={isMinimized}
+                        isMinimizedActive
                         title="Estoque"
                     >
                         <FontAwesomeIcon icon={faWarehouse} className="Side-Bar-Icon"/>
@@ -385,7 +366,7 @@ export function SideBar(){
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('clientes')}>
                     <SideBarButton
                         isActive={isActive['clientes']}
-                        isMinimizedActive={isMinimized}
+                        isMinimizedActive
                         title="Clientes"
                     >   
                         <FontAwesomeIcon icon={faAddressCard} className="Side-Bar-Icon"/>
@@ -398,7 +379,7 @@ export function SideBar(){
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('pix')}>
                     <SideBarButton
                         isActive={isActive['pix']}
-                        isMinimizedActive={isMinimized}
+                        isMinimizedActive
                         title="Pix Recebidos"
                     >
                         <FontAwesomeIcon icon={faPix as any} className="Side-Bar-Icon"/>
@@ -412,7 +393,7 @@ export function SideBar(){
                     <SideBarItemContainer>
                         <SideBarButton
                             isActive={isActive['administradores']}
-                            isMinimizedActive={isMinimized}
+                            isMinimizedActive
                             title="Vendedores"
                         >
                             <FontAwesomeIcon icon={faUserShield} className="Side-Bar-Icon"/>
@@ -423,7 +404,7 @@ export function SideBar(){
             }
 
             <CompanyInfoContainer
-                isMinimizedActive={isMinimized}
+                isMinimizedActive
             >
 
             <button className="custom-logout-button" onClick={handleSignOut}>

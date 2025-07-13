@@ -375,7 +375,7 @@ export function OnlineOrder() {
                     </ProductContainer>
                     <Form onSubmit={handleSubmit(submitOrder)}>
                         <FormField>
-                            <Label>Descrição</Label>
+                            <Label>Produtos</Label>
                             <DescriptionArea>
                                 {products.map((p, index) => (
                                     <p key={index}>

@@ -7,7 +7,7 @@ export const Container = styled.div`
     flex: 5;
     padding: 0.8rem 2rem;
     overflow-x: hidden;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     margin-right: 1rem;
 
     header{
@@ -58,7 +58,7 @@ export const ContainerTitle = styled.div`
 
 export const ProductsContainer = styled.div`
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     grid-gap: 1.5rem;
     max-height: 80%;
     overflow-y: auto;
@@ -83,15 +83,19 @@ export const ProductItem = styled.div`
     border: 1px solid pink;
     border-radius: 0.4rem;
 
-    background: var(--white-background);
+    background: white;
     box-shadow: 0.3rem 0.1rem 0.1rem 0.1rem var(--shadow-color);
 
     &.disabled {
         background-color: #D0D0D0;
     }
 
-    .product-title{
+    .product-title {
         width: 100%;
+        min-height: 3rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         padding: 0.2rem 0;
         text-align: center;
         background: var(--sideBarBackground);
@@ -99,6 +103,7 @@ export const ProductItem = styled.div`
     }
 
     .product-info {
+        width: 100%;
         display: flex;
         flex-direction: column;
 
@@ -113,15 +118,23 @@ export const ProductItem = styled.div`
         .disabled {
             color: red;
         }
+
+        .product-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.3rem 0;
+            margin-bottom: 0.5rem;
+        }
     }
 
     .product-actions {
         width: 100%;
         display: flex;
         align-items: center;
-        justify-content: space-around;
         margin-top: 0.5rem;
         margin-bottom: 0.4rem;
+        padding: 0 1rem;
 
         span {
             font-size: 1.1rem;
@@ -145,11 +158,11 @@ export const ProductItem = styled.div`
             color: var(--red)
         }
     }
+`
 
-    img{
-        width: 7rem;
-        height: 7rem;
-        margin-right: 0.2rem;
-    }
-
+export const ProductImage = styled.img`
+    width: 100%;
+    height: 100px;
+    object-fit: contain;
+    margin-top: 12px;
 `

@@ -24,7 +24,8 @@ class CreateOrderService{
 		has_card,
 		online_order,
 		online_code,
-		products
+		products,
+		is_delivery
 	}: IOrder) {
 		try {
 			const formattedDeliveryDate = moment.utc(delivery_date)
@@ -53,13 +54,13 @@ class CreateOrderService{
 					has_card,
 					online_order,
 					online_code,
-
+					is_delivery,
 					orderItems: {
-					create: products.map((product: any) => ({
-						product_id: product.id,
-						quantity: Number(product.quantity),
-						price: Number(product.price),
-					})),
+						create: products.map((product: any) => ({
+							product_id: product.id,
+							quantity: Number(product.quantity),
+							price: Number(product.price),
+						})),
 					},
 				},
 

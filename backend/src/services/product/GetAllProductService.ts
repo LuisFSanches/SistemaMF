@@ -12,8 +12,9 @@ class GetAllProductService{
 							contains: query,
 							mode: 'insensitive',
 						},
+						enabled: true
 				}
-				: {};
+				: { enabled: true };
 
 			const [products, total] = await Promise.all([
 				prismaClient.product.findMany({

@@ -151,8 +151,12 @@ export const Header = styled.div`
         background-color: #246D90;
     }
 
+    .store-orders {
+        background-color: #EC4899;
+    }
+
     input {
-        max-width: 250px;
+        max-width: 310px;
         margin-left: 15px;
     }
 

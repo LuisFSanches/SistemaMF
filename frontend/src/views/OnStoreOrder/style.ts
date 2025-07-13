@@ -4,8 +4,6 @@ export const Container = styled.div`
     width: 100%;
     height: 98vh;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     overflow-y: hidden;
     overflow-x: hidden;
 
@@ -17,12 +15,100 @@ export const Container = styled.div`
         height: 100vh;
     }
 `
+
+export const NewOrderContainer = styled.div`
+    width: 100%;
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+
+    @media (max-width: 850px) {
+        flex-direction: column;
+    }
+`;
+
+export const ProductContainer = styled.div`
+    max-height: 850px;
+    margin-top: 20px;
+    margin-left: 15px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    margin-top: 30px;
+
+    ::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #fcc5d0;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+`
+
+export const NewProductButton = styled.button`
+    padding: 10px;
+    border-radius: 10px;
+    background: #EC4899 !important;
+    color: white !important;
+    font-weight: bold;
+`
+
+export const ProductList = styled.div`
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+
+    @media (max-width: 1820px) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media (max-width: 1580px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 1350px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 1000px) {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    @media (max-width: 850px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+`;
+
+export const FormContainer = styled.div`
+    margin-top: 30px;
+`;
+
+export const PageHeaderActions = styled.div`
+    display: flex;
+`;
+
+export const SwitchDetail = styled.p`
+    font-weight: 600;
+    text-align: right;
+    padding: 8px 12px;
+    color: rgb(236, 72, 153);
+`
+
 export const FormHeader = styled.div`
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 20px;
     color: #e7b7c2;
     font-size: 18px;
 
@@ -32,8 +118,8 @@ export const FormHeader = styled.div`
 `
 
 export const Form = styled.form<{ step?: number }>`
-    width: 700px;
-    height: 800px;
+    width: 550px;
+    height: 88vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -101,8 +187,10 @@ export const StepButton = styled.button `
 
 export const ActionButtons = styled.div`
     display: flex;
+    align-items: center;
     justify-content: center;
-    margin: 20px 0;
+    margin: 10px 0;
+    margin-bottom: 20px;
 `
 
 export const CheckboxContainer = styled.div<{alignLeft?: boolean}>`

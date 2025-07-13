@@ -2,12 +2,12 @@ import React from 'react';
 import * as S from './style';
 
 interface NewOrderProgressBarProps {
+	steps: string[];
 	currentStep: number;
 }
 
-const steps = ["Usuário", "Endereço", "Pedido", "Resumo"];
 
-export const NewOrderProgressBar: React.FC<NewOrderProgressBarProps> = ({ currentStep }) => {
+export const NewOrderProgressBar: React.FC<NewOrderProgressBarProps> = ({ steps, currentStep }) => {
 	return (
 		<S.ProgressBarContainer>
 			{steps.map((step, index) => (

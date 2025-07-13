@@ -32,7 +32,8 @@ export const createOrder = async ({
 	created_by,
 	online_order,
 	online_code,
-	products
+	products,
+	is_delivery
 }: any) => {
 	const response = await api.post("/order", {
 		clientId,
@@ -66,6 +67,7 @@ export const createOrder = async ({
 		online_order,
 		online_code,
 		products,
+		is_delivery,
 		headers: {
 			Authorization: `${token}`,
 		}

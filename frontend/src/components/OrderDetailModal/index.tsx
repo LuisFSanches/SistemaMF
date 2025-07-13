@@ -86,10 +86,14 @@ export function OrderDetailModal({
 					<h1>Pedido #{order.code}</h1>
 					<OrderInfo>
 						<h2>Dados do Cliente</h2>
-						<p><strong>Cliente: </strong>
-							{formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}
-						</p>
-						<p><strong>Telefone: </strong> {order.client.phone_number}</p>
+						{order.is_delivery &&
+							<>
+								<p><strong>Cliente: </strong>
+									{formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}
+								</p>
+								<p><strong>Telefone: </strong> {order.client.phone_number}</p>
+							</>
+						}
 					</OrderInfo>
 					<OrderInfo>
 						<h2>Dados do Recebedor</h2>
@@ -135,9 +139,11 @@ export function OrderDetailModal({
 						<p><strong>Total: </strong>R$ {order.total}</p>
 					</OrderInfo>
 					<OrderInfo>
-						<p><strong>Tipo de Entrega: </strong>
-							{TYPES_OF_DELIVERY[order.type_of_delivery as keyof typeof TYPES_OF_DELIVERY]}
-						</p>
+						{order.is_delivery &&
+							<p><strong>Tipo de Entrega: </strong>
+								{TYPES_OF_DELIVERY[order.type_of_delivery as keyof typeof TYPES_OF_DELIVERY]}
+							</p>
+						}
 					</OrderInfo>
 					<OrderInfo>
 						<h2>Endereço de entrega</h2>

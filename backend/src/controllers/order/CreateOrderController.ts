@@ -8,7 +8,7 @@ import { GetClientByPhoneNumberService } from '../../services/client/GetClientBy
 import { GetAllClientAddressService } from '../../services/address/GetAllClientAddressService'
 
 class CreateOrderController{
-	async handle(req: Request, res: Response, next: NextFunction) {
+	handle = async (req: Request, res: Response, next: NextFunction) => {
 		const {
 			clientId,
 			first_name,
@@ -40,14 +40,15 @@ class CreateOrderController{
 			created_by,
 			online_order,
 			online_code,
-			products
+			products,
+			is_delivery
 		} = req.body;
 
 		let client_id = clientId;
 		let address_id = addressId;
 		let newAddress = false;
 
-		if (!client_id && !online_order) {
+		if (!client_id && !online_order && first_name) {
 			const createClientService = new CreateClientService();
 
 			const client = await createClientService.execute({
@@ -61,7 +62,17 @@ class CreateOrderController{
 			}
 		}
 
-		if (!address_id && !online_order) {
+		if (!is_delivery) {
+			const defaultUserId = await this.getDefaultUserId();
+			if (!client_id) {
+				client_id = defaultUserId;
+			}
+			const getClientAddressService = new GetAllClientAddressService();
+			let address = await getClientAddressService.execute(defaultUserId) as any;
+			address_id = address[0]?.id;
+		}
+
+		if (!address_id && !online_order && is_delivery) {
 			const createAddressService = new CreateAddressService();
 			const address = await createAddressService.execute({
 				client_id,
@@ -83,10 +94,8 @@ class CreateOrderController{
 		}
 
 		if (online_order) {
-			const storePhoneNumber = "22997517940";
-			const getClientService = new GetClientByPhoneNumberService();
-			const getClient = await getClientService.execute(storePhoneNumber) as any;
-			client_id = getClient?.id;
+			const defaultUserId = await this.getDefaultUserId();
+			client_id = defaultUserId;
 
 			const getClientAddressService = new GetAllClientAddressService();
 			let address = await getClientAddressService.execute(client_id) as any;
@@ -115,7 +124,8 @@ class CreateOrderController{
 			has_card: has_card,
 			online_order,
 			online_code,
-			products
+			products,
+			is_delivery
 		}) as any;
 
 		if ('error' in order && order.error) {
@@ -139,6 +149,17 @@ class CreateOrderController{
 		if (!online_order) {
 			return res.json(order);
 		}
+	}
+
+	/*
+	* Get default user
+	* @returns {string}
+	*/
+	async getDefaultUserId(): Promise<string> {
+		const storePhoneNumber = "22997517940";
+		const getClientService = new GetClientByPhoneNumberService();
+		const getClient = await getClientService.execute(storePhoneNumber) as any;
+		return getClient.id
 	}
 }
 

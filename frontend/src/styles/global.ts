@@ -660,12 +660,20 @@ export const Switch = styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-right: 25px;
 
     span {
-        min-width: 81px;
+        display: flex;
+        align-items: center;
         font-size: 1rem;
         color: #333;
         text-align: center;
+        font-weight: 600;
+    }
+
+    i {
+        max-width: 30px;
+        width: 30px;
     }
 
     input {

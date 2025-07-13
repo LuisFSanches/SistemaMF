@@ -5,8 +5,9 @@ export const ProgressBarContainer = styled.div`
   align-items: center;
   justify-content: space-between;
   position: relative;
-  width: 80%;
-  padding: 20px 0;
+  width: 50%;
+  padding: 10px 0;
+  padding-bottom: 0px;
 `;
 
 export const Step = styled.div`
@@ -21,13 +22,13 @@ export const StepIndicator = styled.div<{ active: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background-color: ${({ active }) => (active ? '#fcc5d0' : '#F3DBE0')};
   color: var(--text-body);
   font-weight: bold;
-  font-size: 18px;
+  font-size: 15px;
 `;
 
 export const StepLabel = styled.span<{ active: boolean }>`
@@ -53,7 +54,7 @@ export const Progress = styled.div<{ activeStep: number }>`
     css`
       background: linear-gradient(
         to right,
-        #fcc5d0 ${(activeStep - 1) * 33.33}%,
+        #fcc5d0 ${(activeStep - 1) * 50.33}%,
         #7d7d7d ${(activeStep - 1) * 33.33}%
       );
     `}

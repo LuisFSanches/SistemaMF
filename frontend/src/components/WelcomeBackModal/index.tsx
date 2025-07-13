@@ -22,7 +22,7 @@ export function WelcomeBackModal({isOpen, onRequestClose, name}:WelcomeBackModal
             </button>
 
             <Container>
-                <h2>Bem vindo {name}, ficamos muito felizes em tê-lo de volta! 😃</h2>
+                <h2>Bem vindo {name}, ficamos muito felizes em ter você de volta! 😃</h2>
                 <p>Ao preencher o formulário, selecione um endereço já cadastrado, ou crie um novo caso deseje.</p>
             </Container>
         </Modal>

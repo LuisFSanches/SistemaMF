@@ -5,7 +5,7 @@ class GetOnGoingOrderService {
         const orders = await prismaClient.order.findMany({
             where: {
                 status: {
-                notIn: ['FINISHED', 'CANCELED', 'DONE']
+                    notIn: ['FINISHED', 'CANCELED', 'DONE']
                 }
             },
             orderBy: {

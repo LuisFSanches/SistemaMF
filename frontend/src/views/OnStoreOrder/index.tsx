@@ -4,7 +4,9 @@ import InputMask from "react-input-mask";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { faNewspaper } from "@fortawesome/free-solid-svg-icons";
+import { faComputer } from "@fortawesome/free-solid-svg-icons";
+import { ProductCard} from "../../components/ProductCard";
+import { Pagination } from "../../components/Pagination";
 import {
     Container,
     FormHeader,
@@ -13,7 +15,14 @@ import {
     ErrorMessage,
     CheckboxContainer,
     Checkbox,
-    OrderSummary
+    OrderSummary,
+    NewOrderContainer,
+    ProductContainer,
+    NewProductButton,
+    ProductList,
+    FormContainer,
+    PageHeaderActions,
+    SwitchDetail
 } from "./style";
 
 import {
@@ -24,8 +33,10 @@ import {
     Textarea,
     InlineFormField,
     PrimaryButton,
-    ProductContainer,
     DescriptionArea,
+    PageHeader,
+    Switch,
+    StyledSwitch
 } from "../../styles/global";
 
 import { NewOrderProgressBar } from "../../components/NewOrderProgressBar";
@@ -34,12 +45,13 @@ import { Loader } from '../../components/Loader';
 import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
-import { searchProducts } from "../../services/productService";
 import { getPickupAddress } from "../../services/addressService";
 import { rawTelephone } from "../../utils";
 import { PAYMENT_METHODS, STATES } from "../../constants";
 import { useOrders } from "../../contexts/OrdersContext";
 import { useAdmins } from "../../contexts/AdminsContext";
+import { useProducts } from "../../contexts/ProductsContext";
+import placeholder_products from '../../assets/images/placeholder_products.png';
 
 interface INewOrder {
     phone_number: string;
@@ -80,6 +92,7 @@ interface IProduct {
 export function OnStoreOrder() {
     const { addOrder } = useOrders();
     const { admins } = useAdmins();
+    const { products: availableProducts, loadAvailableProducts, totalProducts } = useProducts();
 
     const formRef = useRef<HTMLDivElement>(null);
     const [step, setStep] = useState(1);
@@ -94,16 +107,15 @@ export function OnStoreOrder() {
     const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
     const [showLoader, setShowLoader] = useState(false);
     const [query, setQuery] = useState('');
-    const [productSuggestions, setProductSuggestions] = useState([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
-    const [quantity, setQuantity] = useState<number>(1);
-    const [price, setPrice] = useState<number>(0);
     const [products, setProducts] = useState<IProduct[]>([]);
     const [productModal, setProductModal] = useState(false);
-    const [showProductError, setShowProductError] = useState(false);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(8);
+    const [steps, setSteps] = useState(["Pedido", "Endereço", "Resumo"]);
+    const [is_delivery, setIsDelivery] = useState(false);
+    const [fillClientInformation, setFillClientInformation] = useState(false);
+    const [orderStatus, setOrderStatus] = useState<"OPENED" | "DONE">("OPENED");
 
-    const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
     const navigate = useNavigate();
 
     const [order, setOrder] = useState<INewOrder>({
@@ -136,13 +148,20 @@ export function OnStoreOrder() {
     });
 
     const handleNextStep = () => {
-        if (step < 4) {
+        if (step === 1 && is_delivery === false) {
+            setStep((prevStep) => prevStep + 2);
+        }
+        if (step < 4 && is_delivery === true) {
             setStep((prevStep) => prevStep + 1);
         }
     }
 
     const handlePreviousStep = () => {
-        setStep((prevStep) => prevStep - 1);
+        if (step > 1 && is_delivery === false) {
+            setStep((prevStep) => prevStep - 2);
+        } else {
+            setStep((prevStep) => prevStep - 1);
+        }
     }
 
     const {
@@ -192,7 +211,8 @@ export function OnStoreOrder() {
         const total = Number(products_value) + Number(delivery_fee);
 
         const orderData = {
-            phone_number: rawTelephone(phone_number),
+            phone_number: (is_delivery === false && fillClientInformation === false)
+                ? '(22)99751-7940' : rawTelephone(phone_number),
             first_name,
             last_name,
             receiver_name,
@@ -216,27 +236,33 @@ export function OnStoreOrder() {
             products_value: Number(products_value),
             delivery_fee: Number(delivery_fee),
             total: Number(total),
-            status: "OPENED",
+            status: orderStatus,
             has_card,
             created_by,
             products
         }
 
-        if (step === 3) {
+        if (step === 2 || (step === 1 && is_delivery === false)) {
             setOrder(orderData);
         }
 
-        if (step === 4) {
+        if (step === 3 || (step === 3 && is_delivery === false)) {
             const { data } = await createOrder({
                 clientId: client_id,
                 ...orderData,
+                is_delivery
             })
 
             setShowLoader(true);
 
             addOrder(data);
 
-            navigate("/ordensDeServico");
+            if (orderStatus === "DONE") {
+                navigate("/pedidos");
+            } else {
+                navigate("/ordensDeServico");
+            }
+
         }
 
         handleNextStep();
@@ -255,6 +281,7 @@ export function OnStoreOrder() {
 
                     if (!client) {
                         setClientId("");
+                        setAddresses([]);
                     }
 
                     if (client) {
@@ -298,7 +325,7 @@ export function OnStoreOrder() {
     useEffect(() => {
         const phoneNumber = watch("receiver_phone") || "";
         const numericValue = rawTelephone(phoneNumber);
-    
+
         const timeout = setTimeout(() => {
             if (numericValue.length === 10) {
                 setReceiverMask("(99) 9999-9999");
@@ -327,60 +354,49 @@ export function OnStoreOrder() {
 
     const handleSearchProducts = (text: string) => {
         setQuery(text);
-
-        if (debounceTimeout.current) {
-            clearTimeout(debounceTimeout.current);
-        }
-        
-        debounceTimeout.current = setTimeout(async () => {
-            if (text.length >= 2) {
-                const response = await searchProducts(text);
-                setProductSuggestions(response.data as any);
-                setShowSuggestions(true);
-            }
-        }, 700);
+        setPage(1);
     };
 
+    const handleAddProduct = (product: IProduct, quantity: number, price: number) => {
+        setProducts((prev: IProduct[]) => {
+            const existingIndex = prev.findIndex((p) => p.id === product.id);
+            let updated;
 
-    const handleSelectProduct = (product: any) => {
-        setSelectedProduct(product);
-        setPrice(product.price);
-        setQuantity(quantity);
-        setQuery(product.name);
-        setShowSuggestions(false);
-    };
+            if (existingIndex !== -1) {
+                const existing = prev[existingIndex];
+                const newQuantity = existing.quantity + quantity;
 
-    const addProduct = () => {
-        if (quantity > 0 && query !== '' && price > 0) {
-            setProducts((prev: any) => {
-                const updated = [
+                // Recalcula o preço médio ponderado
+                const newPrice = (
+                    (existing.quantity * existing.price + quantity * price) /
+                    newQuantity
+                );
+
+                updated = [...prev];
+                updated[existingIndex] = {
+                    ...existing,
+                    quantity: newQuantity,
+                    price: Number(newPrice.toFixed(2)),
+                };
+            } else {
+                updated = [
                     ...prev,
                     {
-                        ...selectedProduct,
+                        ...product,
                         quantity,
                         price: Number(price),
                     },
                 ];
-                
-                const total = updated.reduce((sum, p) => {
-                  return sum + Number(p.quantity) * Number(p.price);
-                }, 0);
-                setValue("products_value", total);
-                return updated;
-            });
+            }
 
-            setSelectedProduct(null);
-            setQuery('');
-            setPrice(0);
-            setQuantity(1);
-            setShowSuggestions(false);
-        } else {
-            setShowProductError(true);
-            setTimeout(() => {
-                setShowProductError(false);
-            }, 2000);
-        }
-    }
+            const total = updated.reduce((sum, p) => {
+                return sum + Number(p.quantity) * Number(p.price);
+            }, 0);
+
+            setValue("products_value", total);
+            return updated;
+        });
+    };
 
     const removeProduct = (product: any) => {
         setProducts((prev: any) => {
@@ -404,6 +420,16 @@ export function OnStoreOrder() {
         setProductModal(false)
     }
 
+    function handleSetFillClientInformation() {
+        setFillClientInformation(!fillClientInformation);
+
+        if (fillClientInformation) {
+            setValue("first_name", "");
+            setValue("last_name", "");
+            setValue("phone_number", "");
+        }
+    }
+
     const description = products
         .map((p) => `${p.quantity}x ${p.name} - R$ ${p.price}`)
         .join('\n');
@@ -412,6 +438,53 @@ export function OnStoreOrder() {
         setValue('description', description);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [description]);
+
+    useEffect(() => {
+        loadAvailableProducts(page, pageSize, query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page, pageSize, query]);
+
+    useEffect(() => {
+        if (is_delivery) {
+            setSteps(["Pedido", "Endereço", "Resumo"]);
+            setValue("delivery_date", "");
+            setPickupOnStore(false);
+            setValue("payment_received", false);
+        } else {
+            setSteps(["Pedido", "Resumo"]);
+            setValue("first_name", "");
+            setValue("last_name", "");
+            setValue("phone_number", "");
+            const today = new Date().toISOString().split("T")[0];
+            setValue("delivery_date", today);
+            setPickupOnStore(true);
+            setValue("payment_received", true);
+            setStep(1);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [is_delivery]);
+
+    useEffect(() => {
+        function handleResize() {
+            const width = window.innerWidth;
+            if (width < 800) {
+                setPageSize(1);
+            } else if (width < 1300) {
+                setPageSize(4);
+            } 
+            else if (width < 1600) {
+                setPageSize(6);
+            }
+            else if (width < 1830) {
+                setPageSize(8);
+            } else {
+                setPageSize(10);
+            }
+        }
+
+        // Executa ao montar
+        handleResize();
+    }, []);
     
     return(
         <Container>
@@ -431,461 +504,502 @@ export function OnStoreOrder() {
                 }}
             />
             <Loader show={showLoader} />
-            <NewOrderProgressBar currentStep={step}/>
-            <Form onSubmit={handleSubmit(onSubmitStep)} step={step} autoComplete="off">
-                <FormHeader>
-                    <FontAwesomeIcon icon={faNewspaper} size="3x"/>
-                    <h2>Novo Pedido</h2>
-                </FormHeader>
-                {step === 1 &&
-                    <>
-                        <FormField>
-                            <Label>Telefone</Label>
-                            <InputMask
-                                autoComplete="off"
-                                mask={mask}
-                                alwaysShowMask={false}
-                                placeholder='Telefone'
-                                value={watch("phone_number") || ""}
-                                {...register("phone_number", { 
-                                    required: "Telefone inválido",
-                                    validate: (value) => {
-                                        if (value.replace(/[^0-9]/g, "").length < 10) {
-                                            return "Telefone inválido";
-                                        }
-                                        return true;
+            <NewOrderContainer>
+                <ProductContainer>
+                    <PageHeader style={{ marginBottom: '5px' }}>
+                        <div className="title">
+                            <FontAwesomeIcon icon={faComputer as any} />
+                            <span>Pedido Balcão</span>
+                        </div>
+                        <PageHeaderActions>
+                            <Switch>
+                                <span style={{ color: is_delivery ? "#333" : "#EC4899" }}>
+                                    <i className="material-icons">storefront</i>
+                                    Pedido na Loja
+                                </span>
+                                <Input id="switch" type="checkbox" placeholder='Ativo'
+                                    onChange={(e: any) => setIsDelivery(e.target.checked)}/>
+                                <StyledSwitch htmlFor="switch" $checked={is_delivery as boolean} />
+                                <span style={{ color: is_delivery ? "#EC4899" : "#333" }}>
+                                    <i className="material-icons">moped_package</i>
+                                    Entrega
+                                </span>
+                            </Switch>
+                            <NewProductButton type="button" onClick={handleOpenProductModal}>
+                                Novo Produto
+                            </NewProductButton>
+                        </PageHeaderActions>
+                    </PageHeader>
+                    <SwitchDetail>
+                        {is_delivery ? "Pedido para entrega" : "Será Retirado na Loja"}
+                    </SwitchDetail>
+                    <div className="product-data">
+                        <div style={{ position: 'relative', width: '100%' }}>
+                            <Input
+                                placeholder="Buscar Produtos"
+                                onKeyDown={(e: any) => {
+                                    if (e.key === 'Enter') {
+                                        handleSearchProducts(e.target.value);
                                     }
-                                })}
+                                }}
                             />
-                            {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
-                        </FormField>
-                        <InlineFormField>
-                            <FormField>
-                                <Label>Nome</Label>
-                                <Input type="text" autoComplete="off" placeholder="Digite seu nome"
-                                    {...register("first_name", {
-                                        required: "Nome inválido",
-                                    })}
-                                    disabled={client_id ? true : false}
-                                />
-                                {errors.first_name && <ErrorMessage>{errors.first_name.message}</ErrorMessage>}
-                            </FormField>
-                            <FormField>
-                                <Label>Sobrenome</Label>
-                                <Input type="text" placeholder="Digite seu sobrenome" 
-                                    {...register("last_name", {
-                                        required: "Sobrenome inválido",
-                                    })}
-                                    disabled={client_id ? true : false}
-                                />
-                                {errors.last_name && <ErrorMessage>{errors.last_name.message}</ErrorMessage>}
-                            </FormField>
-                        </InlineFormField>
-                        
-                        <CheckboxContainer>
-                            <Checkbox type="checkbox"
-                                onChange={() => setDiferentReceiver(!differentReceiver)} checked={differentReceiver}/>
-                            <Label>Pessoa diferente recebe</Label>
-                        </CheckboxContainer>
-                        
-                        {differentReceiver &&
-                            <InlineFormField>
-                                <FormField>
-                                    <Label>Recebedor</Label>
-                                    <Input type="text" placeholder="Recebedor"
-                                        {...register("receiver_name", {
-                                            required: "Nome inválido",
-                                        })}
-                                    />
-                                    {errors.receiver_name && <ErrorMessage>{errors.receiver_name.message}</ErrorMessage>}
-                                </FormField>
-                                <FormField>
-                                    <Label>Telefone do recebedor</Label>
-                                    <InputMask
-                                        autoComplete="off"
-                                        mask={receiverMask}
-                                        alwaysShowMask={false}
-                                        placeholder='Telefone'
-                                        value={watch("receiver_phone") || ""}
-                                        {...register("receiver_phone", { 
-                                        })}
-                                    />
-                                    {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
-                                </FormField>
-                            </InlineFormField>
-                        }
-
-                        <FormField>
-                            <Label>Vendedor:</Label>
-                            <Select {...register("created_by", { required: "Vendedor Responsável inválido" })}>
-                                <option value="">Pedido Anotado por:</option>
-                                {admins.map((admin: any) => (
-                                    <option key={admin.id} value={admin.id}>{admin.name}</option>
-                                ))}
-                            </Select>
-                            {errors.created_by && <ErrorMessage>{errors.created_by.message}</ErrorMessage>}
-                        </FormField>
-                    </>
-                }
-
-                {step === 2 &&
-                    <>
-                        {addresses.length === 0 &&
-                            <CheckboxContainer alignLeft>
-                                <Checkbox type="checkbox" onChange={(e) => {
-                                    setPickupOnStore(!pickupOnStore)
-                                    handlePickUpAddress(e.target.checked);
-                                    
-                                }} checked={pickupOnStore}/>
-                                <Label>Retirar no local</Label>
-                            </CheckboxContainer>
-                        }
-                        {addresses.length > 0 && (
-                            <>
-                                {!pickupOnStore &&
-                                    <FormField>
-                                        <Label>Selecione o Endereço</Label>
-                                        <Select
-                                            {...register("addressId")}
-                                            onChange={(e) => {
-                                                const selectedAddressId = e.target.value;
-                                                const selectedAddress: any = addresses.find((address: any) => address.id === selectedAddressId);
-                                                setSelectedAddress(selectedAddress);
-                                                if (selectedAddress) {
-                                                    setValue("postal_code", selectedAddress.postal_code);
-                                                    setValue("street", selectedAddress.street);
-                                                    setValue("street_number", selectedAddress.street_number);
-                                                    setValue("city", selectedAddress.city);
-                                                    setValue("neighborhood", selectedAddress.neighborhood);
-                                                    setValue("complement", selectedAddress.complement);
-                                                    setValue("reference_point", selectedAddress.reference_point);
-                                                    setValue("state", selectedAddress.state);
-                                                    setValue("country", selectedAddress.country);
-                                                    setAddressId(selectedAddressId);
-                                                }
-                                            }}
-                                        >
-                                            <option value="">Selecione um endereço</option>
-                                            {addresses.map((address: any) => (
-                                                <option key={address.id} value={address.id}>
-                                                    {address.street}, {address.number} - {address.city}
-                                                </option>
-                                            ))}
-                                        </Select>
-                                    </FormField>
-                                }
-                                
-                                <InlineFormField>
-                                    <CheckboxContainer>
-                                        <Checkbox type="checkbox" disabled={pickupOnStore} onChange={() => {
-                                            setNewAddress(!newAddress)
-
-                                            if (!newAddress) {
-                                                setAddressId("");
-                                                setValue("addressId", "");
-                                            }
-
-                                            if (newAddress) {
-                                                setAddressId(selectedAddress.id);
-                                                setValue("addressId", selectedAddress.id);
-                                            }
-                                            
-                                        }} checked={newAddress}/>
-                                        <Label>Cadastrar novo endereço</Label>
-                                    </CheckboxContainer>
-
-                                    <CheckboxContainer>
-                                        <Checkbox type="checkbox" onChange={(e) => {
-                                            setPickupOnStore(!pickupOnStore)
-                                            handlePickUpAddress(e.target.checked);
-                                            
-                                        }} checked={pickupOnStore}/>
-                                        <Label>Retirar no local</Label>
-                                    </CheckboxContainer>
-                                </InlineFormField>
-                            </>
-                        )}
-                        {!pickupOnStore &&
-                            <>
-                                <InlineFormField>
-                                    <FormField isShortField>
-                                        <Label>CEP</Label>
-                                        <Input type="tel" placeholder="CEP" {...register("postal_code", {
-                                            required: "CEP inválido",
-                                            })}
-                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                        />
-                                        {errors.postal_code && <ErrorMessage>{errors.postal_code.message}</ErrorMessage>}
-                                    </FormField>
-                                    <FormField>
-                                        <Label>Rua</Label>
-                                        <Input type="text" placeholder="Rua" {...register("street", {
-                                            required: "Rua inválida",
-                                            })}
-                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                        />
-                                        {errors.street && <ErrorMessage>{errors.street.message}</ErrorMessage>}
-                                    </FormField>
-                                </InlineFormField>
-                                
-                                <InlineFormField>
-                                    <FormField isShortField>
-                                        <Label>Número</Label>
-                                        <Input type="text" placeholder="Número" {...register("street_number", {
-                                            required: "Número inválido",
-                                            })}
-                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                        />
-                                        {errors.street_number && <ErrorMessage>{errors.street_number.message}</ErrorMessage>}
-                                    </FormField>
-                                    <FormField>
-                                        <Label>Complemento</Label>
-                                        <Input type="text" placeholder="Complemento" {...register("complement")}
-                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                        />
-                                    </FormField>
-                                </InlineFormField>
-                                <FormField>
-
-                                <Label>Bairro</Label>
-                                
-                                        <Input type="text" placeholder="Bairro" {...register("neighborhood", {
-                                            required: "Bairro inválido",
-                                            })}
-                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                        />
-                                        {errors.neighborhood && <ErrorMessage>{errors.neighborhood.message}</ErrorMessage>}
-                                     
-                                </FormField>
-                                <InlineFormField>
-                                    <FormField>
-                                        
-                                        <Label>Ponto de referência</Label>
-                                        <Input type="text" placeholder="Ponto de referência" {...register("reference_point")}
-                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                        />
-                                    
-                                    </FormField>
-                                    <FormField isShortField>
-                                        <Label>País</Label>
-                                        <Input type="text" placeholder="País" {...register("country", {
-                                            required: "País inválido",
-                                            })}
-                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                        />
-                                        {errors.country && <ErrorMessage>{errors.country.message}</ErrorMessage>}
-                                    </FormField>
-                                </InlineFormField>
-
-                                <InlineFormField>
-                                    <FormField>
-                                        <Label>Estado</Label>
-                                        <Select {...register("state", {
-                                            required: "Estado inválido",
-                                        })}>
-                                        <option value="">Selecionar:</option>
-                                            {Object.entries(STATES).map(([key, value]) => (
-                                                <option key={key} value={key}>{value}</option>
-                                            ))}
-                                        </Select>
-                                        {errors.state && <ErrorMessage>{errors.state.message}</ErrorMessage>}
-                                    </FormField>
-                                    <FormField>
-                                        <Label>Cidade</Label>
-                                        <Input type="text" placeholder="Cidade" {...register("city", {
-                                            required: "Cidade inválido",
-                                            })}
-                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
-                                        />
-                                        {errors.city && <ErrorMessage>{errors.city.message}</ErrorMessage>}
-                                    </FormField>
-                                </InlineFormField>
-                            </>
-                        }
-                    </>
-                }
-
-                {step === 3 &&
-                    <>
-                        <ProductContainer isEditModal={false}>
-                            <Label>Adicionar Produtos</Label>
-                            <div className="product-data">
-                                <div>
-                                    <Label>Quantidade</Label>
-                                    <Input
-                                        type="number"
-                                        placeholder="0"
-                                        value={quantity}
-                                        onChange={(e) => setQuantity(e.target.value as any)}/>
-                                </div>
-                                
-                                <div style={{ position: 'relative', width: '100%' }}>
-                                    <Label>Produto</Label>
-                                    <Input
-                                        placeholder="Produto"
-                                        value={query}
-                                        onChange={(e) => handleSearchProducts(e.target.value)}
-                                        onFocus={() => query && setShowSuggestions(true)}
-                                    />
-
-                                    {showSuggestions && productSuggestions.length > 0 && query.length >= 2 && (
-                                        <ul className="suggestion-box">
-                                        {productSuggestions.map((product: any) => (
-                                            <li key={product.id} onClick={() => handleSelectProduct(product)}>
-                                            {product.name} - R$ {product.price}
-                                            </li>
-                                        ))}
-                                        </ul>
-                                    )}
-                                </div>
-                                <div>
-                                    <Label>Valor</Label>
-                                    <Input
-                                        placeholder="Valor"
-                                        type="number"
-                                        value={price}
-                                        onChange={(e) => setPrice(e.target.value as any)}
-                                    />
-                                </div>
-                            </div>
-                            <div className="product-actions">
-                                <button type="button" className="add-button" onClick={addProduct}>Adicionar</button>
-                                <button type="button" onClick={handleOpenProductModal}>Novo produto</button>
-                            </div>
-                            {showProductError && <ErrorMessage style={{ textAlign: 'center', marginTop: '10px' }}>
-                                Preencha todos os campos
-                                </ErrorMessage>}
-                        </ProductContainer>
-                        <FormField>
-                            <Label>Descrição</Label>
-                            <DescriptionArea>
-                                {products.map((p, index) => (
-                                    <p key={index}>
-                                        {p.quantity}x {p.name} - R$ {p.price}
-                                        <button type="button" onClick={() => removeProduct(p)}>
-                                            <FontAwesomeIcon icon={faXmark}/>
-                                        </button>
-                                    </p>
-                                ))}
-                            </DescriptionArea>
-                            <Input {...register("description", { required: "Descrição obrigatória" })}
-                                style={{ display: 'none'}} value={watch("description")}/>
-
-                            {errors.description && (
-                                <ErrorMessage>{errors.description.message}</ErrorMessage>
-                            )}
-                        </FormField>
-                        <FormField>
-                            <Label>Observações</Label>
-                            <Textarea placeholder="Observações" {...register("additional_information")}
+                        </div>
+                    </div>
+                    <ProductList>
+                        {availableProducts.map((product: any) => (
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                image={product.image ? product.image : placeholder_products}
+                                onAdd={handleAddProduct}
                             />
-                        </FormField>
-                        <InlineFormField>
-                            <FormField>
-                                <CheckboxContainer>
-                                    <Checkbox type="checkbox" {...register("has_card")} />
-                                    <Label>Pedido Contém Cartão</Label>
-                                </CheckboxContainer>
-                            </FormField>
-                            <FormField>
-                                <CheckboxContainer>
-                                    <Checkbox type="checkbox" {...register("payment_received")} />
-                                    <Label>Pagamento Recebido</Label>
-                                </CheckboxContainer>
-                            </FormField>
-                        </InlineFormField>
-                        
-                        <InlineFormField>
-                            <FormField>
-                                <Label>Data de Entrega</Label>
-                                <Input type="date" {...register("delivery_date", {
-                                    required: "Data de entrega é obrigatória",
-                                })}/>
-                                {errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
-                            </FormField>
-                            <FormField>
-                                <Label>Método de pagamento</Label>
-                                <Select {...register("payment_method")}>
-                                    {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
-                                        <option key={key} value={key}>{value}</option>
+                        ))}
+
+                    </ProductList>
+                    <Pagination
+                        currentPage={page}
+                        total={totalProducts}
+                        pageSize={pageSize as number}
+                        onPageChange={setPage}
+                    />
+                </ProductContainer>
+            </NewOrderContainer>
+            <FormContainer>
+                <Form onSubmit={handleSubmit(onSubmitStep)} step={step} autoComplete="off">
+                    <FormHeader>
+                        <NewOrderProgressBar steps={steps} currentStep={step}/>
+                    </FormHeader>
+                    {step === 1 &&
+                        <>
+                            <FormField style={{ marginTop: '0px' }}>
+                                <Label>Produtos</Label>
+                                <DescriptionArea>
+                                    {products.map((p, index) => (
+                                        <p key={index}>
+                                            {p.quantity}x {p.name} - R$ {p.price}
+                                            <button type="button" onClick={() => removeProduct(p)}>
+                                                <FontAwesomeIcon icon={faXmark}/>
+                                            </button>
+                                        </p>
                                     ))}
-                                </Select>
-                            </FormField> 
-                        </InlineFormField>
-                        <InlineFormField>
-                            <FormField>
-                                <Label>Valor total dos Produtos</Label>
-                                <Input type="number" step="0.01" placeholder="Total" {...register("products_value", {
-                                    required: "Valor total é obrigatório",
-                                })} />
-                                {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
-                            </FormField>
-                            <FormField>
-                                <Label>Taxa de entrega</Label>
-                                <Input type="number" step="0.01" placeholder="0.00" {...register("delivery_fee", {
-                                })} />
-                            </FormField>
-                        </InlineFormField>
-                    </>
-                }
+                                </DescriptionArea>
+                                <Input {...register("description", { required: "Selecione um produto" })}
+                                    style={{ display: 'none'}} value={watch("description")}/>
 
-                {step === 4 &&
-                    <OrderSummary ref={formRef}>
-                        <h2>Resumo do Pedido</h2>
-                        <div>
-                            <p>Realizado em {new Date().toLocaleString()}</p>
-                        </div>
-                        <div>
-                            <p><strong>Descrição do pedido: </strong>{order.description}</p>
-                            <p>Observações: {order.additional_information}</p>
-                        </div>
-                        <div>
-                            <p><strong>Valor dos produtos:</strong> R$ {order.products_value}</p>
-                            <p><strong>Taxa de entrega:</strong> R$ {order.delivery_fee}</p>
-                            <p><strong>Total:</strong> R$ {Number(order.products_value) + Number(order.delivery_fee)}</p>
-                        </div>
-                        <div>
-                            <p><strong>Cliente: </strong>{order.first_name}</p>
-                        </div>
-                        <div>
-                            <p><strong>Endereço:</strong></p>
-                            {order.pickup_on_store && <p>Retirar na loja</p>}
-                            {!order.pickup_on_store &&
+                                {errors.description && (
+                                    <ErrorMessage>{errors.description.message}</ErrorMessage>
+                                )}
+                            </FormField>
+                            <FormField style={{ marginTop: '5px' }}>
+                                <Label>Observações</Label>
+                                <Textarea
+                                    style={{ minHeight: '70px' }}
+                                    placeholder="Observações"
+                                    {...register("additional_information")}
+                                />
+                            </FormField>
+                            {is_delivery === false &&
+                                <InlineFormField>
+                                    <CheckboxContainer style={{ marginTop: '10px' }}>
+                                        <Checkbox type="checkbox"
+                                            onChange={() => handleSetFillClientInformation()} checked={fillClientInformation}/>
+                                        <Label>Preencher dados do cliente</Label>
+                                    </CheckboxContainer>
+                                </InlineFormField>
+                            }
+                            {(fillClientInformation || is_delivery) &&
                                 <>
-                                    <p>{order.street}, {order.street_number}</p>
-                                    <p>{order.neighborhood}, {order.city}</p>
-                                    <p><strong>Ponto de referência: </strong>{order.reference_point}</p>
+                                    <FormField style={{ marginTop: '10px' }}>
+                                        <Label>Telefone</Label>
+                                        <InputMask
+                                            autoComplete="off"
+                                            mask={mask}
+                                            alwaysShowMask={false}
+                                            placeholder='Telefone'
+                                            value={watch("phone_number") || ""}
+                                            {...register("phone_number", { 
+                                                required: "Telefone inválido",
+                                                validate: (value) => {
+                                                    if (value.replace(/[^0-9]/g, "").length < 10) {
+                                                        return "Telefone inválido";
+                                                    }
+                                                    return true;
+                                                }
+                                            })}
+                                        />
+                                        {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
+                                    </FormField>
+                                    <InlineFormField style={{ marginTop: '0px' }}>
+                                        <FormField style={{ marginTop: '10px' }}>
+                                            <Label>Nome Cliente</Label>
+                                            <Input type="text" autoComplete="off" placeholder="Nome do Cliente"
+                                                {...register("first_name", {
+                                                    required: "Nome inválido",
+                                                })}
+                                                disabled={client_id ? true : false}
+                                            />
+                                            {errors.first_name && <ErrorMessage>{errors.first_name.message}</ErrorMessage>}
+                                        </FormField>
+                                        <FormField style={{ marginTop: '10px' }}>
+                                            <Label>Sobrenome Cliente</Label>
+                                            <Input type="text" placeholder="Sobrenome do Cliente" 
+                                                {...register("last_name", {
+                                                    required: "Sobrenome inválido",
+                                                })}
+                                                disabled={client_id ? true : false}
+                                            />
+                                            {errors.last_name && <ErrorMessage>{errors.last_name.message}</ErrorMessage>}
+                                        </FormField>
+                                    </InlineFormField>
                                 </>
                             }
-                        </div>
-                        <div>
-                            <p><strong>Entregar para: </strong>
-                                {order.receiver_name ? order.receiver_name : order.first_name}</p>
-                            <p><strong>Telefone do Recebedor: </strong>
-                                {order.receiver_name ? order.receiver_phone : order.phone_number}
-                            </p>
-                        </div>
-                        <div>
-                            <p><strong>Método de pagamento: </strong>
-                                {PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS]}
-                            </p>
-                            <p><strong>Status do pagamento: </strong>
-                                {order.payment_received ? "Recebido" : "Pendente"}
-                            </p>
-                        </div>
-                    </OrderSummary>
-                }
-                
-                <ActionButtons>
-                    {step > 1 && 
-                        <PrimaryButton style={{marginRight: "20px"}} type="button"
-                            onClick={handlePreviousStep}>Voltar</PrimaryButton>
+                            {is_delivery &&
+                                <InlineFormField>
+                                    <CheckboxContainer style={{ marginTop: '10px' }}>
+                                        <Checkbox type="checkbox"
+                                            onChange={() => setDiferentReceiver(!differentReceiver)} checked={differentReceiver}/>
+                                        <Label>Pessoa diferente recebe</Label>
+                                    </CheckboxContainer>
+                                
+                                </InlineFormField>
+                            }
+                            
+                            {differentReceiver &&
+                                <InlineFormField>
+                                    <FormField>
+                                        <Label>Recebedor</Label>
+                                        <Input type="text" placeholder="Recebedor"
+                                            {...register("receiver_name", {
+                                                required: "Nome inválido",
+                                            })}
+                                        />
+                                        {errors.receiver_name && <ErrorMessage>{errors.receiver_name.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>Telefone do recebedor</Label>
+                                        <InputMask
+                                            autoComplete="off"
+                                            mask={receiverMask}
+                                            alwaysShowMask={false}
+                                            placeholder='Telefone'
+                                            value={watch("receiver_phone") || ""}
+                                            {...register("receiver_phone", { 
+                                            })}
+                                        />
+                                        {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
+                                    </FormField>
+                                </InlineFormField>
+                            }
+
+                            <FormField style={{ marginTop: '5px' }}>
+                                <Label>Vendedor Responsável:</Label>
+                                <Select {...register("created_by", { required: "Vendedor Responsável inválido" })}>
+                                    <option value="">Pedido Anotado por:</option>
+                                    {admins.map((admin: any) => (
+                                        <option key={admin.id} value={admin.id}>{admin.name}</option>
+                                    ))}
+                                </Select>
+                                {errors.created_by && <ErrorMessage>{errors.created_by.message}</ErrorMessage>}
+                            </FormField>
+                            <InlineFormField>
+                                <FormField>
+                                    <CheckboxContainer style={{ margin: '0px' }}>
+                                        <Checkbox type="checkbox" {...register("has_card")} />
+                                        <Label>Pedido Contém Cartão</Label>
+                                    </CheckboxContainer>
+                                </FormField>
+                                <FormField>
+                                    <CheckboxContainer style={{ margin: '0px' }}>
+                                        <Checkbox
+                                            type="checkbox" {...register("payment_received")} />
+                                        <Label>Pagamento Recebido</Label>
+                                    </CheckboxContainer>
+                                </FormField>
+                            </InlineFormField>
+                            
+                            <InlineFormField>
+                                <FormField style={{ marginTop: '10px' }}>
+                                    <Label>Data de Entrega</Label>
+                                    <Input type="date" {...register("delivery_date", {
+                                        required: "Data de entrega é obrigatória",
+                                    })}/>
+                                    {errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
+                                </FormField>
+                                <FormField style={{ marginTop: '10px' }}>
+                                    <Label>Método de pagamento</Label>
+                                    <Select {...register("payment_method")}>
+                                        {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
+                                            <option key={key} value={key}>{value}</option>
+                                        ))}
+                                    </Select>
+                                </FormField> 
+                            </InlineFormField>
+                            <InlineFormField>
+                                <FormField style={{ marginTop: '10px' }}>
+                                    <Label>Valor total dos Produtos</Label>
+                                    <Input type="number" step="0.01" placeholder="Total" {...register("products_value", {
+                                        required: "Valor total é obrigatório",
+                                    })} />
+                                    {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
+                                </FormField>
+                                <FormField style={{ marginTop: '10px' }}>
+                                    <Label>Taxa de entrega</Label>
+                                    <Input type="number" step="0.01" placeholder="0.00" {...register("delivery_fee", {
+                                    })} />
+                                </FormField>
+                            </InlineFormField>
+                        </>
                     }
-                    <PrimaryButton type="submit">
-                        {step < 4 ? "Continuar" : "Finalizar"}
-                    </PrimaryButton>
-                </ActionButtons>
-            </Form>
+
+                    {step === 2 &&
+                        <>
+                            {addresses.length === 0 &&
+                                <CheckboxContainer alignLeft>
+                                    <Checkbox type="checkbox" onChange={(e) => {
+                                        setPickupOnStore(!pickupOnStore)
+                                        handlePickUpAddress(e.target.checked);
+                                        
+                                    }} checked={pickupOnStore}/>
+                                    <Label>Retirar no local</Label>
+                                </CheckboxContainer>
+                            }
+                            {addresses.length > 0 && (
+                                <>
+                                    {!pickupOnStore &&
+                                        <FormField>
+                                            <Label>Selecione o Endereço</Label>
+                                            <Select
+                                                {...register("addressId")}
+                                                onChange={(e) => {
+                                                    const selectedAddressId = e.target.value;
+                                                    const selectedAddress: any = addresses.find((address: any) => address.id === selectedAddressId);
+                                                    setSelectedAddress(selectedAddress);
+                                                    if (selectedAddress) {
+                                                        setValue("postal_code", selectedAddress.postal_code);
+                                                        setValue("street", selectedAddress.street);
+                                                        setValue("street_number", selectedAddress.street_number);
+                                                        setValue("city", selectedAddress.city);
+                                                        setValue("neighborhood", selectedAddress.neighborhood);
+                                                        setValue("complement", selectedAddress.complement);
+                                                        setValue("reference_point", selectedAddress.reference_point);
+                                                        setValue("state", selectedAddress.state);
+                                                        setValue("country", selectedAddress.country);
+                                                        setAddressId(selectedAddressId);
+                                                    }
+                                                }}
+                                            >
+                                                <option value="">Selecione um endereço</option>
+                                                {addresses.map((address: any) => (
+                                                    <option key={address.id} value={address.id}>
+                                                        {address.street}, {address.number} - {address.city}
+                                                    </option>
+                                                ))}
+                                            </Select>
+                                        </FormField>
+                                    }
+                                    
+                                    <InlineFormField>
+                                        <CheckboxContainer>
+                                            <Checkbox type="checkbox" disabled={pickupOnStore} onChange={() => {
+                                                setNewAddress(!newAddress)
+
+                                                if (!newAddress) {
+                                                    setAddressId("");
+                                                    setValue("addressId", "");
+                                                }
+
+                                                if (newAddress) {
+                                                    setAddressId(selectedAddress.id);
+                                                    setValue("addressId", selectedAddress.id);
+                                                }
+                                                
+                                            }} checked={newAddress}/>
+                                            <Label>Cadastrar novo endereço</Label>
+                                        </CheckboxContainer>
+
+                                        <CheckboxContainer>
+                                            <Checkbox type="checkbox" onChange={(e) => {
+                                                setPickupOnStore(!pickupOnStore)
+                                                handlePickUpAddress(e.target.checked);
+                                                
+                                            }} checked={pickupOnStore}/>
+                                            <Label>Retirar no local</Label>
+                                        </CheckboxContainer>
+                                    </InlineFormField>
+                                </>
+                            )}
+                            {!pickupOnStore &&
+                                <>
+                                    <InlineFormField>
+                                        <FormField isShortField>
+                                            <Label>CEP</Label>
+                                            <Input type="tel" placeholder="CEP" {...register("postal_code", {
+                                                required: "CEP inválido",
+                                                })}
+                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                            />
+                                            {errors.postal_code && <ErrorMessage>{errors.postal_code.message}</ErrorMessage>}
+                                        </FormField>
+                                        <FormField>
+                                            <Label>Rua</Label>
+                                            <Input type="text" placeholder="Rua" {...register("street", {
+                                                required: "Rua inválida",
+                                                })}
+                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                            />
+                                            {errors.street && <ErrorMessage>{errors.street.message}</ErrorMessage>}
+                                        </FormField>
+                                    </InlineFormField>
+                                    
+                                    <InlineFormField>
+                                        <FormField isShortField>
+                                            <Label>Número</Label>
+                                            <Input type="text" placeholder="Número" {...register("street_number", {
+                                                required: "Número inválido",
+                                                })}
+                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                            />
+                                            {errors.street_number && <ErrorMessage>{errors.street_number.message}</ErrorMessage>}
+                                        </FormField>
+                                        <FormField>
+                                            <Label>Complemento</Label>
+                                            <Input type="text" placeholder="Complemento" {...register("complement")}
+                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                            />
+                                        </FormField>
+                                    </InlineFormField>
+                                    <FormField>
+
+                                    <Label>Bairro</Label>
+                                    
+                                            <Input type="text" placeholder="Bairro" {...register("neighborhood", {
+                                                required: "Bairro inválido",
+                                                })}
+                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                            />
+                                            {errors.neighborhood && <ErrorMessage>{errors.neighborhood.message}</ErrorMessage>}
+                                        
+                                    </FormField>
+                                    <InlineFormField>
+                                        <FormField>
+                                            
+                                            <Label>Ponto de referência</Label>
+                                            <Input type="text" placeholder="Ponto de referência" {...register("reference_point")}
+                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                            />
+                                        
+                                        </FormField>
+                                        <FormField isShortField>
+                                            <Label>País</Label>
+                                            <Input type="text" placeholder="País" {...register("country", {
+                                                required: "País inválido",
+                                                })}
+                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                            />
+                                            {errors.country && <ErrorMessage>{errors.country.message}</ErrorMessage>}
+                                        </FormField>
+                                    </InlineFormField>
+
+                                    <InlineFormField>
+                                        <FormField>
+                                            <Label>Estado</Label>
+                                            <Select {...register("state", {
+                                                required: "Estado inválido",
+                                            })}>
+                                            <option value="">Selecionar:</option>
+                                                {Object.entries(STATES).map(([key, value]) => (
+                                                    <option key={key} value={key}>{value}</option>
+                                                ))}
+                                            </Select>
+                                            {errors.state && <ErrorMessage>{errors.state.message}</ErrorMessage>}
+                                        </FormField>
+                                        <FormField>
+                                            <Label>Cidade</Label>
+                                            <Input type="text" placeholder="Cidade" {...register("city", {
+                                                required: "Cidade inválido",
+                                                })}
+                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                            />
+                                            {errors.city && <ErrorMessage>{errors.city.message}</ErrorMessage>}
+                                        </FormField>
+                                    </InlineFormField>
+                                </>
+                            }
+                        </>
+                    }
+
+                    {step === 3 &&
+                        <OrderSummary ref={formRef}>
+                            <h2>Resumo do Pedido</h2>
+                            <div>
+                                <p>Realizado em {new Date().toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p><strong>Descrição do pedido: </strong>{order.description}</p>
+                                <p>Observações: {order.additional_information}</p>
+                            </div>
+                            <div>
+                                <p><strong>Valor dos produtos:</strong> R$ {order.products_value}</p>
+                                <p><strong>Taxa de entrega:</strong> R$ {order.delivery_fee}</p>
+                                <p><strong>Total:</strong> R$ {Number(order.products_value) + Number(order.delivery_fee)}</p>
+                            </div>
+                            <div>
+                                <p><strong>Cliente: </strong>{order.first_name}</p>
+                            </div>
+                            {is_delivery &&
+                                <>
+                                    <div>
+                                        <p><strong>Endereço:</strong></p>
+                                        {order.pickup_on_store && <p>Retirar na loja</p>}
+                                        {!order.pickup_on_store &&
+                                            <>
+                                                <p>{order.street}, {order.street_number}</p>
+                                                <p>{order.neighborhood}, {order.city}</p>
+                                                <p><strong>Ponto de referência: </strong>{order.reference_point}</p>
+                                            </>
+                                        }
+                                    </div>
+                                    <div>
+                                        <p><strong>Entregar para: </strong>
+                                            {order.receiver_name ? order.receiver_name : order.first_name}</p>
+                                        <p><strong>Telefone do Recebedor: </strong>
+                                            {order.receiver_name ? order.receiver_phone : order.phone_number}
+                                        </p>
+                                    </div>
+                                </>
+                            }
+                            
+                            <div>
+                                <p><strong>Método de pagamento: </strong>
+                                    {PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS]}
+                                </p>
+                                <p><strong>Status do pagamento: </strong>
+                                    {order.payment_received ? "Recebido" : "Pendente"}
+                                </p>
+                            </div>
+                        </OrderSummary>
+                    }
+                    
+                    <ActionButtons>
+                        {step > 1 && 
+                            <PrimaryButton style={{marginRight: "20px"}} type="button"
+                                onClick={handlePreviousStep}>Voltar</PrimaryButton>
+                        }
+                        {step === 3 && (
+                            <PrimaryButton
+                                type="submit"
+                                style={{ marginRight: "20px", backgroundColor: "#f5cb2e", color: "#000" }}
+                                onClick={() => setOrderStatus("OPENED")}
+                            >
+                                Gerar Pedido
+                            </PrimaryButton>
+                        )}
+                        <PrimaryButton type="submit" style={{margin: "0px"}} onClick={() => setOrderStatus("DONE")}>
+                            {step < 3 ? "Continuar" : "Finalizar"}
+                        </PrimaryButton>
+                    </ActionButtons>
+                </Form>
+            </FormContainer>
         </Container>
     )
 }

@@ -8,19 +8,28 @@ class GetAllOrderService {
 
             const filters = query
                 ? {
-                    client: {
-                        OR: [
-                            { first_name: { contains: query, mode: 'insensitive' } },
-                            { last_name: { contains: query, mode: 'insensitive' } },
-                            { phone_number: { contains: query, mode: 'insensitive' } }
-                        ]
-                    } as any
+                    OR: [
+                        {
+                            client: {
+                                OR: [
+                                    { first_name: { contains: query, mode: 'insensitive' } },
+                                    { last_name: { contains: query, mode: 'insensitive' } },
+                                    { phone_number: { contains: query, mode: 'insensitive' } }
+                                ]
+                            }
+                        },
+                        {
+                            code: {
+                                equals: isNaN(Number(query)) ? undefined : Number(query)
+                            }
+                        }
+                    ]
                 }
                 : {};
 
             const [orders, total] = await Promise.all([
                 prismaClient.order.findMany({
-                    where: filters,
+                    where: filters as any,
                     include: {
                         client: true,
                         clientAddress: true,
@@ -38,7 +47,7 @@ class GetAllOrderService {
                     take: pageSize
                 }),
                 prismaClient.order.count({
-                    where: filters
+                    where: filters as any
                 })
             ]);
 
