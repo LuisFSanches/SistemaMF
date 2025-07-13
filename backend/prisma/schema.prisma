@@ -128,6 +128,7 @@ model Order {
   online_order      Boolean       @default(false)
   online_code       String?
   type_of_delivery  String?
+  is_delivery       Boolean       @default(true)
 
   orderItems OrderItem[]
 
