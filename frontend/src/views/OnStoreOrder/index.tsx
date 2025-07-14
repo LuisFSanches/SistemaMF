@@ -946,28 +946,24 @@ export function OnStoreOrder() {
                             <div>
                                 <p><strong>Cliente: </strong>{order.first_name}</p>
                             </div>
-                            {is_delivery &&
-                                <>
-                                    <div>
-                                        <p><strong>Endereço:</strong></p>
-                                        {order.pickup_on_store && <p>Retirar na loja</p>}
-                                        {!order.pickup_on_store &&
-                                            <>
-                                                <p>{order.street}, {order.street_number}</p>
-                                                <p>{order.neighborhood}, {order.city}</p>
-                                                <p><strong>Ponto de referência: </strong>{order.reference_point}</p>
-                                            </>
-                                        }
-                                    </div>
-                                    <div>
-                                        <p><strong>Entregar para: </strong>
-                                            {order.receiver_name ? order.receiver_name : order.first_name}</p>
-                                        <p><strong>Telefone do Recebedor: </strong>
-                                            {order.receiver_name ? order.receiver_phone : order.phone_number}
-                                        </p>
-                                    </div>
-                                </>
-                            }
+                            <div>
+                                <p><strong>Endereço:</strong></p>
+                                {(order.pickup_on_store || !is_delivery) && <p>Retirar na loja</p>}
+                                {(!order.pickup_on_store && is_delivery) &&
+                                    <>
+                                        <p>{order.street}, {order.street_number}</p>
+                                        <p>{order.neighborhood}, {order.city}</p>
+                                        <p><strong>Ponto de referência: </strong>{order.reference_point}</p>
+                                    </>
+                                }
+                            </div>
+                            <div>
+                                <p><strong>Entregar para: </strong>
+                                    {order.receiver_name ? order.receiver_name : order.first_name}</p>
+                                <p><strong>Telefone do Recebedor: </strong>
+                                    {order.receiver_name ? order.receiver_phone : order.phone_number}
+                                </p>
+                            </div>
                             
                             <div>
                                 <p><strong>Método de pagamento: </strong>

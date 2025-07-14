@@ -96,28 +96,29 @@ export function OrderCard({
 					<p>{formatTitleCase(order.additional_information)}</p>
 				</div>
 			</div>
-			{order.is_delivery &&
-				<div className="address-container">
-					<h3><strong>Endereço de entrega:</strong></h3>
-					{!order.pickup_on_store && 
-						<>
-							<p>{formatTitleCase(order.clientAddress.street)}, {order.clientAddress.street_number},
-								{formatTitleCase(order.clientAddress.complement)}
-							</p>
-							<p>{formatTitleCase(order.clientAddress.neighborhood)}, {formatTitleCase(order.clientAddress.city)}</p>
-						</>
-					}
+			<div className="address-container">
+				<h3><strong>Endereço de entrega:</strong></h3>
+				{(!order.pickup_on_store && order.is_delivery) && 
+					<>
+						<p>{formatTitleCase(order.clientAddress.street)}, {order.clientAddress.street_number},
+							{formatTitleCase(order.clientAddress.complement)}
+						</p>
+						<p>{formatTitleCase(order.clientAddress.neighborhood)}, {formatTitleCase(order.clientAddress.city)}</p>
+					</>
+				}
 
-					{order.pickup_on_store &&
-						<p>Retirar na loja</p>
-					}
+				{(order.pickup_on_store || !order.is_delivery) &&
+					<p>Retirar na loja</p>
+				}
+				{order.is_delivery &&
 					<p>Ponto de referência:
 						{!order.pickup_on_store &&
 							formatTitleCase(order.clientAddress.reference_point)
 						}
 					</p>
-				</div>
-			}
+				}
+	
+			</div>
 			<div className="address-container">
 				<p><strong>Tipo de Entrega: </strong>
 					{TYPES_OF_DELIVERY[order.type_of_delivery as keyof typeof TYPES_OF_DELIVERY]}
