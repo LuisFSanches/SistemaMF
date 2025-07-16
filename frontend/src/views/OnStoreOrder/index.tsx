@@ -41,6 +41,7 @@ import {
 
 import { NewOrderProgressBar } from "../../components/NewOrderProgressBar";
 import { ProductModal } from "../../components/ProductModal";
+import { CompletedOrderModal } from "../../components/CompletedOrderModal";
 import { Loader } from '../../components/Loader';
 import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
@@ -115,6 +116,8 @@ export function OnStoreOrder() {
     const [is_delivery, setIsDelivery] = useState(false);
     const [fillClientInformation, setFillClientInformation] = useState(false);
     const [orderStatus, setOrderStatus] = useState<"OPENED" | "DONE">("OPENED");
+    const [showCompletedModal, setShowCompletedModal] = useState(false);
+    const today = new Date().toISOString().split("T")[0];
 
     const navigate = useNavigate();
 
@@ -171,6 +174,7 @@ export function OnStoreOrder() {
         setValue,
         setError,
         formState: { errors },
+        reset
     } = useForm<INewOrder>({
         defaultValues: {
             postal_code: "28300000",
@@ -258,7 +262,8 @@ export function OnStoreOrder() {
             addOrder(data);
 
             if (orderStatus === "DONE") {
-                navigate("/pedidos");
+                setShowLoader(false);
+                setShowCompletedModal(true);
             } else {
                 navigate("/ordensDeServico");
             }
@@ -267,6 +272,14 @@ export function OnStoreOrder() {
 
         handleNextStep();
     };
+
+    const handleCloseCompleteModal = () => {
+        setShowCompletedModal(false);
+        setStep(1);
+        setProducts([]);
+        reset();
+        setValue('delivery_date', today);
+    }
 
     const phone_number = watch("phone_number");
 
@@ -455,7 +468,6 @@ export function OnStoreOrder() {
             setValue("first_name", "");
             setValue("last_name", "");
             setValue("phone_number", "");
-            const today = new Date().toISOString().split("T")[0];
             setValue("delivery_date", today);
             setPickupOnStore(true);
             setValue("payment_received", true);
@@ -502,6 +514,11 @@ export function OnStoreOrder() {
                     stock: 0,
                     enabled: false
                 }}
+            />
+            
+            <CompletedOrderModal
+                isOpen={showCompletedModal}
+                onRequestClose={handleCloseCompleteModal}
             />
             <Loader show={showLoader} />
             <NewOrderContainer>
