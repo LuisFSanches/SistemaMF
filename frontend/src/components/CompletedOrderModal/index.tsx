@@ -24,15 +24,7 @@ export function CompletedOrderModal({
     admins
 }:AdminModalProps){
     function printOrder(order: any) {
-    const date = new Date(order.delivery_date);
-
-    const formattedDate = date.toLocaleDateString('pt-BR', {
-        weekday: 'long',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    });
-
+    const today = moment().locale('pt-br').format('DD/MM/YYYY');
     const formattedTime = moment().locale('pt-br').format('HH:mm');
 
     const clientName = `${order.first_name || ''} ${order.last_name || ''}`.trim();
@@ -60,7 +52,7 @@ COMPROVANTE DE VENDA
 NÃO FISCAL
 
 PEDIDO: #${orderCode}
-DATA: ${formattedDate.toUpperCase()}
+DATA: ${today.toUpperCase()}
 HORA: ${formattedTime}
 
 ITEM DESCRIÇÃO                           QTD  UN   VALOR
@@ -71,8 +63,8 @@ TAXA DE ENTREGA:                         R$ ${order.delivery_fee.toFixed(2).padS
 ----------------------------------------------
 TOTAL:                                   R$ ${order.total.toFixed(2).padStart(7)}
 
-FORMA DE PAGAMENTO:                     ${paymentMethod}
-STATUS DO PAGAMENTO:                    ${order.payment_received ? 'PAGO' : 'NÃO PAGO'}
+FORMA DE PAGAMENTO: ${paymentMethod}
+STATUS DO PAGAMENTO: ${order.payment_received ? 'PAGO' : 'NÃO PAGO'}
 Vendedor(a): ${admins.find(admin => admin.id === order.created_by)?.name}
 
 === DADOS DO CLIENTE ===

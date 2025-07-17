@@ -217,7 +217,7 @@ export function OnStoreOrder() {
 
         const orderData = {
             phone_number: (is_delivery === false && fillClientInformation === false)
-                ? '-' : rawTelephone(phone_number),
+                ? '---' : rawTelephone(phone_number),
             first_name,
             last_name,
             receiver_name,
