@@ -118,6 +118,7 @@ export function OnStoreOrder() {
     const [orderStatus, setOrderStatus] = useState<"OPENED" | "DONE">("OPENED");
     const [showCompletedModal, setShowCompletedModal] = useState(false);
     const today = new Date().toISOString().split("T")[0];
+    const [orderCode, setOrderCode] = useState("");
 
     const navigate = useNavigate();
 
@@ -216,7 +217,7 @@ export function OnStoreOrder() {
 
         const orderData = {
             phone_number: (is_delivery === false && fillClientInformation === false)
-                ? '(22)99751-7940' : rawTelephone(phone_number),
+                ? '-' : rawTelephone(phone_number),
             first_name,
             last_name,
             receiver_name,
@@ -257,6 +258,8 @@ export function OnStoreOrder() {
                 is_delivery
             })
 
+            setOrderCode(data.code);
+
             setShowLoader(true);
 
             addOrder(data);
@@ -279,6 +282,7 @@ export function OnStoreOrder() {
         setProducts([]);
         reset();
         setValue('delivery_date', today);
+        setValue('payment_received', true);
     }
 
     const phone_number = watch("phone_number");
@@ -519,6 +523,9 @@ export function OnStoreOrder() {
             <CompletedOrderModal
                 isOpen={showCompletedModal}
                 onRequestClose={handleCloseCompleteModal}
+                order={order}
+                orderCode={orderCode}
+                admins={admins}
             />
             <Loader show={showLoader} />
             <NewOrderContainer>
