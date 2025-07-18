@@ -83,7 +83,7 @@ export const PrintOrder = ({
                     <div class="row"><strong>Vendedor:</strong> ${admins.find((admin: IAdmin) => admin.id === order.created_by)?.name || '---'}</div>
 
                     <p class="center-text">=========== DADOS DO CLIENTE ===========</p>
-                    <div class="row"><strong>Nome:</strong>${clientName || '---'}</div>
+                    <div class="row"><strong>Nome:</strong>${formatTitleCase(clientName) || '---'}</div>
                     <div class="row"><strong>Telefone:</strong>${clientTelephone || '---'}</div>
 
                     <div class="divider"></div>
