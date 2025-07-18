@@ -49,6 +49,7 @@ export const PrintOrder = ({
                         strong { margin-right: 4px; }
                         .center-text { text-align: center; margin: 15px 0;}
                         .footer { text-align:center; margin: 25px 0;}
+                        div { font-size: 15px;}
                     </style>
                 </head>
                 <body>
@@ -66,7 +67,7 @@ export const PrintOrder = ({
                     <div class="row"><strong>Data:</strong> ${order.created_at ? moment(order.created_at).format("DD/MM/YYYY (dddd)") : date.format("DD/MM/YYYY (dddd)")}</div>
                     <div class="row"><strong>Hora:</strong> ${order.created_at ? moment(order.created_at).format("HH:mm") : date.format("HH:mm")}</div>
                     <div class="divider"></div>
-                    <p class="center-text">================ ITEMS ================</p>
+                    <p class="center-text">======= ITEMS =======</p>
                     ${formatDescriptionWithPrice(order.description).map((item, index) => `
                         <div class="row">${item}</div>
                     `).join('')}
@@ -82,13 +83,13 @@ export const PrintOrder = ({
                     <div class="row"><strong>Status do pagamento:</strong> ${paymentStatus}</div>
                     <div class="row"><strong>Vendedor:</strong> ${admins.find((admin: IAdmin) => admin.id === order.created_by)?.name || '---'}</div>
 
-                    <p class="center-text">=========== DADOS DO CLIENTE ===========</p>
+                    <p class="center-text">===== DADOS DO CLIENTE =====</p>
                     <div class="row"><strong>Nome:</strong>${formatTitleCase(clientName) || '---'}</div>
                     <div class="row"><strong>Telefone:</strong>${clientTelephone || '---'}</div>
 
                     <div class="divider"></div>
                     ${order.is_delivery
-                        ? `<p class="center-text">================ ENTREGA ================</p>
+                        ? `<p class="center-text">======= ENTREGA =======</p>
                             <div>
                             <p><strong>Endereço:</strong>
                                 <span>${formatTitleCase(order.clientAddress.street)}, ${order.clientAddress.street_number},
