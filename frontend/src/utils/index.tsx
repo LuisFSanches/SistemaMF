@@ -33,3 +33,13 @@ export const formatDescription = (description: string|undefined): string[] => {
         })
         .filter(Boolean);
 };
+
+export const formatDescriptionWithPrice = (description: string|undefined): string[] => {
+    if (!description) return [];
+    console.log(description);
+
+    return description
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean);
+}
