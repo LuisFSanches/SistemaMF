@@ -106,7 +106,7 @@ export const PrintOrder = ({
                     <div class="row"><strong>Telefone:</strong>${clientTelephone || '---'}</div>
 
                     <div class="divider"></div>
-                    ${order.is_delivery
+                    ${(order.is_delivery && !order.pickup_on_store)
                         ? `<div class="center-text">
                                 <p>=====</p>
                                 <p>ENTREGA</p>
