@@ -87,7 +87,7 @@ export const PrintOrder = ({
                     <br />
                     <div class="row"><strong>Forma de pagamento:</strong> ${paymentMethod || '---'}</div>
                     <div class="row"><strong>Status do pagamento:</strong> ${paymentStatus}</div>
-                    <div class="row"><strong>Vendedor:</strong> ${admins.find((admin: IAdmin) => admin.id === order.created_by)?.name || '---'}</div>
+                    <div class="row"><strong>Vendedor(a):</strong> ${admins.find((admin: IAdmin) => admin.id === order.created_by)?.name || '---'}</div>
 
                     <div class="center-text">
                         <p>=====</p>
