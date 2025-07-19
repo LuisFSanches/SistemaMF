@@ -7,7 +7,7 @@ import { ViewCardMessage } from "../ViewCardMessage";
 import { OrderCardContainer } from "./style"
 import { HAS_CARD, TYPES_OF_DELIVERY } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faAnglesRight, faAnglesLeft, faPrint, faEye, faPen, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faAnglesRight, faAnglesLeft, faEye, faPen, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { formatTitleCase, formatDescription } from "../../utils";
 import { PAYMENT_METHODS } from "../../constants";
 import { PrintOrder } from "../PrintOrder";
@@ -15,7 +15,6 @@ import { useAdmins } from "../../contexts/AdminsContext";
 
 export function OrderCard({
 	order,
-	handlePrint,
 	handleOrderStatus,
 	buttonStatus,
 	previousButtonStatus,
@@ -74,22 +73,6 @@ export function OrderCard({
 				<h2>*** Pedido #{order?.code} ***</h2>
 				<div>
 					<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
-					<PrintOrder
-						order={order}
-						orderCode={order.code}
-						admins={admins}
-						clientName={`${order.client.first_name} ${order.client.last_name}`}
-						clientTelephone={order.client.phone_number}
-						buttonLabel={'Notinha'}
-						style={{
-							position: 'absolute',
-							right: '5px',
-							top: '35px',
-							background: 'white',
-							border: 'none',
-							color: '#666666',
-						}}
-					/>
 				</div>
 
 			</div>
@@ -198,10 +181,19 @@ export function OrderCard({
 					<FontAwesomeIcon icon={faEye}/>
 					Pedido
 				</button>
-				<button className="print" onClick={() => handlePrint(`order-card-${order.id}`)}> 
-					<FontAwesomeIcon icon={faPrint}/>
-					<p>Imprimir</p>
-				</button>
+				<PrintOrder
+						order={order}
+						orderCode={order.code}
+						admins={admins}
+						clientName={`${order.client.first_name} ${order.client.last_name}`}
+						clientTelephone={order.client.phone_number}
+						buttonLabel={'Imprimir'}
+						style={{
+							background: 'white',
+							border: 'none',
+							color: '#666666',
+						}}
+					/>
 				{(order.has_card && order.online_order) &&
 					<button className="view-button" onClick={() => handleOpenViewCardMessage(order)}> 
 						<FontAwesomeIcon icon={faEnvelope}/>
