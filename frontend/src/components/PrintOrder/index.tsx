@@ -84,6 +84,10 @@ export const PrintOrder = ({
                     <br />
                     <div class="row"><strong>Subtotal:</strong> ${convertMoney(order.products_value)}</div>
                     <div class="row"><strong>Taxa de Entrega:</strong> ${convertMoney(order.delivery_fee)}</div>
+                    ${(order.pickup_on_store || order.is_delivery===false) ?
+                        `<div class="row"><strong>Retirada na loja</strong></div>`
+                        :''
+                    }
                     <div class="divider"></div>
                     <div class="row"><strong>Total:</strong> ${convertMoney(order.total)}</div>
 
@@ -114,6 +118,7 @@ export const PrintOrder = ({
                                 <span>${formatTitleCase(order.clientAddress.neighborhood)}, ${formatTitleCase(order.clientAddress.city)}</span>
                             </p>
                             <p><strong>Complemento:</strong> ${formatTitleCase(order.clientAddress.complement)}</p>
+                            <p><strong>Ponto de Referência:</strong> ${formatTitleCase(order.clientAddress.reference_point)}</p>
                             <p><strong>Entregar para:</strong> ${formatTitleCase(order.receiver_name) || formatTitleCase(clientName)}</p>
                             <p><strong>Telefone do recebedor:</strong> ${order.receiver_phone || clientTelephone}</p>
                             </div>
