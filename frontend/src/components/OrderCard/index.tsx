@@ -10,6 +10,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faAnglesRight, faAnglesLeft, faPrint, faEye, faPen, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { formatTitleCase, formatDescription } from "../../utils";
 import { PAYMENT_METHODS } from "../../constants";
+import { PrintOrder } from "../PrintOrder";
+import { useAdmins } from "../../contexts/AdminsContext";
 
 export function OrderCard({
 	order,
@@ -26,6 +28,7 @@ export function OrderCard({
 
 	const [orderDetailModal, setOrderDetailModal] = useState(false);
 	const [viewCardMessage, setViewCardMessage] = useState(false);
+	const { admins } = useAdmins();
 
 	function handleOpenOrderDetailModal(order: IOrder){
         setOrderDetailModal(true);
@@ -45,6 +48,8 @@ export function OrderCard({
 	if (!order) {
 		return <></>;
 	}
+
+	console.log(order)
 
 	return (
     	<OrderCardContainer className={order?.status?.toLowerCase()}>
@@ -67,7 +72,26 @@ export function OrderCard({
 				}
 
 				<h2>*** Pedido #{order?.code} ***</h2>
-				<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
+				<div>
+					<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
+					<PrintOrder
+						order={order}
+						orderCode={order.code}
+						admins={admins}
+						clientName={`${order.client.first_name} ${order.client.last_name}`}
+						clientTelephone={order.client.phone_number}
+						buttonLabel={'Notinha'}
+						style={{
+							position: 'absolute',
+							right: '5px',
+							top: '35px',
+							background: 'white',
+							border: 'none',
+							color: '#666666',
+						}}
+					/>
+				</div>
+
 			</div>
 			<div className="client-info">
 				<div>

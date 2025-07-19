@@ -16,6 +16,7 @@ interface IReceiptPrintProps {
     clientName: string;
     clientTelephone: string;
     buttonLabel?: string;
+    style?: React.CSSProperties
 }
 
 export const PrintOrder = ({
@@ -24,7 +25,8 @@ export const PrintOrder = ({
     admins,
     clientName,
     clientTelephone,
-    buttonLabel = "Imprimir"
+    buttonLabel = "Imprimir",
+    style
 }: IReceiptPrintProps) => {
     const date = moment();
 
@@ -33,7 +35,6 @@ export const PrintOrder = ({
         const paymentStatus = order.payment_received ? "Pago" : "Pendente";
         const paymentMethodKey = order.payment_method?.toUpperCase() as keyof typeof PAYMENT_METHODS;
         const paymentMethod = PAYMENT_METHODS[paymentMethodKey] || order.payment_method;
-        console.log(order.created_at)
 
         const receiptHTML = `
             <html>
@@ -47,7 +48,8 @@ export const PrintOrder = ({
                         .row { display: flex; margin: 4px 0; }
                         .divider { border-top: 1px dashed #ccc; margin: 10px 0; }
                         strong { margin-right: 4px; }
-                        .center-text { text-align: center; margin: 15px 0;}
+                        .center-text { display:flex; flex-direction: column; text-align: center; margin: 10px 0;}
+                        .center-text p { line-height: 12px }
                         .footer { text-align:center; margin: 25px 0;}
                         div { font-size: 15px;}
                     </style>
@@ -67,7 +69,11 @@ export const PrintOrder = ({
                     <div class="row"><strong>Data:</strong> ${order.created_at ? moment(order.created_at).format("DD/MM/YYYY (dddd)") : date.format("DD/MM/YYYY (dddd)")}</div>
                     <div class="row"><strong>Hora:</strong> ${order.created_at ? moment(order.created_at).format("HH:mm") : date.format("HH:mm")}</div>
                     <div class="divider"></div>
-                    <p class="center-text">======= ITEMS =======</p>
+                    <div class="center-text">
+                        <p>=====</p>
+                        <p>ITEMS</p>
+                        <p>=====</p>
+                    </div>
                     ${formatDescriptionWithPrice(order.description).map((item, index) => `
                         <div class="row">${item}</div>
                     `).join('')}
@@ -83,13 +89,21 @@ export const PrintOrder = ({
                     <div class="row"><strong>Status do pagamento:</strong> ${paymentStatus}</div>
                     <div class="row"><strong>Vendedor:</strong> ${admins.find((admin: IAdmin) => admin.id === order.created_by)?.name || '---'}</div>
 
-                    <p class="center-text">===== DADOS DO CLIENTE =====</p>
+                    <div class="center-text">
+                        <p>=====</p>
+                        <p>DADOS DO CLIENTE</p>
+                        <p>=====</p>
+                    </div>
                     <div class="row"><strong>Nome:</strong>${formatTitleCase(clientName) || '---'}</div>
                     <div class="row"><strong>Telefone:</strong>${clientTelephone || '---'}</div>
 
                     <div class="divider"></div>
                     ${order.is_delivery
-                        ? `<p class="center-text">======= ENTREGA =======</p>
+                        ? `<div class="center-text">
+                                <p>=====</p>
+                                <p>ENTREGA</p>
+                                <p>=====</p>
+                            </div>
                             <div>
                             <p><strong>Endereço:</strong>
                                 <span>${formatTitleCase(order.clientAddress.street)}, ${order.clientAddress.street_number},
@@ -97,7 +111,7 @@ export const PrintOrder = ({
                                 <span>${formatTitleCase(order.clientAddress.neighborhood)}, ${formatTitleCase(order.clientAddress.city)}</span>
                             </p>
                             <p><strong>Complemento:</strong> ${formatTitleCase(order.clientAddress.complement)}</p>
-                            <p><strong>Entregar para:</strong> ${order.receiver_name || clientName}</p>
+                            <p><strong>Entregar para:</strong> ${formatTitleCase(order.receiver_name) || formatTitleCase(clientName)}</p>
                             <p><strong>Telefone do recebedor:</strong> ${order.receiver_phone || clientTelephone}</p>
                             </div>
                             `
@@ -108,7 +122,8 @@ export const PrintOrder = ({
 
                     <div class="footer">
                         <div>OBRIGADO PELA PREFERÊNCIA!</div>
-                        <div>MIRAI FLORES - SEMPRE COM VOCÊ</div>
+                        <div>FLORES, SEMPRE</div>
+                        <div>UMA ÓTIMA IDEIA</div>
                     </div>
                 </body>
             </html>
@@ -124,7 +139,7 @@ export const PrintOrder = ({
     };
 
     return (
-        <PrintButton onClick={handlePrint}>
+        <PrintButton onClick={handlePrint} style={style}>
             {buttonLabel && <span>{buttonLabel}</span>}
             <FontAwesomeIcon icon={faPrint} />
         </PrintButton>
