@@ -77,7 +77,10 @@ export const PrintOrder = ({
                     ${formatDescriptionWithPrice(order.description).map((item, index) => `
                         <div class="row">${item}</div>
                     `).join('')}
-
+                    ${order.additional_information ? 
+                        `<p style="font-size: 14px;"><strong>Observação: </strong>${order.additional_information}</p>`
+                        : ''
+                    }
                     <br />
                     <div class="row"><strong>Subtotal:</strong> ${convertMoney(order.products_value)}</div>
                     <div class="row"><strong>Taxa de Entrega:</strong> ${convertMoney(order.delivery_fee)}</div>
