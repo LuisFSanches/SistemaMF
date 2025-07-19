@@ -7,12 +7,15 @@ import { faEye, faPen } from "@fortawesome/free-solid-svg-icons";
 import { OrderDetailModal } from "../../components/OrderDetailModal";
 import { EditOrderModal } from "../../components/EditOrderModal";
 import { Pagination } from "../../components/Pagination";
+import { PrintOrder } from '../../components/PrintOrder';
 import { useOrders } from "../../contexts/OrdersContext";
+import { useAdmins } from "../../contexts/AdminsContext";
 import { STATUS_LABEL } from "../../constants";
 import { formatTitleCase } from "../../utils";
 
 export function OrdersPage(){
     const { orders, loadAvailableOrders, totalOrders } = useOrders();
+    const { admins } = useAdmins();
 
     const [orderDetailModal, setOrderDetailModal] = useState(false);
     const [editOrderModal, setEditOrderModal] = useState(false);
@@ -46,6 +49,14 @@ export function OrdersPage(){
             setPage(1);
             loadAvailableOrders(page, pageSize, '');
         }
+    }
+
+    const getName = (first_name: string, last_name: string) => {
+        if (first_name === 'Cliente') {
+            return '';
+        }
+
+        return `${first_name} ${last_name}`
     }
 
     useEffect(() => {
@@ -87,6 +98,7 @@ export function OrdersPage(){
                         <th>Total</th>
                         <th>Editar</th>
                         <th>Visualizar</th>
+                        <th>Imprimir</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -112,6 +124,16 @@ export function OrdersPage(){
                                     <button className="view-button" onClick={() => handleOpenOrderDetailModal(order)}>
                                         <FontAwesomeIcon icon={faEye}/>
                                     </button>
+                                </td>
+
+                                <td className="table-icon">
+                                    <PrintOrder
+                                        order={order}
+                                        orderCode={order.code}
+                                        clientName={getName(order.client.first_name, order.client.last_name)}
+                                        clientTelephone={order.client.phone_number !== '22997517940' ? order.client.phone_number : ''}
+                                        admins={admins}
+                                        buttonLabel="" />
                                 </td>
                             </tr>
                         </>

@@ -41,6 +41,7 @@ import {
 
 import { NewOrderProgressBar } from "../../components/NewOrderProgressBar";
 import { ProductModal } from "../../components/ProductModal";
+import { CompletedOrderModal } from "../../components/CompletedOrderModal";
 import { Loader } from '../../components/Loader';
 import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
@@ -115,6 +116,9 @@ export function OnStoreOrder() {
     const [is_delivery, setIsDelivery] = useState(false);
     const [fillClientInformation, setFillClientInformation] = useState(false);
     const [orderStatus, setOrderStatus] = useState<"OPENED" | "DONE">("OPENED");
+    const [showCompletedModal, setShowCompletedModal] = useState(false);
+    const today = new Date().toISOString().split("T")[0];
+    const [orderCode, setOrderCode] = useState("");
 
     const navigate = useNavigate();
 
@@ -171,6 +175,7 @@ export function OnStoreOrder() {
         setValue,
         setError,
         formState: { errors },
+        reset
     } = useForm<INewOrder>({
         defaultValues: {
             postal_code: "28300000",
@@ -212,7 +217,7 @@ export function OnStoreOrder() {
 
         const orderData = {
             phone_number: (is_delivery === false && fillClientInformation === false)
-                ? '(22)99751-7940' : rawTelephone(phone_number),
+                ? '---' : rawTelephone(phone_number),
             first_name,
             last_name,
             receiver_name,
@@ -253,12 +258,15 @@ export function OnStoreOrder() {
                 is_delivery
             })
 
+            setOrderCode(data.code);
+
             setShowLoader(true);
 
             addOrder(data);
 
             if (orderStatus === "DONE") {
-                navigate("/pedidos");
+                setShowLoader(false);
+                setShowCompletedModal(true);
             } else {
                 navigate("/ordensDeServico");
             }
@@ -267,6 +275,15 @@ export function OnStoreOrder() {
 
         handleNextStep();
     };
+
+    const handleCloseCompleteModal = () => {
+        setShowCompletedModal(false);
+        setStep(1);
+        setProducts([]);
+        reset();
+        setValue('delivery_date', today);
+        setValue('payment_received', true);
+    }
 
     const phone_number = watch("phone_number");
 
@@ -455,7 +472,6 @@ export function OnStoreOrder() {
             setValue("first_name", "");
             setValue("last_name", "");
             setValue("phone_number", "");
-            const today = new Date().toISOString().split("T")[0];
             setValue("delivery_date", today);
             setPickupOnStore(true);
             setValue("payment_received", true);
@@ -502,6 +518,14 @@ export function OnStoreOrder() {
                     stock: 0,
                     enabled: false
                 }}
+            />
+            
+            <CompletedOrderModal
+                isOpen={showCompletedModal}
+                onRequestClose={handleCloseCompleteModal}
+                order={order}
+                orderCode={orderCode}
+                admins={admins}
             />
             <Loader show={showLoader} />
             <NewOrderContainer>
@@ -946,28 +970,24 @@ export function OnStoreOrder() {
                             <div>
                                 <p><strong>Cliente: </strong>{order.first_name}</p>
                             </div>
-                            {is_delivery &&
-                                <>
-                                    <div>
-                                        <p><strong>Endereço:</strong></p>
-                                        {order.pickup_on_store && <p>Retirar na loja</p>}
-                                        {!order.pickup_on_store &&
-                                            <>
-                                                <p>{order.street}, {order.street_number}</p>
-                                                <p>{order.neighborhood}, {order.city}</p>
-                                                <p><strong>Ponto de referência: </strong>{order.reference_point}</p>
-                                            </>
-                                        }
-                                    </div>
-                                    <div>
-                                        <p><strong>Entregar para: </strong>
-                                            {order.receiver_name ? order.receiver_name : order.first_name}</p>
-                                        <p><strong>Telefone do Recebedor: </strong>
-                                            {order.receiver_name ? order.receiver_phone : order.phone_number}
-                                        </p>
-                                    </div>
-                                </>
-                            }
+                            <div>
+                                <p><strong>Endereço:</strong></p>
+                                {(order.pickup_on_store || !is_delivery) && <p>Retirar na loja</p>}
+                                {(!order.pickup_on_store && is_delivery) &&
+                                    <>
+                                        <p>{order.street}, {order.street_number}</p>
+                                        <p>{order.neighborhood}, {order.city}</p>
+                                        <p><strong>Ponto de referência: </strong>{order.reference_point}</p>
+                                    </>
+                                }
+                            </div>
+                            <div>
+                                <p><strong>Entregar para: </strong>
+                                    {order.receiver_name ? order.receiver_name : order.first_name}</p>
+                                <p><strong>Telefone do Recebedor: </strong>
+                                    {order.receiver_name ? order.receiver_phone : order.phone_number}
+                                </p>
+                            </div>
                             
                             <div>
                                 <p><strong>Método de pagamento: </strong>

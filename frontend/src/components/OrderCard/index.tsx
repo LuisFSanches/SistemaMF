@@ -7,13 +7,14 @@ import { ViewCardMessage } from "../ViewCardMessage";
 import { OrderCardContainer } from "./style"
 import { HAS_CARD, TYPES_OF_DELIVERY } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faAnglesRight, faAnglesLeft, faPrint, faEye, faPen, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faAnglesRight, faAnglesLeft, faEye, faPen, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { formatTitleCase, formatDescription } from "../../utils";
 import { PAYMENT_METHODS } from "../../constants";
+import { PrintOrder } from "../PrintOrder";
+import { useAdmins } from "../../contexts/AdminsContext";
 
 export function OrderCard({
 	order,
-	handlePrint,
 	handleOrderStatus,
 	buttonStatus,
 	previousButtonStatus,
@@ -26,6 +27,7 @@ export function OrderCard({
 
 	const [orderDetailModal, setOrderDetailModal] = useState(false);
 	const [viewCardMessage, setViewCardMessage] = useState(false);
+	const { admins } = useAdmins();
 
 	function handleOpenOrderDetailModal(order: IOrder){
         setOrderDetailModal(true);
@@ -45,6 +47,8 @@ export function OrderCard({
 	if (!order) {
 		return <></>;
 	}
+
+	console.log(order)
 
 	return (
     	<OrderCardContainer className={order?.status?.toLowerCase()}>
@@ -67,7 +71,10 @@ export function OrderCard({
 				}
 
 				<h2>*** Pedido #{order?.code} ***</h2>
-				<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
+				<div>
+					<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
+				</div>
+
 			</div>
 			<div className="client-info">
 				<div>
@@ -96,28 +103,29 @@ export function OrderCard({
 					<p>{formatTitleCase(order.additional_information)}</p>
 				</div>
 			</div>
-			{order.is_delivery &&
-				<div className="address-container">
-					<h3><strong>Endereço de entrega:</strong></h3>
-					{!order.pickup_on_store && 
-						<>
-							<p>{formatTitleCase(order.clientAddress.street)}, {order.clientAddress.street_number},
-								{formatTitleCase(order.clientAddress.complement)}
-							</p>
-							<p>{formatTitleCase(order.clientAddress.neighborhood)}, {formatTitleCase(order.clientAddress.city)}</p>
-						</>
-					}
+			<div className="address-container">
+				<h3><strong>Endereço de entrega:</strong></h3>
+				{(!order.pickup_on_store && order.is_delivery) && 
+					<>
+						<p>{formatTitleCase(order.clientAddress.street)}, {order.clientAddress.street_number},
+							{formatTitleCase(order.clientAddress.complement)}
+						</p>
+						<p>{formatTitleCase(order.clientAddress.neighborhood)}, {formatTitleCase(order.clientAddress.city)}</p>
+					</>
+				}
 
-					{order.pickup_on_store &&
-						<p>Retirar na loja</p>
-					}
+				{(order.pickup_on_store || !order.is_delivery) &&
+					<p>Retirar na loja</p>
+				}
+				{order.is_delivery &&
 					<p>Ponto de referência:
 						{!order.pickup_on_store &&
 							formatTitleCase(order.clientAddress.reference_point)
 						}
 					</p>
-				</div>
-			}
+				}
+	
+			</div>
 			<div className="address-container">
 				<p><strong>Tipo de Entrega: </strong>
 					{TYPES_OF_DELIVERY[order.type_of_delivery as keyof typeof TYPES_OF_DELIVERY]}
@@ -173,10 +181,19 @@ export function OrderCard({
 					<FontAwesomeIcon icon={faEye}/>
 					Pedido
 				</button>
-				<button className="print" onClick={() => handlePrint(`order-card-${order.id}`)}> 
-					<FontAwesomeIcon icon={faPrint}/>
-					<p>Imprimir</p>
-				</button>
+				<PrintOrder
+						order={order}
+						orderCode={order.code}
+						admins={admins}
+						clientName={`${order.client.first_name} ${order.client.last_name}`}
+						clientTelephone={order.client.phone_number}
+						buttonLabel={'Imprimir'}
+						style={{
+							background: 'white',
+							border: 'none',
+							color: '#666666',
+						}}
+					/>
 				{(order.has_card && order.online_order) &&
 					<button className="view-button" onClick={() => handleOpenViewCardMessage(order)}> 
 						<FontAwesomeIcon icon={faEnvelope}/>
