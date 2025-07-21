@@ -41,9 +41,34 @@ export const Container = styled.div<SidebarProps>`
   }
 `;
 
+export const InternalContainer = styled.div<SidebarProps>`
+  flex: 0;
+  max-height: 100%;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  width: ${getSidebarWidth};
+
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+
+  transition: width 0.2s ease-in-out;
+
+  @media (max-width: 750px) {
+    align-items: center;
+    width: 4rem;
+  }
+
+  @media (max-width: 550px) {
+    width: 3rem;
+  }
+`
+
 export const SideBarItemContainer = styled.div`
   width: 100%;
-  padding: 0.35rem 1rem;
+  padding: 0.7rem 1rem;
 `;
 
 export const LogoContainer = styled.div<SidebarProps>`

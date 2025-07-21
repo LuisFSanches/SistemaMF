@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
-import { Container,SideBarItemContainer, SideBarButton, CompanyInfoContainer } from "./style";
+import { Container,SideBarItemContainer, SideBarButton, CompanyInfoContainer, InternalContainer } from "./style";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faComputer,
@@ -253,133 +253,134 @@ export function SideBar(){
 
     return(
         <Container isMinimizedActive={true}>
-            <NavLink to="/dashboard" style={{display: 'none'}}>
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('dashboard')}>
-                    <SideBarButton
-                        isActive={isActive['dashboard']}
-                        isMinimizedActive
-                    >
-                        <FontAwesomeIcon icon={faHome} className="Side-Bar-Icon"/>
-                        <span>Dashboard</span>
-                    </SideBarButton>
-                </SideBarItemContainer>
-            </NavLink>
+            <InternalContainer isMinimizedActive={true}>
+                <NavLink to="/dashboard" style={{display: 'none'}}>
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('dashboard')}>
+                        <SideBarButton
+                            isActive={isActive['dashboard']}
+                            isMinimizedActive
+                        >
+                            <FontAwesomeIcon icon={faHome} className="Side-Bar-Icon"/>
+                            <span>Dashboard</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
 
-            <NavLink to="/pedidoBalcao">
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidoBalcao')}>
-                    <SideBarButton
-                        isActive={isActive['pedidoBalcao']}
-                        isMinimizedActive
-                        title="Novo Pedido"
-                    >
-                        <FontAwesomeIcon icon={faComputer} className="Side-Bar-Icon"/>
-                        <span>Novo Pedido</span>
-                    </SideBarButton>
-                </SideBarItemContainer>
-            </NavLink>
+                <NavLink to="/pedidoBalcao">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidoBalcao')}>
+                        <SideBarButton
+                            isActive={isActive['pedidoBalcao']}
+                            isMinimizedActive
+                            title="Novo Pedido"
+                        >
+                            <FontAwesomeIcon icon={faComputer} className="Side-Bar-Icon"/>
+                            <span>Novo Pedido</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
 
-            <NavLink to="/pedidoOnline">
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidoOnline')}>
-                    <SideBarButton
-                        isActive={isActive['pedidoOnline']}
-                        isMinimizedActive
-                        title="Pedido Online"
-                    >
-                        <FontAwesomeIcon icon={faWhatsapp as any} className="Side-Bar-Icon"/>
-                        <span>Pedido Online</span>
-                    </SideBarButton>
-                </SideBarItemContainer>
-            </NavLink>
+                <NavLink to="/pedidoOnline">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidoOnline')}>
+                        <SideBarButton
+                            isActive={isActive['pedidoOnline']}
+                            isMinimizedActive
+                            title="Pedido Online"
+                        >
+                            <FontAwesomeIcon icon={faWhatsapp as any} className="Side-Bar-Icon"/>
+                            <span>Pedido Online</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
 
-            <NavLink to="/ordensDeServico" >
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('ordensDeServico')}>
-                    <SideBarButton
-                        isActive={isActive['ordensDeServico']}
-                        isMinimizedActive
-                        title="Pedidos em Aberto"
-                    >
-                        <FontAwesomeIcon icon={faReceipt} className="Side-Bar-Icon"/>
-                        <span>Pedidos atuais</span>
-                    </SideBarButton>
-                    
-                </SideBarItemContainer>
-            </NavLink>
+                <NavLink to="/ordensDeServico" >
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('ordensDeServico')}>
+                        <SideBarButton
+                            isActive={isActive['ordensDeServico']}
+                            isMinimizedActive
+                            title="Pedidos em Aberto"
+                        >
+                            <FontAwesomeIcon icon={faReceipt} className="Side-Bar-Icon"/>
+                            <span>Pedidos atuais</span>
+                        </SideBarButton>
+                        
+                    </SideBarItemContainer>
+                </NavLink>
 
-            <NavLink to="/aguardandoCliente">
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('aguardandoCliente')}>
-                    <SideBarButton
-                        isActive={isActive['aguardandoCliente']}
-                        isMinimizedActive
-                        title="Aguardando Cliente"
-                    >
-                        <FontAwesomeIcon icon={faGlobe} className="Side-Bar-Icon"/>
-                        <span>Aguardando Cliente</span>
-                    </SideBarButton>
-                </SideBarItemContainer>
-            </NavLink>
+                <NavLink to="/aguardandoCliente">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('aguardandoCliente')}>
+                        <SideBarButton
+                            isActive={isActive['aguardandoCliente']}
+                            isMinimizedActive
+                            title="Aguardando Cliente"
+                        >
+                            <FontAwesomeIcon icon={faGlobe} className="Side-Bar-Icon"/>
+                            <span>Aguardando Cliente</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
 
-            <NavLink to="/pedidos">
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidos')}>
-                    <SideBarButton
-                        isActive={isActive['pedidos']}
-                        isMinimizedActive
-                        title="Pedidos"
-                    >
-                        <FontAwesomeIcon icon={faBagShopping} className="Side-Bar-Icon"/>
-                        <span>Pedidos finalizados</span>
-                    </SideBarButton>
-                </SideBarItemContainer>
-            </NavLink>
+                <NavLink to="/pedidos">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidos')}>
+                        <SideBarButton
+                            isActive={isActive['pedidos']}
+                            isMinimizedActive
+                            title="Pedidos"
+                        >
+                            <FontAwesomeIcon icon={faBagShopping} className="Side-Bar-Icon"/>
+                            <span>Pedidos finalizados</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
 
-            <NavLink to="/produtos">
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('produtos')}>
-                    <SideBarButton
-                        isActive={isActive['produtos']}
-                        isMinimizedActive
-                        title="Produtos"
-                    >
-                        <i className="material-icons">local_florist</i>
-                        <span>Produtos</span>
-                    </SideBarButton>
-                </SideBarItemContainer>
-            </NavLink>
-            
-            <NavLink to="/estoque">
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('estoque')}>
-                    <SideBarButton
-                        isActive={isActive['estoque']}
-                        isMinimizedActive
-                        title="Estoque"
-                    >
-                        <FontAwesomeIcon icon={faWarehouse} className="Side-Bar-Icon"/>
-                        <span>Compras Efetuadas</span>
-                    </SideBarButton>
-                </SideBarItemContainer>
-            </NavLink>
+                <NavLink to="/produtos">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('produtos')}>
+                        <SideBarButton
+                            isActive={isActive['produtos']}
+                            isMinimizedActive
+                            title="Produtos"
+                        >
+                            <i className="material-icons">local_florist</i>
+                            <span>Produtos</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
+                
+                <NavLink to="/estoque">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('estoque')}>
+                        <SideBarButton
+                            isActive={isActive['estoque']}
+                            isMinimizedActive
+                            title="Estoque"
+                        >
+                            <FontAwesomeIcon icon={faWarehouse} className="Side-Bar-Icon"/>
+                            <span>Compras Efetuadas</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
 
-            <NavLink to="/pix">
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('pix')}>
-                    <SideBarButton
-                        isActive={isActive['pix']}
-                        isMinimizedActive
-                        title="Pix Recebidos"
-                    >
-                        <FontAwesomeIcon icon={faPix as any} className="Side-Bar-Icon"/>
-                        <span>Pix Recebidos</span>
-                    </SideBarButton>
-                </SideBarItemContainer>
-            </NavLink>
+                <NavLink to="/pix">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('pix')}>
+                        <SideBarButton
+                            isActive={isActive['pix']}
+                            isMinimizedActive
+                            title="Pix Recebidos"
+                        >
+                            <FontAwesomeIcon icon={faPix as any} className="Side-Bar-Icon"/>
+                            <span>Pix Recebidos</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
 
-            <CompanyInfoContainer
-                isMinimizedActive
-            >
+                <CompanyInfoContainer
+                    isMinimizedActive
+                >
 
-            <button className="custom-logout-button" onClick={handleSignOut}>
-                <FontAwesomeIcon icon={faRightFromBracket} className="custom-logout-icon" />
-                <span className="custom-logout-text">Sair</span>
-            </button>
-            </CompanyInfoContainer>
-
+                <button className="custom-logout-button" onClick={handleSignOut}>
+                    <FontAwesomeIcon icon={faRightFromBracket} className="custom-logout-icon" />
+                    <span className="custom-logout-text">Sair</span>
+                </button>
+                </CompanyInfoContainer>
+            </InternalContainer>
         </Container>
     )
 }
