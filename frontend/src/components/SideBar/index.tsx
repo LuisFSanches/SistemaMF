@@ -7,20 +7,16 @@ import {
     faComputer,
     faRightFromBracket,
     faGlobe,
-    faUserShield,
     faBagShopping,
-    faAddressCard,
     faReceipt,
     faHome,
     faWarehouse
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
-import { useAdminData } from "../../contexts/AuthContext";
 import { NavLink} from 'react-router-dom'
 
 export function SideBar(){
     const { handleSignOut } = useContext(AuthContext);
-    const { adminData } = useAdminData();
     const location = useLocation();
 
     const [isActive, setActive] = useState({
@@ -347,7 +343,6 @@ export function SideBar(){
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
-
             
             <NavLink to="/estoque">
                 <SideBarItemContainer onClick={()=>handleActiveMenuButton('estoque')}>
@@ -358,19 +353,6 @@ export function SideBar(){
                     >
                         <FontAwesomeIcon icon={faWarehouse} className="Side-Bar-Icon"/>
                         <span>Compras Efetuadas</span>
-                    </SideBarButton>
-                </SideBarItemContainer>
-            </NavLink>
-
-            <NavLink to="/clientes">
-                <SideBarItemContainer onClick={()=>handleActiveMenuButton('clientes')}>
-                    <SideBarButton
-                        isActive={isActive['clientes']}
-                        isMinimizedActive
-                        title="Clientes"
-                    >   
-                        <FontAwesomeIcon icon={faAddressCard} className="Side-Bar-Icon"/>
-                        <span>Lista de Clientes</span>
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
@@ -387,21 +369,6 @@ export function SideBar(){
                     </SideBarButton>
                 </SideBarItemContainer>
             </NavLink>
-            
-            {adminData && adminData.role === "SUPER_ADMIN" &&
-                <NavLink to="/administradores" onClick={()=>handleActiveMenuButton('administradores')}>
-                    <SideBarItemContainer>
-                        <SideBarButton
-                            isActive={isActive['administradores']}
-                            isMinimizedActive
-                            title="Vendedores"
-                        >
-                            <FontAwesomeIcon icon={faUserShield} className="Side-Bar-Icon"/>
-                            <span>Vendedores</span>
-                        </SideBarButton>
-                    </SideBarItemContainer>
-                </NavLink>
-            }
 
             <CompanyInfoContainer
                 isMinimizedActive

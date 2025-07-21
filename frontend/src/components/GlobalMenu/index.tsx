@@ -8,7 +8,8 @@ import {
     faReceipt,
     faPlantWilt,
     faHome,
-    faWarehouse
+    faWarehouse,
+    faUserShield
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
@@ -371,6 +372,18 @@ export function GlobalMenu({
                             <span>
                                 <FontAwesomeIcon icon={faAddressCard} className="Side-Bar-Icon"/>
                                 Clientes
+                            </span>
+                        </NavButton>
+                    </NavLink>
+                    <NavLink to="/administradores">
+                        <NavButton
+                            type="button"
+                            onClick={() => handleActiveMenuButton('administradores')}
+                            isActive={isActive['administradores']}
+                        >
+                            <span>
+                                <FontAwesomeIcon icon={faUserShield} className="Side-Bar-Icon"/>
+                                Vendedores
                             </span>
                         </NavButton>
                     </NavLink>
