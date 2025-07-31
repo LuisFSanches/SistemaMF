@@ -66,7 +66,6 @@ export const PrintOrder = ({
                     </div>
 
                     <div class="row"><strong>Pedido:</strong> #${orderCode}</div>
-                    <div class="row"><strong>Data do pedido:</strong> ${order.created_at ? moment(order.created_at).format("DD/MM/YYYY (dddd)") : date.format("DD/MM/YYYY (dddd)")}</div>
                     <div class="row"><strong>Hora do pedido:</strong> ${order.created_at ? moment(order.created_at).format("HH:mm") : date.format("HH:mm")}</div>
                     <div class="row"><strong>Data de Entrega:</strong> ${moment(order.delivery_date).format("DD/MM/YYYY (dddd)")}</div>
                     <div class="divider"></div>

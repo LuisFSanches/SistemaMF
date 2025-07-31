@@ -435,7 +435,6 @@ export const EditFormField = styled.div<{ isShortField?: boolean }>`
     flex-direction: column;
     margin: 0 auto;
     margin-bottom: 10px;
-    margin-top: 20px;
 `;
 
 export const InlineFormField = styled.div<{fullWidth?: boolean}>`

@@ -59,6 +59,7 @@ export function EditOrderModal({
 
 	const handleOrder = async (formData: IOrder) => {
 		setShowLoader(true);
+
 		const data = {
             id: order.id,
 			code: order.code,
@@ -90,13 +91,15 @@ export function EditOrderModal({
 				state: formData.clientAddress.state,
 				country: formData.clientAddress.country
 			},
-			products
+			products,
+			is_delivery: order.is_delivery
         }
 
 		const { data: orderData } = await updateOrder(data);
 
 		editOrder(orderData);
 		loadAvailableOrders(1, 25, '');
+		setEditAddress(false);
 		setShowLoader(false);
 		onRequestClose();
 	}
@@ -366,8 +369,10 @@ export function EditOrderModal({
 										</div>
 									</>
 								))}
-								<div className="product-actions">
-									<button type="button" className="add-button" onClick={addProduct}>Incluir Produto</button>
+								<div className="product-actions" style={{ marginTop: '0px' }}>
+									<button type="button" className="add-button" onClick={addProduct}>
+										Incluir Produto
+									</button>
 								</div>
 							</ProductContainer>
 						</EditFormField>
