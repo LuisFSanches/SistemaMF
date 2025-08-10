@@ -193,6 +193,8 @@ export function CompleteOrder() {
 
                     if (!client) {
                         setClientId("");
+                        setValue("first_name", "");
+                        setValue("last_name", "");
                         setShowLoader(false);
                     }
 
