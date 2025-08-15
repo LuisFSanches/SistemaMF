@@ -397,6 +397,7 @@ export const FormField = styled.div<{ isShortField?: boolean }>`
     margin: 0 auto;
     margin-bottom: 10px;
     margin-top: 20px;
+    position: relative;
 
     @media (max-width:768px) {
         width: ${({ isShortField }) => (isShortField ? '45%' : '100%')};
@@ -465,6 +466,17 @@ export const Label = styled.label`
     span {
         color: red;
         margin-left: 5px;
+    }
+
+    .label-question {
+        border-radius: 50%;
+        color: #EC4899;
+        font-weight: 700;
+        font-size: 23px;
+        margin-left: 10px;
+        position: absolute;
+        left: 68px;
+        top: -6px;
     }
 `;
 

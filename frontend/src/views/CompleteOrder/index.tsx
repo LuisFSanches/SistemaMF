@@ -10,6 +10,7 @@ import { getOrder } from "../../services/orderService";
 import { useOrders } from "../../contexts/OrdersContext";
 import { Loader } from '../../components/Loader';
 import { WelcomeBackModal } from "../../components/WelcomeBackModal";
+import { TooltipModal } from "../../components/Tooltip";
 import { RememberCardModal } from "../../components/RememberCardModal";
 import { formatDescription } from "../../utils";
 import { ErrorAlert } from "../../components/ErrorAlert";
@@ -34,6 +35,8 @@ import { rawTelephone } from "../../utils";
 import { createClientOnline } from "../../services/clientService";
 
 import { Form, Container, FormHeader, CompletedOrder, OrderReview } from "./style";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleQuestion } from "@fortawesome/free-solid-svg-icons";
 
 interface INewOrder {
     first_name: string;
@@ -75,7 +78,10 @@ export function CompleteOrder() {
     const [showWelcomeModal, setShowWelcomeModal] = useState(false);
     const [showRememberCardModal, setShowRememberCardModal] = useState(false);
     const [cardModalShowed, setCardModalShowed] = useState(false);
+    const [showToolTipModal, setShowToolTipModal] = useState(false);
     const cardSectionRef = useRef<HTMLDivElement>(null);
+    const tooltipMessage = `Para entregas em outras regiões,
+        por favor entre em contato conosco pelo whatsapp.`
 
     const [errorMessage, setErrorMessage] = useState("");
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
@@ -364,6 +370,11 @@ export function CompleteOrder() {
                 onRequestClose={() => setShowRememberCardModal(false)}
                 handleWriteMessageClick={handleWriteMessageClick}
                 handleNoMessageClick={handleNoMessageClick}
+            />
+            <TooltipModal
+                isOpen={showToolTipModal}
+                onRequestClose={() => setShowToolTipModal(false)}
+                textContent={tooltipMessage}
             />
             <Loader show={showLoader} />
             {errorMessage && <ErrorAlert message={errorMessage} />}
@@ -660,7 +671,7 @@ export function CompleteOrder() {
                                                 Estado
                                                 <span>*</span>
                                             </Label>
-                                            <Select {...register("state", {
+                                            <Select disabled {...register("state", {
                                                 required: "Estado inválido",
                                                 })}>
                                                 <option value="">Selecionar</option>
@@ -671,14 +682,22 @@ export function CompleteOrder() {
                                             {errors.state && <ErrorMessage>{errors.state.message}</ErrorMessage>}
                                         </FormField>
                                         <FormField>
-                                            <Label>
-                                                Cidade
-                                                <span>*</span>
+                                            <Label style={{ display: "flex" }}>
+                                                <div>
+                                                    Cidade
+                                                    <span>*</span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="label-question"
+                                                    onClick={() => setShowToolTipModal(!showToolTipModal)}>
+                                                    <FontAwesomeIcon icon={faCircleQuestion} />
+                                                </button>
                                             </Label>
                                             <Input type="text" placeholder="Cidade" {...register("city", {
                                                 required: "Cidade inválido",
                                                 })}
-                                                disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                                disabled
                                             />
                                             {errors.city && <ErrorMessage>{errors.city.message}</ErrorMessage>}
                                         </FormField>
