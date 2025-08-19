@@ -1,21 +1,21 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
 
-  class GetAdminService{
+class GetAdminService{
     async execute(id: string) {
-      try {
-        const admin = await prismaClient.admin.findFirst({
-          where: {
-            id
-          }
-        });
+        try {
+            const admin = await prismaClient.admin.findFirst({
+                where: {
+                    id
+                }
+            });
 
-        return admin;
+            return admin;
 
-      } catch(error: any) {
-        return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
-      }
+        } catch(error: any) {
+            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+        }
     }
-  }
-  
-  export { GetAdminService }
+}
+
+export { GetAdminService }

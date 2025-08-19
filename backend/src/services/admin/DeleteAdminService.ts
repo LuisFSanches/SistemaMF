@@ -1,21 +1,21 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
 
-  class DeleteAdminService{
+class DeleteAdminService{
     async execute(id: string) {
-      try {
-        await prismaClient.admin.delete({
-          where: {
-            id
-          }
-        })
+        try {
+            await prismaClient.admin.delete({
+                where: {
+                    id
+                }
+            })
 
-        return { Status: "Admin successfully deleted" };
+            return { Status: "Admin successfully deleted" };
 
-      } catch(error: any) {
-        return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
-      }
+        } catch(error: any) {
+            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+        }
     }
-  }
-  
-  export { DeleteAdminService }
+}
+
+export { DeleteAdminService }

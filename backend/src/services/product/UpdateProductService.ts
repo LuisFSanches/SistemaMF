@@ -4,7 +4,6 @@ import { ErrorCodes } from "../../exceptions/root";
 
 class UpdateProductService{
 	async execute({ id, name, price, unity, stock, enabled, image }: IProduct) {	
-        console.log('id', id)	
 		try {
 			let data = {
 				name,

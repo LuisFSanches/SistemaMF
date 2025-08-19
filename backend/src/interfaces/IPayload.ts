@@ -1,4 +1,4 @@
 export interface IPayload {
-  id: string;
-  role: string;
+    id: string;
+    role: string;
 }

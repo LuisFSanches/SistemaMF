@@ -50,7 +50,7 @@ export function UsersPage(){
                     <input
                         style={{width: '250px'}}
                         type="text"
-                        placeholder="Buscar por Produto/Fornecedor"
+                        placeholder="Buscar por Cliente"
                         onKeyDown={(e: any) => {
                             if (e.key === 'Enter') {
                                 searchClients(e.target.value);

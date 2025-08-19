@@ -1,21 +1,29 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { deleteAddressSchema } from "../../schemas/address/deleteAddress";
 
-  class DeleteAddressService{
+class DeleteAddressService {
     async execute(id: string) {
-      try {
-        await prismaClient.address.delete({
-          where: {
-            id
-          }
-        })
+        try {
+            const parsed = deleteAddressSchema.safeParse(id);
+            if (!parsed.success) {
+                return {
+                    error: true,
+                    message: parsed.error.errors[0].message,
+                    code: ErrorCodes.VALIDATION_ERROR
+                };
+            }
 
-        return { Status: "Address successfully deleted" };
+            await prismaClient.address.delete({
+                where: { id }
+            })
 
-      } catch(error: any) {
-        return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
-      }
+            return { Status: "Address successfully deleted" };
+
+        } catch(error: any) {
+            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+        }
     }
-  }
-  
-  export { DeleteAddressService }
+}
+
+export { DeleteAddressService }

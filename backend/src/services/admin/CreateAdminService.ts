@@ -20,10 +20,10 @@ class CreateAdminService{
 		try {
 			const newAdmin =await prismaClient.admin.create({
 				data: {
-				username,
-				name,
-				password: hashedPassword,
-				role
+					username,
+					name,
+					password: hashedPassword,
+					role
 				}
 			})
 

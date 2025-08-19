@@ -717,7 +717,7 @@ export function CompleteOrder() {
                             <FormField>
                                 <CheckboxContainer>
                                     <Checkbox type="checkbox" {...register("has_card")} />
-                                    <Label>Pedido Contém Cartão.</Label>
+                                    <Label>Pedido Contém Cartão de Mensagem.</Label>
                                 </CheckboxContainer>
                             </FormField>
                             {hasCard &&

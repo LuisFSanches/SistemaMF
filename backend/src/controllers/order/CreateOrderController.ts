@@ -124,9 +124,8 @@ class CreateOrderController{
 			has_card: has_card,
 			online_order,
 			online_code,
-			products,
 			is_delivery
-		}) as any;
+		}, products) as any;
 
 		if ('error' in order && order.error) {
 			next(new BadRequestException(
@@ -159,6 +158,7 @@ class CreateOrderController{
 		const storePhoneNumber = "22997517940";
 		const getClientService = new GetClientByPhoneNumberService();
 		const getClient = await getClientService.execute(storePhoneNumber) as any;
+		
 		return getClient.id
 	}
 }

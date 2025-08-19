@@ -5,38 +5,37 @@ import { compareSync } from 'bcrypt'
 import * as jwt from 'jsonwebtoken'
 
 class LoginAdminService{
+    async execute({ username, password }: IAdmin) {
+        try {
+            const admin = await prismaClient.admin.findFirst({
+                where: {
+                username,
+                },
+            })
 
-  async execute({ username, password }: IAdmin) {
-    try {
-      const admin = await prismaClient.admin.findFirst({
-        where: {
-          username,
-        },
-      })
+            if (!admin) {
+                return { error: true, message: 'Admin not found', code: ErrorCodes.USER_NOT_FOUND }
+            }
 
-      if (!admin) {
-        return { error: true, message: 'Admin not found', code: ErrorCodes.USER_NOT_FOUND }
-      }
+            if (!compareSync(password, admin.password)) {
+                return { error: true, message: 'Wrong password', code: ErrorCodes.INCORRECT_PASSWORD }
+            }
 
-      if (!compareSync(password, admin.password)) {
-        return { error: true, message: 'Wrong password', code: ErrorCodes.INCORRECT_PASSWORD }
-      }
+            const token = jwt.sign({
+                id: admin.id,
+                role: admin.role
+            }, process.env.JWT_SECRET!, {
+                expiresIn: '1y'
+            })
 
-      const token = jwt.sign({
-        id: admin.id,
-        role: admin.role
-      }, process.env.JWT_SECRET!, {
-        expiresIn: '1y'
-      })
+            delete (admin as { password?: string }).password;
 
-      delete (admin as { password?: string }).password;
+            return { admin, token }
 
-      return { admin, token }
-
-    } catch(error: any) {
-      return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+        } catch(error: any) {
+            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+        }
     }
-  }
 }
 
 export { LoginAdminService }

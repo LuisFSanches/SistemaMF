@@ -1,19 +1,27 @@
 import { Request, Response } from 'express'
-import { CreateAddressService } from '../../services/address/CreateAddressService'
+import { CreateAddressService } from "../../services/address/CreateAddressService"
+import { createAddressSchema } from "../../schemas/address/createAddress";
+import { ErrorCodes } from "../../exceptions/root";
 
 class CreateAddressController{
-async handle(req: Request, res: Response) {
-	const { client_id, street, street_number, complement, reference_point, neighborhood, city, state, postal_code, country } = req.body;
+	async handle(req: Request, res: Response) {
+		const data = req.body;
 
-	const createAddressService = new CreateAddressService();
+		const parsed = createAddressSchema.safeParse(data);
+		if (!parsed.success) {
+			return {
+				error: true,
+				message: parsed.error.errors[0].message,
+				code: ErrorCodes.VALIDATION_ERROR
+			};
+		}
 
-	const address = await createAddressService.execute({
-		client_id, street, street_number, complement, reference_point, neighborhood, city, state, postal_code, country
-	});
+		const createAddressService = new CreateAddressService();
 
+		const address = await createAddressService.execute(data);
 
-	return res.json(address)
-}
+		return res.json(address)
+	}
 }
 
 export { CreateAddressController }

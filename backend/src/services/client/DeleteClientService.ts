@@ -1,21 +1,21 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
 
-  class DeleteClientService{
+class DeleteClientService{
     async execute(id: string) {
-      try {
-        await prismaClient.client.delete({
-          where: {
-            id
-          }
-        })
+        try {
+            await prismaClient.client.delete({
+                where: {
+                id
+                }
+            })
 
-        return { Status: "Client successfully deleted" };
+            return { Status: "Client successfully deleted" };
 
-      } catch(error: any) {
-        return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
-      }
+        } catch(error: any) {
+            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+        }
     }
-  }
-  
-  export { DeleteClientService }
+}
+
+export { DeleteClientService }

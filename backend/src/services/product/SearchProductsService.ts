@@ -18,4 +18,3 @@ export class SearchProductsService {
         return products;
     }
 }
-

@@ -3,16 +3,10 @@ import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
 
 export class CreateProductService {
-    async execute({ name, price, unity, stock }: IProduct) {
+    async execute(data: IProduct) {
         try {
             const product = await prismaClient.product.create({
-                data: {
-                    name,
-                    unity,
-                    price,
-                    stock,
-                    enabled: true
-                },
+                data,
             });
     
             return product;

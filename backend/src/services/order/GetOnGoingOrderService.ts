@@ -28,4 +28,3 @@ class GetOnGoingOrderService {
 }
 
 export { GetOnGoingOrderService };
-
