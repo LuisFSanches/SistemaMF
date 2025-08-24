@@ -18,6 +18,7 @@ import { GetAllClientAddressController } from './controllers/address/GetAllClien
 import { GetPickUpAddressController } from './controllers/address/GetPickUpAddressController';
 
 import { CreateOrderController } from './controllers/order/CreateOrderController';
+import { CreateOrderByAIController } from './controllers/order/CreateOrderByAIController';
 import { GetOnGoingOrderController } from './controllers/order/GetOnGoingOrderController';
 import { GetAllOrderController } from './controllers/order/GetAllOrderController';
 import { UpdateOrderController } from './controllers/order/UpdateOrderController';
@@ -74,6 +75,7 @@ router.get('/order/ongoing', adminAuthMiddleware, new GetOnGoingOrderController(
 router.get('/order/all', adminAuthMiddleware, new GetAllOrderController().handle);
 router.get('/order/waitingForClient', adminAuthMiddleware, new GetWaitingOnlineOrderController().handle);
 router.post('/order', adminAuthMiddleware, new CreateOrderController().handle);
+router.post('/order/ai', adminAuthMiddleware, new CreateOrderByAIController().handle);
 router.put('/order/:id', adminAuthMiddleware, new UpdateOrderController().handle);
 router.put('/order/finish/:id', new FinishOnlineOrderController().handle);
 router.patch('/order/:id', adminAuthMiddleware, new UpdateOrderStatusController().handle);

@@ -375,6 +375,9 @@ export function CompleteOrder() {
                 isOpen={showToolTipModal}
                 onRequestClose={() => setShowToolTipModal(false)}
                 textContent={tooltipMessage}
+                title=""
+                showWhatsapp
+                showCopyButton={false}
             />
             <Loader show={showLoader} />
             {errorMessage && <ErrorAlert message={errorMessage} />}
@@ -691,7 +694,8 @@ export function CompleteOrder() {
                                                     type="button"
                                                     className="label-question"
                                                     onClick={() => setShowToolTipModal(!showToolTipModal)}>
-                                                    <FontAwesomeIcon icon={faCircleQuestion} />
+                                                        <FontAwesomeIcon icon={faCircleQuestion}
+                                                    />
                                                 </button>
                                             </Label>
                                             <Input type="text" placeholder="Cidade" {...register("city", {

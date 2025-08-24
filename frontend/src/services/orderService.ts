@@ -76,6 +76,12 @@ export const createOrder = async ({
 	return response;
 };
 
+export const createOrderByAi = async (data: any) => {
+	const response = await api.post("/order/ai", data);
+
+	return response;
+}
+
 export const getOrder = async (id: string) => {
 	const response = api.get(`/order/completedOrder/${id}`);
 

@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import InputMask from "react-input-mask";
 import { useForm } from "react-hook-form";
 import { ProductCard} from "../../components/ProductCard";
 import { Pagination } from "../../components/Pagination";
+import { TooltipModal } from "../../components/Tooltip";
+import { Loader } from '../../components/Loader';
 import { PAYMENT_METHODS } from "../../constants";
 import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { createOrder } from "../../services/orderService";
+import { faXmark, faCircleQuestion } from "@fortawesome/free-solid-svg-icons";
+import { createOrder, createOrderByAi } from "../../services/orderService";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { useOrders } from "../../contexts/OrdersContext";
 import { ProductModal } from "../../components/ProductModal";
-import { Loader } from '../../components/Loader';
 import { rawTelephone } from "../../utils";
 import { useProducts } from "../../contexts/ProductsContext";
 import {
@@ -28,6 +30,8 @@ import {
     PrimaryButton,
     DescriptionArea,
     PageHeader,
+    Switch,
+    StyledSwitch
 } from "../../styles/global";
 
 import {
@@ -37,7 +41,8 @@ import {
     NewOrderContainer,
     ProductList,
     ProductContainer,
-    NewProductButton
+    NewProductButton,
+    PageHeaderActions
 } from "./style";
 
 import placeholder_products from '../../assets/images/placeholder_products.png';
@@ -55,7 +60,8 @@ interface INewOrder {
     total: number;
     created_by: string;
     online_code: string;
-    receiver_phone: string;
+    phone_number: string;
+    order_ai_information: string;
 }
 
 interface IProduct {
@@ -65,11 +71,14 @@ interface IProduct {
     quantity: number;
 }
 
+// parseWithAI(message).then(console.log);
+
 export function OnlineOrder() {
     const { products: availableProducts, loadAvailableProducts, totalProducts } = useProducts();
-
+    const navigate = useNavigate();
     const { admins } = useAdmins();
     const { addOrder } = useOrders();
+
     const [showLoader, setShowLoader] = useState(false);
     const [showOrderDetail, setShowOrderDetail] = useState(false);
     const [orderLink, setOrderLink] = useState("");
@@ -81,6 +90,19 @@ export function OnlineOrder() {
     const [productModal, setProductModal] = useState(false);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(8);
+    const [useAIToGenerate, setUseAIToGenerate] = useState(false);
+    const [showToolTipModal, setShowToolTipModal] = useState(false);
+    const tooltipMessage = `
+👉 Entregar dia:
+👉 Nome do Remetente:
+👉 telefone do remetente:
+👉🏼 Nome do destinatário:
+👉🏼 Telefone do destinatário: 
+👉🏼 Endereço:
+👉 Bairro:
+👉 Número:
+👉🏼 Ponto de referência:
+👉🏼 Dizer do cartão para ser impresso:`
 
     const {
         register,
@@ -90,7 +112,7 @@ export function OnlineOrder() {
         setValue
     } = useForm<INewOrder>();
 
-    const receiver_phone = watch("receiver_phone");
+    const phone_number = watch("phone_number");
 
     const handleCopy = () => {
         const message = `Você poderia preencher esse link com o endereço completo prfv? E nele também tem um espacinho para você enviar um cartão. ✉️❤️\n${orderLink}`;
@@ -102,7 +124,6 @@ export function OnlineOrder() {
             }, 2000);
         });
     };
-
 
     function generateOnlineCode() {
         const numerosAleatorios = Array.from({ length: 4 }, () => Math.floor(Math.random() * 10)).join('');
@@ -116,11 +137,11 @@ export function OnlineOrder() {
         setShowLoader(true);
         const orderData = {
             client_id: null,
-            phone_number: "",
+            phone_number: rawTelephone(phone_number),
             first_name: "",
             last_name: "",
             receiver_name: "",
-            receiver_phone: rawTelephone(receiver_phone),
+            receiver_phone: "",
             addressId: "",
             pickup_on_store: false,
             street: "",
@@ -145,10 +166,27 @@ export function OnlineOrder() {
             created_by: data.created_by,
             online_order: true,
             online_code: generateOnlineCode(),
-            products: products
+            products: products,
+            order_ai_information: data.order_ai_information
         }
-        const { data: response } = await createOrder(orderData);
-        if (response.order.id) {
+
+        let response;
+
+        if (!useAIToGenerate) {
+            const { data: responseData } = await createOrder(orderData);
+            response = responseData;
+        }
+
+        if (useAIToGenerate) {
+            const { data: responseData } = await createOrderByAi(orderData);
+            response = responseData;
+            addOrder(response);
+            setShowLoader(false);
+            navigate("/ordensDeServico");
+            return;
+        }
+
+        if (response.order.id && !useAIToGenerate) {
             setShowOrderDetail(true);
             setOrderLink(`${baseUrl}completarPedido/${response.order.id}`);
         }
@@ -159,8 +197,8 @@ export function OnlineOrder() {
     }
 
     useEffect(() => {
-        const receiver_phone = watch("receiver_phone") || "";
-        const numericValue = rawTelephone(receiver_phone);
+        const phone_number = watch("phone_number") || "";
+        const numericValue = rawTelephone(phone_number);
     
         const timeout = setTimeout(() => {
             if (numericValue.length === 10) {
@@ -171,7 +209,7 @@ export function OnlineOrder() {
         }, 800);
 
         return () => clearTimeout(timeout);
-    }, [receiver_phone, watch, setMask]);
+    }, [phone_number, watch, setMask]);
 
     const handleSearchProducts = (text: string) => {
         setQuery(text);
@@ -272,12 +310,19 @@ export function OnlineOrder() {
             }
         }
 
-        // Executa ao montar
         handleResize();
     }, []);
 
     return (
         <Container>
+            <TooltipModal
+                isOpen={showToolTipModal}
+                onRequestClose={() => setShowToolTipModal(false)}
+                textContent={tooltipMessage}
+                title="Utilize o modelo abaixo, se atente a questão da Cidade e do Estado caso não seja Itaperuna."
+                showWhatsapp={false}
+                showCopyButton={true}
+            />
             <ProductModal 
                 isOpen={productModal}
                 onRequestClose={handleCloseProductModal}
@@ -339,9 +384,24 @@ export function OnlineOrder() {
                                 <FontAwesomeIcon icon={faWhatsapp as any} />
                                 <span>Pedido Online</span>
                             </div>
-                            <NewProductButton type="button" onClick={handleOpenProductModal}>
-                                Novo Produto
-                            </NewProductButton>
+                            <PageHeaderActions>
+                                <Switch>
+                                    <span style={{ color: useAIToGenerate ? "#333" : "#EC4899" }}>
+                                        <i className="material-icons">link</i>
+                                        Pedido via Link
+                                    </span>
+                                    <Input id="switch" type="checkbox" placeholder='Ativo'
+                                        onChange={(e: any) => setUseAIToGenerate(e.target.checked)}/>
+                                    <StyledSwitch htmlFor="switch" $checked={useAIToGenerate as boolean} />
+                                    <span style={{ color: useAIToGenerate ? "#EC4899" : "#333" }}>
+                                        <i className="material-icons">smart_toy</i>
+                                        Pedido via IA
+                                    </span>
+                                </Switch>
+                                <NewProductButton type="button" onClick={handleOpenProductModal}>
+                                    Novo Produto
+                                </NewProductButton>
+                            </PageHeaderActions>
                         </PageHeader>
                         <div className="product-data">
                             <div style={{ position: 'relative', width: '100%' }}>
@@ -393,81 +453,165 @@ export function OnlineOrder() {
                                 <ErrorMessage>{errors.description.message}</ErrorMessage>
                             )}
                         </FormField>
-                        <FormField>
-                            <Label>Observações</Label>
-                            <Textarea style={{ minHeight: "100px" }} placeholder="Observações" {...register("additional_information")}
-                            />
-                        </FormField>
-                        <FormField>
-                            <Label>
-                                Telefone do cliente
-                                <span>*</span>
-                            </Label>
-                            <InputMask
-                                autoComplete="off"
-                                mask={mask}
-                                alwaysShowMask={false}
-                                placeholder='Telefone'
-                                value={watch("receiver_phone") || ""}
-                                {...register("receiver_phone", { 
-                                    required: "Telefone inválido",
-                                    validate: (value) => {
-                                        if (value.replace(/[^0-9]/g, "").length < 10) {
-                                            return "Telefone inválido";
-                                        }
-                                        return true;
-                                    }
-                                })}
-                            />
-                            {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
-                        </FormField>
-                        <InlineFormField style={{ alignItems: "center" }}>
-                            <FormField style={{ marginRight: "20px" }}>
-                                <Label>
-                                    Método de pagamento
-                                    <span>*</span>
-                                </Label>
-                                <Select {...register("payment_method", { required: "Método de pagamento inválido" })}>
-                                    <option value="">Selecione um método</option>
-                                    {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
-                                        <option key={key} value={key}>{value}</option>
-                                    ))}
-                                </Select>
-                                {errors.payment_method && <ErrorMessage>{errors.payment_method.message}</ErrorMessage>}
-                            </FormField>
-                            <FormField>
-                                <CheckboxContainer>
-                                    <Checkbox type="checkbox" {...register("payment_received")} />
-                                    <Label>Pagamento Recebido</Label>
-                                </CheckboxContainer>
-                            </FormField>
-                        </InlineFormField>
-                        <FormField>
-                            <Label>Vendedor Responsável</Label>
-                            <Select {...register("created_by", { required: "Vendedor Responsável inválido" })}>
-                                <option value="">Selecione um Vendedor</option>
-                                {admins.map((admin: any) => (
-                                    <option key={admin.id} value={admin.id}>{admin.name}</option>
-                                ))}
-                            </Select>
-                            {errors.created_by && <ErrorMessage>{errors.created_by.message}</ErrorMessage>}
-                        </FormField>
-                        <InlineFormField>
-                            <FormField>
-                                <Label>Valor total dos Produtos</Label>
-                                <Input type="number" step="0.01" placeholder="Total" value={watch("products_value")}
-                                    {...register("products_value", {
-                                        required: "Valor total é obrigatório",
-                                    })}
-                                />
-                                {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
-                            </FormField>
-                            <FormField>
-                                <Label>Taxa de entrega</Label>
-                                <Input type="number" step="0.01" placeholder="0.00" {...register("delivery_fee", {
-                                })} />
-                            </FormField>
-                        </InlineFormField>
+                        {!useAIToGenerate &&
+                            <>
+                                <FormField>
+                                    <Label>Observações</Label>
+                                    <Textarea style={{ minHeight: "100px" }} placeholder="Observações" {...register("additional_information")}
+                                    />
+                                </FormField>
+                                <FormField>
+                                    <Label>
+                                        Telefone do cliente
+                                        <span>*</span>
+                                    </Label>
+                                    <InputMask
+                                        autoComplete="off"
+                                        mask={mask}
+                                        alwaysShowMask={false}
+                                        placeholder='Telefone'
+                                        value={watch("phone_number") || ""}
+                                        {...register("phone_number", { 
+                                            required: "Telefone inválido",
+                                            validate: (value) => {
+                                                if (value.replace(/[^0-9]/g, "").length < 10) {
+                                                    return "Telefone inválido";
+                                                }
+                                                return true;
+                                            }
+                                        })}
+                                    />
+                                    {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
+                                </FormField>
+                                <InlineFormField style={{ alignItems: "center" }}>
+                                    <FormField style={{ marginRight: "20px" }}>
+                                        <Label>
+                                            Método de pagamento
+                                            <span>*</span>
+                                        </Label>
+                                        <Select {...register("payment_method", { required: "Método de pagamento inválido" })}>
+                                            <option value="">Selecione um método</option>
+                                            {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
+                                                <option key={key} value={key}>{value}</option>
+                                            ))}
+                                        </Select>
+                                        {errors.payment_method && <ErrorMessage>{errors.payment_method.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <CheckboxContainer>
+                                            <Checkbox type="checkbox" {...register("payment_received")} />
+                                            <Label>Pagamento Recebido</Label>
+                                        </CheckboxContainer>
+                                    </FormField>
+                                </InlineFormField>
+                                <FormField>
+                                    <Label>Vendedor Responsável</Label>
+                                    <Select {...register("created_by", { required: "Vendedor Responsável inválido" })}>
+                                        <option value="">Selecione um Vendedor</option>
+                                        {admins.map((admin: any) => (
+                                            <option key={admin.id} value={admin.id}>{admin.name}</option>
+                                        ))}
+                                    </Select>
+                                    {errors.created_by && <ErrorMessage>{errors.created_by.message}</ErrorMessage>}
+                                </FormField>
+                                <InlineFormField>
+                                    <FormField>
+                                        <Label>Valor total dos Produtos</Label>
+                                        <Input type="number" step="0.01" placeholder="Total" value={watch("products_value")}
+                                            {...register("products_value", {
+                                                required: "Valor total é obrigatório",
+                                            })}
+                                        />
+                                        {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>Taxa de entrega</Label>
+                                        <Input type="number" step="0.01" placeholder="0.00" {...register("delivery_fee", {
+                                        })} />
+                                    </FormField>
+                                </InlineFormField>
+                            </>
+                        }
+
+                        {useAIToGenerate &&
+                            <>
+                                <FormField>
+                                    <Label>Observações</Label>
+                                    <Textarea style={{ minHeight: "50px" }} placeholder="Observações" {...register("additional_information")}
+                                    />
+                                </FormField>
+                                <InlineFormField style={{ alignItems: "center" }}>
+                                    <FormField style={{ marginRight: "20px" }}>
+                                        <Label>
+                                            Método de pagamento
+                                            <span>*</span>
+                                        </Label>
+                                        <Select {...register("payment_method", { required: "Método de pagamento inválido" })}>
+                                            <option value="">Selecione um método</option>
+                                            {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
+                                                <option key={key} value={key}>{value}</option>
+                                            ))}
+                                        </Select>
+                                        {errors.payment_method && <ErrorMessage>{errors.payment_method.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <CheckboxContainer>
+                                            <Checkbox type="checkbox" {...register("payment_received")} />
+                                            <Label>Pagamento Recebido</Label>
+                                        </CheckboxContainer>
+                                    </FormField>
+                                </InlineFormField>
+                                <FormField>
+                                    <Label>Vendedor Responsável</Label>
+                                    <Select {...register("created_by", { required: "Vendedor Responsável inválido" })}>
+                                        <option value="">Selecione um Vendedor</option>
+                                        {admins.map((admin: any) => (
+                                            <option key={admin.id} value={admin.id}>{admin.name}</option>
+                                        ))}
+                                    </Select>
+                                    {errors.created_by && <ErrorMessage>{errors.created_by.message}</ErrorMessage>}
+                                </FormField>
+                                <InlineFormField>
+                                    <FormField>
+                                        <Label>Valor total dos Produtos</Label>
+                                        <Input type="number" step="0.01" placeholder="Total" value={watch("products_value")}
+                                            {...register("products_value", {
+                                                required: "Valor total é obrigatório",
+                                            })}
+                                        />
+                                        {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>Taxa de entrega</Label>
+                                        <Input type="number" step="0.01" placeholder="0.00" {...register("delivery_fee", {
+                                        })} />
+                                    </FormField>
+                                </InlineFormField>
+
+                                <FormField>
+                                    <Label>
+                                        <div>
+                                            Infomações do Cliente
+                                            <span>*</span>
+                                        </div>
+
+                                        <button
+                                            style={{ left: "0px", right: "50px" }}
+                                            type="button"
+                                            className="label-question"
+                                            onClick={() => setShowToolTipModal(!showToolTipModal)}>
+                                            <FontAwesomeIcon icon={faCircleQuestion} />
+                                        </button>
+                                    </Label>
+                                    <Textarea
+                                        style={{ minHeight: "150px" }}
+                                        placeholder="Infomações do Cliente"
+                                        {...register("order_ai_information")}
+                                    />
+                                </FormField>
+                            </>
+                        }
+                        
                         <PrimaryButton type="submit">Finalizar Pedido</PrimaryButton>
                     </Form>
                 </NewOrderContainer>

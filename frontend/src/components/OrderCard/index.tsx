@@ -64,7 +64,13 @@ export function OrderCard({
 					</span>
 				}
 
-				{!order.is_delivery &&
+				{(!order.is_delivery && order.online_order) &&
+					<span className={`order-type online`}>
+						Online
+					</span> 
+				}
+
+				{(!order.is_delivery && !order.online_order) &&
 					<span className={`order-type pdv`}>
 						PDV
 					</span> 

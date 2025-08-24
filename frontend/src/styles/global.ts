@@ -477,6 +477,7 @@ export const Label = styled.label`
         position: absolute;
         left: 68px;
         top: -6px;
+        background: none;
     }
 `;
 

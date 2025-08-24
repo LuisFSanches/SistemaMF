@@ -133,3 +133,6 @@ export const OrderDetail = styled.div`
         }
     }
 `
+export const PageHeaderActions = styled.div`
+    display: flex;
+`;

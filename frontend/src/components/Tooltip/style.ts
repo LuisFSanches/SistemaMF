@@ -3,8 +3,12 @@ import styled from "styled-components";
 export const Container = styled.form`
     p {
         font-size: 18px;
-        margin: 15px 0;
-        line-height: 24px;
+        margin: 5px 0;
+        line-height: 26px;
+    }
+
+    h2 {
+        font-size: 19px;
     }
 `;
 
@@ -27,4 +31,11 @@ export const WhatsappButton = styled.a `
         margin-right: 10px;
         font-size: 25px;
     }
+`
+
+export const CopyContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
 `
