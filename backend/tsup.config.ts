@@ -2,6 +2,7 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
     entry: ['src/server.ts'],
+    target: "es2020",
     outDir: 'dist',
     loader: {
         '.crt': 'file',
