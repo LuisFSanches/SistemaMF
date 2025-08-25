@@ -48,8 +48,6 @@ export function OrderCard({
 		return <></>;
 	}
 
-	console.log(order)
-
 	return (
     	<OrderCardContainer className={order?.status?.toLowerCase()}>
 			<div className="order-header">
