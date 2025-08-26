@@ -64,7 +64,7 @@ export function WaitingClientOrders(){
                             <tr key={order.id}>
                                 <td>#{order.code}</td>
                                 <td>{formatTitleCase(order.description)}</td>
-                                <td>{order.receiver_phone}</td>
+                                <td>{order.phone_number}</td>
                                 <td>R$ {order.total}</td>
                                 <td className="table-icon">
                                     <button className="view-button" onClick={() => handleOpenOrderDetailModal(order)}>
