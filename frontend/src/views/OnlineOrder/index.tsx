@@ -60,7 +60,7 @@ interface INewOrder {
     total: number;
     created_by: string;
     online_code: string;
-    phone_number: string;
+    receiver_phone: string;
     order_ai_information: string;
 }
 
@@ -112,7 +112,7 @@ export function OnlineOrder() {
         setValue
     } = useForm<INewOrder>();
 
-    const phone_number = watch("phone_number");
+    const receiver_phone = watch("receiver_phone");
 
     const handleCopy = () => {
         const message = `Você poderia preencher esse link com o endereço completo prfv? E nele também tem um espacinho para você enviar um cartão. ✉️❤️\n${orderLink}`;
@@ -137,11 +137,10 @@ export function OnlineOrder() {
         setShowLoader(true);
         const orderData = {
             client_id: null,
-            phone_number: rawTelephone(phone_number),
+            receiver_phone: rawTelephone(receiver_phone),
             first_name: "",
             last_name: "",
             receiver_name: "",
-            receiver_phone: "",
             addressId: "",
             pickup_on_store: false,
             street: "",
@@ -197,8 +196,8 @@ export function OnlineOrder() {
     }
 
     useEffect(() => {
-        const phone_number = watch("phone_number") || "";
-        const numericValue = rawTelephone(phone_number);
+        const receiver_phone = watch("receiver_phone") || "";
+        const numericValue = rawTelephone(receiver_phone);
     
         const timeout = setTimeout(() => {
             if (numericValue.length === 10) {
@@ -209,7 +208,7 @@ export function OnlineOrder() {
         }, 800);
 
         return () => clearTimeout(timeout);
-    }, [phone_number, watch, setMask]);
+    }, [receiver_phone, watch, setMask]);
 
     const handleSearchProducts = (text: string) => {
         setQuery(text);
@@ -470,8 +469,8 @@ export function OnlineOrder() {
                                         mask={mask}
                                         alwaysShowMask={false}
                                         placeholder='Telefone'
-                                        value={watch("phone_number") || ""}
-                                        {...register("phone_number", { 
+                                        value={watch("receiver_phone") || ""}
+                                        {...register("receiver_phone", { 
                                             required: "Telefone inválido",
                                             validate: (value) => {
                                                 if (value.replace(/[^0-9]/g, "").length < 10) {
@@ -481,7 +480,7 @@ export function OnlineOrder() {
                                             }
                                         })}
                                     />
-                                    {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
+                                    {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
                                 </FormField>
                                 <InlineFormField style={{ alignItems: "center" }}>
                                     <FormField style={{ marginRight: "20px" }}>
