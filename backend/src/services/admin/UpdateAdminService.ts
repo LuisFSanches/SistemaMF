@@ -2,6 +2,7 @@ import { IAdmin } from "../../interfaces/IAdmin";
 import prismaClient from '../../prisma';
 import { hash } from 'bcrypt'
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class UpdateAdminService{
 	async execute({ id, username, name, password, role }: IAdmin) {		
@@ -31,7 +32,10 @@ class UpdateAdminService{
 			return updatedAdmin;
 
 		} catch(error: any) {
-			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+            throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
 		}
 	}
 }

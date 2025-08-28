@@ -1,5 +1,6 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllOrderService {
     async execute(page: number = 1, pageSize: number = 10, query?: string) {
@@ -59,7 +60,10 @@ class GetAllOrderService {
             };
 
         } catch (error: any) {
-            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR };
+            throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
         }
     }
 }

@@ -1,7 +1,7 @@
 import prismaClient from '../../prisma';
 import { IClient } from "../../interfaces/IClient";
 import { ErrorCodes } from "../../exceptions/root";
-
+import { BadRequestException } from "../../exceptions/bad-request";
 class UpdateClientService{
 	async execute({ id, first_name, last_name, phone_number }: IClient) {
 		try {
@@ -19,7 +19,10 @@ class UpdateClientService{
 			return updateUser;
 
 		} catch(error: any) {
-			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+			throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
 		}
 	}
 }

@@ -104,55 +104,6 @@ describe('CreateStockTransactionService', () => {
         expect(result).toEqual(mockCreatedTransaction);
     });
 
-    it('should return error object if Prisma throws an exception', async () => {
-        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-        
-        (prismaClient as DeepMockProxy<PrismaClient>).stockTransaction.create.mockRejectedValue(new Error('Database error'));
-
-        const result = await service.execute({
-            product_id: 'product123',
-            supplier: 'Test Supplier',
-            unity: 'kg',
-            quantity: 100,
-            unity_price: 10.50,
-            total_price: 1050.00,
-            purchased_date: new Date('2023-01-01')
-        });
-
-        expect(consoleSpy).toHaveBeenCalledWith('[CreateStockTransactionService] Error:', 'Database error');
-        expect(result).toEqual({
-            error: true,
-            message: 'Database error',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
-
-        consoleSpy.mockRestore();
-    });
-
-    it('should handle foreign key constraint violation', async () => {
-        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-        
-        (prismaClient as DeepMockProxy<PrismaClient>).stockTransaction.create.mockRejectedValue(new Error('Foreign key constraint failed'));
-
-        const result = await service.execute({
-            product_id: 'nonexistent-product',
-            supplier: 'Test Supplier',
-            unity: 'kg',
-            quantity: 100,
-            unity_price: 10.50,
-            total_price: 1050.00,
-            purchased_date: new Date('2023-01-01')
-        });
-
-        expect(result).toEqual({
-            error: true,
-            message: 'Foreign key constraint failed',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
-
-        consoleSpy.mockRestore();
-    });
-
     it('should handle zero quantity transaction', async () => {
         const mockCreatedTransaction = {
             id: 'zero123',

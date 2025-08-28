@@ -1,5 +1,6 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllStockTransactionsService {
     async execute(page: number = 1, pageSize: number = 10, query?: string) {
@@ -50,8 +51,10 @@ class GetAllStockTransactionsService {
                 totalPages: Math.ceil(total / pageSize)
             };
         } catch (error: any) {
-            console.log("[GetAllStockTransactionsService] Error:", error.message);
-            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR };
+            throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
         }
     }
 }

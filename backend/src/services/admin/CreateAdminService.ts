@@ -2,6 +2,7 @@ import { IAdmin } from "../../interfaces/IAdmin";
 import prismaClient from '../../prisma';
 import { hash } from 'bcrypt'
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class CreateAdminService{
 	async execute({ username, name, password, role }: IAdmin) {
@@ -14,7 +15,10 @@ class CreateAdminService{
 		})
 
 		if (admin) {
-			return { error: true, message: 'Admin already created', code: ErrorCodes.USER_ALREADY_EXISTS }
+			throw new BadRequestException(
+                "Admin already created",
+                ErrorCodes.USER_ALREADY_EXISTS
+            );
 		}
 
 		try {
@@ -30,7 +34,10 @@ class CreateAdminService{
 			return newAdmin;
 
 		} catch(error: any) {
-			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+			throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
 		}
 	}
 }

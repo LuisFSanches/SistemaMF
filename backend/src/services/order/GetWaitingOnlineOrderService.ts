@@ -1,5 +1,6 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetWaitingOnlineOrderService{
     async execute() {
@@ -21,7 +22,10 @@ class GetWaitingOnlineOrderService{
             return { orders };
 
         } catch(error: any) {
-            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+            throw new BadRequestException(
+                "Client already created",
+                ErrorCodes.USER_ALREADY_EXISTS
+            );
         }
     }
 }

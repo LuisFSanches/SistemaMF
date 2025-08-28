@@ -1,5 +1,6 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllAdminService{
 	async execute() {
@@ -16,7 +17,10 @@ class GetAllAdminService{
 			return { admins };
 
 			} catch(error: any) {
-				return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+				throw new BadRequestException(
+					error.message,
+					ErrorCodes.SYSTEM_ERROR
+				);
 			}
 		}
 	}

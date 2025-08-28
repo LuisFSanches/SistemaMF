@@ -1,6 +1,5 @@
 import {Request, Response, NextFunction} from 'express';
 import { UpdateClientService } from '../../services/client/UpdateClientService';
-import { BadRequestException } from '../../exceptions/bad-request';
 
 class UpdateClientController{
 	async handle(req: Request, res: Response, next: NextFunction) {
@@ -14,15 +13,6 @@ class UpdateClientController{
 			last_name,
 			phone_number
 		});
-
-		if ('error' in client && client.error) {
-			next(new BadRequestException(
-				client.message,
-				client.code
-			));
-
-			return;
-		}
 
 		return res.json(client)
 	}

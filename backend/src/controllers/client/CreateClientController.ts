@@ -1,5 +1,4 @@
 import {Request, Response, NextFunction} from 'express'
-import { BadRequestException } from "../../exceptions/bad-request";
 import { CreateClientService } from '../../services/client/CreateClientService'
 
 class CreateClientController{
@@ -13,13 +12,6 @@ class CreateClientController{
             last_name,
             phone_number
         });
-        
-        if ('error' in client && client.error) {
-            next(new BadRequestException(
-                client.message,
-                client.code
-            ));
-        }
         
         return res.json(client)
     }

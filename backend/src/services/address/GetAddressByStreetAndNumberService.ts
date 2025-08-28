@@ -1,5 +1,6 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAddressByStreetAndNumberService {
     async execute(client_id: string, street: string, street_number: string) {
@@ -15,7 +16,10 @@ class GetAddressByStreetAndNumberService {
             return address;
 
         } catch(error: any) {
-            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+            throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
         }
     }
 }

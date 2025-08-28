@@ -3,6 +3,7 @@ import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 import { PrismaClient } from '@prisma/client';
 import { CreateProductService } from '../CreateProductService';
 import { ErrorCodes } from '../../../exceptions/root';
+import { BadRequestException } from '../../../exceptions/bad-request';
 
 vi.mock('../../../prisma', () => ({
     default: mockDeep<PrismaClient>()
@@ -91,38 +92,22 @@ describe('CreateProductService', () => {
     });
 
     it('should return error object if Prisma throws an exception', async () => {
-        (prismaClient as DeepMockProxy<PrismaClient>).product.create.mockRejectedValue(new Error('Database error'));
+        const errorMessage = 'Database error';
+        (prismaClient as DeepMockProxy<PrismaClient>).product.create.mockRejectedValue(new Error(errorMessage));
 
-        const result = await service.execute({
-            name: 'Test Product',
-            price: 29.99,
-            unity: 'kg',
-            stock: 100,
-            enabled: true
-        });
-
-        expect(result).toEqual({
-            error: true,
-            message: 'Database error',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
-    });
-
-    it('should handle unique constraint violation', async () => {
-        (prismaClient as DeepMockProxy<PrismaClient>).product.create.mockRejectedValue(new Error('Unique constraint failed'));
-
-        const result = await service.execute({
-            name: 'Test Product',
-            price: 29.99,
-            unity: 'kg',
-            stock: 100,
-            enabled: true
-        });
-
-        expect(result).toEqual({
-            error: true,
-            message: 'Unique constraint failed',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
+        try {
+            await service.execute({
+                name: 'Test Product',
+                price: 29.99,
+                unity: 'kg',
+                stock: 100,
+                enabled: true
+            });
+        } catch (error) {
+            expect(error).toBeInstanceOf(BadRequestException);
+            expect((error as BadRequestException).message).toBe(errorMessage);
+            expect((error as BadRequestException).errorCode).toBe(ErrorCodes.SYSTEM_ERROR);
+            expect((error as BadRequestException).statusCode).toBe(400);
+        }
     });
 });

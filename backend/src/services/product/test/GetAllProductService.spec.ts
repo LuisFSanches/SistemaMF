@@ -3,6 +3,7 @@ import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 import { PrismaClient } from '@prisma/client';
 import { GetAllProductService } from '../GetAllProductService';
 import { ErrorCodes } from '../../../exceptions/root';
+import { BadRequestException } from '../../../exceptions/bad-request';
 
 vi.mock('../../../prisma', () => ({
     default: mockDeep<PrismaClient>()
@@ -183,15 +184,17 @@ describe('GetAllProductService', () => {
     });
 
     it('should return error object if Prisma throws an exception', async () => {
-        (prismaClient as DeepMockProxy<PrismaClient>).product.findMany.mockRejectedValue(new Error('Database error'));
+        const errorMessage = 'Database error';
+        (prismaClient as DeepMockProxy<PrismaClient>).product.findMany.mockRejectedValue(new Error(errorMessage));
 
-        const result = await service.execute();
-
-        expect(result).toEqual({
-            error: true,
-            message: 'Database error',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
+        try {
+            await service.execute();
+        } catch(error) {
+            expect(error).toBeInstanceOf(BadRequestException);
+            expect((error as BadRequestException).message).toBe(errorMessage);
+            expect((error as BadRequestException).errorCode).toBe(ErrorCodes.SYSTEM_ERROR);
+            expect((error as BadRequestException).statusCode).toBe(400);
+        }
     });
 
     it('should handle empty results', async () => {

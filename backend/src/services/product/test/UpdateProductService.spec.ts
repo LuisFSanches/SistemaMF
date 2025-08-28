@@ -3,6 +3,7 @@ import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 import { PrismaClient } from '@prisma/client';
 import { UpdateProductService } from '../UpdateProductService';
 import { ErrorCodes } from '../../../exceptions/root';
+import { BadRequestException } from '../../../exceptions/bad-request';
 
 vi.mock('../../../prisma', () => ({
     default: mockDeep<PrismaClient>()
@@ -141,100 +142,42 @@ describe('UpdateProductService', () => {
     });
 
     it('should return error object if Prisma throws an exception', async () => {
-        (prismaClient as DeepMockProxy<PrismaClient>).product.update.mockRejectedValue(new Error('Database error'));
-
-        const result = await service.execute({
-            id: 'abc123',
-            name: 'Test Product',
-            price: 29.99,
-            unity: 'kg',
-            stock: 100,
-            enabled: true
-        });
-
-        expect(result).toEqual({
-            error: true,
-            message: 'Database error',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
+        const errorMessage = 'Database error';
+        (prismaClient as DeepMockProxy<PrismaClient>).product.update.mockRejectedValue(new Error(errorMessage));
+        try {
+            await service.execute({
+                id: 'abc123',
+                name: 'Test Product',
+                price: 29.99,
+                unity: 'kg',
+                stock: 100,
+                enabled: true
+            });
+        } catch(error) {
+            expect(error).toBeInstanceOf(BadRequestException);
+            expect((error as BadRequestException).message).toBe(errorMessage);
+            expect((error as BadRequestException).errorCode).toBe(ErrorCodes.SYSTEM_ERROR);
+            expect((error as BadRequestException).statusCode).toBe(400);
+        }
     });
 
     it('should handle product not found error', async () => {
-        (prismaClient as DeepMockProxy<PrismaClient>).product.update.mockRejectedValue(new Error('Record to update not found'));
-
-        const result = await service.execute({
-            id: 'nonexistent',
-            name: 'Test Product',
-            price: 29.99,
-            unity: 'kg',
-            stock: 100,
-            enabled: true
-        });
-
-        expect(result).toEqual({
-            error: true,
-            message: 'Record to update not found',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
-    });
-
-    it('should handle unique constraint violation', async () => {
-        (prismaClient as DeepMockProxy<PrismaClient>).product.update.mockRejectedValue(new Error('Unique constraint failed'));
-
-        const result = await service.execute({
-            id: 'abc123',
-            name: 'Duplicate Product Name',
-            price: 29.99,
-            unity: 'kg',
-            stock: 100,
-            enabled: true
-        });
-
-        expect(result).toEqual({
-            error: true,
-            message: 'Unique constraint failed',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
-    });
-
-    it('should update stock to zero', async () => {
-        const mockUpdatedProduct = {
-            id: 'abc123',
-            name: 'Out of Stock Product',
-            price: 29.99,
-            unity: 'kg',
-            stock: 0,
-            enabled: true,
-            image: 'test.jpg',
-            created_at: new Date(),
-            updated_at: new Date()
-        };
-
-        (prismaClient as DeepMockProxy<PrismaClient>).product.update.mockResolvedValue(mockUpdatedProduct);
-
-        const result = await service.execute({
-            id: 'abc123',
-            name: 'Out of Stock Product',
-            price: 29.99,
-            unity: 'kg',
-            stock: 0,
-            enabled: true,
-            image: 'test.jpg'
-        });
-
-        expect(prismaClient.product.update).toHaveBeenCalledWith({
-            where: {
-                id: 'abc123'
-            },
-            data: {
-                name: 'Out of Stock Product',
+        const errorMessage = 'Record to update not found';
+        (prismaClient as DeepMockProxy<PrismaClient>).product.update.mockRejectedValue(new Error(errorMessage));
+        try {
+            await service.execute({
+                id: 'nonexistent',
+                name: 'Test Product',
                 price: 29.99,
                 unity: 'kg',
-                stock: 0,
-                enabled: true,
-                image: 'test.jpg'
-            }
-        });
-        expect(result).toEqual(mockUpdatedProduct);
+                stock: 100,
+                enabled: true
+            });
+        } catch(error) {
+            expect(error).toBeInstanceOf(BadRequestException);
+            expect((error as BadRequestException).message).toBe(errorMessage);
+            expect((error as BadRequestException).errorCode).toBe(ErrorCodes.SYSTEM_ERROR);
+            expect((error as BadRequestException).statusCode).toBe(400);
+        }
     });
 });

@@ -1,6 +1,6 @@
 import prismaClient from '../../prisma';
-import { IOrder } from "../../interfaces/IOrder";
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 interface IOrderStatus {
 	id: string;
@@ -26,7 +26,10 @@ class UpdateOrderStatusService{
 			return updateOrder;
 
 		} catch(error: any) {
-			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+			throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
 		}
 	}
 }

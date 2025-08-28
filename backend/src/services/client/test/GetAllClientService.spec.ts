@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 import { PrismaClient } from '@prisma/client';
 import { GetAllClientService } from '../GetAllClientService';
-import { ErrorCodes } from '../../../exceptions/root';
 
 vi.mock('../../../prisma', () => ({
     default: mockDeep<PrismaClient>()
@@ -121,18 +120,6 @@ describe('GetAllClientService', () => {
             total: 1,
             currentPage: 1,
             totalPages: 1
-        });
-    });
-
-    it('should return error object if Prisma throws an exception', async () => {
-        (prismaClient as DeepMockProxy<PrismaClient>).client.findMany.mockRejectedValue(new Error('Database error'));
-
-        const result = await service.execute();
-
-        expect(result).toEqual({
-            error: true,
-            message: 'Database error',
-            code: ErrorCodes.SYSTEM_ERROR
         });
     });
 

@@ -9,10 +9,6 @@ export class CreateProductController {
         const service = new CreateProductService();
         const result = await service.execute({ name, price, unity: unity, stock, enabled: true });
 
-        if ('error' in result) {
-            return next(new BadRequestException(result.message, result.code));
-        }
-
         return res.status(201).json(result);
     }
 }

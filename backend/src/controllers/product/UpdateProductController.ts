@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import { BadRequestException } from "../../exceptions/bad-request";
 import { UpdateProductService } from '../../services/product/UpdateProductService';
 
 class UpdateProductController{
@@ -18,13 +17,6 @@ class UpdateProductController{
             enabled,
 			image
 		});
-
-		if ('error' in admin && admin.error) {
-			next(new BadRequestException(
-				admin.message,
-				admin.code
-			));
-		}
 
 		return res.json(admin)
 	}

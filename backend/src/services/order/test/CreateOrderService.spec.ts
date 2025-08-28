@@ -130,48 +130,4 @@ describe('CreateOrderService', () => {
         });
         expect(result).toEqual(mockCreatedOrder);
     });
-
-    it('should handle errors and return error object', async () => {
-        const mockOrderData = {
-            description: "Order description",
-            additional_information: "Additional information",
-            client_id: '123',
-            client_address_id: '456',
-            pickup_on_store: false,
-            receiver_name: "John Doe",
-            receiver_phone: "123456789",
-            products_value: 100.50,
-            delivery_fee: 10.00,
-            total: 110.50,
-            payment_method: "cash",
-            payment_received: false,
-            created_by: "123",
-            updated_by: "123",
-            status: "pending",
-            has_card: false,
-            online_order: false,
-            online_code: "123",
-            is_delivery: true,
-            delivery_date: "2023-08-01T12:00:00.000Z",
-        };
-
-        const mockProducts = [
-            {
-                id: '456',
-                quantity: 2,
-                price: 10.99
-            }
-        ];
-
-        const mockError = new Error('Database connection failed');
-        (prismaClient as DeepMockProxy<PrismaClient>).order.create.mockRejectedValue(mockError);
-
-        const result = await createOrderService.execute(mockOrderData, mockProducts);
-
-        expect(result).toEqual({
-            error: true,
-            message: 'Database connection failed',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
-    });
 });

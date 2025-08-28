@@ -1,5 +1,6 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class DeleteOrderService{
 	async execute(id: string) {
@@ -19,7 +20,10 @@ class DeleteOrderService{
 			return deleteOrder;
 
 		} catch(error: any) {
-			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+			throw new BadRequestException(
+				error.message,
+				ErrorCodes.SYSTEM_ERROR
+			);
 		}
 	}
 }

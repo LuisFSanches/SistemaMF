@@ -1,7 +1,8 @@
+import moment from 'moment-timezone';
 import { IOrder } from "../../interfaces/IOrder";
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
-import moment from 'moment-timezone';
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class CreateOrderService{
 	async execute(data: IOrder, products: any) {
@@ -35,7 +36,10 @@ class CreateOrderService{
 		return order;
 
 		} catch(error: any) {
-			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+			throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
 		}
 	}
 }

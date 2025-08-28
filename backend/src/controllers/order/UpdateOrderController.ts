@@ -31,15 +31,6 @@ class UpdateOrderController{
 					postal_code: clientAddress.postal_code,
 					country: clientAddress.country
 				});
-				
-				if ('error' in address && address.error) {
-					next(new BadRequestException(
-						address.message,
-						address.code
-					));
-					
-					return;
-				}
 
 				client_address_id = (address as { id: string }).id;
 				is_delivery = true;
@@ -47,15 +38,6 @@ class UpdateOrderController{
 
 			if (order.is_delivery === true) {
 				const address = await updateAddressService.execute(clientAddress);
-				
-				if ('error' in address && address.error) {
-					next(new BadRequestException(
-						address.message,
-						address.code
-					));
-					
-					return;
-				}
 			}
 		}
 
@@ -68,15 +50,6 @@ class UpdateOrderController{
 		const updateOrderService = new UpdateOrderService();
 
 		const data = await updateOrderService.execute(order);
-
-		if ('error' in data && data.error) {
-			next(new BadRequestException(
-				data.message,
-				data.code
-			));
-
-			return;
-		}
 
 		orderEmitter.emit("orderUpdated", { data });
 

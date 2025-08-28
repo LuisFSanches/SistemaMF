@@ -2,6 +2,7 @@ import prismaClient from '../../prisma';
 import moment from 'moment-timezone';
 import { IOnlineOrder } from "../../interfaces/IOnlineOrder";
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class FinishOnlineOrderService{
 	async execute(data: IOnlineOrder) {
@@ -32,7 +33,10 @@ class FinishOnlineOrderService{
 
 		} catch(error: any) {
             console.log('Failed when finishing online order', error.message)
-			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+			throw new BadRequestException(
+				error.message,
+				ErrorCodes.SYSTEM_ERROR
+			);
 		}
 	}
 }

@@ -13,6 +13,7 @@ export interface IOrder {
   client: IClient;
   clientAddress: IAddress;
   receiver_name?: string;
+  phone_number?: string;
   receiver_phone?: string;
   delivery_fee: number;
   products_value: number;

@@ -1,21 +1,25 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
-  class GetClientService{
+class GetClientService{
     async execute(id: string) {
-      try {
-        const user = await prismaClient.client.findFirst({
-          where: {
-            id
-          }
-        });
+        try {
+            const user = await prismaClient.client.findFirst({
+                where: {
+                id
+                }
+            });
 
-        return { user };
+            return { user };
 
-      } catch(error: any) {
-        return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
-      }
+        } catch(error: any) {
+            throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
+        }
     }
-  }
-  
-  export { GetClientService }
+}
+
+export { GetClientService }

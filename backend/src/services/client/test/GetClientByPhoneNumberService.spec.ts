@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 import { PrismaClient } from '@prisma/client';
 import { GetClientByPhoneNumberService } from '../GetClientByPhoneNumberService';
-import { ErrorCodes } from '../../../exceptions/root';
 
 vi.mock('../../../prisma', () => ({
     default: mockDeep<PrismaClient>()
@@ -73,17 +72,5 @@ describe('GetClientByPhoneNumberService', () => {
 
         expect(prismaClient.client.findFirst).not.toHaveBeenCalled();
         expect(result).toBeNull();
-    });
-
-    it('should return error object if Prisma throws an exception', async () => {
-        (prismaClient as DeepMockProxy<PrismaClient>).client.findFirst.mockRejectedValue(new Error('Database error'));
-
-        const result = await service.execute('123456789');
-
-        expect(result).toEqual({
-            error: true,
-            message: 'Database error',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
     });
 });

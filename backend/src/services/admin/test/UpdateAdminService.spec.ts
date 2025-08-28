@@ -3,6 +3,7 @@ import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 import { PrismaClient } from '@prisma/client';
 import { UpdateAdminService } from '../UpdateAdminService';
 import { ErrorCodes } from '../../../exceptions/root';
+import { BadRequestException } from '../../../exceptions/bad-request';
 
 vi.mock('../../../prisma', () => ({
     default: mockDeep<PrismaClient>()
@@ -116,12 +117,13 @@ describe('UpdateAdminService', () => {
             role: 'admin'
         };
 
-        const result = await service.execute(adminInput);
-
-        expect(result).toEqual({
-            error: true,
-            message: errorMessage,
-            code: ErrorCodes.SYSTEM_ERROR
-        });
+        try {
+            await service.execute(adminInput);
+        } catch (error) {
+            expect(error).toBeInstanceOf(BadRequestException);
+            expect((error as BadRequestException).message).toBe(errorMessage);
+            expect((error as BadRequestException).errorCode).toBe(ErrorCodes.SYSTEM_ERROR);
+            expect((error as BadRequestException).statusCode).toBe(400);
+        }
     });
 });

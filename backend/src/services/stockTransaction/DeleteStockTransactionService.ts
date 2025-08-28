@@ -1,5 +1,6 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class DeleteStockTransactionService {
     async execute(id: string) {
@@ -9,7 +10,10 @@ class DeleteStockTransactionService {
             });
 
             if (!existing) {
-                return { error: true, message: 'Transaction not found', code: ErrorCodes.USER_NOT_FOUND };
+                throw new BadRequestException(
+                    'Transaction not found',
+                    ErrorCodes.USER_NOT_FOUND
+                )
             }
 
             const transaction = await prismaClient.stockTransaction.delete({
@@ -18,8 +22,10 @@ class DeleteStockTransactionService {
 
             return transaction;
         } catch (error: any) {
-            console.log("[DeleteStockTransactionService] Error:", error.message);
-            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR };
+            throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
         }
     }
 }

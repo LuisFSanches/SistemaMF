@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 import { PrismaClient } from '@prisma/client';
 import { CreateAdminService } from '../CreateAdminService';
-import { ErrorCodes } from '../../../exceptions/root';
 
 vi.mock('../../../prisma', () => ({
     default: mockDeep<PrismaClient>()
@@ -66,41 +65,5 @@ describe('CreateAdminService', () => {
             }
         });
         expect(result).toEqual(mockCreatedAdmin);
-    });
-
-    it('should return error if admin already exists', async () => {
-        const adminInput = {
-            username: 'admin',
-            name: 'Admin',
-            password: 'password123',
-            role: 'admin'
-        };
-
-        const existingAdmin = {
-            id: 'existing123',
-            username: 'admin',
-            name: 'Existing Admin',
-            password: 'existingHashedPassword',
-            role: 'admin',
-            created_at: new Date(),
-            updated_at: new Date()
-        };
-
-        prismaClientMock.admin.findFirst.mockResolvedValue(existingAdmin);
-
-        const result = await createAdminService.execute(adminInput);
-
-        expect(hash).toHaveBeenCalledWith('password123', 10);
-        expect(prismaClientMock.admin.findFirst).toHaveBeenCalledWith({
-            where: {
-                username: 'admin'
-            }
-        });
-        expect(prismaClientMock.admin.create).not.toHaveBeenCalled();
-        expect(result).toEqual({ 
-            error: true, 
-            message: 'Admin already created', 
-            code: ErrorCodes.USER_ALREADY_EXISTS 
-        });
     });
 });

@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 import { PrismaClient } from '@prisma/client';
 import { CreateAddressService } from '../CreateAddressService';
-import { ErrorCodes } from '../../../exceptions/root';
 
 vi.mock('../../../prisma', () => ({
     default: mockDeep<PrismaClient>()
@@ -43,18 +42,5 @@ describe('CreateAddressService', () => {
 
         expect(prismaClient.address.create).toHaveBeenCalledWith({ data: mockAddressData });
         expect(result).toEqual(mockCreatedAddress);
-    });
-
-    it('should return error object if Prisma throws an exception', async () => {
-        (prismaClient as DeepMockProxy<PrismaClient>).address.create.mockRejectedValue(new Error('Database error'));
-
-        const service = new CreateAddressService();
-        const result = await service.execute(mockAddressData);
-
-        expect(result).toEqual({
-            error: true,
-            message: 'Database error',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
     });
 });

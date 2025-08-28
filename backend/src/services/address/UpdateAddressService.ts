@@ -1,6 +1,7 @@
 import prismaClient from '../../prisma';
 import { IAddress } from "../../interfaces/IAddress";
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class UpdateAddressService{
 	async execute(address: IAddress) {
@@ -15,7 +16,10 @@ class UpdateAddressService{
 			return { status: "Address successfully updated", address: updatedAddress };
 
 		} catch(error: any) {
-			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+			throw new BadRequestException(
+				error.message,
+				ErrorCodes.SYSTEM_ERROR
+			);
 		}
 	}
 }

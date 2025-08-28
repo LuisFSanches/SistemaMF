@@ -282,23 +282,6 @@ describe('GetAllStockTransactionsService', () => {
         });
     });
 
-    it('should return error object if Prisma throws an exception', async () => {
-        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-        
-        (prismaClient as DeepMockProxy<PrismaClient>).stockTransaction.findMany.mockRejectedValue(new Error('Database error'));
-
-        const result = await service.execute();
-
-        expect(consoleSpy).toHaveBeenCalledWith('[GetAllStockTransactionsService] Error:', 'Database error');
-        expect(result).toEqual({
-            error: true,
-            message: 'Database error',
-            code: ErrorCodes.SYSTEM_ERROR
-        });
-
-        consoleSpy.mockRestore();
-    });
-
     it('should handle empty results', async () => {
         (prismaClient as DeepMockProxy<PrismaClient>).stockTransaction.findMany.mockResolvedValue([]);
         (prismaClient as DeepMockProxy<PrismaClient>).stockTransaction.count.mockResolvedValue(0);

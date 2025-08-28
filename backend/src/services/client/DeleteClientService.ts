@@ -1,19 +1,23 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { InternalServiceException } from "../../exceptions/internal";
 
 class DeleteClientService{
     async execute(id: string) {
         try {
             await prismaClient.client.delete({
                 where: {
-                id
+                    id
                 }
             })
 
             return { Status: "Client successfully deleted" };
 
         } catch(error: any) {
-            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+            throw new InternalServiceException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            )
         }
     }
 }

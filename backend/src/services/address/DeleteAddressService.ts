@@ -1,6 +1,7 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
 import { deleteAddressSchema } from "../../schemas/address/deleteAddress";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class DeleteAddressService {
     async execute(id: string) {
@@ -21,7 +22,10 @@ class DeleteAddressService {
             return { Status: "Address successfully deleted" };
 
         } catch(error: any) {
-            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+            throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
         }
     }
 }

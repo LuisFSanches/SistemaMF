@@ -3,6 +3,7 @@ import { IAdmin } from "../../interfaces/IAdmin";
 import prismaClient from '../../prisma';
 import { compareSync } from 'bcrypt'
 import * as jwt from 'jsonwebtoken'
+import { BadRequestException } from "../../exceptions/bad-request";
 
 class LoginAdminService{
     async execute({ username, password }: IAdmin) {
@@ -14,11 +15,17 @@ class LoginAdminService{
             })
 
             if (!admin) {
-                return { error: true, message: 'Admin not found', code: ErrorCodes.USER_NOT_FOUND }
+                throw new BadRequestException(
+                    'Admin not found',
+                    ErrorCodes.USER_NOT_FOUND
+                )
             }
 
             if (!compareSync(password, admin.password)) {
-                return { error: true, message: 'Wrong password', code: ErrorCodes.INCORRECT_PASSWORD }
+                throw new BadRequestException(
+                    'Wrong password',
+                    ErrorCodes.INCORRECT_PASSWORD
+                )
             }
 
             const token = jwt.sign({
@@ -33,7 +40,10 @@ class LoginAdminService{
             return { admin, token }
 
         } catch(error: any) {
-            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+            throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
         }
     }
 }

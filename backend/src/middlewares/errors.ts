@@ -6,7 +6,6 @@ export const errorMiddleware = (error: HttpException, req: Request, res: Respons
         {
             message: error.message,
             errorCode: error.errorCode,
-            errors: error.errors
         }
     )
 }

@@ -7,15 +7,6 @@ class GetAllAdminController{
 		const getAllAdminService = new GetAllAdminService();
 		const admins = await getAllAdminService.execute();
 
-		if ('error' in admins && admins.error) {
-			next(new BadRequestException(
-				admins.message,
-				admins.code
-			));
-
-			return;
-		}
-
 		return res.json(admins);
 	}
 }

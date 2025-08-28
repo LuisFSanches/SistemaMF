@@ -15,13 +15,6 @@ class LoginAdminController{
             role,
         });
 
-        if (login.error) {
-            next(new BadRequestException(
-                login.message,
-                login.code
-            ))
-        }
-
         return res.json(login)
     }
 }

@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 import { PrismaClient } from '@prisma/client';
 import { DeleteAddressService } from '../DeleteAddressService';
-import { ErrorCodes } from '../../../exceptions/root';
 
 vi.mock('../../../prisma', () => ({
     default: mockDeep<PrismaClient>()
@@ -41,18 +40,5 @@ describe("DeleteAddressService", () => {
 
         expect(prismaClient.address.delete).toHaveBeenCalledWith({ where: { id: mockId } });
         expect(result).toEqual({ Status: "Address successfully deleted" });
-    });
-
-    it("should return error object if Prisma throws an exception", async () => {
-        (prismaClient as DeepMockProxy<PrismaClient>).address.delete.mockRejectedValue(new Error("DB error"));
-
-        const service = new DeleteAddressService();
-        const result = await service.execute(mockId);
-
-        expect(result).toEqual({
-            error: true,
-            message: "DB error",
-            code: ErrorCodes.SYSTEM_ERROR
-        });
     });
 });

@@ -12,15 +12,6 @@ class GetAllProductController{
             String(query)
 		);
 
-		if ('error' in products && products.error) {
-			next(new BadRequestException(
-				products.message,
-				products.code
-			));
-
-			return;
-		}
-
 		return res.json(products);
 	}
 }

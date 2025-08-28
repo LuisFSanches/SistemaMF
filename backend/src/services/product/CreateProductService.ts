@@ -1,6 +1,7 @@
 import { IProduct } from '../../interfaces/IProduct';
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 export class CreateProductService {
     async execute(data: IProduct) {
@@ -11,7 +12,10 @@ export class CreateProductService {
     
             return product;
         } catch (error: any) {
-            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+            throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
         }
     }
 }

@@ -1,6 +1,7 @@
 import { IProduct } from "../../interfaces/IProduct";
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from '../../exceptions/bad-request';
 
 class UpdateProductService{
 	async execute({ id, name, price, unity, stock, enabled, image }: IProduct) {	
@@ -24,7 +25,10 @@ class UpdateProductService{
 			return updatedProduct;
 
 		} catch(error: any) {
-			return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR }
+			throw new BadRequestException(
+				error.message,
+				ErrorCodes.SYSTEM_ERROR
+			);
 		}
 	}
 }

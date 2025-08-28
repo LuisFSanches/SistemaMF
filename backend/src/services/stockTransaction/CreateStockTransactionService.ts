@@ -1,6 +1,7 @@
 import prismaClient from '../../prisma';
-import { ErrorCodes } from "../../exceptions/root";
 import moment from 'moment-timezone';
+import { ErrorCodes } from "../../exceptions/root";
+import { BadRequestException } from "../../exceptions/bad-request";
 
 interface IStockTransaction {
     product_id: string;
@@ -34,8 +35,10 @@ class CreateStockTransactionService {
 
             return transaction;
         } catch (error: any) {
-            console.log("[CreateStockTransactionService] Error:", error.message);
-            return { error: true, message: error.message, code: ErrorCodes.SYSTEM_ERROR };
+            throw new BadRequestException(
+                error.message,
+                ErrorCodes.SYSTEM_ERROR
+            );
         }
     }
 }

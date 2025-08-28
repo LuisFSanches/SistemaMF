@@ -36,13 +36,6 @@ class UpdateAdminController{
 			role,
 		});
 
-		if ('error' in admin && admin.error) {
-			next(new BadRequestException(
-				admin.message,
-				admin.code
-			));
-		}
-
 		return res.json(admin)
 	}
 }

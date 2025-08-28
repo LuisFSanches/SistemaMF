@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { CreateStockTransactionService } from "../../services/stockTransaction/CreateStockTransactionService";
-import { BadRequestException } from "../../exceptions/bad-request";
 
 class CreateStockTransactionController {
     async handle(req: Request, res: Response, next: NextFunction) {
@@ -17,13 +16,6 @@ class CreateStockTransactionController {
             purchased_date,
             total_price
         });
-
-        if ('error' in transaction && transaction.error) {
-            next(new BadRequestException(
-                transaction.message,
-                transaction.code
-            ));
-        }
 
         return res.json(transaction);
     }
