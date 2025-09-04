@@ -252,6 +252,7 @@ export function OnStoreOrder() {
         }
 
         if (step === 3 || (step === 3 && is_delivery === false)) {
+            setShowLoader(true);
             const { data } = await createOrder({
                 clientId: client_id,
                 ...orderData,
@@ -259,8 +260,6 @@ export function OnStoreOrder() {
             })
 
             setOrderCode(data.code);
-
-            setShowLoader(true);
 
             addOrder(data);
 
