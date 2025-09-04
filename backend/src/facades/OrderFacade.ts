@@ -78,9 +78,8 @@ class OrderFacade {
             }
         } else {
             const defaultUser = await this.getClientByPhoneService.execute("22997517940") as any;
-            client_id = client_id || defaultUser.id;
 
-            const addresses = await this.getClientAddressService.execute(client_id) as any;
+            const addresses = await this.getClientAddressService.execute(defaultUser.id) as any;
             address_id = addresses[0]?.id;
         }
 
