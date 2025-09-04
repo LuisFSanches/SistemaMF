@@ -185,9 +185,9 @@ export function OnlineOrder() {
             return;
         }
 
-        if (response.order.id && !useAIToGenerate) {
+        if (response.id && !useAIToGenerate) {
             setShowOrderDetail(true);
-            setOrderLink(`${baseUrl}completarPedido/${response.order.id}`);
+            setOrderLink(`${baseUrl}completarPedido/${response.id}`);
         }
 
         addOrder(response);
