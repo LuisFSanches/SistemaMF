@@ -50,7 +50,7 @@ class OrderFacade {
             }
         }
 
-        if (data.is_delivery && data.online_order === false) {
+        if (data.is_delivery) {
             if (!address_id && data?.street && data.street_number) {
                 const existingAddress = await this.getAddressByStreetAndNumberService.execute(
                     client_id,
@@ -76,7 +76,9 @@ class OrderFacade {
                     address_id = address.id;
                 }
             }
-        } else {
+        }
+
+        if (!data.is_delivery) {
             const defaultUser = await this.getClientByPhoneService.execute("22997517940") as any;
             if (!client_id) {
                 client_id = defaultUser.id
