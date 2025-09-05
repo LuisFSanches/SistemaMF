@@ -11,7 +11,7 @@
     "dev": "ts-node-dev src/server.ts",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "build": "rm -rf dist && tsup src --ignore **/*.spec.ts --ignore **/test/**",
+    "build": "rm -rf dist && tsup src",
     "start": "node dist/server.js"
   },
   "devDependencies": {
