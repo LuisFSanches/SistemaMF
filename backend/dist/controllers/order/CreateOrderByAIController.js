@@ -313,6 +313,7 @@ var OrderFacade = class {
         receiver_phone: data.receiver_phone,
         products_value: data.products_value,
         delivery_fee: data.delivery_fee,
+        discount: data.discount || 0,
         total: data.total,
         payment_method: data.payment_method,
         payment_received: data.payment_received,

@@ -18806,6 +18806,7 @@ describe("CreateOrderService", () => {
       receiver_phone: "123456789",
       products_value: 100.5,
       delivery_fee: 10,
+      discount: 5,
       total: 110.5,
       payment_method: "cash",
       payment_received: false,

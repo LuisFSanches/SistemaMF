@@ -83,9 +83,10 @@ var DashboardService = class {
         }
       }
     });
-    const totalOrders = orders.length;
-    const totalAmount = orders.reduce((acc, order) => acc + order.total, 0);
-    const amountReceived = orders.filter((o) => o.payment_received).reduce((acc, order) => acc + order.total, 0);
+    const ordersWithoutCanceled = orders.filter((o) => o.status !== "CANCELED");
+    const totalOrders = ordersWithoutCanceled.length;
+    const totalAmount = ordersWithoutCanceled.reduce((acc, order) => acc + order.total, 0);
+    const amountReceived = ordersWithoutCanceled.filter((o) => o.payment_received).reduce((acc, order) => acc + order.total, 0);
     const amountPending = totalAmount - amountReceived;
     const inStoreOrders = orders.filter((o) => !o.online_order).length;
     const onlineOrders = orders.filter((o) => o.online_order).length;
@@ -744,6 +745,7 @@ var OrderFacade = class {
         receiver_phone: data.receiver_phone,
         products_value: data.products_value,
         delivery_fee: data.delivery_fee,
+        discount: data.discount || 0,
         total: data.total,
         payment_method: data.payment_method,
         payment_received: data.payment_received,
