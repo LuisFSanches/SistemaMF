@@ -38,6 +38,7 @@ var import_http = __toESM(require("http"));
 var import_express_async_errors = require("express-async-errors");
 var import_cors = __toESM(require("cors"));
 var import_dotenv = __toESM(require("dotenv"));
+var import_path5 = __toESM(require("path"));
 
 // src/events/orderEvents.ts
 var import_events = require("events");
@@ -538,6 +539,130 @@ var SearchProductsController = class {
     const service = new SearchProductsService();
     const products = await service.execute(query);
     return res.json(products);
+  }
+};
+
+// src/services/product/UploadProductImageService.ts
+var import_fs = __toESM(require("fs"));
+var import_path = __toESM(require("path"));
+var UploadProductImageService = class {
+  async execute({ product_id, filename }) {
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:3334";
+    const product = await prisma_default.product.findFirst({
+      where: { id: product_id }
+    });
+    if (!product) {
+      const uploadDir2 = import_path.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
+      const filePath = import_path.default.join(uploadDir2, filename);
+      if (import_fs.default.existsSync(filePath)) {
+        import_fs.default.unlinkSync(filePath);
+      }
+      throw new BadRequestException(
+        "Product not found",
+        400 /* USER_NOT_FOUND */
+      );
+    }
+    if (product.image) {
+      const oldImagePath = product.image.replace(`${backendUrl}/uploads/products/`, "");
+      const uploadDir2 = import_path.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
+      const oldFilePath = import_path.default.join(uploadDir2, oldImagePath);
+      if (import_fs.default.existsSync(oldFilePath)) {
+        import_fs.default.unlinkSync(oldFilePath);
+      }
+    }
+    const imageUrl = `${backendUrl}/uploads/products/${filename}`;
+    try {
+      const updatedProduct = await prisma_default.product.update({
+        where: { id: product_id },
+        data: { image: imageUrl }
+      });
+      return updatedProduct;
+    } catch (error) {
+      console.error("[UploadProductImageService] Failed:", error);
+      const uploadDir2 = import_path.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
+      const filePath = import_path.default.join(uploadDir2, filename);
+      if (import_fs.default.existsSync(filePath)) {
+        import_fs.default.unlinkSync(filePath);
+      }
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/product/UploadProductImageController.ts
+var UploadProductImageController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    if (!req.file) {
+      throw new BadRequestException(
+        "No image file provided",
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    const uploadProductImageService = new UploadProductImageService();
+    const product = await uploadProductImageService.execute({
+      product_id: id,
+      filename: req.file.filename
+    });
+    return res.json(product);
+  }
+};
+
+// src/services/product/DeleteProductImageService.ts
+var import_fs2 = __toESM(require("fs"));
+var import_path2 = __toESM(require("path"));
+var DeleteProductImageService = class {
+  async execute({ product_id }) {
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:3334";
+    const product = await prisma_default.product.findFirst({
+      where: { id: product_id }
+    });
+    if (!product) {
+      throw new BadRequestException(
+        "Product not found",
+        400 /* USER_NOT_FOUND */
+      );
+    }
+    if (!product.image) {
+      throw new BadRequestException(
+        "Product has no image to delete",
+        404 /* BAD_REQUEST */
+      );
+    }
+    const imagePath = product.image.replace(`${backendUrl}/uploads/products/`, "");
+    const uploadDir2 = import_path2.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
+    const filePath = import_path2.default.join(uploadDir2, imagePath);
+    if (import_fs2.default.existsSync(filePath)) {
+      import_fs2.default.unlinkSync(filePath);
+    }
+    try {
+      const updatedProduct = await prisma_default.product.update({
+        where: { id: product_id },
+        data: { image: null }
+      });
+      return updatedProduct;
+    } catch (error) {
+      console.error("[DeleteProductImageService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/product/DeleteProductImageController.ts
+var DeleteProductImageController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const deleteProductImageService = new DeleteProductImageService();
+    const product = await deleteProductImageService.execute({
+      product_id: id
+    });
+    return res.json(product);
   }
 };
 
@@ -1782,8 +1907,8 @@ var GetInterAuthService = _GetInterAuthService;
 
 // src/utils/getCertificates.ts
 var import_https = __toESM(require("https"));
-var path = __toESM(require("path"));
-var pathCerts = path.join(__dirname, "..", "certs");
+var path3 = __toESM(require("path"));
+var pathCerts = path3.join(__dirname, "..", "certs");
 var getCertificates = () => {
   const cert = process.env.BANCO_INTER_API_CERT_PATH.replace(/(^"|"$)/g, "");
   const key = process.env.BANCO_INTER_API_KEY_PATH.replace(/(^"|"$)/g, "");
@@ -2203,6 +2328,101 @@ var superAdminAuthMiddleware = async (req, res, next) => {
 };
 var super_admin_auth_default = superAdminAuthMiddleware;
 
+// src/config/multer.ts
+var import_multer = __toESM(require("multer"));
+var import_path3 = __toESM(require("path"));
+var import_crypto = __toESM(require("crypto"));
+var uploadDir = import_path3.default.resolve(__dirname, "..", "..", "uploads", "products");
+var storage = import_multer.default.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const hash3 = import_crypto.default.randomBytes(16).toString("hex");
+    const filename = `${hash3}-${Date.now()}${import_path3.default.extname(file.originalname)}`;
+    cb(null, filename);
+  }
+});
+var fileFilter = (req, file, cb) => {
+  const allowedMimes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new BadRequestException(
+      "Invalid file type. Only JPEG, JPG, PNG and WEBP are allowed",
+      400 /* VALIDATION_ERROR */
+    ));
+  }
+};
+var upload = (0, import_multer.default)({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 100 * 1024
+    // 100KB
+  }
+});
+
+// src/middlewares/process_image.ts
+var import_sharp = __toESM(require("sharp"));
+var import_fs3 = __toESM(require("fs"));
+var import_path4 = __toESM(require("path"));
+var processImage = async (req, res, next) => {
+  if (!req.file) {
+    return next();
+  }
+  const uploadDir2 = import_path4.default.resolve(__dirname, "..", "..", "uploads", "products");
+  const inputPath = req.file.path;
+  const date = /* @__PURE__ */ new Date();
+  const outputFilename = `optimized-${date.getTime()}-${req.file.filename}`;
+  const outputPath = import_path4.default.join(uploadDir2, outputFilename);
+  try {
+    await (0, import_sharp.default)(inputPath).resize(800, 800, {
+      fit: "inside",
+      withoutEnlargement: true
+    }).jpeg({ quality: 80 }).toFile(outputPath);
+    const stats = import_fs3.default.statSync(outputPath);
+    const fileSizeInKB = stats.size / 1024;
+    if (fileSizeInKB > 100) {
+      await (0, import_sharp.default)(inputPath).resize(600, 600, {
+        fit: "inside",
+        withoutEnlargement: true
+      }).jpeg({ quality: 60 }).toFile(outputPath);
+      const newStats = import_fs3.default.statSync(outputPath);
+      const newFileSizeInKB = newStats.size / 1024;
+      if (newFileSizeInKB > 100) {
+        import_fs3.default.unlinkSync(inputPath);
+        import_fs3.default.unlinkSync(outputPath);
+        return next(
+          new BadRequestException(
+            "Image is too large even after compression. Please upload a smaller image.",
+            400 /* VALIDATION_ERROR */
+          )
+        );
+      }
+    }
+    import_fs3.default.unlinkSync(inputPath);
+    req.file.filename = outputFilename;
+    req.file.path = outputPath;
+    req.file.size = import_fs3.default.statSync(outputPath).size;
+    next();
+  } catch (error) {
+    console.error("[processImage] Failed:", error);
+    if (import_fs3.default.existsSync(inputPath)) {
+      import_fs3.default.unlinkSync(inputPath);
+    }
+    if (import_fs3.default.existsSync(outputPath)) {
+      import_fs3.default.unlinkSync(outputPath);
+    }
+    next(
+      new BadRequestException(
+        "Failed to process image",
+        500 /* SYSTEM_ERROR */
+      )
+    );
+  }
+};
+
 // src/routes.ts
 var router = (0, import_express.Router)();
 router.get("/dashboard", admin_auth_default, new DashboardController().handle);
@@ -2229,6 +2449,8 @@ router.post("/product", admin_auth_default, new CreateProductController().handle
 router.put("/product/:id", super_admin_auth_default, new UpdateProductController().handle);
 router.get("/product/all", super_admin_auth_default, new GetAllProductController().handle);
 router.get("/product/search", super_admin_auth_default, new SearchProductsController().handle);
+router.post("/product/:id/image", admin_auth_default, upload.single("image"), processImage, new UploadProductImageController().handle);
+router.delete("/product/:id/image", admin_auth_default, new DeleteProductImageController().handle);
 router.post("/admin", super_admin_auth_default, new CreateAdminController().handle);
 router.post("/admins/login", new LoginAdminController().handle);
 router.get("/admins/admin", admin_auth_default, new GetAdminController().handle);
@@ -2265,6 +2487,7 @@ app.use((0, import_cors.default)({
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 }));
 app.use(import_express2.default.json());
+app.use("/uploads", import_express2.default.static(import_path5.default.resolve(__dirname, "..", "uploads")));
 app.use(router);
 app.use(errorMiddleware);
 var PORT = 3333;
