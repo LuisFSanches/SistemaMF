@@ -3,6 +3,7 @@ import http from 'http';
 import 'express-async-errors';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import { orderEmitter, OrderEvents } from './events/orderEvents';
 
 import { Server } from 'socket.io';
@@ -17,7 +18,6 @@ orderEmitter.on(OrderEvents.OnlineOrderReceived, (data) => {
 });
 
 const app = express();
-// const httpsOptions = getCertificatesForWebhook() as any;
 
 app.use(cors({
   origin: '*',
@@ -25,6 +25,8 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 app.use(router);
 app.use(errorMiddleware);

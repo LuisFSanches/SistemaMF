@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Modal from 'react-modal';
 import { useForm } from "react-hook-form";
 import {
@@ -12,10 +12,19 @@ import {
     Switch,
     StyledSwitch
 } from '../../styles/global';
+import { 
+    ImageUploadContainer,
+    ImagePreviewBox,
+    UploadLabel,
+    HiddenFileInput,
+    ImageActions,
+    ImageActionButton,
+    ImageInfo
+} from './style';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faXmark, faCloudArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { IProduct } from "../../interfaces/IProduct";
-import { createProduct, updateProduct } from "../../services/productService";
+import { createProduct, updateProduct, uploadProductImage, deleteProductImage } from "../../services/productService";
 import { useProducts } from "../../contexts/ProductsContext";
 import { UNITIES } from "../../constants";
 import { Loader } from "../Loader";
@@ -45,48 +54,114 @@ export function ProductModal({
         watch
     } = useForm<IProduct>();
     const [showLoader, setShowLoader] = useState(false);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string>("");
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (file.size > 100 * 1024) {
+                alert("A imagem deve ter no máximo 100KB. Escolha outra imagem por favor.");
+            }
+
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            if (!validTypes.includes(file.type)) {
+                alert("Formato inválido. Use JPEG, JPG, PNG.");
+                return;
+            }
+
+            setImageFile(file);
+            
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveImage = async () => {
+        if (currentProduct.id && currentProduct.image) {
+            try {
+                setShowLoader(true);
+                await deleteProductImage(currentProduct.id);
+                setImagePreview("");
+                setImageFile(null);
+                setValue("image", "");
+                loadAvailableProducts(1, 400, "");
+                setShowLoader(false);
+            } catch (error) {
+                setShowLoader(false);
+                alert("Erro ao remover imagem");
+            }
+        } else {
+            setImagePreview("");
+            setImageFile(null);
+        }
+    };
 
     const handleProduct = async (formData: IProduct) => {
         setShowLoader(true);
-        if (action === "create") {
-            const { data: adminData } = await createProduct({
-                name: formData.name,
-                image: formData.image,
-                price: formData.price,
-                unity: formData.unity,
-                stock: formData.stock,
-                enabled: formData.enabled,
-            });
-            addProduct(adminData);
-            loadAvailableProducts(1, 400, "");
-            onRequestClose();
-        }
+        try {
+            if (action === "create") {
+                const { data: productData } = await createProduct({
+                    name: formData.name,
+                    price: formData.price,
+                    unity: formData.unity,
+                    stock: formData.stock,
+                    enabled: formData.enabled,
+                });
 
-        if (action === "edit") {
-            const { data: adminData } = await updateProduct({
-                id: currentProduct.id,
-                name: formData.name,
-                image: formData.image,
-                price: formData.price,
-                unity: formData.unity,
-                stock: formData.stock,
-                enabled: formData.enabled
-            });
-            editProduct(adminData);
-            loadAvailableProducts(1, 400, "");
-            onRequestClose();
-        }
+                if (imageFile && productData.id) {
+                    await uploadProductImage(productData.id, imageFile);
+                }
 
-        setShowLoader(false);
+                addProduct(productData);
+                loadAvailableProducts(1, 400, "");
+                onRequestClose();
+            }
+
+            if (action === "edit") {
+                const { data: productData } = await updateProduct({
+                    id: currentProduct.id,
+                    name: formData.name,
+                    price: formData.price,
+                    unity: formData.unity,
+                    stock: formData.stock,
+                    enabled: formData.enabled
+                });
+
+                if (imageFile && currentProduct.id) {
+                    await uploadProductImage(currentProduct.id, imageFile);
+                }
+
+                editProduct(productData);
+                loadAvailableProducts(1, 400, "");
+                onRequestClose();
+            }
+
+            setShowLoader(false);
+        } catch (error) {
+            setShowLoader(false);
+            alert("Erro ao salvar produto");
+        }
     }
 
     useEffect(() => {
         setValue("name", currentProduct.name);
-        setValue("image", currentProduct.image);
         setValue("price", currentProduct.price || null);
         setValue("unity", currentProduct.unity);
         setValue("stock", currentProduct.stock);
         setValue("enabled", currentProduct.enabled);
+        
+        if (currentProduct.image) {
+            setImagePreview(currentProduct.image);
+        } else {
+            setImagePreview("");
+        }
+        
+        setImageFile(null);
     }, [currentProduct, setValue]);
 
     if (!currentProduct) {
@@ -131,7 +206,53 @@ export function ProductModal({
                             {errors.stock && <ErrorMessage>{errors.stock.message}</ErrorMessage>}
                         </FormField>
                     </InlineFormField>
-                    <Input type="text" placeholder="Url da imagem" {...register("image")}/>
+
+                    <ImageUploadContainer>
+                        <HiddenFileInput
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                            onChange={handleImageChange}
+                        />
+
+                        {imagePreview ? (
+                            <>
+                                <ImagePreviewBox>
+                                    <img src={imagePreview} alt="Preview" />
+                                </ImagePreviewBox>
+                                <ImageActions>
+                                    <ImageActionButton
+                                        type="button"
+                                        className="change"
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        Trocar Imagem
+                                    </ImageActionButton>
+                                    <ImageActionButton
+                                        type="button"
+                                        className="remove"
+                                        onClick={handleRemoveImage}
+                                    >
+                                        Remover Imagem
+                                    </ImageActionButton>
+                                </ImageActions>
+                            </>
+                        ) : (
+                            <ImagePreviewBox onClick={() => fileInputRef.current?.click()}>
+                                <UploadLabel>
+                                    <FontAwesomeIcon icon={faCloudArrowUp} />
+                                    <span>Clique para selecionar uma imagem</span>
+                                    <span style={{ fontSize: "0.75rem" }}>JPEG, JPG, PNG ou WEBP (máx. 100KB)</span>
+                                </UploadLabel>
+                            </ImagePreviewBox>
+                        )}
+                        
+                        {imageFile && (
+                            <ImageInfo>
+                                Arquivo selecionado: {imageFile.name} ({(imageFile.size / 1024).toFixed(2)} KB)
+                            </ImageInfo>
+                        )}
+                    </ImageUploadContainer>
 
                     <Switch>
                         <span>
