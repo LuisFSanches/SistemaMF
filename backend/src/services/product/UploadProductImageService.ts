@@ -12,6 +12,7 @@ interface IUploadProductImage {
 class UploadProductImageService {
     async execute({ product_id, filename }: IUploadProductImage) {
         const backendUrl = process.env.BACKEND_URL || 'http://localhost:3334';
+        console.log('Backend URL:', backendUrl);
         
         const product = await prismaClient.product.findFirst({
             where: { id: product_id },
@@ -31,6 +32,8 @@ class UploadProductImageService {
             );
         }
 
+        console.log('chegou aqui')
+
         if (product.image) {
             const oldImagePath = product.image.replace(`${backendUrl}/uploads/products/`, '');
             const uploadDir = path.resolve(__dirname, '..', '..', '..', 'uploads', 'products');
@@ -42,6 +45,7 @@ class UploadProductImageService {
         }
 
         const imageUrl = `${backendUrl}/uploads/products/${filename}`;
+        console.log('New image URL:', imageUrl);
 
         try {
             const updatedProduct = await prismaClient.product.update({
@@ -51,6 +55,7 @@ class UploadProductImageService {
 
             return updatedProduct;
         } catch (error: any) {
+            console.log("[UploadProductImageService] Failed to update product image:", error);
             console.error("[UploadProductImageService] Failed:", error);
 
             const uploadDir = path.resolve(__dirname, '..', '..', '..', 'uploads', 'products');

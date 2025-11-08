@@ -548,6 +548,7 @@ var import_path = __toESM(require("path"));
 var UploadProductImageService = class {
   async execute({ product_id, filename }) {
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3334";
+    console.log("Backend URL:", backendUrl);
     const product = await prisma_default.product.findFirst({
       where: { id: product_id }
     });
@@ -562,6 +563,7 @@ var UploadProductImageService = class {
         400 /* USER_NOT_FOUND */
       );
     }
+    console.log("chegou aqui");
     if (product.image) {
       const oldImagePath = product.image.replace(`${backendUrl}/uploads/products/`, "");
       const uploadDir2 = import_path.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
@@ -571,6 +573,7 @@ var UploadProductImageService = class {
       }
     }
     const imageUrl = `${backendUrl}/uploads/products/${filename}`;
+    console.log("New image URL:", imageUrl);
     try {
       const updatedProduct = await prisma_default.product.update({
         where: { id: product_id },
@@ -578,6 +581,7 @@ var UploadProductImageService = class {
       });
       return updatedProduct;
     } catch (error) {
+      console.log("[UploadProductImageService] Failed to update product image:", error);
       console.error("[UploadProductImageService] Failed:", error);
       const uploadDir2 = import_path.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
       const filePath = import_path.default.join(uploadDir2, filename);
@@ -607,6 +611,7 @@ var UploadProductImageController = class {
       product_id: id,
       filename: req.file.filename
     });
+    console.log("Uploaded product image:", product);
     return res.json(product);
   }
 };
