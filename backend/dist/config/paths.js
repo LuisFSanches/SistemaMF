@@ -37,9 +37,21 @@ __export(paths_exports, {
 module.exports = __toCommonJS(paths_exports);
 var import_path = __toESM(require("path"));
 var import_fs = __toESM(require("fs"));
-var isDevelopment = process.env.NODE_ENV !== "production";
+function findProjectRoot(startPath) {
+  let currentPath = startPath;
+  while (currentPath !== "/") {
+    const packageJsonPath = import_path.default.join(currentPath, "package.json");
+    if (import_fs.default.existsSync(packageJsonPath)) {
+      return currentPath;
+    }
+    currentPath = import_path.default.dirname(currentPath);
+  }
+  return import_path.default.resolve(startPath, "..", "..");
+}
 var isCompiled = __dirname.includes("/dist/");
-var rootDir = isCompiled ? import_path.default.resolve(__dirname, "..", "..") : import_path.default.resolve(__dirname, "..", "..");
+console.log("[Paths] __dirname:", __dirname);
+console.log("[Paths] Is compiled:", isCompiled);
+var rootDir = findProjectRoot(__dirname);
 var uploadsDir = import_path.default.join(rootDir, "uploads");
 var productsUploadDir = import_path.default.join(uploadsDir, "products");
 if (!import_fs.default.existsSync(uploadsDir)) {
@@ -51,6 +63,7 @@ if (!import_fs.default.existsSync(productsUploadDir)) {
   console.log("[Paths] Created products upload directory:", productsUploadDir);
 }
 console.log("[Paths] Root directory:", rootDir);
+console.log("[Paths] Uploads directory:", uploadsDir);
 console.log("[Paths] Products upload directory:", productsUploadDir);
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
