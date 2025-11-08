@@ -4,6 +4,10 @@ export const Container = styled.form`
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    h2 {
+        font-size: 22px;
+    }
 `;
 
 export const DeleteButton = styled.button`
@@ -11,7 +15,7 @@ export const DeleteButton = styled.button`
     align-items: center;
     justify-content: center;
     border: none;
-    font-size: 20px;
+    font-size: 18px;
     background: red;
     color: white;
     cursor: pointer;

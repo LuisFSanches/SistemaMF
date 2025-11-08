@@ -406,6 +406,12 @@ export function CompleteOrder() {
                                 currentOrder?.products_value  &&
                                 convertMoney(currentOrder?.products_value as number)
                             }</p>
+                            {currentOrder?.discount && currentOrder?.discount > 0 &&
+                                <p><strong>Desconto: </strong> {
+                                    currentOrder?.discount &&
+                                    convertMoney(currentOrder?.discount as number)
+                                }</p>
+                            }
                             <p><strong>Taxa de entrega: </strong> {
                                 currentOrder?.delivery_fee &&
                                 convertMoney(currentOrder?.delivery_fee as number)

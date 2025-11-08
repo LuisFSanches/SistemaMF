@@ -154,6 +154,9 @@ export function OrderCard({
 			<div className="address-container order-values">
 				<h3><strong>Valores do pedido: </strong></h3>
 				<p><strong>Valor dos produtos: </strong>R$ {order.products_value}</p>
+				{order.discount > 0 &&
+					<p><strong>Desconto: </strong>R$ {order.discount || 0}</p>
+				}
 				<p><strong>Taxa de entrega: </strong>R$ {order.delivery_fee}</p>
 				<p><strong>Total: </strong>R$ {order.total}</p>
 			</div>

@@ -9,6 +9,7 @@ export interface IOrder {
     receiver_phone?: string;
     products_value: number;
     delivery_fee: number;
+    discount?: number;
     total: number;
     payment_method: string;
     payment_received: boolean;

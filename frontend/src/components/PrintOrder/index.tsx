@@ -83,6 +83,10 @@ export const PrintOrder = ({
                     }
                     <br />
                     <div class="row"><strong>Subtotal:</strong> ${convertMoney(order.products_value)}</div>
+                    ${order.discount > 0 ?
+                        `<div class="row"><strong>Desconto:</strong> ${convertMoney(order.discount || 0)}</div>`
+                        : ''
+                    }
                     <div class="row"><strong>Taxa de Entrega:</strong> ${convertMoney(order.delivery_fee)}</div>
                     ${(order.pickup_on_store || order.is_delivery===false) ?
                         `<div class="row"><strong>Retirada na loja</strong></div>`

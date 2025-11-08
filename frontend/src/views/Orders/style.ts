@@ -10,6 +10,15 @@ export const Container = styled.div`
         font-weight: 600;
 
     }
+
+    .canceled-order {
+        background-color: rgba(220, 53, 69, 0.15);
+    }
+
+    .canceled-order:hover {
+        background-color: rgba(220, 53, 69, 0.25);
+    }
+
     @media (max-width:750px) {
         padding: 0.4rem;
     }

@@ -104,7 +104,7 @@ export function OrdersPage(){
                 <tbody>
                     {orders?.map(order => (
                         <>
-                            <tr key={order.id}>
+                            <tr key={order.id} className={order.status === 'CANCELED' ? 'canceled-order' : ''}>
                                 <td>#{order.code}</td>
                                 <td>{formatTitleCase(order.description)}</td>
                                 <td>

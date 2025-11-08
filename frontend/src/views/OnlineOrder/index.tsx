@@ -56,6 +56,7 @@ interface INewOrder {
     delivery_date: string;
     payment_method: string;
     products_value: number;
+    discount: number;
     delivery_fee: number;
     total: number;
     created_by: string;
@@ -158,15 +159,16 @@ export function OnlineOrder() {
             payment_method: data.payment_method,
             payment_received: data.payment_received,
             products_value: Number(data.products_value),
+            discount: Number(data.discount) || 0,
             delivery_fee: Number(data.delivery_fee),
-            total: Number(data.products_value) + Number(data.delivery_fee),
+            total: Number(data.products_value) - (Number(data.discount) || 0) + Number(data.delivery_fee),
             status: "WAITING_FOR_CLIENT",
             has_card: false,
             created_by: data.created_by,
             online_order: true,
             online_code: generateOnlineCode(),
             products: products,
-            order_ai_information: data.order_ai_information
+            order_ai_information: data.order_ai_information,
         }
 
         let response;
@@ -515,13 +517,18 @@ export function OnlineOrder() {
                                 </FormField>
                                 <InlineFormField>
                                     <FormField>
-                                        <Label>Valor total dos Produtos</Label>
+                                        <Label>Total dos Produtos</Label>
                                         <Input type="number" step="0.01" placeholder="Total" value={watch("products_value")}
                                             {...register("products_value", {
                                                 required: "Valor total é obrigatório",
                                             })}
                                         />
                                         {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>Desconto</Label>
+                                        <Input type="number" step="0.01" placeholder="0.00" defaultValue={0}
+                                            {...register("discount")} />
                                     </FormField>
                                     <FormField>
                                         <Label>Taxa de entrega</Label>
@@ -572,13 +579,18 @@ export function OnlineOrder() {
                                 </FormField>
                                 <InlineFormField>
                                     <FormField>
-                                        <Label>Valor total dos Produtos</Label>
+                                        <Label>Total dos Produtos</Label>
                                         <Input type="number" step="0.01" placeholder="Total" value={watch("products_value")}
                                             {...register("products_value", {
                                                 required: "Valor total é obrigatório",
                                             })}
                                         />
                                         {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
+                                    </FormField>
+                                    <FormField>
+                                        <Label>Desconto</Label>
+                                        <Input type="number" step="0.01" placeholder="0.00" defaultValue={0}
+                                            {...register("discount")} />
                                     </FormField>
                                     <FormField>
                                         <Label>Taxa de entrega</Label>

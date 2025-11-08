@@ -77,6 +77,7 @@ interface INewOrder {
     payment_method: string;
     payment_received: boolean;
     products_value: number;
+    discount: number;
     total: number;
     delivery_fee: number;
     has_card: boolean;
@@ -145,6 +146,7 @@ export function OnStoreOrder() {
         payment_method: "",
         payment_received: false,
         products_value: 0.00,
+        discount: 0.00,
         total: 0.00,
         delivery_fee: 0.00,
         has_card: false,
@@ -208,12 +210,13 @@ export function OnStoreOrder() {
         payment_method,
         payment_received,
         products_value,
+        discount,
         delivery_fee,
         has_card,
         created_by
     }: INewOrder) => {
 
-        const total = Number(products_value) + Number(delivery_fee);
+        const total = Number(products_value) - (Number(discount) || 0) + Number(delivery_fee);
 
         const orderData = {
             phone_number: (is_delivery === false && fillClientInformation === false)
@@ -239,6 +242,7 @@ export function OnStoreOrder() {
             payment_method,
             payment_received,
             products_value: Number(products_value),
+            discount: Number(discount) || 0,
             delivery_fee: Number(delivery_fee),
             total: Number(total),
             status: orderStatus,
@@ -418,7 +422,7 @@ export function OnStoreOrder() {
         setProducts((prev: any) => {
             const updated = prev.filter((p: any) => p.id !== product.id);
         
-            // recalcula o valor total dos produtos
+            // recalcula o Total dos Produtos
             const total = updated.reduce((sum: any, p: any) => {
             return sum + Number(p.quantity) * Number(p.price);
             }, 0);
@@ -759,11 +763,15 @@ export function OnStoreOrder() {
                             </InlineFormField>
                             <InlineFormField>
                                 <FormField style={{ marginTop: '10px' }}>
-                                    <Label>Valor total dos Produtos</Label>
+                                    <Label>Total dos Produtos</Label>
                                     <Input type="number" step="0.01" placeholder="Total" {...register("products_value", {
                                         required: "Valor total é obrigatório",
                                     })} />
                                     {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
+                                </FormField>
+                                <FormField style={{ marginTop: '10px' }}>
+                                    <Label>Desconto</Label>
+                                    <Input type="number" step="0.01" placeholder="0.00" defaultValue={0} {...register("discount")} />
                                 </FormField>
                                 <FormField style={{ marginTop: '10px' }}>
                                     <Label>Taxa de entrega</Label>
@@ -963,8 +971,9 @@ export function OnStoreOrder() {
                             </div>
                             <div>
                                 <p><strong>Valor dos produtos:</strong> R$ {order.products_value}</p>
+                                <p><strong>Desconto:</strong> R$ {order.discount || 0}</p>
                                 <p><strong>Taxa de entrega:</strong> R$ {order.delivery_fee}</p>
-                                <p><strong>Total:</strong> R$ {Number(order.products_value) + Number(order.delivery_fee)}</p>
+                                <p><strong>Total:</strong> R$ {Number(order.products_value) - (Number(order.discount) || 0) + Number(order.delivery_fee)}</p>
                             </div>
                             <div>
                                 <p><strong>Cliente: </strong>{order.first_name}</p>

@@ -27,7 +27,7 @@ type ProductCardProps = {
 
 export function ProductCard({ product, image, onAdd }: ProductCardProps){
     const [quantity, setQuantity] = useState<number>(1);
-    const [initialPrice, setInitialPrice] = useState<number>(product.price);
+    const [initialPrice, setInitialPrice] = useState<any>(product.price);
 
     const handleAddClick = () => {
         if (quantity > 0) {
@@ -46,7 +46,10 @@ export function ProductCard({ product, image, onAdd }: ProductCardProps){
                         type="number"
                         step="0.01"
                         value={initialPrice}
-                        onChange={(e) => setInitialPrice(Number(e.target.value))}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            setInitialPrice(val === "" ? "" : Number(val));
+                        }}
                     />
                     </PriceInputWrapper>
                 <BottomActions>

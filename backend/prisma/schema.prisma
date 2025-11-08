@@ -106,6 +106,7 @@ model Order {
   receiver_phone    String?
   products_value    Float
   delivery_fee      Float
+  discount          Float        @default(0)
   total             Float
   payment_method    String?
   payment_received  Boolean      @default(false)

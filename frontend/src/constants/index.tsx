@@ -5,7 +5,8 @@ export const STATUS_LABEL: Record<Status, string>= {
   "WAITING_FOR_CLIENT": "Aguardando Cliente",
   "IN_PROGRESS": "Em andamento",
   "IN_DELIVERY": "Em entrega",
-  "DONE": "Finalizado"
+  "DONE": "Finalizado",
+  "CANCELED": "Cancelado"
 }
 
 export const PAYMENT_METHODS = {

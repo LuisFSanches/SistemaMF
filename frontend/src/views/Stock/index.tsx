@@ -147,6 +147,7 @@ export function StockPage(){
             <ConfirmPopUp isOpen={deleteTransactionModal}
                 onRequestClose={() => setDeleteTransactionModal(false)}
                 handleAction={handleDeleteStockTransaction}
+                actionLabel="Tem certeza que quer deletar?"
                 label="Remover Registro"
             />
         </Container>

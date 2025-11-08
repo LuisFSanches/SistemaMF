@@ -7,10 +7,17 @@ interface NewCategoryModalProps{
     isOpen: boolean;
     onRequestClose: ()=> void;
     handleAction: () => void;
+    actionLabel: string;
     label: string
 }
 
-export function ConfirmPopUp({isOpen, onRequestClose, handleAction, label}:NewCategoryModalProps){
+export function ConfirmPopUp({
+    isOpen,
+    onRequestClose,
+    handleAction,
+    actionLabel,
+    label
+}:NewCategoryModalProps){
 
     return(
         <Modal 
@@ -24,7 +31,7 @@ export function ConfirmPopUp({isOpen, onRequestClose, handleAction, label}:NewCa
             </button>
 
             <Container>
-                <h2>Tem certeza que quer deletar?</h2>
+                <h2>{actionLabel}</h2>
                 <DeleteButton type="button" onClick={handleAction}>
                     {label}
                 </DeleteButton>

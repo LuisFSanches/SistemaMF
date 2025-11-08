@@ -22,10 +22,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { useOrders } from "../../contexts/OrdersContext";
 import { PAYMENT_METHODS, STATUS_LABEL } from "../../constants";
-import { updateOrder } from "../../services/orderService";
+import { updateOrder, updateStatus } from "../../services/orderService";
 import { searchProducts } from "../../services/productService";
 import { getPickupAddress } from "../../services/addressService";
 import { Loader } from "../Loader";
+import { ConfirmPopUp } from "../ConfirmPopUp";
+import { ModalHeader, CancelButton } from "./style";
 
 interface IEditOrderModal{
 	isOpen: boolean;
@@ -56,6 +58,7 @@ export function EditOrderModal({
 	const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 	const productRefs = useRef<Record<number, HTMLDivElement | null>>({});
 	const [showProductError, setShowProductError] = useState(false);
+	const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
 
 	const handleOrder = async (formData: IOrder) => {
 		setShowLoader(true);
@@ -70,8 +73,9 @@ export function EditOrderModal({
 			receiver_name: formData.receiver_name,
 			receiver_phone: formData.receiver_phone,
 			products_value: Number(formData.products_value),
+			discount: Number(formData.discount) || 0,
 			delivery_fee: Number(formData.delivery_fee),
-			total: Number(formData.products_value) + Number(formData.delivery_fee),
+			total: Number(formData.products_value) - (Number(formData.discount) || 0) + Number(formData.delivery_fee),
 			payment_method: formData.payment_method,
 			payment_received: formData.payment_received,
 			delivery_date: new Date(`${formData.delivery_date}T00:00:00Z`),
@@ -104,6 +108,27 @@ export function EditOrderModal({
 		onRequestClose();
 	}
 
+	const handleCancelOrder = async () => {
+		setShowLoader(true);
+		
+		try {
+			const response = await updateStatus({
+				id: order.id,
+				status: 'CANCELED'
+			});
+			const { data: orderData } = response;
+			editOrder(orderData);
+
+			loadAvailableOrders(1, 25, '');
+			setIsConfirmCancelOpen(false);
+			setShowLoader(false);
+			onRequestClose();
+		} catch (error) {
+			console.error('Erro ao cancelar pedido:', error);
+			setShowLoader(false);
+		}
+	}
+
 	useEffect(() => {
 		if (!order) return;
 
@@ -116,6 +141,7 @@ export function EditOrderModal({
 		setValue("receiver_name", order.receiver_name);
 		setValue("receiver_phone", order.receiver_phone);
 		setValue("products_value", order.products_value);
+		setValue("discount", order.discount || 0);
 		setValue("delivery_fee", order.delivery_fee);
 		setValue("total", order.total);
 		setValue("payment_method", order.payment_method);
@@ -139,9 +165,9 @@ export function EditOrderModal({
     }, [order, setValue]);
 
 	useEffect(() => {
-		setValue("total", Number(watch("products_value")) + Number(watch("delivery_fee")));
+		setValue("total", Number(watch("products_value")) - (Number(watch("discount")) || 0) + Number(watch("delivery_fee")));
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [watch("products_value"), watch("delivery_fee")]);
+	}, [watch("products_value"), watch("discount"), watch("delivery_fee")]);
 
 	const handlePickUpAddress = async (value: boolean) => {
         if (value) {
@@ -306,7 +332,12 @@ export function EditOrderModal({
 
             <ModalContainer>
                 <Form onSubmit={handleSubmit(handleOrder)}>
-                    <h2>Editar Pedido #{order?.code}</h2>
+                    <ModalHeader>
+						<h2>Editar Pedido #{order?.code}</h2>
+						<CancelButton type="button" onClick={() => setIsConfirmCancelOpen(true)}>
+							Cancelar Pedido
+						</CancelButton>
+					</ModalHeader>
 					{order?.orderItems?.length > 0 &&
 						<EditFormField>
 							<Label>Produtos do pedido</Label>
@@ -435,6 +466,10 @@ export function EditOrderModal({
 							<Input type="number" step="0.01" disabled={products?.length > 0}
 								{...register("products_value", {required: "Valor Inválido"})}/>
 							<ErrorMessage>{errors.products_value?.message}</ErrorMessage>
+						</EditFormField>
+						<EditFormField isShortField>
+							<Label>Desconto</Label>
+							<Input type="number" step="0.01" {...register("discount")}/>
 						</EditFormField>
 						<EditFormField isShortField>
 							<Label>Taxa de Entrega</Label>
@@ -599,6 +634,14 @@ export function EditOrderModal({
 						</ErrorMessage>}
                 </Form>
             </ModalContainer>
+
+			<ConfirmPopUp
+				isOpen={isConfirmCancelOpen}
+				onRequestClose={() => setIsConfirmCancelOpen(false)}
+				handleAction={handleCancelOrder}
+				actionLabel="Tem certeza que deseja cancelar este pedido?"
+				label="Sim, cancelar pedido"
+			/>
         </Modal>
     )
 }

@@ -86,14 +86,14 @@ export function OrderDetailModal({
 					<h1>Pedido #{order.code}</h1>
 					<OrderInfo>
 						<h2>Dados do Cliente</h2>
-						{order.is_delivery &&
 							<>
 								<p><strong>Cliente: </strong>
 									{formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}
 								</p>
+								{order.client.last_name !== 'Balcão' &&
 								<p><strong>Telefone: </strong> {order.client.phone_number}</p>
+								}
 							</>
-						}
 					</OrderInfo>
 					<OrderInfo>
 						<h2>Dados do Recebedor</h2>
@@ -135,6 +135,7 @@ export function OrderDetailModal({
 					<OrderInfo>
 						<h2>Valor do Pedido</h2>
 						<p><strong>Valor dos produtos: </strong>R$ {order.products_value}</p>
+						<p><strong>Desconto: </strong>R$ {order.discount || 0}</p>
 						<p><strong>Taxa de entrega: </strong>R$ {order.delivery_fee}</p>
 						<p><strong>Total: </strong>R$ {order.total}</p>
 					</OrderInfo>

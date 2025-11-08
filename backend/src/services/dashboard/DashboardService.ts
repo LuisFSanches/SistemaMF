@@ -33,9 +33,12 @@ export class DashboardService {
             },
         })
 
-        const totalOrders = orders.length
-        const totalAmount = orders.reduce((acc, order) => acc + order.total, 0)
-        const amountReceived = orders
+        // Filtra pedidos cancelados para as estatísticas principais
+        const ordersWithoutCanceled = orders.filter((o) => o.status !== 'CANCELED')
+
+        const totalOrders = ordersWithoutCanceled.length
+        const totalAmount = ordersWithoutCanceled.reduce((acc, order) => acc + order.total, 0)
+        const amountReceived = ordersWithoutCanceled
             .filter((o) => o.payment_received)
             .reduce((acc, order) => acc + order.total, 0)
         const amountPending = totalAmount - amountReceived
