@@ -58,50 +58,70 @@ var BadRequestException = class extends HttpException {
 };
 
 // src/services/product/UploadProductImageService.ts
-var import_fs = __toESM(require("fs"));
+var import_fs2 = __toESM(require("fs"));
+var import_path2 = __toESM(require("path"));
+
+// src/config/paths.ts
 var import_path = __toESM(require("path"));
+var import_fs = __toESM(require("fs"));
+var isDevelopment = process.env.NODE_ENV !== "production";
+var isCompiled = __dirname.includes("/dist/");
+var rootDir = isCompiled ? import_path.default.resolve(__dirname, "..", "..") : import_path.default.resolve(__dirname, "..", "..");
+var uploadsDir = import_path.default.join(rootDir, "uploads");
+var productsUploadDir = import_path.default.join(uploadsDir, "products");
+if (!import_fs.default.existsSync(uploadsDir)) {
+  import_fs.default.mkdirSync(uploadsDir, { recursive: true });
+  console.log("[Paths] Created uploads directory:", uploadsDir);
+}
+if (!import_fs.default.existsSync(productsUploadDir)) {
+  import_fs.default.mkdirSync(productsUploadDir, { recursive: true });
+  console.log("[Paths] Created products upload directory:", productsUploadDir);
+}
+console.log("[Paths] Root directory:", rootDir);
+console.log("[Paths] Products upload directory:", productsUploadDir);
+
+// src/services/product/UploadProductImageService.ts
 var UploadProductImageService = class {
   async execute({ product_id, filename }) {
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3334";
-    console.log("Backend URL:", backendUrl);
+    console.log("[UploadProductImageService] Backend URL:", backendUrl);
+    console.log("[UploadProductImageService] Upload directory:", productsUploadDir);
     const product = await prisma_default.product.findFirst({
       where: { id: product_id }
     });
     if (!product) {
-      const uploadDir = import_path.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
-      const filePath = import_path.default.join(uploadDir, filename);
-      if (import_fs.default.existsSync(filePath)) {
-        import_fs.default.unlinkSync(filePath);
+      const filePath = import_path2.default.join(productsUploadDir, filename);
+      if (import_fs2.default.existsSync(filePath)) {
+        import_fs2.default.unlinkSync(filePath);
       }
       throw new BadRequestException(
         "Product not found",
         400 /* USER_NOT_FOUND */
       );
     }
-    console.log("chegou aqui");
+    console.log("[UploadProductImageService] Product found:", product.id);
     if (product.image) {
       const oldImagePath = product.image.replace(`${backendUrl}/uploads/products/`, "");
-      const uploadDir = import_path.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
-      const oldFilePath = import_path.default.join(uploadDir, oldImagePath);
-      if (import_fs.default.existsSync(oldFilePath)) {
-        import_fs.default.unlinkSync(oldFilePath);
+      const oldFilePath = import_path2.default.join(productsUploadDir, oldImagePath);
+      console.log("[UploadProductImageService] Removing old image:", oldFilePath);
+      if (import_fs2.default.existsSync(oldFilePath)) {
+        import_fs2.default.unlinkSync(oldFilePath);
       }
     }
     const imageUrl = `${backendUrl}/uploads/products/${filename}`;
-    console.log("New image URL:", imageUrl);
+    console.log("[UploadProductImageService] New image URL:", imageUrl);
     try {
       const updatedProduct = await prisma_default.product.update({
         where: { id: product_id },
         data: { image: imageUrl }
       });
+      console.log("[UploadProductImageService] Product updated successfully");
       return updatedProduct;
     } catch (error) {
-      console.log("[UploadProductImageService] Failed to update product image:", error);
       console.error("[UploadProductImageService] Failed:", error);
-      const uploadDir = import_path.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
-      const filePath = import_path.default.join(uploadDir, filename);
-      if (import_fs.default.existsSync(filePath)) {
-        import_fs.default.unlinkSync(filePath);
+      const filePath = import_path2.default.join(productsUploadDir, filename);
+      if (import_fs2.default.existsSync(filePath)) {
+        import_fs2.default.unlinkSync(filePath);
       }
       throw new BadRequestException(
         error.message,

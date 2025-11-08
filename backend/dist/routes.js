@@ -528,50 +528,70 @@ var SearchProductsController = class {
 };
 
 // src/services/product/UploadProductImageService.ts
-var import_fs = __toESM(require("fs"));
+var import_fs2 = __toESM(require("fs"));
+var import_path2 = __toESM(require("path"));
+
+// src/config/paths.ts
 var import_path = __toESM(require("path"));
+var import_fs = __toESM(require("fs"));
+var isDevelopment = process.env.NODE_ENV !== "production";
+var isCompiled = __dirname.includes("/dist/");
+var rootDir = isCompiled ? import_path.default.resolve(__dirname, "..", "..") : import_path.default.resolve(__dirname, "..", "..");
+var uploadsDir = import_path.default.join(rootDir, "uploads");
+var productsUploadDir = import_path.default.join(uploadsDir, "products");
+if (!import_fs.default.existsSync(uploadsDir)) {
+  import_fs.default.mkdirSync(uploadsDir, { recursive: true });
+  console.log("[Paths] Created uploads directory:", uploadsDir);
+}
+if (!import_fs.default.existsSync(productsUploadDir)) {
+  import_fs.default.mkdirSync(productsUploadDir, { recursive: true });
+  console.log("[Paths] Created products upload directory:", productsUploadDir);
+}
+console.log("[Paths] Root directory:", rootDir);
+console.log("[Paths] Products upload directory:", productsUploadDir);
+
+// src/services/product/UploadProductImageService.ts
 var UploadProductImageService = class {
   async execute({ product_id, filename }) {
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3334";
-    console.log("Backend URL:", backendUrl);
+    console.log("[UploadProductImageService] Backend URL:", backendUrl);
+    console.log("[UploadProductImageService] Upload directory:", productsUploadDir);
     const product = await prisma_default.product.findFirst({
       where: { id: product_id }
     });
     if (!product) {
-      const uploadDir2 = import_path.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
-      const filePath = import_path.default.join(uploadDir2, filename);
-      if (import_fs.default.existsSync(filePath)) {
-        import_fs.default.unlinkSync(filePath);
+      const filePath = import_path2.default.join(productsUploadDir, filename);
+      if (import_fs2.default.existsSync(filePath)) {
+        import_fs2.default.unlinkSync(filePath);
       }
       throw new BadRequestException(
         "Product not found",
         400 /* USER_NOT_FOUND */
       );
     }
-    console.log("chegou aqui");
+    console.log("[UploadProductImageService] Product found:", product.id);
     if (product.image) {
       const oldImagePath = product.image.replace(`${backendUrl}/uploads/products/`, "");
-      const uploadDir2 = import_path.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
-      const oldFilePath = import_path.default.join(uploadDir2, oldImagePath);
-      if (import_fs.default.existsSync(oldFilePath)) {
-        import_fs.default.unlinkSync(oldFilePath);
+      const oldFilePath = import_path2.default.join(productsUploadDir, oldImagePath);
+      console.log("[UploadProductImageService] Removing old image:", oldFilePath);
+      if (import_fs2.default.existsSync(oldFilePath)) {
+        import_fs2.default.unlinkSync(oldFilePath);
       }
     }
     const imageUrl = `${backendUrl}/uploads/products/${filename}`;
-    console.log("New image URL:", imageUrl);
+    console.log("[UploadProductImageService] New image URL:", imageUrl);
     try {
       const updatedProduct = await prisma_default.product.update({
         where: { id: product_id },
         data: { image: imageUrl }
       });
+      console.log("[UploadProductImageService] Product updated successfully");
       return updatedProduct;
     } catch (error) {
-      console.log("[UploadProductImageService] Failed to update product image:", error);
       console.error("[UploadProductImageService] Failed:", error);
-      const uploadDir2 = import_path.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
-      const filePath = import_path.default.join(uploadDir2, filename);
-      if (import_fs.default.existsSync(filePath)) {
-        import_fs.default.unlinkSync(filePath);
+      const filePath = import_path2.default.join(productsUploadDir, filename);
+      if (import_fs2.default.existsSync(filePath)) {
+        import_fs2.default.unlinkSync(filePath);
       }
       throw new BadRequestException(
         error.message,
@@ -602,8 +622,8 @@ var UploadProductImageController = class {
 };
 
 // src/services/product/DeleteProductImageService.ts
-var import_fs2 = __toESM(require("fs"));
-var import_path2 = __toESM(require("path"));
+var import_fs3 = __toESM(require("fs"));
+var import_path3 = __toESM(require("path"));
 var DeleteProductImageService = class {
   async execute({ product_id }) {
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3334";
@@ -623,10 +643,13 @@ var DeleteProductImageService = class {
       );
     }
     const imagePath = product.image.replace(`${backendUrl}/uploads/products/`, "");
-    const uploadDir2 = import_path2.default.resolve(__dirname, "..", "..", "..", "uploads", "products");
-    const filePath = import_path2.default.join(uploadDir2, imagePath);
-    if (import_fs2.default.existsSync(filePath)) {
-      import_fs2.default.unlinkSync(filePath);
+    const filePath = import_path3.default.join(productsUploadDir, imagePath);
+    console.log("[DeleteProductImageService] Deleting image:", filePath);
+    if (import_fs3.default.existsSync(filePath)) {
+      import_fs3.default.unlinkSync(filePath);
+      console.log("[DeleteProductImageService] Image deleted successfully");
+    } else {
+      console.log("[DeleteProductImageService] Image file not found");
     }
     try {
       const updatedProduct = await prisma_default.product.update({
@@ -1901,8 +1924,8 @@ var GetInterAuthService = _GetInterAuthService;
 
 // src/utils/getCertificates.ts
 var import_https = __toESM(require("https"));
-var path3 = __toESM(require("path"));
-var pathCerts = path3.join(__dirname, "..", "certs");
+var path4 = __toESM(require("path"));
+var pathCerts = path4.join(__dirname, "..", "certs");
 var getCertificates = () => {
   const cert = process.env.BANCO_INTER_API_CERT_PATH.replace(/(^"|"$)/g, "");
   const key = process.env.BANCO_INTER_API_KEY_PATH.replace(/(^"|"$)/g, "");
@@ -2324,21 +2347,15 @@ var super_admin_auth_default = superAdminAuthMiddleware;
 
 // src/config/multer.ts
 var import_multer = __toESM(require("multer"));
-var import_path3 = __toESM(require("path"));
+var import_path4 = __toESM(require("path"));
 var import_crypto = __toESM(require("crypto"));
-var import_fs3 = __toESM(require("fs"));
-var uploadDir = import_path3.default.resolve(__dirname, "..", "..", "uploads", "products");
-if (!import_fs3.default.existsSync(uploadDir)) {
-  import_fs3.default.mkdirSync(uploadDir, { recursive: true });
-  console.log("[Multer] Upload directory created:", uploadDir);
-}
 var storage = import_multer.default.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);
+    cb(null, productsUploadDir);
   },
   filename: (req, file, cb) => {
     const hash3 = import_crypto.default.randomBytes(16).toString("hex");
-    const filename = `${hash3}-${Date.now()}${import_path3.default.extname(file.originalname)}`;
+    const filename = `${hash3}-${Date.now()}${import_path4.default.extname(file.originalname)}`;
     cb(null, filename);
   }
 });
@@ -2365,16 +2382,17 @@ var upload = (0, import_multer.default)({
 // src/middlewares/process_image.ts
 var import_sharp = __toESM(require("sharp"));
 var import_fs4 = __toESM(require("fs"));
-var import_path4 = __toESM(require("path"));
+var import_path5 = __toESM(require("path"));
 var processImage = async (req, res, next) => {
   if (!req.file) {
     return next();
   }
-  const uploadDir2 = import_path4.default.resolve(__dirname, "..", "..", "uploads", "products");
   const inputPath = req.file.path;
   const date = /* @__PURE__ */ new Date();
   const outputFilename = `optimized-${date.getTime()}-${req.file.filename}`;
-  const outputPath = import_path4.default.join(uploadDir2, outputFilename);
+  const outputPath = import_path5.default.join(productsUploadDir, outputFilename);
+  console.log("[processImage] Input path:", inputPath);
+  console.log("[processImage] Output path:", outputPath);
   try {
     await (0, import_sharp.default)(inputPath).resize(800, 800, {
       fit: "inside",
@@ -2382,6 +2400,7 @@ var processImage = async (req, res, next) => {
     }).jpeg({ quality: 80 }).toFile(outputPath);
     const stats = import_fs4.default.statSync(outputPath);
     const fileSizeInKB = stats.size / 1024;
+    console.log("[processImage] Image processed. Size:", fileSizeInKB.toFixed(2), "KB");
     if (fileSizeInKB > 100) {
       await (0, import_sharp.default)(inputPath).resize(600, 600, {
         fit: "inside",
@@ -2389,6 +2408,7 @@ var processImage = async (req, res, next) => {
       }).jpeg({ quality: 60 }).toFile(outputPath);
       const newStats = import_fs4.default.statSync(outputPath);
       const newFileSizeInKB = newStats.size / 1024;
+      console.log("[processImage] Image recompressed. New size:", newFileSizeInKB.toFixed(2), "KB");
       if (newFileSizeInKB > 100) {
         import_fs4.default.unlinkSync(inputPath);
         import_fs4.default.unlinkSync(outputPath);
@@ -2404,6 +2424,7 @@ var processImage = async (req, res, next) => {
     req.file.filename = outputFilename;
     req.file.path = outputPath;
     req.file.size = import_fs4.default.statSync(outputPath).size;
+    console.log("[processImage] Success. Final filename:", outputFilename);
     next();
   } catch (error) {
     console.error("[processImage] Failed:", error);

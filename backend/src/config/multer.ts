@@ -4,18 +4,11 @@ import crypto from 'crypto';
 import fs from 'fs';
 import { BadRequestException } from '../exceptions/bad-request';
 import { ErrorCodes } from '../exceptions/root';
-
-const uploadDir = path.resolve(__dirname, '..', '..', 'uploads', 'products');
-
-// Criar diretório se não existir
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-    console.log('[Multer] Upload directory created:', uploadDir);
-}
+import { productsUploadDir } from './paths';
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, uploadDir);
+        cb(null, productsUploadDir);
     },
     filename: (req, file, cb) => {
         const hash = crypto.randomBytes(16).toString('hex');

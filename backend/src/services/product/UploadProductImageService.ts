@@ -3,6 +3,7 @@ import { BadRequestException } from "../../exceptions/bad-request";
 import { ErrorCodes } from "../../exceptions/root";
 import fs from 'fs';
 import path from 'path';
+import { productsUploadDir } from "../../config/paths";
 
 interface IUploadProductImage {
     product_id: string;
@@ -12,15 +13,15 @@ interface IUploadProductImage {
 class UploadProductImageService {
     async execute({ product_id, filename }: IUploadProductImage) {
         const backendUrl = process.env.BACKEND_URL || 'http://localhost:3334';
-        console.log('Backend URL:', backendUrl);
+        console.log('[UploadProductImageService] Backend URL:', backendUrl);
+        console.log('[UploadProductImageService] Upload directory:', productsUploadDir);
         
         const product = await prismaClient.product.findFirst({
             where: { id: product_id },
         });
 
         if (!product) {
-            const uploadDir = path.resolve(__dirname, '..', '..', '..', 'uploads', 'products');
-            const filePath = path.join(uploadDir, filename);
+            const filePath = path.join(productsUploadDir, filename);
             
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath);
@@ -32,12 +33,13 @@ class UploadProductImageService {
             );
         }
 
-        console.log('chegou aqui')
+        console.log('[UploadProductImageService] Product found:', product.id);
 
         if (product.image) {
             const oldImagePath = product.image.replace(`${backendUrl}/uploads/products/`, '');
-            const uploadDir = path.resolve(__dirname, '..', '..', '..', 'uploads', 'products');
-            const oldFilePath = path.join(uploadDir, oldImagePath);
+            const oldFilePath = path.join(productsUploadDir, oldImagePath);
+
+            console.log('[UploadProductImageService] Removing old image:', oldFilePath);
 
             if (fs.existsSync(oldFilePath)) {
                 fs.unlinkSync(oldFilePath);
@@ -45,7 +47,7 @@ class UploadProductImageService {
         }
 
         const imageUrl = `${backendUrl}/uploads/products/${filename}`;
-        console.log('New image URL:', imageUrl);
+        console.log('[UploadProductImageService] New image URL:', imageUrl);
 
         try {
             const updatedProduct = await prismaClient.product.update({
@@ -53,13 +55,13 @@ class UploadProductImageService {
                 data: { image: imageUrl },
             });
 
+            console.log('[UploadProductImageService] Product updated successfully');
+
             return updatedProduct;
         } catch (error: any) {
-            console.log("[UploadProductImageService] Failed to update product image:", error);
             console.error("[UploadProductImageService] Failed:", error);
 
-            const uploadDir = path.resolve(__dirname, '..', '..', '..', 'uploads', 'products');
-            const filePath = path.join(uploadDir, filename);
+            const filePath = path.join(productsUploadDir, filename);
             
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath);

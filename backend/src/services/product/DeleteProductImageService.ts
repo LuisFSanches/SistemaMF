@@ -3,6 +3,7 @@ import { BadRequestException } from "../../exceptions/bad-request";
 import { ErrorCodes } from "../../exceptions/root";
 import fs from 'fs';
 import path from 'path';
+import { productsUploadDir } from "../../config/paths";
 
 interface IDeleteProductImage {
     product_id: string;
@@ -31,11 +32,15 @@ class DeleteProductImageService {
         }
 
         const imagePath = product.image.replace(`${backendUrl}/uploads/products/`, '');
-        const uploadDir = path.resolve(__dirname, '..', '..', '..', 'uploads', 'products');
-        const filePath = path.join(uploadDir, imagePath);
+        const filePath = path.join(productsUploadDir, imagePath);
+
+        console.log('[DeleteProductImageService] Deleting image:', filePath);
 
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
+            console.log('[DeleteProductImageService] Image deleted successfully');
+        } else {
+            console.log('[DeleteProductImageService] Image file not found');
         }
 
         try {

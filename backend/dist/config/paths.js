@@ -27,35 +27,14 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/config/multer.ts
-var multer_exports = {};
-__export(multer_exports, {
-  upload: () => upload
-});
-module.exports = __toCommonJS(multer_exports);
-var import_multer = __toESM(require("multer"));
-var import_path2 = __toESM(require("path"));
-var import_crypto = __toESM(require("crypto"));
-
-// src/exceptions/root.ts
-var HttpException = class extends Error {
-  constructor(message, errorCode, statusCode, errors) {
-    super(message);
-    this.message = message;
-    this.errorCode = errorCode;
-    this.statusCode = statusCode;
-    this.errors = errors;
-  }
-};
-
-// src/exceptions/bad-request.ts
-var BadRequestException = class extends HttpException {
-  constructor(message, errorCode) {
-    super(message, errorCode, 400, null);
-  }
-};
-
 // src/config/paths.ts
+var paths_exports = {};
+__export(paths_exports, {
+  productsUploadDir: () => productsUploadDir,
+  rootDir: () => rootDir,
+  uploadsDir: () => uploadsDir
+});
+module.exports = __toCommonJS(paths_exports);
 var import_path = __toESM(require("path"));
 var import_fs = __toESM(require("fs"));
 var isDevelopment = process.env.NODE_ENV !== "production";
@@ -73,38 +52,9 @@ if (!import_fs.default.existsSync(productsUploadDir)) {
 }
 console.log("[Paths] Root directory:", rootDir);
 console.log("[Paths] Products upload directory:", productsUploadDir);
-
-// src/config/multer.ts
-var storage = import_multer.default.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, productsUploadDir);
-  },
-  filename: (req, file, cb) => {
-    const hash = import_crypto.default.randomBytes(16).toString("hex");
-    const filename = `${hash}-${Date.now()}${import_path2.default.extname(file.originalname)}`;
-    cb(null, filename);
-  }
-});
-var fileFilter = (req, file, cb) => {
-  const allowedMimes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-  if (allowedMimes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new BadRequestException(
-      "Invalid file type. Only JPEG, JPG, PNG and WEBP are allowed",
-      400 /* VALIDATION_ERROR */
-    ));
-  }
-};
-var upload = (0, import_multer.default)({
-  storage,
-  fileFilter,
-  limits: {
-    fileSize: 100 * 1024
-    // 100KB
-  }
-});
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  upload
+  productsUploadDir,
+  rootDir,
+  uploadsDir
 });

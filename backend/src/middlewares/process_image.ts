@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { BadRequestException } from '../exceptions/bad-request';
 import { ErrorCodes } from '../exceptions/root';
+import { productsUploadDir } from '../config/paths';
 
 export const processImage = async (
     req: Request,
@@ -14,11 +15,13 @@ export const processImage = async (
         return next();
     }
 
-    const uploadDir = path.resolve(__dirname, '..', '..', 'uploads', 'products');
     const inputPath = req.file.path;
     const date = new Date();
     const outputFilename = `optimized-${date.getTime()}-${req.file.filename}`;
-    const outputPath = path.join(uploadDir, outputFilename);
+    const outputPath = path.join(productsUploadDir, outputFilename);
+
+    console.log('[processImage] Input path:', inputPath);
+    console.log('[processImage] Output path:', outputPath);
 
     try {
         await sharp(inputPath)
@@ -32,6 +35,8 @@ export const processImage = async (
         const stats = fs.statSync(outputPath);
         const fileSizeInKB = stats.size / 1024;
 
+        console.log('[processImage] Image processed. Size:', fileSizeInKB.toFixed(2), 'KB');
+
         if (fileSizeInKB > 100) {
             await sharp(inputPath)
                 .resize(600, 600, {
@@ -43,6 +48,8 @@ export const processImage = async (
 
             const newStats = fs.statSync(outputPath);
             const newFileSizeInKB = newStats.size / 1024;
+
+            console.log('[processImage] Image recompressed. New size:', newFileSizeInKB.toFixed(2), 'KB');
 
             if (newFileSizeInKB > 100) {
                 fs.unlinkSync(inputPath);
@@ -62,6 +69,8 @@ export const processImage = async (
         req.file.filename = outputFilename;
         req.file.path = outputPath;
         req.file.size = fs.statSync(outputPath).size;
+
+        console.log('[processImage] Success. Final filename:', outputFilename);
 
         next();
     } catch (error: any) {
