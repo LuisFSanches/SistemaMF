@@ -27,16 +27,13 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/config/multer.ts
-var multer_exports = {};
-__export(multer_exports, {
-  upload: () => upload
+// src/middlewares/multer_error.ts
+var multer_error_exports = {};
+__export(multer_error_exports, {
+  handleMulterError: () => handleMulterError
 });
-module.exports = __toCommonJS(multer_exports);
+module.exports = __toCommonJS(multer_error_exports);
 var import_multer = __toESM(require("multer"));
-var import_path = __toESM(require("path"));
-var import_crypto = __toESM(require("crypto"));
-var import_fs = __toESM(require("fs"));
 
 // src/exceptions/root.ts
 var HttpException = class extends Error {
@@ -56,42 +53,35 @@ var BadRequestException = class extends HttpException {
   }
 };
 
-// src/config/multer.ts
-var uploadDir = import_path.default.resolve(__dirname, "..", "..", "uploads", "products");
-if (!import_fs.default.existsSync(uploadDir)) {
-  import_fs.default.mkdirSync(uploadDir, { recursive: true });
-  console.log("[Multer] Upload directory created:", uploadDir);
-}
-var storage = import_multer.default.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const hash = import_crypto.default.randomBytes(16).toString("hex");
-    const filename = `${hash}-${Date.now()}${import_path.default.extname(file.originalname)}`;
-    cb(null, filename);
+// src/middlewares/multer_error.ts
+var handleMulterError = (err, req, res, next) => {
+  if (err instanceof import_multer.default.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return next(
+        new BadRequestException(
+          "File is too large. Maximum size is 100KB",
+          400 /* VALIDATION_ERROR */
+        )
+      );
+    }
+    if (err.code === "LIMIT_UNEXPECTED_FILE") {
+      return next(
+        new BadRequestException(
+          "Unexpected field in form data",
+          400 /* VALIDATION_ERROR */
+        )
+      );
+    }
+    return next(
+      new BadRequestException(
+        err.message,
+        400 /* VALIDATION_ERROR */
+      )
+    );
   }
-});
-var fileFilter = (req, file, cb) => {
-  const allowedMimes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-  if (allowedMimes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new BadRequestException(
-      "Invalid file type. Only JPEG, JPG, PNG and WEBP are allowed",
-      400 /* VALIDATION_ERROR */
-    ));
-  }
+  next(err);
 };
-var upload = (0, import_multer.default)({
-  storage,
-  fileFilter,
-  limits: {
-    fileSize: 100 * 1024
-    // 100KB
-  }
-});
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  upload
+  handleMulterError
 });

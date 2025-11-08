@@ -24,12 +24,13 @@ __export(errors_exports, {
 });
 module.exports = __toCommonJS(errors_exports);
 var errorMiddleware = (error, req, res, next) => {
-  res.status(error.statusCode).json(
-    {
-      message: error.message,
-      errorCode: error.errorCode
-    }
-  );
+  const statusCode = error.statusCode || 500;
+  const errorCode = error.errorCode || "INTERNAL_ERROR";
+  const message = error.message || "Internal server error";
+  res.status(statusCode).json({
+    message,
+    errorCode
+  });
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

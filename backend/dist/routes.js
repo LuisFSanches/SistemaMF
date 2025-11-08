@@ -2326,7 +2326,12 @@ var super_admin_auth_default = superAdminAuthMiddleware;
 var import_multer = __toESM(require("multer"));
 var import_path3 = __toESM(require("path"));
 var import_crypto = __toESM(require("crypto"));
+var import_fs3 = __toESM(require("fs"));
 var uploadDir = import_path3.default.resolve(__dirname, "..", "..", "uploads", "products");
+if (!import_fs3.default.existsSync(uploadDir)) {
+  import_fs3.default.mkdirSync(uploadDir, { recursive: true });
+  console.log("[Multer] Upload directory created:", uploadDir);
+}
 var storage = import_multer.default.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -2359,7 +2364,7 @@ var upload = (0, import_multer.default)({
 
 // src/middlewares/process_image.ts
 var import_sharp = __toESM(require("sharp"));
-var import_fs3 = __toESM(require("fs"));
+var import_fs4 = __toESM(require("fs"));
 var import_path4 = __toESM(require("path"));
 var processImage = async (req, res, next) => {
   if (!req.file) {
@@ -2375,18 +2380,18 @@ var processImage = async (req, res, next) => {
       fit: "inside",
       withoutEnlargement: true
     }).jpeg({ quality: 80 }).toFile(outputPath);
-    const stats = import_fs3.default.statSync(outputPath);
+    const stats = import_fs4.default.statSync(outputPath);
     const fileSizeInKB = stats.size / 1024;
     if (fileSizeInKB > 100) {
       await (0, import_sharp.default)(inputPath).resize(600, 600, {
         fit: "inside",
         withoutEnlargement: true
       }).jpeg({ quality: 60 }).toFile(outputPath);
-      const newStats = import_fs3.default.statSync(outputPath);
+      const newStats = import_fs4.default.statSync(outputPath);
       const newFileSizeInKB = newStats.size / 1024;
       if (newFileSizeInKB > 100) {
-        import_fs3.default.unlinkSync(inputPath);
-        import_fs3.default.unlinkSync(outputPath);
+        import_fs4.default.unlinkSync(inputPath);
+        import_fs4.default.unlinkSync(outputPath);
         return next(
           new BadRequestException(
             "Image is too large even after compression. Please upload a smaller image.",
@@ -2395,18 +2400,18 @@ var processImage = async (req, res, next) => {
         );
       }
     }
-    import_fs3.default.unlinkSync(inputPath);
+    import_fs4.default.unlinkSync(inputPath);
     req.file.filename = outputFilename;
     req.file.path = outputPath;
-    req.file.size = import_fs3.default.statSync(outputPath).size;
+    req.file.size = import_fs4.default.statSync(outputPath).size;
     next();
   } catch (error) {
     console.error("[processImage] Failed:", error);
-    if (import_fs3.default.existsSync(inputPath)) {
-      import_fs3.default.unlinkSync(inputPath);
+    if (import_fs4.default.existsSync(inputPath)) {
+      import_fs4.default.unlinkSync(inputPath);
     }
-    if (import_fs3.default.existsSync(outputPath)) {
-      import_fs3.default.unlinkSync(outputPath);
+    if (import_fs4.default.existsSync(outputPath)) {
+      import_fs4.default.unlinkSync(outputPath);
     }
     next(
       new BadRequestException(
@@ -2415,6 +2420,36 @@ var processImage = async (req, res, next) => {
       )
     );
   }
+};
+
+// src/middlewares/multer_error.ts
+var import_multer2 = __toESM(require("multer"));
+var handleMulterError = (err, req, res, next) => {
+  if (err instanceof import_multer2.default.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return next(
+        new BadRequestException(
+          "File is too large. Maximum size is 100KB",
+          400 /* VALIDATION_ERROR */
+        )
+      );
+    }
+    if (err.code === "LIMIT_UNEXPECTED_FILE") {
+      return next(
+        new BadRequestException(
+          "Unexpected field in form data",
+          400 /* VALIDATION_ERROR */
+        )
+      );
+    }
+    return next(
+      new BadRequestException(
+        err.message,
+        400 /* VALIDATION_ERROR */
+      )
+    );
+  }
+  next(err);
 };
 
 // src/routes.ts
@@ -2443,7 +2478,7 @@ router.post("/product", admin_auth_default, new CreateProductController().handle
 router.put("/product/:id", super_admin_auth_default, new UpdateProductController().handle);
 router.get("/product/all", super_admin_auth_default, new GetAllProductController().handle);
 router.get("/product/search", super_admin_auth_default, new SearchProductsController().handle);
-router.post("/product/:id/image", admin_auth_default, upload.single("image"), processImage, new UploadProductImageController().handle);
+router.post("/product/:id/image", admin_auth_default, upload.single("image"), handleMulterError, processImage, new UploadProductImageController().handle);
 router.delete("/product/:id/image", admin_auth_default, new DeleteProductImageController().handle);
 router.post("/admin", super_admin_auth_default, new CreateAdminController().handle);
 router.post("/admins/login", new LoginAdminController().handle);

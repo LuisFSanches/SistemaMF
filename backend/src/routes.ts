@@ -53,6 +53,7 @@ import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 import { upload } from './config/multer';
 import { processImage } from './middlewares/process_image';
+import { handleMulterError } from './middlewares/multer_error';
 
 
 const router = Router();
@@ -90,7 +91,7 @@ router.post('/product', adminAuthMiddleware, new CreateProductController().handl
 router.put('/product/:id', superAdminAuthMiddleware, new UpdateProductController().handle)
 router.get('/product/all', superAdminAuthMiddleware, new GetAllProductController().handle)
 router.get('/product/search', superAdminAuthMiddleware, new SearchProductsController().handle)
-router.post('/product/:id/image', adminAuthMiddleware, upload.single('image'), processImage, new UploadProductImageController().handle)
+router.post('/product/:id/image', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadProductImageController().handle)
 router.delete('/product/:id/image', adminAuthMiddleware, new DeleteProductImageController().handle)
 
 //-- ROTAS ADMIN --
