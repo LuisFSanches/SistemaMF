@@ -21,8 +21,6 @@ class UploadProductImageController {
             filename: req.file.filename
         });
 
-        console.log('Uploaded product image:', product);
-
         return res.json(product);
     }
 }

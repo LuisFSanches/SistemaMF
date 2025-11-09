@@ -70,8 +70,6 @@ function findProjectRoot(startPath) {
   return import_path.default.resolve(startPath, "..", "..");
 }
 var isCompiled = __dirname.includes("/dist/");
-console.log("[Paths] __dirname:", __dirname);
-console.log("[Paths] Is compiled:", isCompiled);
 var rootDir = findProjectRoot(__dirname);
 var uploadsDir = import_path.default.join(rootDir, "uploads");
 var productsUploadDir = import_path.default.join(uploadsDir, "products");
@@ -83,9 +81,6 @@ if (!import_fs.default.existsSync(productsUploadDir)) {
   import_fs.default.mkdirSync(productsUploadDir, { recursive: true });
   console.log("[Paths] Created products upload directory:", productsUploadDir);
 }
-console.log("[Paths] Root directory:", rootDir);
-console.log("[Paths] Uploads directory:", uploadsDir);
-console.log("[Paths] Products upload directory:", productsUploadDir);
 
 // src/config/multer.ts
 var storage = import_multer.default.diskStorage({
