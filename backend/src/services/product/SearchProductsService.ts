@@ -8,7 +8,7 @@ export class SearchProductsService {
             `
                 SELECT * FROM "products"
                 WHERE enabled = true
-                AND unaccent(lower(name)) LIKE '%' || unaccent(lower($1)) || '%'
+                AND replace(unaccent(lower(name)), ' ', '') LIKE '%' || replace(unaccent(lower($1)), ' ', '') || '%'
                 ORDER BY name
                 LIMIT 50
             `,

@@ -18731,7 +18731,7 @@ var SearchProductsService = class {
       `
                 SELECT * FROM "products"
                 WHERE enabled = true
-                AND unaccent(lower(name)) LIKE '%' || unaccent(lower($1)) || '%'
+                AND replace(unaccent(lower(name)), ' ', '') LIKE '%' || replace(unaccent(lower($1)), ' ', '') || '%'
                 ORDER BY name
                 LIMIT 50
             `,
@@ -18782,7 +18782,7 @@ describe("SearchProductsService", () => {
       `
                 SELECT * FROM "products"
                 WHERE enabled = true
-                AND unaccent(lower(name)) LIKE '%' || unaccent(lower($1)) || '%'
+                AND replace(unaccent(lower(name)), ' ', '') LIKE '%' || replace(unaccent(lower($1)), ' ', '') || '%'
                 ORDER BY name
                 LIMIT 50
             `,
@@ -18822,7 +18822,7 @@ describe("SearchProductsService", () => {
     prisma_default.$queryRawUnsafe.mockResolvedValue(mockProducts);
     const result = await service.execute("apple");
     globalExpect(prisma_default.$queryRawUnsafe).toHaveBeenCalledWith(
-      globalExpect.stringContaining("unaccent(lower(name)) LIKE"),
+      globalExpect.stringContaining("replace(unaccent(lower(name))"),
       "apple"
     );
     globalExpect(result).toEqual(mockProducts);

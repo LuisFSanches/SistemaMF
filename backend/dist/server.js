@@ -409,16 +409,44 @@ var GetAllProductService = class {
   async execute(page = 1, pageSize = 8, query) {
     try {
       const skip = (page - 1) * pageSize;
-      const filters = query ? {
-        name: {
-          contains: query,
-          mode: "insensitive"
-        },
-        enabled: true
-      } : { enabled: true };
+      if (query && query.trim()) {
+        const searchTerms = query.trim().split(/\s+/).filter((term) => term.length > 0);
+        const conditions = searchTerms.map(
+          (_, index) => `replace(unaccent(lower(name)), ' ', '') LIKE '%' || replace(unaccent(lower($${index + 1})), ' ', '') || '%'`
+        ).join(" AND ");
+        const products2 = await prisma_default.$queryRawUnsafe(
+          `
+						SELECT id, name, image, price, unity, stock, enabled
+						FROM "products"
+						WHERE enabled = true
+						AND ${conditions}
+						ORDER BY created_at DESC
+						LIMIT $${searchTerms.length + 1} OFFSET $${searchTerms.length + 2}
+					`,
+          ...searchTerms,
+          pageSize,
+          skip
+        );
+        const totalResult = await prisma_default.$queryRawUnsafe(
+          `
+						SELECT COUNT(*) as count
+						FROM "products"
+						WHERE enabled = true
+						AND ${conditions}
+					`,
+          ...searchTerms
+        );
+        const total2 = Number(totalResult[0].count);
+        return {
+          products: products2,
+          total: total2,
+          currentPage: page,
+          totalPages: Math.ceil(total2 / pageSize)
+        };
+      }
       const [products, total] = await Promise.all([
         prisma_default.product.findMany({
-          where: filters,
+          where: { enabled: true },
           skip,
           take: pageSize,
           select: {
@@ -435,7 +463,7 @@ var GetAllProductService = class {
           }
         }),
         prisma_default.product.count({
-          where: filters
+          where: { enabled: true }
         })
       ]);
       return {
@@ -522,7 +550,7 @@ var SearchProductsService = class {
       `
                 SELECT * FROM "products"
                 WHERE enabled = true
-                AND unaccent(lower(name)) LIKE '%' || unaccent(lower($1)) || '%'
+                AND replace(unaccent(lower(name)), ' ', '') LIKE '%' || replace(unaccent(lower($1)), ' ', '') || '%'
                 ORDER BY name
                 LIMIT 50
             `,

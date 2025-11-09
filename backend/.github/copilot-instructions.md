@@ -786,7 +786,12 @@ Ao implementar uma nova funcionalidade, siga este checklist:
 
 ## 🚀 Comandos Úteis
 
+
 ```bash
+# Versão do Node.js
+Sempre use a versão mais recente do Node.js (22.18+ recomendado).
+nvm use v22
+
 # Desenvolvimento
 yarn dev                          # Iniciar servidor em modo desenvolvimento
 

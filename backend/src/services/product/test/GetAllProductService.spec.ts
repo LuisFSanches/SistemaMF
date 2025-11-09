@@ -138,43 +138,14 @@ describe('GetAllProductService', () => {
             }
         ];
 
-        (prismaClient as DeepMockProxy<PrismaClient>).product.findMany.mockResolvedValue(mockProducts);
-        (prismaClient as DeepMockProxy<PrismaClient>).product.count.mockResolvedValue(1);
+        const mockCountResult = [{ count: BigInt(1) }];
+
+        (prismaClient as DeepMockProxy<PrismaClient>).$queryRawUnsafe.mockResolvedValueOnce(mockProducts);
+        (prismaClient as DeepMockProxy<PrismaClient>).$queryRawUnsafe.mockResolvedValueOnce(mockCountResult);
 
         const result = await service.execute(1, 8, 'Apple');
 
-        expect(prismaClient.product.findMany).toHaveBeenCalledWith({
-            where: {
-                name: {
-                    contains: 'Apple',
-                    mode: 'insensitive'
-                },
-                enabled: true
-            },
-            skip: 0,
-            take: 8,
-            select: {
-                id: true,
-                name: true,
-                image: true,
-                price: true,
-                unity: true,
-                stock: true,
-                enabled: true
-            },
-            orderBy: {
-                created_at: 'desc'
-            }
-        });
-        expect(prismaClient.product.count).toHaveBeenCalledWith({
-            where: {
-                name: {
-                    contains: 'Apple',
-                    mode: 'insensitive'
-                },
-                enabled: true
-            }
-        });
+        expect(prismaClient.$queryRawUnsafe).toHaveBeenCalledTimes(2);
         expect(result).toEqual({
             products: mockProducts,
             total: 1,

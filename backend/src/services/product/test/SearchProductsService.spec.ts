@@ -51,7 +51,7 @@ describe('SearchProductsService', () => {
             `
                 SELECT * FROM "products"
                 WHERE enabled = true
-                AND unaccent(lower(name)) LIKE '%' || unaccent(lower($1)) || '%'
+                AND replace(unaccent(lower(name)), ' ', '') LIKE '%' || replace(unaccent(lower($1)), ' ', '') || '%'
                 ORDER BY name
                 LIMIT 50
             `,
@@ -101,7 +101,7 @@ describe('SearchProductsService', () => {
         const result = await service.execute('apple');
 
         expect(prismaClient.$queryRawUnsafe).toHaveBeenCalledWith(
-            expect.stringContaining('unaccent(lower(name)) LIKE'),
+            expect.stringContaining('replace(unaccent(lower(name))'),
             'apple'
         );
         expect(result).toEqual(mockProducts);

@@ -7,19 +7,50 @@ class GetAllProductService{
 		try {
 			const skip = (page - 1) * pageSize;
 
-			const filters = query
-				? {
-						name: {
-							contains: query,
-							mode: 'insensitive',
-						},
-						enabled: true
-				}
-				: { enabled: true };
+			if (query && query.trim()) {
+				const searchTerms = query.trim().split(/\s+/).filter(term => term.length > 0);
+				
+				const conditions = searchTerms.map((_, index) => 
+					`replace(unaccent(lower(name)), ' ', '') LIKE '%' || replace(unaccent(lower($${index + 1})), ' ', '') || '%'`
+				).join(' AND ');
+
+				const products = await prismaClient.$queryRawUnsafe<any[]>(
+					`
+						SELECT id, name, image, price, unity, stock, enabled
+						FROM "products"
+						WHERE enabled = true
+						AND ${conditions}
+						ORDER BY created_at DESC
+						LIMIT $${searchTerms.length + 1} OFFSET $${searchTerms.length + 2}
+					`,
+					...searchTerms,
+					pageSize,
+					skip
+				);
+
+				const totalResult = await prismaClient.$queryRawUnsafe<{ count: bigint }[]>(
+					`
+						SELECT COUNT(*) as count
+						FROM "products"
+						WHERE enabled = true
+						AND ${conditions}
+					`,
+					...searchTerms
+				);
+
+				const total = Number(totalResult[0].count);
+
+				return {
+					products,
+					total,
+					currentPage: page,
+					totalPages: Math.ceil(total / pageSize)
+				};
+			}
 
 			const [products, total] = await Promise.all([
 				prismaClient.product.findMany({
-					where: filters as any,
+					where: { enabled: true },
 					skip,
 					take: pageSize,
 					select: {
@@ -36,7 +67,7 @@ class GetAllProductService{
 					}
 				}),
 				prismaClient.product.count({
-					where: filters as any,
+					where: { enabled: true },
 				}),
 			]);
 

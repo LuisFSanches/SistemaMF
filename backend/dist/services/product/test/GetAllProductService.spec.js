@@ -18746,16 +18746,44 @@ var GetAllProductService = class {
   async execute(page = 1, pageSize = 8, query) {
     try {
       const skip = (page - 1) * pageSize;
-      const filters = query ? {
-        name: {
-          contains: query,
-          mode: "insensitive"
-        },
-        enabled: true
-      } : { enabled: true };
+      if (query && query.trim()) {
+        const searchTerms = query.trim().split(/\s+/).filter((term) => term.length > 0);
+        const conditions = searchTerms.map(
+          (_, index2) => `replace(unaccent(lower(name)), ' ', '') LIKE '%' || replace(unaccent(lower($${index2 + 1})), ' ', '') || '%'`
+        ).join(" AND ");
+        const products2 = await prisma_default.$queryRawUnsafe(
+          `
+						SELECT id, name, image, price, unity, stock, enabled
+						FROM "products"
+						WHERE enabled = true
+						AND ${conditions}
+						ORDER BY created_at DESC
+						LIMIT $${searchTerms.length + 1} OFFSET $${searchTerms.length + 2}
+					`,
+          ...searchTerms,
+          pageSize,
+          skip
+        );
+        const totalResult = await prisma_default.$queryRawUnsafe(
+          `
+						SELECT COUNT(*) as count
+						FROM "products"
+						WHERE enabled = true
+						AND ${conditions}
+					`,
+          ...searchTerms
+        );
+        const total2 = Number(totalResult[0].count);
+        return {
+          products: products2,
+          total: total2,
+          currentPage: page,
+          totalPages: Math.ceil(total2 / pageSize)
+        };
+      }
       const [products, total] = await Promise.all([
         prisma_default.product.findMany({
-          where: filters,
+          where: { enabled: true },
           skip,
           take: pageSize,
           select: {
@@ -18772,7 +18800,7 @@ var GetAllProductService = class {
           }
         }),
         prisma_default.product.count({
-          where: filters
+          where: { enabled: true }
         })
       ]);
       return {
@@ -18910,41 +18938,11 @@ describe("GetAllProductService", () => {
         updated_at: /* @__PURE__ */ new Date()
       }
     ];
-    prisma_default.product.findMany.mockResolvedValue(mockProducts);
-    prisma_default.product.count.mockResolvedValue(1);
+    const mockCountResult = [{ count: BigInt(1) }];
+    prisma_default.$queryRawUnsafe.mockResolvedValueOnce(mockProducts);
+    prisma_default.$queryRawUnsafe.mockResolvedValueOnce(mockCountResult);
     const result = await service.execute(1, 8, "Apple");
-    globalExpect(prisma_default.product.findMany).toHaveBeenCalledWith({
-      where: {
-        name: {
-          contains: "Apple",
-          mode: "insensitive"
-        },
-        enabled: true
-      },
-      skip: 0,
-      take: 8,
-      select: {
-        id: true,
-        name: true,
-        image: true,
-        price: true,
-        unity: true,
-        stock: true,
-        enabled: true
-      },
-      orderBy: {
-        created_at: "desc"
-      }
-    });
-    globalExpect(prisma_default.product.count).toHaveBeenCalledWith({
-      where: {
-        name: {
-          contains: "Apple",
-          mode: "insensitive"
-        },
-        enabled: true
-      }
-    });
+    globalExpect(prisma_default.$queryRawUnsafe).toHaveBeenCalledTimes(2);
     globalExpect(result).toEqual({
       products: mockProducts,
       total: 1,
