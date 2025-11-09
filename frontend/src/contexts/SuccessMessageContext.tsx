@@ -2,7 +2,7 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 import { SuccessMessage } from '../components/SuccessMessage';
 
 interface ISuccessMessageContextData {
-    showSuccess: (message: string) => void;
+    showSuccess: (message: string, duration?: number) => void;
 }
 
 const SuccessMessageContext = createContext<ISuccessMessageContextData>({} as ISuccessMessageContextData);
@@ -14,15 +14,16 @@ interface ISuccessMessageProviderProps {
 interface IMessage {
     id: number;
     text: string;
+    duration?: number;
 }
 
 export function SuccessMessageProvider({ children }: ISuccessMessageProviderProps) {
     const [messages, setMessages] = useState<IMessage[]>([]);
     const [nextId, setNextId] = useState(0);
 
-    const showSuccess = (message: string) => {
+    const showSuccess = (message: string, duration?: number) => {
         const id = nextId;
-        setMessages((prev) => [...prev, { id, text: message }]);
+        setMessages((prev) => [...prev, { id, text: message, duration }]);
         setNextId((prev) => prev + 1);
     };
 
@@ -46,6 +47,7 @@ export function SuccessMessageProvider({ children }: ISuccessMessageProviderProp
                     <SuccessMessage
                         message={msg.text}
                         onClose={() => handleClose(msg.id)}
+                        duration={msg.duration}
                     />
                 </div>
             ))}

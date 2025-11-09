@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import {
     Card,
     ProductImage,
@@ -26,12 +27,15 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product, image, onAdd }: ProductCardProps){
+    const { showSuccess } = useSuccessMessage();
+
     const [quantity, setQuantity] = useState<number>(1);
     const [initialPrice, setInitialPrice] = useState<any>(product.price);
 
     const handleAddClick = () => {
         if (quantity > 0) {
             onAdd(product, quantity, initialPrice);
+            showSuccess(`x${quantity} ${product.name} adicionado ao pedido!`, 1800);
         }
     };
 
