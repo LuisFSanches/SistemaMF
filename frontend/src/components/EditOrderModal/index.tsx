@@ -23,6 +23,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { useOrders } from "../../contexts/OrdersContext";
 import { PAYMENT_METHODS, STATUS_LABEL } from "../../constants";
 import { updateOrder, updateStatus } from "../../services/orderService";
+import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { searchProducts } from "../../services/productService";
 import { getPickupAddress } from "../../services/addressService";
 import { Loader } from "../Loader";
@@ -41,6 +42,8 @@ export function EditOrderModal({
     order
 }:IEditOrderModal){
     const { loadAvailableOrders, editOrder } = useOrders();
+	const { showSuccess } = useSuccessMessage();
+
 	const [editAddress, setEditAddress] = useState(false);
 	const [pickupAddress, setPickupAddress] = useState(order?.pickup_on_store);
     const {
@@ -103,6 +106,7 @@ export function EditOrderModal({
 
 		editOrder(orderData);
 		loadAvailableOrders(1, 25, '');
+		showSuccess("Pedido atualizado com sucesso!");
 		setEditAddress(false);
 		setShowLoader(false);
 		onRequestClose();

@@ -25,6 +25,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark, faCloudArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { IProduct } from "../../interfaces/IProduct";
 import { createProduct, updateProduct, uploadProductImage, deleteProductImage } from "../../services/productService";
+import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { useProducts } from "../../contexts/ProductsContext";
 import { UNITIES } from "../../constants";
 import { Loader } from "../Loader";
@@ -45,6 +46,7 @@ export function ProductModal({
     currentProduct
 }:ProductModalProps){
     const { addProduct, editProduct, loadAvailableProducts } = useProducts();
+    const { showSuccess } = useSuccessMessage();
 
     const {
         register,
@@ -119,6 +121,7 @@ export function ProductModal({
 
                 addProduct(productData);
                 loadAvailableProducts(1, 400, "");
+                showSuccess("Produto criado com sucesso!");
                 onRequestClose();
             }
 
@@ -138,6 +141,7 @@ export function ProductModal({
 
                 editProduct(productData);
                 loadAvailableProducts(1, 400, "");
+                showSuccess("Produto atualizado com sucesso!");
                 onRequestClose();
             }
 

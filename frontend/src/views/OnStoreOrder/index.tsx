@@ -52,6 +52,7 @@ import { PAYMENT_METHODS, STATES } from "../../constants";
 import { useOrders } from "../../contexts/OrdersContext";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { useProducts } from "../../contexts/ProductsContext";
+import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import placeholder_products from '../../assets/images/placeholder_products.png';
 
 interface INewOrder {
@@ -95,6 +96,7 @@ export function OnStoreOrder() {
     const { addOrder } = useOrders();
     const { admins } = useAdmins();
     const { products: availableProducts, loadAvailableProducts, totalProducts } = useProducts();
+    const { showSuccess } = useSuccessMessage();
 
     const formRef = useRef<HTMLDivElement>(null);
     const [step, setStep] = useState(1);
@@ -266,6 +268,8 @@ export function OnStoreOrder() {
             setOrderCode(data.code);
 
             addOrder(data);
+            
+            showSuccess("Pedido criado com sucesso!");
 
             if (orderStatus === "DONE") {
                 setShowLoader(false);

@@ -17,6 +17,7 @@ import { useOrders } from "../../contexts/OrdersContext";
 import { ProductModal } from "../../components/ProductModal";
 import { rawTelephone } from "../../utils";
 import { useProducts } from "../../contexts/ProductsContext";
+import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import {
     FormField,
     Label,
@@ -72,10 +73,10 @@ interface IProduct {
     quantity: number;
 }
 
-// parseWithAI(message).then(console.log);
-
 export function OnlineOrder() {
     const { products: availableProducts, loadAvailableProducts, totalProducts } = useProducts();
+    const { showSuccess } = useSuccessMessage();
+
     const navigate = useNavigate();
     const { admins } = useAdmins();
     const { addOrder } = useOrders();
@@ -193,6 +194,7 @@ export function OnlineOrder() {
         }
 
         addOrder(response);
+        showSuccess("Pedido online criado com sucesso!");
 
         setShowLoader(false);
     }

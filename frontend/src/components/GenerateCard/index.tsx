@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import fontkit from '@pdf-lib/fontkit';
 import Modal from 'react-modal';
+import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faPrint, faXmark } from "@fortawesome/free-solid-svg-icons";
@@ -12,6 +13,8 @@ const pdfModel = `./cartao_limpo.pdf`;
 const emojiFontVariable = `./noto_emoji_variable.ttf`;
 
 export function GenerateCard() {
+    const { showSuccess } = useSuccessMessage();
+
     const emojiRegex = /\p{Emoji}/u;
     const [cardMessage, setCardMessage] = useState("");
     const [showLoader, setShowLoader] = useState(false);
@@ -143,6 +146,7 @@ export function GenerateCard() {
             link.download = `Cartão de mensagem.pdf`;
             link.click();
             URL.revokeObjectURL(url);
+            showSuccess("Cartão gerado com sucesso!");
             setShowLoader(false);
 
         } catch (error) {
