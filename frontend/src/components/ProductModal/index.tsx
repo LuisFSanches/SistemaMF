@@ -242,7 +242,7 @@ export function ProductModal({
                                 <UploadLabel>
                                     <FontAwesomeIcon icon={faCloudArrowUp} />
                                     <span>Clique para selecionar uma imagem</span>
-                                    <span style={{ fontSize: "0.75rem" }}>JPEG, JPG, PNG ou WEBP (máx. 100KB)</span>
+                                    <span style={{ fontSize: "0.75rem" }}>JPEG, JPG, PNG (máx. 100KB)</span>
                                 </UploadLabel>
                             </ImagePreviewBox>
                         )}
