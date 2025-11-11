@@ -65,6 +65,7 @@ export const Form = styled.form`
     background: white;
     border-radius: 20px;
     box-shadow: 0.1rem 0.2rem 0.2rem var(--shadow-color);
+    overflow-y: scroll;
 
     ::-webkit-scrollbar {
         width: 8px;
