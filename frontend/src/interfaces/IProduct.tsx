@@ -6,4 +6,5 @@ export interface IProduct {
     unity: string;
     stock: number;
     enabled: boolean;
+    qr_code?: string;
 }

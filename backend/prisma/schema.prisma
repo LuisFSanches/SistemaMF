@@ -71,6 +71,7 @@ model Product {
   stock       Float
   enabled     Boolean
   image       String?
+  qr_code     String?
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 

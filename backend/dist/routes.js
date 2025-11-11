@@ -363,14 +363,26 @@ var UpdateClientController = class {
 };
 
 // src/services/product/CreateProductService.ts
+var import_qrcode = __toESM(require("qrcode"));
 var CreateProductService = class {
   async execute(data) {
     try {
       const product = await prisma_default.product.create({
         data
       });
-      return product;
+      const qrCodeDataURL = await import_qrcode.default.toDataURL(product.id, {
+        errorCorrectionLevel: "M",
+        type: "image/png",
+        width: 300,
+        margin: 1
+      });
+      const updatedProduct = await prisma_default.product.update({
+        where: { id: product.id },
+        data: { qr_code: qrCodeDataURL }
+      });
+      return updatedProduct;
     } catch (error) {
+      console.error("[CreateProductService] Failed:", error);
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */
@@ -401,7 +413,7 @@ var GetAllProductService = class {
         ).join(" AND ");
         const products2 = await prisma_default.$queryRawUnsafe(
           `
-						SELECT id, name, image, price, unity, stock, enabled
+						SELECT id, name, image, price, unity, stock, enabled, qr_code
 						FROM "products"
 						WHERE enabled = true
 						AND ${conditions}
@@ -441,7 +453,8 @@ var GetAllProductService = class {
             price: true,
             unity: true,
             stock: true,
-            enabled: true
+            enabled: true,
+            qr_code: true
           },
           orderBy: {
             created_at: "desc"
@@ -477,6 +490,55 @@ var GetAllProductController = class {
       String(query)
     );
     return res.json(products);
+  }
+};
+
+// src/services/product/GetProductByIdService.ts
+var GetProductByIdService = class {
+  async execute({ id }) {
+    try {
+      const product = await prisma_default.product.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          unity: true,
+          stock: true,
+          enabled: true,
+          image: true,
+          qr_code: true,
+          created_at: true,
+          updated_at: true
+        }
+      });
+      if (!product) {
+        throw new BadRequestException(
+          "Product not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+      return product;
+    } catch (error) {
+      console.error("[GetProductByIdService] Failed:", error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/product/GetProductByIdController.ts
+var GetProductByIdController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const getProductByIdService = new GetProductByIdService();
+    const product = await getProductByIdService.execute({ id });
+    return res.json(product);
   }
 };
 
@@ -710,6 +772,59 @@ var DeleteProductImageController = class {
     const product = await deleteProductImageService.execute({
       product_id: id
     });
+    return res.json(product);
+  }
+};
+
+// src/services/product/GenerateProductQRCodeService.ts
+var import_qrcode2 = __toESM(require("qrcode"));
+var GenerateProductQRCodeService = class {
+  async execute({ id }) {
+    try {
+      const product = await prisma_default.product.findUnique({
+        where: { id }
+      });
+      if (!product) {
+        throw new BadRequestException(
+          "Product not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+      const qrCodeDataURL = await import_qrcode2.default.toDataURL(id, {
+        errorCorrectionLevel: "M",
+        type: "image/png",
+        width: 300,
+        margin: 1
+      });
+      const updatedProduct = await prisma_default.product.update({
+        where: { id },
+        data: { qr_code: qrCodeDataURL },
+        select: {
+          id: true,
+          name: true,
+          qr_code: true
+        }
+      });
+      return updatedProduct;
+    } catch (error) {
+      console.error("[GenerateProductQRCodeService] Failed:", error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/product/GenerateProductQRCodeController.ts
+var GenerateProductQRCodeController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const generateProductQRCodeService = new GenerateProductQRCodeService();
+    const product = await generateProductQRCodeService.execute({ id });
     return res.json(product);
   }
 };
@@ -2531,11 +2646,13 @@ router.put("/order/finish/:id", new FinishOnlineOrderController().handle);
 router.patch("/order/:id", admin_auth_default, new UpdateOrderStatusController().handle);
 router.delete("/order/:id", admin_auth_default, new DeleteOrderController().handle);
 router.post("/product", admin_auth_default, new CreateProductController().handle);
-router.put("/product/:id", super_admin_auth_default, new UpdateProductController().handle);
 router.get("/product/all", super_admin_auth_default, new GetAllProductController().handle);
 router.get("/product/search", super_admin_auth_default, new SearchProductsController().handle);
+router.get("/product/:id", admin_auth_default, new GetProductByIdController().handle);
+router.put("/product/:id", super_admin_auth_default, new UpdateProductController().handle);
 router.post("/product/:id/image", admin_auth_default, upload.single("image"), handleMulterError, processImage, new UploadProductImageController().handle);
 router.delete("/product/:id/image", admin_auth_default, new DeleteProductImageController().handle);
+router.post("/product/:id/qrcode", admin_auth_default, new GenerateProductQRCodeController().handle);
 router.post("/admin", super_admin_auth_default, new CreateAdminController().handle);
 router.post("/admins/login", new LoginAdminController().handle);
 router.get("/admins/admin", admin_auth_default, new GetAdminController().handle);

@@ -275,3 +275,94 @@ export const OrderSummary = styled.div`
         background: blue;
     }
 `
+
+export const DiscountSwitch = styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 8px;
+    margin: 10px auto;
+
+    span {
+        font-size: 0.9rem;
+        color: #5B5B5B;
+        font-weight: 600;
+    }
+
+    input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    @media (max-width: 768px) {
+        width: 100%;
+    }
+`;
+
+export const DiscountSwitchLabel = styled.label<{ $checked: boolean }>`
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 22px;
+    background-color: ${({ $checked }) => ($checked ? "#EC4899" : "#ccc")};
+    border-radius: 22px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &::after {
+        content: "";
+        position: absolute;
+        left: ${({ $checked }) => ($checked ? "22px" : "3px")};
+        top: 3px;
+        width: 16px;
+        height: 16px;
+        background: white;
+        border-radius: 50%;
+        transition: left 0.3s;
+    }
+`;
+
+export const PriceSummary = styled.div`
+    width: 85%;
+    margin: 15px auto;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #e7b7c2;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #5B5B5B;
+
+    .summary-line {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        
+        span:first-child {
+            font-weight: 500;
+        }
+        
+        span:last-child {
+            font-weight: 600;
+        }
+    }
+
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 2px solid #e7b7c2;
+        font-size: 1.1rem;
+        
+        span {
+            font-weight: 700;
+            color: #333;
+        }
+    }
+
+    @media (max-width: 768px) {
+        width: 95%;
+    }
+`;

@@ -19,10 +19,16 @@ import {
     HiddenFileInput,
     ImageActions,
     ImageActionButton,
-    ImageInfo
+    ImageInfo,
+    QRCodeContainer,
+    QRCodeTitle,
+    QRCodeImageBox,
+    QRCodeActions,
+    QRCodeButton,
+    QRCodeInfo
 } from './style';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faXmark, faCloudArrowUp } from "@fortawesome/free-solid-svg-icons";
+import { faXmark, faCloudArrowUp, faQrcode, faPrint, faDownload } from "@fortawesome/free-solid-svg-icons";
 import { IProduct } from "../../interfaces/IProduct";
 import { createProduct, updateProduct, uploadProductImage, deleteProductImage } from "../../services/productService";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
@@ -101,6 +107,66 @@ export function ProductModal({
             setImagePreview("");
             setImageFile(null);
         }
+    };
+
+    const handlePrintQRCode = () => {
+        if (!currentProduct.qr_code) return;
+
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>QR Code - ${currentProduct.name}</title>
+                        <style>
+                            body {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                min-height: 100vh;
+                                margin: 0;
+                                font-family: Arial, sans-serif;
+                            }
+                            img {
+                                max-width: 400px;
+                                height: auto;
+                            }
+                            h2 {
+                                margin-top: 1rem;
+                                text-align: center;
+                            }
+                            @media print {
+                                body {
+                                    margin: 2cm;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <img src="${currentProduct.qr_code}" alt="QR Code ${currentProduct.name}" />
+                        <h2>${currentProduct.name}</h2>
+                        <p>ID: ${currentProduct.id}</p>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
+        }
+    };
+
+    const handleDownloadQRCode = () => {
+        if (!currentProduct.qr_code) return;
+
+        const link = document.createElement('a');
+        link.href = currentProduct.qr_code;
+        link.download = `qrcode-${currentProduct.name.replace(/\s+/g, '-').toLowerCase()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const handleProduct = async (formData: IProduct) => {
@@ -257,6 +323,39 @@ export function ProductModal({
                             </ImageInfo>
                         )}
                     </ImageUploadContainer>
+
+                    {action === "edit" && currentProduct.qr_code && (
+                        <QRCodeContainer>
+                            <QRCodeTitle>
+                                <FontAwesomeIcon icon={faQrcode as any} />
+                                QR Code do Produto
+                            </QRCodeTitle>
+                            <QRCodeImageBox>
+                                <img src={currentProduct.qr_code} alt={`QR Code - ${currentProduct.name}`} />
+                            </QRCodeImageBox>
+                            <QRCodeInfo>
+                                Use este QR Code para adicionar o produto rapidamente ao pedido
+                            </QRCodeInfo>
+                            <QRCodeActions>
+                                <QRCodeButton
+                                    type="button"
+                                    className="print"
+                                    onClick={handlePrintQRCode}
+                                >
+                                    <FontAwesomeIcon icon={faPrint as any} />
+                                    Imprimir QR Code
+                                </QRCodeButton>
+                                <QRCodeButton
+                                    type="button"
+                                    className="download"
+                                    onClick={handleDownloadQRCode}
+                                >
+                                    <FontAwesomeIcon icon={faDownload as any} />
+                                    Baixar QR Code
+                                </QRCodeButton>
+                            </QRCodeActions>
+                        </QRCodeContainer>
+                    )}
 
                     <Switch>
                         <span>

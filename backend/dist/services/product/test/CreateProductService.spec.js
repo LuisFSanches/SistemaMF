@@ -18718,6 +18718,9 @@ var mock = (mockImplementation = {}, opts) => {
   return overrideMockImp(mockImplementation, opts);
 };
 
+// src/services/product/CreateProductService.ts
+var import_qrcode = __toESM(require("qrcode"));
+
 // src/prisma/index.ts
 var import_client = require("@prisma/client");
 var prismaClient = new import_client.PrismaClient();
@@ -18748,8 +18751,19 @@ var CreateProductService = class {
       const product = await prisma_default.product.create({
         data
       });
-      return product;
+      const qrCodeDataURL = await import_qrcode.default.toDataURL(product.id, {
+        errorCorrectionLevel: "M",
+        type: "image/png",
+        width: 300,
+        margin: 1
+      });
+      const updatedProduct = await prisma_default.product.update({
+        where: { id: product.id },
+        data: { qr_code: qrCodeDataURL }
+      });
+      return updatedProduct;
     } catch (error) {
+      console.error("[CreateProductService] Failed:", error);
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */

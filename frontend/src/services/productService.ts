@@ -21,6 +21,16 @@ export const searchProducts = async (query: string) => {
     return response;
 }
 
+export const getProductById = async (productId: string) => {
+    const response = await api.get(`/product/${productId}`, {
+        headers: {
+            Authorization: `${token}`,
+        }
+    });
+    
+    return response;
+};
+
 export const createProduct = async (product: any) => {
     const response = await api.post("/product", {
         name: product.name,

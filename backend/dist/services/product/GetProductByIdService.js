@@ -1,9 +1,7 @@
 "use strict";
-var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -17,23 +15,14 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/services/product/CreateProductService.ts
-var CreateProductService_exports = {};
-__export(CreateProductService_exports, {
-  CreateProductService: () => CreateProductService
+// src/services/product/GetProductByIdService.ts
+var GetProductByIdService_exports = {};
+__export(GetProductByIdService_exports, {
+  GetProductByIdService: () => GetProductByIdService
 });
-module.exports = __toCommonJS(CreateProductService_exports);
-var import_qrcode = __toESM(require("qrcode"));
+module.exports = __toCommonJS(GetProductByIdService_exports);
 
 // src/prisma/index.ts
 var import_client = require("@prisma/client");
@@ -58,26 +47,37 @@ var BadRequestException = class extends HttpException {
   }
 };
 
-// src/services/product/CreateProductService.ts
-var CreateProductService = class {
-  async execute(data) {
+// src/services/product/GetProductByIdService.ts
+var GetProductByIdService = class {
+  async execute({ id }) {
     try {
-      const product = await prisma_default.product.create({
-        data
+      const product = await prisma_default.product.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          unity: true,
+          stock: true,
+          enabled: true,
+          image: true,
+          qr_code: true,
+          created_at: true,
+          updated_at: true
+        }
       });
-      const qrCodeDataURL = await import_qrcode.default.toDataURL(product.id, {
-        errorCorrectionLevel: "M",
-        type: "image/png",
-        width: 300,
-        margin: 1
-      });
-      const updatedProduct = await prisma_default.product.update({
-        where: { id: product.id },
-        data: { qr_code: qrCodeDataURL }
-      });
-      return updatedProduct;
+      if (!product) {
+        throw new BadRequestException(
+          "Product not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+      return product;
     } catch (error) {
-      console.error("[CreateProductService] Failed:", error);
+      console.error("[GetProductByIdService] Failed:", error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */
@@ -87,5 +87,5 @@ var CreateProductService = class {
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  CreateProductService
+  GetProductByIdService
 });

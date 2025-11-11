@@ -43,7 +43,10 @@ import {
     ProductList,
     ProductContainer,
     NewProductButton,
-    PageHeaderActions
+    PageHeaderActions,
+    DiscountSwitch,
+    DiscountSwitchLabel,
+    PriceSummary
 } from "./style";
 
 import placeholder_products from '../../assets/images/placeholder_products.png';
@@ -94,6 +97,7 @@ export function OnlineOrder() {
     const [pageSize, setPageSize] = useState(8);
     const [useAIToGenerate, setUseAIToGenerate] = useState(false);
     const [showToolTipModal, setShowToolTipModal] = useState(false);
+    const [isPercentageDiscount, setIsPercentageDiscount] = useState(false);
     const tooltipMessage = `
 👉 Entregar dia:
 👉 Nome do Remetente:
@@ -116,6 +120,23 @@ export function OnlineOrder() {
 
     const receiver_phone = watch("receiver_phone");
 
+    // Calcula o desconto absoluto baseado no tipo (% ou valor)
+    const calculateAbsoluteDiscount = (discountValue: number, productsValue: number) => {
+        if (!discountValue) return 0;
+        if (isPercentageDiscount) {
+            return (productsValue * discountValue) / 100;
+        }
+        return discountValue;
+    };
+
+    // Watch para recalcular o total quando mudar desconto ou produtos
+    const productsValue = watch("products_value") || 0;
+    const discountInput = watch("discount") || 0;
+    const deliveryFee = watch("delivery_fee") || 0;
+
+    const absoluteDiscount = calculateAbsoluteDiscount(Number(discountInput), Number(productsValue));
+    const totalValue = Number(productsValue) - absoluteDiscount + Number(deliveryFee);
+
     const handleCopy = () => {
         const message = `Você poderia preencher esse link com o endereço completo prfv? E nele também tem um espacinho para você enviar um cartão. ✉️❤️\n${orderLink}`;
 
@@ -137,6 +158,10 @@ export function OnlineOrder() {
         const baseUrl = process.env.REACT_APP_URL;
 
         setShowLoader(true);
+
+        // Calcula o desconto absoluto para enviar ao backend
+        const absoluteDiscountValue = calculateAbsoluteDiscount(Number(data.discount) || 0, Number(data.products_value));
+
         const orderData = {
             client_id: null,
             receiver_phone: rawTelephone(receiver_phone),
@@ -160,9 +185,9 @@ export function OnlineOrder() {
             payment_method: data.payment_method,
             payment_received: data.payment_received,
             products_value: Number(data.products_value),
-            discount: Number(data.discount) || 0,
+            discount: absoluteDiscountValue,
             delivery_fee: Number(data.delivery_fee),
-            total: Number(data.products_value) - (Number(data.discount) || 0) + Number(data.delivery_fee),
+            total: Number(data.products_value) - absoluteDiscountValue + Number(data.delivery_fee),
             status: "WAITING_FOR_CLIENT",
             has_card: false,
             created_by: data.created_by,
@@ -529,8 +554,13 @@ export function OnlineOrder() {
                                     </FormField>
                                     <FormField>
                                         <Label>Desconto</Label>
-                                        <Input type="number" step="0.01" placeholder="0.00" defaultValue={0}
-                                            {...register("discount")} />
+                                        <Input 
+                                            type="number" 
+                                            step="0.01" 
+                                            placeholder={isPercentageDiscount ? "0.00%" : "0.00"} 
+                                            defaultValue={0}
+                                            {...register("discount")} 
+                                        />
                                     </FormField>
                                     <FormField>
                                         <Label>Taxa de entrega</Label>
@@ -538,6 +568,35 @@ export function OnlineOrder() {
                                         })} />
                                     </FormField>
                                 </InlineFormField>
+                                <DiscountSwitch>
+                                    <span style={{ color: isPercentageDiscount ? "#5B5B5B" : "#EC4899" }}>R$</span>
+                                    <Input 
+                                        id="discount-switch" 
+                                        type="checkbox" 
+                                        checked={isPercentageDiscount}
+                                        onChange={(e) => setIsPercentageDiscount(e.target.checked)}
+                                    />
+                                    <DiscountSwitchLabel htmlFor="discount-switch" $checked={isPercentageDiscount} />
+                                    <span style={{ color: isPercentageDiscount ? "#EC4899" : "#5B5B5B" }}>%</span>
+                                </DiscountSwitch>
+                                <PriceSummary>
+                                    <div className="summary-line">
+                                        <span>Subtotal (Produtos):</span>
+                                        <span>R$ {Number(productsValue).toFixed(2)}</span>
+                                    </div>
+                                    <div className="summary-line">
+                                        <span>Desconto {isPercentageDiscount ? `(${Number(discountInput).toFixed(2)}%)` : ''}:</span>
+                                        <span>- R$ {absoluteDiscount.toFixed(2)}</span>
+                                    </div>
+                                    <div className="summary-line">
+                                        <span>Taxa de Entrega:</span>
+                                        <span>R$ {Number(deliveryFee).toFixed(2)}</span>
+                                    </div>
+                                    <div className="summary-total">
+                                        <span>Total:</span>
+                                        <span>R$ {totalValue.toFixed(2)}</span>
+                                    </div>
+                                </PriceSummary>
                             </>
                         }
 
@@ -591,8 +650,13 @@ export function OnlineOrder() {
                                     </FormField>
                                     <FormField>
                                         <Label>Desconto</Label>
-                                        <Input type="number" step="0.01" placeholder="0.00" defaultValue={0}
-                                            {...register("discount")} />
+                                        <Input 
+                                            type="number" 
+                                            step="0.01" 
+                                            placeholder={isPercentageDiscount ? "0.00%" : "0.00"} 
+                                            defaultValue={0}
+                                            {...register("discount")} 
+                                        />
                                     </FormField>
                                     <FormField>
                                         <Label>Taxa de entrega</Label>
@@ -600,6 +664,35 @@ export function OnlineOrder() {
                                         })} />
                                     </FormField>
                                 </InlineFormField>
+                                <DiscountSwitch>
+                                    <span style={{ color: isPercentageDiscount ? "#5B5B5B" : "#EC4899" }}>R$</span>
+                                    <Input 
+                                        id="discount-switch-ai" 
+                                        type="checkbox" 
+                                        checked={isPercentageDiscount}
+                                        onChange={(e) => setIsPercentageDiscount(e.target.checked)}
+                                    />
+                                    <DiscountSwitchLabel htmlFor="discount-switch-ai" $checked={isPercentageDiscount} />
+                                    <span style={{ color: isPercentageDiscount ? "#EC4899" : "#5B5B5B" }}>%</span>
+                                </DiscountSwitch>
+                                <PriceSummary>
+                                    <div className="summary-line">
+                                        <span>Subtotal (Produtos):</span>
+                                        <span>R$ {Number(productsValue).toFixed(2)}</span>
+                                    </div>
+                                    <div className="summary-line">
+                                        <span>Desconto {isPercentageDiscount ? `(${Number(discountInput).toFixed(2)}%)` : ''}:</span>
+                                        <span>- R$ {absoluteDiscount.toFixed(2)}</span>
+                                    </div>
+                                    <div className="summary-line">
+                                        <span>Taxa de Entrega:</span>
+                                        <span>R$ {Number(deliveryFee).toFixed(2)}</span>
+                                    </div>
+                                    <div className="summary-total">
+                                        <span>Total:</span>
+                                        <span>R$ {totalValue.toFixed(2)}</span>
+                                    </div>
+                                </PriceSummary>
 
                                 <FormField>
                                     <Label>

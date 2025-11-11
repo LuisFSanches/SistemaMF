@@ -3,10 +3,12 @@ import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faXmark, faQrcode } from "@fortawesome/free-solid-svg-icons";
 import { faComputer } from "@fortawesome/free-solid-svg-icons";
 import { ProductCard} from "../../components/ProductCard";
 import { Pagination } from "../../components/Pagination";
+import { QRCodeScanner } from "../../components/QRCodeScanner";
+import { ProductConfirmModal } from "../../components/ProductConfirmModal";
 import {
     Container,
     FormHeader,
@@ -22,7 +24,10 @@ import {
     ProductList,
     FormContainer,
     PageHeaderActions,
-    SwitchDetail
+    SwitchDetail,
+    DiscountSwitch,
+    DiscountSwitchLabel,
+    PriceSummary
 } from "./style";
 
 import {
@@ -47,6 +52,7 @@ import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
 import { getPickupAddress } from "../../services/addressService";
+import { getProductById } from "../../services/productService";
 import { rawTelephone } from "../../utils";
 import { PAYMENT_METHODS, STATES } from "../../constants";
 import { useOrders } from "../../contexts/OrdersContext";
@@ -122,6 +128,10 @@ export function OnStoreOrder() {
     const [showCompletedModal, setShowCompletedModal] = useState(false);
     const today = new Date().toISOString().split("T")[0];
     const [orderCode, setOrderCode] = useState("");
+    const [showQRScanner, setShowQRScanner] = useState(false);
+    const [showProductConfirm, setShowProductConfirm] = useState(false);
+    const [scannedProduct, setScannedProduct] = useState<any>(null);
+    const [isPercentageDiscount, setIsPercentageDiscount] = useState(false);
 
     const navigate = useNavigate();
 
@@ -189,6 +199,23 @@ export function OnStoreOrder() {
         }
     });
 
+    // Calcula o desconto absoluto baseado no tipo (% ou valor)
+    const calculateAbsoluteDiscount = (discountValue: number, productsValue: number) => {
+        if (!discountValue) return 0;
+        if (isPercentageDiscount) {
+            return (productsValue * discountValue) / 100;
+        }
+        return discountValue;
+    };
+
+    // Watch para recalcular o total quando mudar desconto ou produtos
+    const productsValue = watch("products_value") || 0;
+    const discountInput = watch("discount") || 0;
+    const deliveryFee = watch("delivery_fee") || 0;
+
+    const absoluteDiscount = calculateAbsoluteDiscount(Number(discountInput), Number(productsValue));
+    const totalValue = Number(productsValue) - absoluteDiscount + Number(deliveryFee);
+
     const onSubmitStep = async ({
         phone_number,
         first_name,
@@ -218,7 +245,9 @@ export function OnStoreOrder() {
         created_by
     }: INewOrder) => {
 
-        const total = Number(products_value) - (Number(discount) || 0) + Number(delivery_fee);
+        // Calcula o desconto absoluto para enviar ao backend
+        const absoluteDiscountValue = calculateAbsoluteDiscount(Number(discount) || 0, Number(products_value));
+        const total = Number(products_value) - absoluteDiscountValue + Number(delivery_fee);
 
         const orderData = {
             phone_number: (is_delivery === false && fillClientInformation === false)
@@ -244,7 +273,7 @@ export function OnStoreOrder() {
             payment_method,
             payment_received,
             products_value: Number(products_value),
-            discount: Number(discount) || 0,
+            discount: absoluteDiscountValue,
             delivery_fee: Number(delivery_fee),
             total: Number(total),
             status: orderStatus,
@@ -454,6 +483,42 @@ export function OnStoreOrder() {
         }
     }
 
+    const handleQRCodeScan = async (decodedText: string) => {
+        try {
+            setShowLoader(true);
+            // Assume que o QR Code contém o ID do produto
+            const { data: product } = await getProductById(decodedText);
+            
+            if (product) {
+                // Armazena o produto e abre o modal de confirmação
+                setScannedProduct(product);
+                setShowProductConfirm(true);
+            }
+        } catch (error) {
+            console.error("Erro ao buscar produto por QR Code:", error);
+            alert("Produto não encontrado. Verifique o QR Code.");
+        } finally {
+            setShowLoader(false);
+        }
+    };
+
+    const handleConfirmProduct = (quantity: number, price: number) => {
+        if (scannedProduct) {
+            handleAddProduct(
+                {
+                    id: scannedProduct.id,
+                    name: scannedProduct.name,
+                    price: price,
+                    quantity: quantity
+                },
+                quantity,
+                price
+            );
+            showSuccess(`${quantity}x ${scannedProduct.name} adicionado ao pedido!`);
+            setScannedProduct(null);
+        }
+    };
+
     const description = products
         .map((p) => `${p.quantity}x ${p.name} - R$ ${p.price}`)
         .join('\n');
@@ -534,6 +599,24 @@ export function OnStoreOrder() {
                 orderCode={orderCode}
                 admins={admins}
             />
+
+            <QRCodeScanner
+                isOpen={showQRScanner}
+                onRequestClose={() => setShowQRScanner(false)}
+                onScanSuccess={handleQRCodeScan}
+            />
+
+            <ProductConfirmModal
+                isOpen={showProductConfirm}
+                onRequestClose={() => {
+                    setShowProductConfirm(false);
+                    setScannedProduct(null);
+                }}
+                product={scannedProduct}
+                onConfirm={handleConfirmProduct}
+                productImage={scannedProduct?.image || placeholder_products}
+            />
+
             <Loader show={showLoader} />
             <NewOrderContainer>
                 <ProductContainer>
@@ -541,6 +624,12 @@ export function OnStoreOrder() {
                         <div className="title">
                             <FontAwesomeIcon icon={faComputer as any} />
                             <span>Pedido Balcão</span>
+
+                            <NewProductButton type="button" onClick={() => setShowQRScanner(true)}
+                                style={{ marginLeft: '20px' }}>
+                                <FontAwesomeIcon icon={faQrcode as any} style={{ marginRight: '5px' }} />
+                                Escanear Produto
+                            </NewProductButton>
                         </div>
                         <PageHeaderActions>
                             <Switch>
@@ -765,6 +854,22 @@ export function OnStoreOrder() {
                                     </Select>
                                 </FormField> 
                             </InlineFormField>
+                            <FormField>
+                                <Label>Tipo de Desconto</Label>
+
+                                <DiscountSwitch>
+                                    <span style={{ color: isPercentageDiscount ? "#5B5B5B" : "#EC4899" }}>Valor(R$)</span>
+                                    <Input 
+                                        id="discount-switch-store" 
+                                        type="checkbox" 
+                                        checked={isPercentageDiscount}
+                                        onChange={(e) => setIsPercentageDiscount(e.target.checked)}
+                                    />
+                                    <DiscountSwitchLabel htmlFor="discount-switch-store" $checked={isPercentageDiscount} />
+                                    <span style={{ color: isPercentageDiscount ? "#EC4899" : "#5B5B5B" }}>Percentual(%)</span>
+                                </DiscountSwitch>
+                            </FormField>
+
                             <InlineFormField>
                                 <FormField style={{ marginTop: '10px' }}>
                                     <Label>Total dos Produtos</Label>
@@ -775,7 +880,13 @@ export function OnStoreOrder() {
                                 </FormField>
                                 <FormField style={{ marginTop: '10px' }}>
                                     <Label>Desconto</Label>
-                                    <Input type="number" step="0.01" placeholder="0.00" defaultValue={0} {...register("discount")} />
+                                    <Input 
+                                        type="number" 
+                                        step="0.01" 
+                                        placeholder={isPercentageDiscount ? "0.00%" : "0.00"} 
+                                        defaultValue={0} 
+                                        {...register("discount")} 
+                                    />
                                 </FormField>
                                 <FormField style={{ marginTop: '10px' }}>
                                     <Label>Taxa de entrega</Label>
@@ -783,6 +894,24 @@ export function OnStoreOrder() {
                                     })} />
                                 </FormField>
                             </InlineFormField>
+                            <PriceSummary>
+                                <div className="summary-line">
+                                    <span>Subtotal (Produtos):</span>
+                                    <span>R$ {Number(productsValue).toFixed(2)}</span>
+                                </div>
+                                <div className="summary-line">
+                                    <span>Desconto {isPercentageDiscount ? `(${Number(discountInput).toFixed(2)}%)` : ''}:</span>
+                                    <span>- R$ {absoluteDiscount.toFixed(2)}</span>
+                                </div>
+                                <div className="summary-line">
+                                    <span>Taxa de Entrega:</span>
+                                    <span>R$ {Number(deliveryFee).toFixed(2)}</span>
+                                </div>
+                                <div className="summary-total">
+                                    <span>Total:</span>
+                                    <span>R$ {totalValue.toFixed(2)}</span>
+                                </div>
+                            </PriceSummary>
                         </>
                     }
 

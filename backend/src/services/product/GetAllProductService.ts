@@ -16,7 +16,7 @@ class GetAllProductService{
 
 				const products = await prismaClient.$queryRawUnsafe<any[]>(
 					`
-						SELECT id, name, image, price, unity, stock, enabled
+						SELECT id, name, image, price, unity, stock, enabled, qr_code
 						FROM "products"
 						WHERE enabled = true
 						AND ${conditions}
@@ -60,7 +60,8 @@ class GetAllProductService{
 						price: true,
 						unity: true,
 						stock: true,
-						enabled: true
+						enabled: true,
+						qr_code: true
 					},
 					orderBy: {
 						created_at: 'desc'

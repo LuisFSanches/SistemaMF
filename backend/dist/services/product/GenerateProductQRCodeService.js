@@ -27,12 +27,12 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/services/product/CreateProductService.ts
-var CreateProductService_exports = {};
-__export(CreateProductService_exports, {
-  CreateProductService: () => CreateProductService
+// src/services/product/GenerateProductQRCodeService.ts
+var GenerateProductQRCodeService_exports = {};
+__export(GenerateProductQRCodeService_exports, {
+  GenerateProductQRCodeService: () => GenerateProductQRCodeService
 });
-module.exports = __toCommonJS(CreateProductService_exports);
+module.exports = __toCommonJS(GenerateProductQRCodeService_exports);
 var import_qrcode = __toESM(require("qrcode"));
 
 // src/prisma/index.ts
@@ -58,26 +58,40 @@ var BadRequestException = class extends HttpException {
   }
 };
 
-// src/services/product/CreateProductService.ts
-var CreateProductService = class {
-  async execute(data) {
+// src/services/product/GenerateProductQRCodeService.ts
+var GenerateProductQRCodeService = class {
+  async execute({ id }) {
     try {
-      const product = await prisma_default.product.create({
-        data
+      const product = await prisma_default.product.findUnique({
+        where: { id }
       });
-      const qrCodeDataURL = await import_qrcode.default.toDataURL(product.id, {
+      if (!product) {
+        throw new BadRequestException(
+          "Product not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+      const qrCodeDataURL = await import_qrcode.default.toDataURL(id, {
         errorCorrectionLevel: "M",
         type: "image/png",
         width: 300,
         margin: 1
       });
       const updatedProduct = await prisma_default.product.update({
-        where: { id: product.id },
-        data: { qr_code: qrCodeDataURL }
+        where: { id },
+        data: { qr_code: qrCodeDataURL },
+        select: {
+          id: true,
+          name: true,
+          qr_code: true
+        }
       });
       return updatedProduct;
     } catch (error) {
-      console.error("[CreateProductService] Failed:", error);
+      console.error("[GenerateProductQRCodeService] Failed:", error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */
@@ -87,5 +101,5 @@ var CreateProductService = class {
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  CreateProductService
+  GenerateProductQRCodeService
 });

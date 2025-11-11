@@ -10,10 +10,12 @@ import { UpdateClientController } from './controllers/client/UpdateClientControl
 
 import { CreateProductController } from './controllers/product/CreateProductController';
 import { GetAllProductController } from './controllers/product/GetAllProductController';
+import { GetProductByIdController } from './controllers/product/GetProductByIdController';
 import { UpdateProductController } from './controllers/product/UpdateProductController';
 import { SearchProductsController } from './controllers/product/SearchProductsController';
 import { UploadProductImageController } from './controllers/product/UploadProductImageController';
 import { DeleteProductImageController } from './controllers/product/DeleteProductImageController';
+import { GenerateProductQRCodeController } from './controllers/product/GenerateProductQRCodeController';
 
 import { CreateAddressController } from './controllers/address/CreateAddressController';
 import { GetAllClientAddressController } from './controllers/address/GetAllClientAddressController';
@@ -88,11 +90,13 @@ router.delete('/order/:id', adminAuthMiddleware, new DeleteOrderController().han
 
 //-- ROTAS PRODUCT --
 router.post('/product', adminAuthMiddleware, new CreateProductController().handle)
-router.put('/product/:id', superAdminAuthMiddleware, new UpdateProductController().handle)
 router.get('/product/all', superAdminAuthMiddleware, new GetAllProductController().handle)
 router.get('/product/search', superAdminAuthMiddleware, new SearchProductsController().handle)
+router.get('/product/:id', adminAuthMiddleware, new GetProductByIdController().handle)
+router.put('/product/:id', superAdminAuthMiddleware, new UpdateProductController().handle)
 router.post('/product/:id/image', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadProductImageController().handle)
 router.delete('/product/:id/image', adminAuthMiddleware, new DeleteProductImageController().handle)
+router.post('/product/:id/qrcode', adminAuthMiddleware, new GenerateProductQRCodeController().handle)
 
 //-- ROTAS ADMIN --
 router.post('/admin', superAdminAuthMiddleware, new CreateAdminController().handle)
