@@ -83,7 +83,7 @@ interface INewOrder {
     delivery_date: string;
     payment_method: string;
     payment_received: boolean;
-    products_value: number;
+    products_value: any;
     discount: number;
     total: number;
     delivery_fee: number;
@@ -446,7 +446,9 @@ export function OnStoreOrder() {
                 return sum + Number(p.quantity) * Number(p.price);
             }, 0);
 
-            setValue("products_value", total);
+            const formattedTotal = total > 0 ? total.toFixed(2) : 0;
+
+            setValue("products_value", formattedTotal);
             return updated;
         });
     };
@@ -459,8 +461,10 @@ export function OnStoreOrder() {
             const total = updated.reduce((sum: any, p: any) => {
             return sum + Number(p.quantity) * Number(p.price);
             }, 0);
+
+            const formattedTotal = total > 0 ? total.toFixed(2) : 0;
         
-            setValue("products_value", total);
+            setValue("products_value", formattedTotal);
         
             return updated;
         });
@@ -529,7 +533,12 @@ export function OnStoreOrder() {
     }, [description]);
 
     useEffect(() => {
-        loadAvailableProducts(page, pageSize, query);
+        setShowLoader(true);
+        setTimeout(() => {
+            loadAvailableProducts(page, pageSize, query).then(() => {
+                setShowLoader(false);
+            });
+        }, 300);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, pageSize, query]);
 
@@ -856,7 +865,6 @@ export function OnStoreOrder() {
                             </InlineFormField>
                             <FormField>
                                 <Label>Tipo de Desconto</Label>
-
                                 <DiscountSwitch>
                                     <span style={{ color: isPercentageDiscount ? "#5B5B5B" : "#EC4899" }}>Valor(R$)</span>
                                     <Input 
@@ -1104,9 +1112,10 @@ export function OnStoreOrder() {
                             </div>
                             <div>
                                 <p><strong>Valor dos produtos:</strong> R$ {order.products_value}</p>
-                                <p><strong>Desconto:</strong> R$ {order.discount || 0}</p>
+                                <p><strong>Desconto:</strong> R$ {order.discount.toFixed(2) || 0}</p>
                                 <p><strong>Taxa de entrega:</strong> R$ {order.delivery_fee}</p>
-                                <p><strong>Total:</strong> R$ {Number(order.products_value) - (Number(order.discount) || 0) + Number(order.delivery_fee)}</p>
+                                <p><strong>Total:</strong> 
+                                R$ {(Number(order.products_value) - (Number(order.discount) || 0) + Number(order.delivery_fee)).toFixed(2)}</p>
                             </div>
                             <div>
                                 <p><strong>Cliente: </strong>{order.first_name}</p>

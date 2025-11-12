@@ -95,11 +95,17 @@ export const CompletedOrder = styled.div`
     }
 
     h1, h2 {
-        font-size: 30px;
+        font-size: 27px;
         margin-top: 25px;
         text-align: center;
         color: pink;
-        font-family: "Pacifico", sans-serif;
+        font-family: "Poppins", sans-serif;
+        font-style: italic;
+    }
+
+    p {
+        font-size: 25px;
+        margin-top: 15px;
     }
 `
 

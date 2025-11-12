@@ -4,10 +4,23 @@ import Modal from 'react-modal';
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faPrint, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faPrint, faXmark, faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Loader } from "../../components/Loader";
 import { ErrorAlert } from '../ErrorAlert';
-import { Container, Button, ModalContainer, TextArea } from "./style";
+import { 
+    Container, 
+    Button, 
+    ModalContainer, 
+    EditorSection,
+    PreviewSection,
+    FormGroup,
+    Input,
+    TextArea,
+    FontSizeControl,
+    PreviewCard,
+    PreviewContent,
+    PrintButton
+} from "./style";
 
 const pdfModel = `./cartao_limpo.pdf`;
 const emojiFontVariable = `./noto_emoji_variable.ttf`;
@@ -16,7 +29,10 @@ export function GenerateCard() {
     const { showSuccess } = useSuccessMessage();
 
     const emojiRegex = /\p{Emoji}/u;
+    const [cardFrom, setCardFrom] = useState("");
+    const [cardTo, setCardTo] = useState("");
     const [cardMessage, setCardMessage] = useState("");
+    const [fontSize, setFontSize] = useState(15);
     const [showLoader, setShowLoader] = useState(false);
     const [showError, setShowError] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -90,24 +106,35 @@ export function GenerateCard() {
         }
     };
 
-    function wrapText(text: string, maxLength: number) {
+    function wrapTextByWidth(text: string, font: any, fontSize: number, maxWidth: number) {
         const lines = [];
-        while (text.length > 0) {
-            if (text.length <= maxLength) {
-                lines.push(text);
-                break;
+        const words = text.split(' ');
+        let currentLine = '';
+
+        for (const word of words) {
+            const testLine = currentLine ? `${currentLine} ${word}` : word;
+            const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+            if (testWidth > maxWidth && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+            } else {
+                currentLine = testLine;
             }
-            let breakPoint = text.lastIndexOf(' ', maxLength);
-            if (breakPoint === -1) breakPoint = maxLength;
-            lines.push(text.slice(0, breakPoint));
-            text = text.slice(breakPoint).trim();
         }
+
+        if (currentLine) {
+            lines.push(currentLine);
+        }
+
         return lines;
     }
 
-    function wrapMultilineText(text: string, maxLineLength: number): string[] {
+    function wrapMultilineText(text: string, font: any, fontSize: number, maxWidth: number): string[] {
         const rawLines = text.split('\n');
-        const wrappedLines = rawLines.flatMap(line => wrapText(line.trim(), maxLineLength));
+        const wrappedLines = rawLines.flatMap(line => 
+            line.trim() ? wrapTextByWidth(line.trim(), font, fontSize, maxWidth) : ['']
+        );
         return wrappedLines;
     }
 
@@ -121,29 +148,49 @@ export function GenerateCard() {
             
             const pdfDoc = await PDFDocument.load(pdfBytes);
             pdfDoc.setAuthor('Mirai Flores');
-            pdfDoc.setTitle(`Cartão de mensagem`);
+            pdfDoc.setTitle(`Cartão de mensagem`);
 
             pdfDoc.registerFontkit(fontkit);
 
             const regularFont = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic);
             const emojiFont = await pdfDoc.embedFont(emojiFontBytes);
-            const lineHeight = 24; 
+            const lineHeight = fontSize * 1.6; // Altura da linha proporcional ao tamanho da fonte
+            const maxWidth = 455; // Largura máxima disponível no PDF (595 - 120 de margem esquerda - 20 de margem direita)
 
             const pages = pdfDoc.getPages();
             const firstPage = pages[0];
+            let currentY = 710;
+            
+            // Adicionar "De" se existir
+            if (cardFrom) {
+                const sanitizedFrom = sanitizeText(`De: ${cardFrom}`);
+                write(true, firstPage, regularFont, emojiFont, sanitizedFrom, 120, currentY, fontSize);
+            }
 
-            const sanitizedCardMessage = sanitizeText(cardMessage);
-            const message_formatted = wrapMultilineText(sanitizedCardMessage, 65);
-            message_formatted.forEach((line, index) => {
-                write(true, firstPage, regularFont, emojiFont, line, 120, (710 - (index * lineHeight)), 14);
-            });
+            // Adicionar "Para" se existir
+
+            if (cardTo) {
+                const sanitizedTo = sanitizeText(`Para: ${cardTo}`);
+                write(true, firstPage, regularFont, emojiFont, sanitizedTo, 120, 685, fontSize);
+                currentY -= lineHeight * 2;
+            }
+
+            // Adicionar mensagem
+            if (cardMessage) {
+                const sanitizedCardMessage = sanitizeText(cardMessage);
+                const message_formatted = wrapMultilineText(sanitizedCardMessage, regularFont, fontSize, maxWidth);
+                message_formatted.forEach((line, index) => {
+                    write(true, firstPage, regularFont, emojiFont, line, 120, (650 - (index * lineHeight)), fontSize);
+                });
+                currentY -= (message_formatted.length * lineHeight) + lineHeight;
+            }
 
             const pdfOutput = await pdfDoc.save();
             const blob = new Blob([pdfOutput as any], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `Cartão de mensagem.pdf`;
+            link.download = `Cartão de mensagem.pdf`;
             link.click();
             URL.revokeObjectURL(url);
             showSuccess("Cartão gerado com sucesso!");
@@ -159,27 +206,88 @@ export function GenerateCard() {
     return (
         <Container>
             {showError &&
-                <ErrorAlert message='Não foi possível gerar o PDF'/>
+                <ErrorAlert message='Não foi possível gerar o PDF'/>
             }
             <Modal 
                 isOpen={isOpen}
                 onRequestClose={() => setIsOpen(false)}
                 overlayClassName="react-modal-overlay"
-                className="react-modal-content"
+                className="react-modal-content-wide"
                 >
                     <button type="button" onClick={() => setIsOpen(false)} className="modal-close">
                         <FontAwesomeIcon icon={faXmark}/>
                     </button>
                     <ModalContainer>
-                        <h2>Cole o conteúdo do cartão</h2>
-                        <TextArea
-                            onChange={(e) => setCardMessage(e.target.value)}
-                            placeholder="Cole o conteúdo do cartão aqui."
-                        />
-                        <Button onClick={generatePDF}>
-                            <FontAwesomeIcon icon={faPrint}/>
-                            Gerar
-                        </Button>
+                        <EditorSection>
+                            <h2>Personalizar Cartão</h2>
+                            
+                            <FormGroup>
+                                <label>De:</label>
+                                <Input
+                                    value={cardFrom}
+                                    onChange={(e) => setCardFrom(e.target.value)}
+                                    placeholder="Quem está enviando"
+                                />
+                            </FormGroup>
+
+                            <FormGroup>
+                                <label>Para:</label>
+                                <Input
+                                    value={cardTo}
+                                    onChange={(e) => setCardTo(e.target.value)}
+                                    placeholder="Para quem é o cartão"
+                                />
+                            </FormGroup>
+
+                            <FormGroup>
+                                <label>Mensagem:</label>
+                                <TextArea
+                                    value={cardMessage}
+                                    onChange={(e) => setCardMessage(e.target.value)}
+                                    placeholder="Digite sua mensagem aqui..."
+                                />
+                            </FormGroup>
+
+                            <FormGroup>
+                                <label>Tamanho da Fonte: {fontSize}px</label>
+                                <FontSizeControl>
+                                    <button onClick={() => setFontSize(Math.max(12, fontSize - 2))}>
+                                        <FontAwesomeIcon icon={faMinus} />
+                                    </button>
+                                    <input 
+                                        type="range" 
+                                        min="12" 
+                                        max="48" 
+                                        value={fontSize}
+                                        onChange={(e) => setFontSize(Number(e.target.value))}
+                                        style={{ flex: 1 }}
+                                    />
+                                    <button onClick={() => setFontSize(Math.min(48, fontSize + 2))}>
+                                        <FontAwesomeIcon icon={faPlus} />
+                                    </button>
+                                </FontSizeControl>
+                            </FormGroup>
+
+                            <PrintButton onClick={generatePDF}>
+                                <FontAwesomeIcon icon={faPrint}/>
+                                Imprimir
+                            </PrintButton>
+                        </EditorSection>
+
+                        <PreviewSection>
+                            <PreviewCard>
+                                <PreviewContent fontSize={fontSize}>
+                                    {cardFrom && <div className="card-from">De: {cardFrom}</div>}
+                                    {cardTo && <div className="card-to">Para: {cardTo}</div>}
+                                    {cardMessage && <div className="card-message">{cardMessage}</div>}
+                                    {!cardTo && !cardMessage && !cardFrom && (
+                                        <div style={{ color: '#999', fontStyle: 'italic' }}>
+                                            Preencha os campos para visualizar o cartão
+                                        </div>
+                                    )}
+                                </PreviewContent>
+                            </PreviewCard>
+                        </PreviewSection>
                     </ModalContainer>
             </Modal>
             <Loader show={showLoader} />

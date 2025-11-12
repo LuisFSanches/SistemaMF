@@ -174,7 +174,7 @@ export function ProductsPage(){
                     style={{ marginBottom: 0, marginRight: '10px', backgroundColor: '#10b981' }}
                 >
                     <FontAwesomeIcon icon={faQrcode}/>
-                    <p>Gerar QRCodes</p>
+                    <p>Imprimir QRCodes</p>
                 </AddButton>
                 <AddButton onClick={() =>handleOpenProductModal("create", 
                     {id: "", name: "", price: null, unity: "", stock: null, enabled: true})}

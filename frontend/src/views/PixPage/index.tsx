@@ -22,9 +22,15 @@ export function PixPage(){
             if (!initialDate || !finalDate) return;
             setShowLoader(true);
             const params = `?initial_date=${initialDate}&final_date=${finalDate}&limit=${selectedLimit}`
-            const { data } = await getPix(params);
-            setPixList(data);
-            setShowLoader(false);
+
+            try {
+                const { data } = await getPix(params);
+                setPixList(data);
+                setShowLoader(false);
+            } catch(error) {
+                setShowLoader(false);
+            }
+
         }
 
         if (initialDate !== "" && finalDate !== "") {

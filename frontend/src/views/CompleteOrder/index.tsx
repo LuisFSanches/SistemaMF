@@ -385,7 +385,17 @@ export function CompleteOrder() {
                 <CompletedOrder>
                     <img src={logoFull} alt="" />
                     <h1>Seu pedido foi enviado para a loja!</h1>
-                    <h2>Qualquer dúvida entre em contato conosco.</h2>
+                    {!currentOrder?.payment_received &&
+                        <>
+                            <h2>Para concluir, finalize o pagamento com nosso atendente no WhatsApp.</h2>
+                            <h2>Assim que confirmado, daremos sequência ao seu pedido.</h2>
+                            <p>🌺🌻🌸</p>
+                        </>
+                    }
+
+                    {currentOrder?.payment_received &&
+                        <h2>Qualquer dúvida entre em contato conosco.</h2>
+                    }
                 </CompletedOrder>
             }
             {isWaitingForClienteOrder &&

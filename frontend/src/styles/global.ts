@@ -246,6 +246,28 @@ button{
     }
 }
 
+.react-modal-content-wide {
+    width: 100%;
+    max-width: 1200px;
+    max-height: 95vh;
+    background: var(--background);
+    padding: 2rem;
+    position: relative;
+    border-radius: 0.25rem;
+    outline: none;
+    overflow: hidden;
+
+    @media (max-width: 968px){
+        max-width: 90%;
+        padding: 1.5rem;
+    }
+
+    @media (max-width: 768px){
+        max-width: 95%;
+        padding: 1rem;
+    }
+}
+
 .react-modal-content-edit-order {
     width: 100%;
     max-height: 835px;

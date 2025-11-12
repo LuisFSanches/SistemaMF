@@ -59,7 +59,7 @@ interface INewOrder {
     payment_received: boolean;
     delivery_date: string;
     payment_method: string;
-    products_value: number;
+    products_value: any;
     discount: number;
     delivery_fee: number;
     total: number;
@@ -280,7 +280,9 @@ export function OnlineOrder() {
                 return sum + Number(p.quantity) * Number(p.price);
             }, 0);
 
-            setValue("products_value", total);
+            const formattedTotal = total > 0 ? total.toFixed(2) : 0;
+
+            setValue("products_value", formattedTotal);
             return updated;
         });
     };
@@ -292,8 +294,10 @@ export function OnlineOrder() {
             const total = updated.reduce((sum: any, p: any) => {
                 return sum + Number(p.quantity) * Number(p.price);
             }, 0);
+
+            const formattedTotal = total > 0 ? total.toFixed(2) : 0;
         
-            setValue("products_value", total);
+            setValue("products_value", formattedTotal);
         
             return updated;
         });
@@ -316,7 +320,12 @@ export function OnlineOrder() {
     }, [description]);
 
     useEffect(() => {
-        loadAvailableProducts(page, pageSize, query);
+        setShowLoader(true);
+        setTimeout(() => {
+            loadAvailableProducts(page, pageSize, query).then(() => {
+                setShowLoader(false);
+            });
+        }, 300);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, pageSize, query]);
 
@@ -485,7 +494,9 @@ export function OnlineOrder() {
                             <>
                                 <FormField>
                                     <Label>Observações</Label>
-                                    <Textarea style={{ minHeight: "100px" }} placeholder="Observações" {...register("additional_information")}
+                                    <Textarea
+                                        style={{ minHeight: "50px" }}
+                                        placeholder="Observações" {...register("additional_information")}
                                     />
                                 </FormField>
                                 <FormField>
@@ -542,6 +553,20 @@ export function OnlineOrder() {
                                     </Select>
                                     {errors.created_by && <ErrorMessage>{errors.created_by.message}</ErrorMessage>}
                                 </FormField>
+                                <FormField>
+                                    <Label>Tipo de Desconto</Label>
+                                    <DiscountSwitch>
+                                        <span style={{ color: isPercentageDiscount ? "#5B5B5B" : "#EC4899" }}>Valor(R$)</span>
+                                        <Input 
+                                            id="discount-switch-store" 
+                                            type="checkbox" 
+                                            checked={isPercentageDiscount}
+                                            onChange={(e) => setIsPercentageDiscount(e.target.checked)}
+                                        />
+                                        <DiscountSwitchLabel htmlFor="discount-switch-store" $checked={isPercentageDiscount} />
+                                        <span style={{ color: isPercentageDiscount ? "#EC4899" : "#5B5B5B" }}>Percentual(%)</span>
+                                    </DiscountSwitch>
+                                </FormField>
                                 <InlineFormField>
                                     <FormField>
                                         <Label>Total dos Produtos</Label>
@@ -568,17 +593,6 @@ export function OnlineOrder() {
                                         })} />
                                     </FormField>
                                 </InlineFormField>
-                                <DiscountSwitch>
-                                    <span style={{ color: isPercentageDiscount ? "#5B5B5B" : "#EC4899" }}>R$</span>
-                                    <Input 
-                                        id="discount-switch" 
-                                        type="checkbox" 
-                                        checked={isPercentageDiscount}
-                                        onChange={(e) => setIsPercentageDiscount(e.target.checked)}
-                                    />
-                                    <DiscountSwitchLabel htmlFor="discount-switch" $checked={isPercentageDiscount} />
-                                    <span style={{ color: isPercentageDiscount ? "#EC4899" : "#5B5B5B" }}>%</span>
-                                </DiscountSwitch>
                                 <PriceSummary>
                                     <div className="summary-line">
                                         <span>Subtotal (Produtos):</span>
@@ -604,7 +618,9 @@ export function OnlineOrder() {
                             <>
                                 <FormField>
                                     <Label>Observações</Label>
-                                    <Textarea style={{ minHeight: "50px" }} placeholder="Observações" {...register("additional_information")}
+                                    <Textarea
+                                        style={{ minHeight: "70px" }}
+                                        placeholder="Observações" {...register("additional_information")}
                                     />
                                 </FormField>
                                 <InlineFormField style={{ alignItems: "center" }}>
