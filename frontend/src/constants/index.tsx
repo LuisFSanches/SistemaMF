@@ -73,3 +73,8 @@ export const UNITIES = {
   "L": "Litro",
   "M": "Metro",
 }
+
+export const ORDERS_TO_RECEIVE_TYPES = {
+  "PROMISSORY": "Promissório",
+  "BOLETO": "Boleto"
+}

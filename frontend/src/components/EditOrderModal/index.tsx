@@ -290,14 +290,14 @@ export function EditOrderModal({
 	}, [description]);
 
 	useEffect(() => {
-		console.log(products);
-		const hasInvalidProduct = products.some(p => {
-			return !p.quantity || !p.price;
-		});
+		if (products) {
+			const hasInvalidProduct = products && products.some(p => {
+				return !p.quantity || !p.price;
+			});
+		
+			setShowProductError(hasInvalidProduct );
+		}
 
-		console.log(hasInvalidProduct);
-	
-		setShowProductError(hasInvalidProduct);
 	}, [products]);
 
 	useEffect(() => {

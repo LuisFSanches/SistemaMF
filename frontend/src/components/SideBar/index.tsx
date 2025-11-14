@@ -33,7 +33,8 @@ export function SideBar(){
         administradores: false,
         pedidoOnline: false,
         aguardandoCliente: false,
-        estoque: false
+        estoque: false,
+        valoresAReceber: false
     })
     
     const handleActiveMenuButton = useCallback((name:string) => {
@@ -51,7 +52,8 @@ export function SideBar(){
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
             case 'pedidoBalcao':
@@ -67,7 +69,8 @@ export function SideBar(){
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
             case 'ordensDeServico':
@@ -83,7 +86,8 @@ export function SideBar(){
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
             case 'statistics':
@@ -99,7 +103,8 @@ export function SideBar(){
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
             case 'pedidos':
@@ -115,7 +120,8 @@ export function SideBar(){
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
 
@@ -132,7 +138,8 @@ export function SideBar(){
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
 
@@ -149,7 +156,8 @@ export function SideBar(){
                     "administradores": true,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
 
@@ -167,7 +175,8 @@ export function SideBar(){
                     'pix': true,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
 
@@ -185,7 +194,8 @@ export function SideBar(){
                     'pix': false,
                     "pedidoOnline": true,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
             case 'aguardandoCliente':
@@ -202,7 +212,8 @@ export function SideBar(){
                     'pix': false,
                     "pedidoOnline": false,
                     "aguardandoCliente": true,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
 
@@ -220,13 +231,34 @@ export function SideBar(){
                     'pix': false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
 
             case 'estoque':
                 setActive({...isActive,
                     'estoque':true,
+                    'dashboard':false,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false,
+                    "valoresAReceber": false,
+                })
+            break;
+
+            case 'valoresAReceber':
+                setActive({...isActive,
+                    'valoresAReceber':true,
+                    'estoque':false,
                     'dashboard':false,
                     'pedidoBalcao':false,
                     'ordensDeServico':false,
@@ -345,7 +377,7 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
                 
-                <NavLink to="/estoque">
+                <NavLink to="/estoque" style={{ display: 'none'}}>
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('estoque')}>
                         <SideBarButton
                             isActive={isActive['estoque']}
@@ -354,6 +386,19 @@ export function SideBar(){
                         >
                             <FontAwesomeIcon icon={faWarehouse} className="Side-Bar-Icon"/>
                             <span>Compras Efetuadas</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
+
+                <NavLink to="/valores-a-receber">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('valoresAReceber')}>
+                        <SideBarButton
+                            isActive={isActive['valoresAReceber']}
+                            isMinimizedActive
+                            title="Valores a Receber"
+                        >
+                            <i className="material-icons">account_balance_wallet</i>
+                            <span>Ordens para receber</span>
                         </SideBarButton>
                     </SideBarItemContainer>
                 </NavLink>

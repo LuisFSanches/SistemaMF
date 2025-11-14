@@ -36,7 +36,8 @@ export function GlobalMenu({
         administradores: false,
         pedidoOnline: false,
         aguardandoCliente: false,
-        estoque: false
+        estoque: false,
+        valoresAReceber: false
     })
 
     const handleActiveMenuButton = useCallback((name:string) => {
@@ -54,7 +55,8 @@ export function GlobalMenu({
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
             case 'pedidoBalcao':
@@ -70,7 +72,8 @@ export function GlobalMenu({
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
             case 'ordensDeServico':
@@ -86,7 +89,8 @@ export function GlobalMenu({
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
             case 'statistics':
@@ -102,7 +106,8 @@ export function GlobalMenu({
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
             case 'pedidos':
@@ -118,7 +123,8 @@ export function GlobalMenu({
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
 
@@ -135,7 +141,8 @@ export function GlobalMenu({
                     "administradores": false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
 
@@ -152,7 +159,8 @@ export function GlobalMenu({
                     "administradores": true,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
 
@@ -170,7 +178,8 @@ export function GlobalMenu({
                     'pix': true,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
 
@@ -188,7 +197,8 @@ export function GlobalMenu({
                     'pix': false,
                     "pedidoOnline": true,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
             case 'aguardandoCliente':
@@ -205,7 +215,8 @@ export function GlobalMenu({
                     'pix': false,
                     "pedidoOnline": false,
                     "aguardandoCliente": true,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
                 })
             break;
 
@@ -223,7 +234,27 @@ export function GlobalMenu({
                     'pix': false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "estoque": false
+                    "estoque": false,
+                    "valoresAReceber": false
+                })
+            break;
+
+            case 'valoresAReceber':
+                setActive({...isActive,
+                    'dashboard':false,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false,
+                    "estoque": false,
+                    "valoresAReceber": true
                 })
             break;
 
@@ -241,7 +272,8 @@ export function GlobalMenu({
                     "administradores": false,
                     'pix': false,
                     "pedidoOnline": false,
-                    "aguardandoCliente": false
+                    "aguardandoCliente": false,
+                    "valoresAReceber": false
                 })
             break;
         }
@@ -385,6 +417,16 @@ export function GlobalMenu({
                                 <FontAwesomeIcon icon={faUserShield} className="Side-Bar-Icon"/>
                                 Vendedores
                             </span>
+                        </NavButton>
+                    </NavLink>
+                    <NavLink to="/valores-a-receber">
+                        <NavButton
+                            type="button"
+                            onClick={() => handleActiveMenuButton('valoresAReceber')}
+                            isActive={isActive['valoresAReceber']}
+                        >
+                            <i className="material-icons">account_balance_wallet</i>
+                            <span>Ordens para receber</span>
                         </NavButton>
                     </NavLink>
                     <NavLink to="/pix">

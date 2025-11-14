@@ -146,6 +146,18 @@ export const updateOrder = async(order: any) => {
 	return response;
 };
 
+export const updateOrderPaymentStatus = async(id: string, payment_received: boolean) => {
+	const response = await api.patch(`/order/${id}/payment`, {
+		payment_received
+	}, {
+		headers: {
+			Authorization: `${token}`,
+		}
+	});
+
+	return response.data;
+};
+
 export const finishOnlineOrder = async(order: any) => {
 	const response = await api.put(`/order/finish/${order.id}`, {
 		order,

@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
 import moment from "moment";
 import { IOrder } from "../../interfaces/IOrder";
+import { ICreateOrderToReceive } from "../../interfaces/IOrderToReceive";
 import { Container, Orders, Header } from "./style";
-import { updateStatus } from "../../services/orderService";
+import { updateStatus, updateOrderPaymentStatus } from "../../services/orderService";
 import { OrderCard } from "../../components/OrderCard";
 import { useOrders } from "../../contexts/OrdersContext";
+import { useOrdersToReceive } from "../../contexts/OrdersToReceiveContext";
+import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { Loader } from "../../components/Loader";
 import { EditOrderModal } from "../../components/EditOrderModal";
+import { PaymentStatusModal } from "../../components/PaymentStatusModal";
 
 export function ServiceOrdersPage(){
 	const { onGoingOrders, editOrder, loadOnGoingOrders } = useOrders();
+	const { createOrderToReceive } = useOrdersToReceive();
+	const { showSuccess } = useSuccessMessage();
 
 	const [openedOrders, setOpenedOrders] = useState<IOrder[]>([]);
 	const [inProgressOrders, setInProgressOrders] = useState<IOrder[]>([]);
@@ -17,6 +23,7 @@ export function ServiceOrdersPage(){
 	const [showLoader, setShowLoader] = useState(false);
 	const [requestOrders, setRequestOrders] = useState(false);
     const [editOrderModal, setEditOrderModal] = useState(false);
+    const [paymentStatusModal, setPaymentStatusModal] = useState(false);
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 	const [selectedOrderType, setSelectedOrderType] = useState("all-orders");
 	const [selectedDate, setSelectedDate] = useState("all-dates");
@@ -46,11 +53,46 @@ export function ServiceOrdersPage(){
 
 	const handleOrderStatus = async (id: string, status: string) => {
 		setShowLoader(true);
+		const orderToUpdate = onGoingOrders.find(order => order.id === id);
+
+		if (status === 'DONE' && orderToUpdate && !orderToUpdate.payment_received) {
+			setCurrentOrder(orderToUpdate);
+			setPaymentStatusModal(true);
+			setShowLoader(false);
+			return;
+		}
+
 		const response =await updateStatus({ id, status });
 		const { data: order } = response;
 		editOrder(order);
 		setShowLoader(false);
 	}
+
+	const handleConfirmPayment = async () => {
+		if (!currentOrder) return;
+		setShowLoader(true);
+		await updateOrderPaymentStatus(currentOrder.id!, true);
+		const response = await updateStatus({ id: currentOrder.id!, status: 'DONE' });
+		const { data: order } = response;
+		editOrder(order);
+		showSuccess("Pagamento confirmado e pedido movido para concluído!");
+		setShowLoader(false);
+		setPaymentStatusModal(false);
+		setCurrentOrder(null);
+	};
+
+	const handleCreateOrderToReceive = async (data: ICreateOrderToReceive) => {
+		if (!currentOrder) return;
+		setShowLoader(true);
+		await createOrderToReceive(data);
+		const response = await updateStatus({ id: currentOrder.id!, status: 'DONE' });
+		const { data: order } = response;
+		editOrder(order);
+		showSuccess("Valor a receber criado e pedido movido para concluído!");
+		setShowLoader(false);
+		setPaymentStatusModal(false);
+		setCurrentOrder(null);
+	};
 
 	const filterOrdersByType = (orderType: string) => {
 		setSelectedOrderType(orderType);
@@ -194,11 +236,11 @@ export function ServiceOrdersPage(){
 							<OrderCard order={order}
 								handleOrderStatus={handleOrderStatus}
 								buttonStatus="to-finished"
-								previousButtonStatus="to-production"
+								previousButtonStatus="to-open"
 								nextStatus="IN_DELIVERY"
 								previousStatus="OPENED"
 								nextAction="Entrega"
-								previousAction="Em produção"
+								previousAction="Aberta"
 								handleOpenEditOrderModal={handleOpenEditOrderModal}
 							/>
 						</div>
@@ -213,11 +255,11 @@ export function ServiceOrdersPage(){
 							<OrderCard order={order}
 								handleOrderStatus={handleOrderStatus}
 								buttonStatus="delivered"
-								previousButtonStatus="to-finished"
+								previousButtonStatus="to-production"
 								nextStatus="DONE"
 								previousStatus="IN_PROGRESS"
 								nextAction="Finalizado"
-								previousAction="Entrega"
+								previousAction="Produção"
 								handleOpenEditOrderModal={handleOpenEditOrderModal}
 							/>
 						</div>
@@ -230,6 +272,19 @@ export function ServiceOrdersPage(){
                 onRequestClose={() => setEditOrderModal(false)}
                 order={currentOrder as any}
             />
+
+			{currentOrder && (
+				<PaymentStatusModal
+					isOpen={paymentStatusModal}
+					onRequestClose={() => {
+						setPaymentStatusModal(false);
+						setCurrentOrder(null);
+					}}
+					order={currentOrder}
+					onConfirmPayment={handleConfirmPayment}
+					onCreateOrderToReceive={handleCreateOrderToReceive}
+				/>
+			)}
 		</Container>
 	)
 }

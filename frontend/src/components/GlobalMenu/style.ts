@@ -10,6 +10,8 @@ export const MenuList = styled.div`
 `;
 
 export const NavButton = styled.button<MenuButtonProps>`
+    display: flex;
+    align-items: center;
     background: ${({ isActive }) => isActive ? '#EC4899' : 'none'};
     border: none;
     cursor: pointer;

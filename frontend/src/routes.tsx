@@ -18,6 +18,7 @@ import { CompleteOrder } from "./views/CompleteOrder";
 import { WaitingClientOrders } from "./views/WaitingClientOrders";
 import { ProductsPage } from "./views/Products";
 import { StockPage } from "./views/Stock";
+import { OrdersToReceivePage } from "./views/OrdersToReceive";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -89,6 +90,11 @@ export default function routes(){
                         <Route path="pedidos" element={
                             <PrivateRoute>
                                 <OrdersPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="valores-a-receber" element={
+                            <PrivateRoute>
+                                <OrdersToReceivePage/>
                             </PrivateRoute>
                         }/>
                         <Route path="pix" element={

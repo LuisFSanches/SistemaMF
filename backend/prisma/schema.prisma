@@ -133,6 +133,7 @@ model Order {
   is_delivery       Boolean       @default(true)
 
   orderItems OrderItem[]
+  ordersToReceive OrderToReceive[]
 
   @@map("orders")
 }
@@ -152,4 +153,19 @@ model StockTransaction {
   product        Product  @relation(fields: [product_id], references: [id])
 
   @@map("stock_transactions")
+}
+
+model OrderToReceive {
+  id               String   @id @default(uuid())
+  order_id         String
+  payment_due_date DateTime
+  received_date    DateTime?
+  type             String
+  is_archived      Boolean  @default(false)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  order            Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@map("orders_to_receive")
 }

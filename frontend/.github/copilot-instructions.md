@@ -33,8 +33,11 @@ src/
 #### 1. Styling Pattern
 - **Every component has a `style.ts` file** (not `styles.ts`)
 - Import from `styled-components`, never plain CSS
-- Shared styled components live in `src/styles/global.ts`:
-  - `PageHeader`, `FormField`, `Label`, `Input`, `Select`, `PrimaryButton`, etc.
+- **ALWAYS prioritize using global styled components from `src/styles/global.ts`**:
+  - Available components: `PageHeader`, `FormField`, `InlineFormField`, `EditFormField`, `Label`, `Input`, `Select`, `PrimaryButton`, `SecondaryButton`, `ModalContainer`, `Form`, `ErrorMessage`, etc.
+  - Import pattern: `import { ModalContainer, Form, Input, Label, Select, ErrorMessage } from '../../styles/global';`
+  - Only create custom styled components in `style.ts` when the global ones don't fit the specific use case
+  - Check existing modals/pages for reference before creating new styled components
 - Color variables defined in `:root` within `GlobalStyle` (e.g., `var(--primary-color)`)
 
 #### 2. Form Management
@@ -94,7 +97,14 @@ npm test           # Jest tests
 1. **Adding a new page**: Create in `src/views/[PageName]/`, add route in `routes.tsx`, wrap in `<PrivateRoute>`
 2. **Adding a modal**: Follow pattern of existing modals (e.g., `OrderDetailModal`), use `react-modal`
 3. **New API endpoint**: Add to relevant service file, import `api` instance, handle token in headers
-4. **Styling a component**: Create `style.ts`, import styled, export named styled components
+4. **Styling a component**: 
+   - First check `src/styles/global.ts` for existing styled components
+   - Import and use global components: `ModalContainer`, `Form`, `Input`, `Label`, `Select`, `ErrorMessage`, `PrimaryButton`, `SecondaryButton`, etc.
+   - Only create `style.ts` with custom styled components when global ones don't meet the specific need
+5. **Adding constants**: 
+   - Add to `src/constants/index.tsx` (never create local constants)
+   - Use uppercase naming with underscores: `CONSTANT_NAME`
+   - Import where needed: `import { CONSTANT_NAME } from '../../constants';`
 
 ### Important Notes
 - **No inline styles** except for rare dynamic width adjustments
@@ -103,6 +113,12 @@ npm test           # Jest tests
 - **Phone input**: Use `react-input-mask` with mask `(99) 99999-9999`
 - **FontAwesome icons**: Imported from `@fortawesome/react-fontawesome` + icon packs
 - **PDF generation**: Uses `pdf-lib` + `@pdf-lib/fontkit` for order/card printing
+- **Code formatting**: Always use **4 spaces for indentation** (tabulation), never tabs or 2 spaces
+- **Constants management**: ALL application constants must be defined in `src/constants/index.tsx` and imported where needed
+  - Never create duplicate constant objects in individual files
+  - Examples: `PAYMENT_METHODS`, `STATUS_LABEL`, `ORDERS_TO_RECEIVE_TYPES`, `STATES`, `UNITIES`, etc.
+  - Pattern: `export const CONSTANT_NAME = { "KEY": "Value", ... }`
+  - Import pattern: `import { CONSTANT_NAME } from '../../constants';`
 
 ### Domain-Specific Logic
 - **Orders can have card messages** (`has_card`, `card_message`, `card_from`, `card_to`)
@@ -115,8 +131,10 @@ npm test           # Jest tests
 - ❌ Creating CSS/SCSS files (use styled-components only)
 - ❌ Using `useState` for form fields (use react-hook-form)
 - ❌ Direct localStorage/token manipulation outside AuthContext
-- ❌ Importing from `src/styles/` for component-specific styles
+- ❌ Creating custom styled components when global ones exist in `src/styles/global.ts`
 - ❌ Creating service functions that don't use the shared `api` instance
+- ❌ Defining constants locally in files instead of using `src/constants/index.tsx`
+- ❌ Using 2 spaces or tabs for indentation (always use 4 spaces)
 
 ### AI-Specific Enhancements
 - **OpenAI integration**: `createOrderByAi` endpoint in `orderService.ts` for natural language order creation

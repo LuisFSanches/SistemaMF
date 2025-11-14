@@ -133,6 +133,11 @@ export const OrderCardContainer= styled.div`
         color: var(--text-title);
         background: #fff;
     }
+    .to-open {
+        background: var(--order-yellow);
+        color: #000;
+    }
+
     .to-production{
         color: #fff;
         background: var(--order-blue);

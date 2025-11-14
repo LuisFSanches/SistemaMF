@@ -27,6 +27,7 @@ import { GetOnGoingOrderController } from './controllers/order/GetOnGoingOrderCo
 import { GetAllOrderController } from './controllers/order/GetAllOrderController';
 import { UpdateOrderController } from './controllers/order/UpdateOrderController';
 import { UpdateOrderStatusController } from './controllers/order/UpdateOrderStatusController';
+import { UpdateOrderPaymentController } from './controllers/order/UpdateOrderPaymentController';
 import { GetOrderController } from './controllers/order/GetOrderController';
 import { FinishOnlineOrderController } from './controllers/order/FinishOnlineOrderController';
 import { GetWaitingOnlineOrderController } from './controllers/order/GetWaitingOnlineOrderController';
@@ -50,6 +51,12 @@ import { TopAdminsController } from './controllers/statistics/TopAdminsControlle
 import { CreateStockTransactionController } from './controllers/stockTransaction/CreateStockTransactionController';
 import { GetAllStockTransactionsController } from './controllers/stockTransaction/GetAllStockTransactionsController';
 import { DeleteStockTransactionController } from './controllers/stockTransaction/DeleteStockTransactionController';
+
+import { CreateOrderToReceiveController } from './controllers/orderToReceive/CreateOrderToReceiveController';
+import { GetOrderToReceiveController } from './controllers/orderToReceive/GetOrderToReceiveController';
+import { GetAllOrderToReceiveController } from './controllers/orderToReceive/GetAllOrderToReceiveController';
+import { UpdateOrderToReceiveController } from './controllers/orderToReceive/UpdateOrderToReceiveController';
+import { DeleteOrderToReceiveController } from './controllers/orderToReceive/DeleteOrderToReceiveController';
 
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
@@ -86,6 +93,7 @@ router.post('/order/ai', adminAuthMiddleware, new CreateOrderByAIController().ha
 router.put('/order/:id', adminAuthMiddleware, new UpdateOrderController().handle);
 router.put('/order/finish/:id', new FinishOnlineOrderController().handle);
 router.patch('/order/:id', adminAuthMiddleware, new UpdateOrderStatusController().handle);
+router.patch('/order/:id/payment', adminAuthMiddleware, new UpdateOrderPaymentController().handle);
 router.delete('/order/:id', adminAuthMiddleware, new DeleteOrderController().handle);
 
 //-- ROTAS PRODUCT --
@@ -120,5 +128,12 @@ router.get('/statistics/top-admins', superAdminAuthMiddleware, new TopAdminsCont
 router.get('/stockTransaction/all', adminAuthMiddleware, new GetAllStockTransactionsController().handle);
 router.post('/stockTransaction', adminAuthMiddleware, new CreateStockTransactionController().handle);
 router.delete('/stockTransaction/:id', adminAuthMiddleware, new DeleteStockTransactionController().handle);
+
+//-- ROTAS ORDER TO RECEIVE --
+router.post('/orderToReceive', adminAuthMiddleware, new CreateOrderToReceiveController().handle);
+router.get('/orderToReceive/all', adminAuthMiddleware, new GetAllOrderToReceiveController().handle);
+router.get('/orderToReceive/:id', adminAuthMiddleware, new GetOrderToReceiveController().handle);
+router.put('/orderToReceive/:id', adminAuthMiddleware, new UpdateOrderToReceiveController().handle);
+router.delete('/orderToReceive/:id', adminAuthMiddleware, new DeleteOrderToReceiveController().handle);
 
 export { router };

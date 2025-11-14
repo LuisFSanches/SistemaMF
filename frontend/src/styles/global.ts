@@ -88,16 +88,19 @@ table{
             width: calc(100% - 10px);
             background: var(--light-background);
         }
+
         tbody{
             display: block;
             max-height: 85vh;
             overflow-y: scroll;
         }
+
         th, td {
-            width: 8%;
+            width: 10%;
             text-align: center;
             word-break:break-all
         }
+
         .table-item-id{
             width: 5%;
         }
@@ -210,10 +213,15 @@ button{
     font-weight:600
 }
 
+.done-button {
+    background: var(--order-green);
+    color: var(--text-white);
+}
+
 .view-button{
-        background: #66c1df;
-        color: var(--text-white);
-        font-weight:600
+    background: #66c1df;
+    color: var(--text-white);
+    font-weight:600
 }
 
 .react-modal-overlay{
