@@ -36,7 +36,7 @@ interface FormData {
 
 export function NewOrderToReceiveModal({ isOpen, onRequestClose, action, currentOrderToReceive }: NewOrderToReceiveModalProps) {
     const { createOrderToReceive, updateOrderToReceive, isLoading } = useOrdersToReceive();
-    const { orders, loadAvailableOrders } = useOrders();
+    const { loadAvailableOrders } = useOrders();
     const [query, setQuery] = useState("");
     const [orderSuggestions, setOrderSuggestions] = useState<IOrder[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -84,14 +84,8 @@ export function NewOrderToReceiveModal({ isOpen, onRequestClose, action, current
 
         debounceTimeout.current = setTimeout(async () => {
             if (text.length >= 2) {
-                await loadAvailableOrders(1, 50, text);
-                const filtered = orders.filter((order) => {
-                    const clientName = `${order.client?.first_name || ''} ${order.client?.last_name || ''}`.toLowerCase();
-                    const orderCode = String(order.code || '').toLowerCase();
-                    const search = text.toLowerCase();
-                    return clientName.includes(search) || orderCode.includes(search);
-                });
-                setOrderSuggestions(filtered);
+                const availableOrders = await loadAvailableOrders(1, 50, text);
+                setOrderSuggestions(availableOrders);
                 setShowSuggestions(true);
             } else {
                 setOrderSuggestions([]);
