@@ -1556,6 +1556,56 @@ var UpdateOrderStatusController = class {
   }
 };
 
+// src/services/order/UpdateOrderPaymentService.ts
+var UpdateOrderPaymentService = class {
+  async execute({ id, payment_received }) {
+    try {
+      const orderExists = await prisma_default.order.findUnique({
+        where: { id }
+      });
+      if (!orderExists) {
+        throw new BadRequestException(
+          "Order not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+      const updateOrder = await prisma_default.order.update({
+        where: {
+          id
+        },
+        data: {
+          payment_received
+        },
+        include: {
+          client: true,
+          clientAddress: true
+        }
+      });
+      return updateOrder;
+    } catch (error) {
+      console.error("[UpdateOrderPaymentService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/order/UpdateOrderPaymentController.ts
+var UpdateOrderPaymentController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const { payment_received } = req.body;
+    const updateOrderPaymentService = new UpdateOrderPaymentService();
+    const order = await updateOrderPaymentService.execute({
+      id,
+      payment_received
+    });
+    return res.json(order);
+  }
+};
+
 // src/services/order/GetOrderService.ts
 var GetOrderService = class {
   async execute(id) {
@@ -2444,6 +2494,349 @@ var DeleteStockTransactionController = class {
   }
 };
 
+// src/schemas/orderToReceive/createOrderToReceive.ts
+var import_zod3 = require("zod");
+var createOrderToReceiveSchema = import_zod3.z.object({
+  order_id: import_zod3.z.string().uuid("order_id must be a valid UUID"),
+  payment_due_date: import_zod3.z.string().datetime("payment_due_date must be a valid datetime"),
+  received_date: import_zod3.z.string().datetime("received_date must be a valid datetime").optional(),
+  type: import_zod3.z.string().nonempty("type is required"),
+  is_archived: import_zod3.z.boolean().optional()
+});
+
+// src/services/orderToReceive/CreateOrderToReceiveService.ts
+var CreateOrderToReceiveService = class {
+  async execute(data) {
+    const parsed = createOrderToReceiveSchema.safeParse({
+      ...data,
+      payment_due_date: data.payment_due_date instanceof Date ? data.payment_due_date.toISOString() : data.payment_due_date,
+      received_date: data.received_date ? data.received_date instanceof Date ? data.received_date.toISOString() : data.received_date : void 0
+    });
+    if (!parsed.success) {
+      throw new BadRequestException(
+        parsed.error.errors[0].message,
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    const orderExists = await prisma_default.order.findUnique({
+      where: { id: data.order_id }
+    });
+    if (!orderExists) {
+      throw new BadRequestException(
+        "Order not found",
+        400 /* USER_NOT_FOUND */
+      );
+    }
+    const existingOrderToReceive = await prisma_default.orderToReceive.findFirst({
+      where: { order_id: data.order_id }
+    });
+    if (existingOrderToReceive) {
+      throw new BadRequestException(
+        "An order to receive already exists for this order",
+        400 /* USER_ALREADY_EXISTS */
+      );
+    }
+    try {
+      const orderToReceive = await prisma_default.orderToReceive.create({
+        data: {
+          order_id: data.order_id,
+          payment_due_date: data.payment_due_date,
+          received_date: data.received_date,
+          type: data.type,
+          is_archived: data.is_archived || false
+        },
+        include: {
+          order: {
+            select: {
+              code: true,
+              total: true,
+              client: {
+                select: {
+                  id: true,
+                  first_name: true,
+                  last_name: true,
+                  phone_number: true
+                }
+              }
+            }
+          }
+        }
+      });
+      console.log("created orderToReceive:", orderToReceive);
+      return orderToReceive;
+    } catch (error) {
+      console.error("[CreateOrderToReceiveService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/orderToReceive/CreateOrderToReceiveController.ts
+var import_moment_timezone6 = __toESM(require("moment-timezone"));
+var CreateOrderToReceiveController = class {
+  async handle(req, res, next) {
+    const { order_id, payment_due_date, received_date, type, is_archived } = req.body;
+    const createOrderToReceiveService = new CreateOrderToReceiveService();
+    const formattedPaymentDueDate = import_moment_timezone6.default.utc(payment_due_date).tz("America/Sao_Paulo", true).set({ hour: 16, minute: 0, second: 0 }).toDate();
+    const formattedReceivedDate = received_date ? import_moment_timezone6.default.utc(received_date).tz("America/Sao_Paulo", true).set({ hour: 12, minute: 0, second: 0 }).toDate() : void 0;
+    const orderToReceive = await createOrderToReceiveService.execute({
+      order_id,
+      payment_due_date: formattedPaymentDueDate,
+      received_date: formattedReceivedDate,
+      type,
+      is_archived
+    });
+    return res.json(orderToReceive);
+  }
+};
+
+// src/services/orderToReceive/GetOrderToReceiveService.ts
+var GetOrderToReceiveService = class {
+  async execute({ id }) {
+    if (!id) {
+      throw new BadRequestException(
+        "id is required",
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    try {
+      const orderToReceive = await prisma_default.orderToReceive.findUnique({
+        where: { id },
+        include: {
+          order: {
+            select: {
+              code: true,
+              total: true,
+              client: {
+                select: {
+                  id: true,
+                  first_name: true,
+                  last_name: true,
+                  phone_number: true
+                }
+              }
+            }
+          }
+        }
+      });
+      if (!orderToReceive) {
+        throw new BadRequestException(
+          "Order to receive not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+      return orderToReceive;
+    } catch (error) {
+      console.error("[GetOrderToReceiveService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/orderToReceive/GetOrderToReceiveController.ts
+var GetOrderToReceiveController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const getOrderToReceiveService = new GetOrderToReceiveService();
+    const orderToReceive = await getOrderToReceiveService.execute({ id });
+    return res.json(orderToReceive);
+  }
+};
+
+// src/services/orderToReceive/GetAllOrderToReceiveService.ts
+var GetAllOrderToReceiveService = class {
+  async execute() {
+    try {
+      const ordersToReceive = await prisma_default.orderToReceive.findMany({
+        include: {
+          order: {
+            select: {
+              code: true,
+              total: true,
+              payment_received: true,
+              client: {
+                select: {
+                  id: true,
+                  first_name: true,
+                  last_name: true,
+                  phone_number: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: {
+          payment_due_date: "asc"
+        }
+      });
+      return ordersToReceive;
+    } catch (error) {
+      console.error("[GetAllOrderToReceiveService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/orderToReceive/GetAllOrderToReceiveController.ts
+var GetAllOrderToReceiveController = class {
+  async handle(req, res, next) {
+    const getAllOrderToReceiveService = new GetAllOrderToReceiveService();
+    const ordersToReceive = await getAllOrderToReceiveService.execute();
+    return res.json(ordersToReceive);
+  }
+};
+
+// src/schemas/orderToReceive/updateOrderToReceive.ts
+var import_zod4 = require("zod");
+var updateOrderToReceiveSchema = import_zod4.z.object({
+  payment_due_date: import_zod4.z.string().datetime("payment_due_date must be a valid datetime").optional(),
+  received_date: import_zod4.z.string().datetime("received_date must be a valid datetime").optional(),
+  type: import_zod4.z.string().nonempty("type cannot be empty").optional(),
+  is_archived: import_zod4.z.boolean().optional()
+});
+
+// src/services/orderToReceive/UpdateOrderToReceiveService.ts
+var UpdateOrderToReceiveService = class {
+  async execute({ id, data }) {
+    if (!id) {
+      throw new BadRequestException(
+        "id is required",
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    const parsed = updateOrderToReceiveSchema.safeParse({
+      ...data,
+      payment_due_date: data.payment_due_date instanceof Date ? data.payment_due_date.toISOString() : data.payment_due_date,
+      received_date: data.received_date ? data.received_date instanceof Date ? data.received_date.toISOString() : data.received_date : void 0
+    });
+    if (!parsed.success) {
+      throw new BadRequestException(
+        parsed.error.errors[0].message,
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    const orderToReceiveExists = await prisma_default.orderToReceive.findUnique({
+      where: { id }
+    });
+    if (!orderToReceiveExists) {
+      throw new BadRequestException(
+        "Order to receive not found",
+        400 /* USER_NOT_FOUND */
+      );
+    }
+    try {
+      const updatedOrderToReceive = await prisma_default.orderToReceive.update({
+        where: { id },
+        data: {
+          payment_due_date: data.payment_due_date,
+          received_date: data.received_date,
+          type: data.type,
+          is_archived: data.is_archived
+        },
+        include: {
+          order: {
+            select: {
+              code: true,
+              total: true,
+              client: {
+                select: {
+                  id: true,
+                  first_name: true,
+                  last_name: true,
+                  phone_number: true
+                }
+              }
+            }
+          }
+        }
+      });
+      return updatedOrderToReceive;
+    } catch (error) {
+      console.error("[UpdateOrderToReceiveService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/orderToReceive/UpdateOrderToReceiveController.ts
+var import_moment_timezone7 = __toESM(require("moment-timezone"));
+var UpdateOrderToReceiveController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const { payment_due_date, received_date, type, is_archived } = req.body;
+    const updateOrderToReceiveService = new UpdateOrderToReceiveService();
+    const data = {};
+    if (payment_due_date) {
+      data.payment_due_date = import_moment_timezone7.default.utc(payment_due_date).tz("America/Sao_Paulo", true).set({ hour: 12, minute: 0, second: 0 }).toDate();
+    }
+    if (received_date) {
+      data.received_date = import_moment_timezone7.default.utc(received_date).tz("America/Sao_Paulo", true).set({ hour: 12, minute: 0, second: 0 }).toDate();
+    }
+    if (type) data.type = type;
+    if (is_archived !== void 0) data.is_archived = is_archived;
+    const orderToReceive = await updateOrderToReceiveService.execute({
+      id,
+      data
+    });
+    return res.json(orderToReceive);
+  }
+};
+
+// src/services/orderToReceive/DeleteOrderToReceiveService.ts
+var DeleteOrderToReceiveService = class {
+  async execute({ id }) {
+    if (!id) {
+      throw new BadRequestException(
+        "id is required",
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    const orderToReceiveExists = await prisma_default.orderToReceive.findUnique({
+      where: { id }
+    });
+    if (!orderToReceiveExists) {
+      throw new BadRequestException(
+        "Order to receive not found",
+        400 /* USER_NOT_FOUND */
+      );
+    }
+    try {
+      await prisma_default.orderToReceive.delete({
+        where: { id }
+      });
+      return { message: "Order to receive deleted successfully" };
+    } catch (error) {
+      console.error("[DeleteOrderToReceiveService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/orderToReceive/DeleteOrderToReceiveController.ts
+var DeleteOrderToReceiveController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const deleteOrderToReceiveService = new DeleteOrderToReceiveService();
+    const result = await deleteOrderToReceiveService.execute({ id });
+    return res.json(result);
+  }
+};
+
 // src/middlewares/admin_auth.ts
 var jwt2 = __toESM(require("jsonwebtoken"));
 
@@ -2655,6 +3048,7 @@ router.post("/order/ai", admin_auth_default, new CreateOrderByAIController().han
 router.put("/order/:id", admin_auth_default, new UpdateOrderController().handle);
 router.put("/order/finish/:id", new FinishOnlineOrderController().handle);
 router.patch("/order/:id", admin_auth_default, new UpdateOrderStatusController().handle);
+router.patch("/order/:id/payment", admin_auth_default, new UpdateOrderPaymentController().handle);
 router.delete("/order/:id", admin_auth_default, new DeleteOrderController().handle);
 router.post("/product", admin_auth_default, new CreateProductController().handle);
 router.get("/product/all", super_admin_auth_default, new GetAllProductController().handle);
@@ -2678,6 +3072,11 @@ router.get("/statistics/top-admins", super_admin_auth_default, new TopAdminsCont
 router.get("/stockTransaction/all", admin_auth_default, new GetAllStockTransactionsController().handle);
 router.post("/stockTransaction", admin_auth_default, new CreateStockTransactionController().handle);
 router.delete("/stockTransaction/:id", admin_auth_default, new DeleteStockTransactionController().handle);
+router.post("/orderToReceive", admin_auth_default, new CreateOrderToReceiveController().handle);
+router.get("/orderToReceive/all", admin_auth_default, new GetAllOrderToReceiveController().handle);
+router.get("/orderToReceive/:id", admin_auth_default, new GetOrderToReceiveController().handle);
+router.put("/orderToReceive/:id", admin_auth_default, new UpdateOrderToReceiveController().handle);
+router.delete("/orderToReceive/:id", admin_auth_default, new DeleteOrderToReceiveController().handle);
 
 // src/middlewares/errors.ts
 var errorMiddleware = (error, req, res, next) => {

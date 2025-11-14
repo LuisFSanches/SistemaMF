@@ -1,0 +1,102 @@
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/controllers/order/UpdateOrderPaymentController.ts
+var UpdateOrderPaymentController_exports = {};
+__export(UpdateOrderPaymentController_exports, {
+  UpdateOrderPaymentController: () => UpdateOrderPaymentController
+});
+module.exports = __toCommonJS(UpdateOrderPaymentController_exports);
+
+// src/prisma/index.ts
+var import_client = require("@prisma/client");
+var prismaClient = new import_client.PrismaClient();
+var prisma_default = prismaClient;
+
+// src/exceptions/root.ts
+var HttpException = class extends Error {
+  constructor(message, errorCode, statusCode, errors) {
+    super(message);
+    this.message = message;
+    this.errorCode = errorCode;
+    this.statusCode = statusCode;
+    this.errors = errors;
+  }
+};
+
+// src/exceptions/bad-request.ts
+var BadRequestException = class extends HttpException {
+  constructor(message, errorCode) {
+    super(message, errorCode, 400, null);
+  }
+};
+
+// src/services/order/UpdateOrderPaymentService.ts
+var UpdateOrderPaymentService = class {
+  async execute({ id, payment_received }) {
+    try {
+      const orderExists = await prisma_default.order.findUnique({
+        where: { id }
+      });
+      if (!orderExists) {
+        throw new BadRequestException(
+          "Order not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+      const updateOrder = await prisma_default.order.update({
+        where: {
+          id
+        },
+        data: {
+          payment_received
+        },
+        include: {
+          client: true,
+          clientAddress: true
+        }
+      });
+      return updateOrder;
+    } catch (error) {
+      console.error("[UpdateOrderPaymentService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/order/UpdateOrderPaymentController.ts
+var UpdateOrderPaymentController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const { payment_received } = req.body;
+    const updateOrderPaymentService = new UpdateOrderPaymentService();
+    const order = await updateOrderPaymentService.execute({
+      id,
+      payment_received
+    });
+    return res.json(order);
+  }
+};
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  UpdateOrderPaymentController
+});
