@@ -38,10 +38,12 @@ export const OrdersToReceiveProvider: React.FC = ({ children }) => {
     setIsLoading(true);
     try {
       const newOrder = await createOrderToReceiveService(data);
+      if (newOrder.errorCode === 400) {
+          return;
+      }
       setOrdersToReceive((prev) => [newOrder, ...prev]);
     } catch (error) {
       console.error("Error creating order to receive:", error);
-      throw error;
     } finally {
       setIsLoading(false);
     }
