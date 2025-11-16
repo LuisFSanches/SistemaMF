@@ -12,8 +12,8 @@ export const createOrderToReceive = async (data: ICreateOrderToReceive) => {
   return response.data;
 };
 
-export const getAllOrdersToReceive = async () => {
-  const response = await api.get("/orderToReceive/all", {
+export const getAllOrdersToReceive = async (page: number, pageSize: number, query: string) => {
+  const response = await api.get(`/orderToReceive/all?page=${page}&pageSize=${pageSize}&query=${query}`, {
     headers: {
       authorization: token,
     },
@@ -28,6 +28,22 @@ export const getOrderToReceiveById = async (id: string) => {
     },
   });
   return response.data;
+};
+
+export const checkOrderToReceiveExists = async (orderId: string) => {
+  try {
+    const response = await api.get(`/orderToReceive/check/${orderId}`, {
+      headers: {
+        authorization: token,
+      },
+    });
+    return response.data !== null;
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      return false;
+    }
+    throw error;
+  }
 };
 
 export const updateOrderToReceive = async (id: string, data: IUpdateOrderToReceive) => {

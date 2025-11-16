@@ -34,13 +34,11 @@ class DeleteProductImageService {
         const imagePath = product.image.replace(`${backendUrl}/uploads/products/`, '');
         const filePath = path.join(productsUploadDir, imagePath);
 
-        console.log('[DeleteProductImageService] Deleting image:', filePath);
-
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
-            console.log('[DeleteProductImageService] Image deleted successfully');
+            // console.log('[DeleteProductImageService] Image deleted successfully');
         } else {
-            console.log('[DeleteProductImageService] Image file not found');
+            // console.log('[DeleteProductImageService] Image file not found');
         }
 
         try {

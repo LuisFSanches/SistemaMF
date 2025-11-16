@@ -667,8 +667,6 @@ if (!import_fs.default.existsSync(productsUploadDir)) {
 var UploadProductImageService = class {
   async execute({ product_id, filename }) {
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3334";
-    console.log("[UploadProductImageService] Backend URL:", backendUrl);
-    console.log("[UploadProductImageService] Upload directory:", productsUploadDir);
     const product = await prisma_default.product.findFirst({
       where: { id: product_id }
     });
@@ -682,23 +680,19 @@ var UploadProductImageService = class {
         400 /* USER_NOT_FOUND */
       );
     }
-    console.log("[UploadProductImageService] Product found:", product.id);
     if (product.image) {
       const oldImagePath = product.image.replace(`${backendUrl}/uploads/products/`, "");
       const oldFilePath = import_path2.default.join(productsUploadDir, oldImagePath);
-      console.log("[UploadProductImageService] Removing old image:", oldFilePath);
       if (import_fs2.default.existsSync(oldFilePath)) {
         import_fs2.default.unlinkSync(oldFilePath);
       }
     }
     const imageUrl = `${backendUrl}/uploads/products/${filename}`;
-    console.log("[UploadProductImageService] New image URL:", imageUrl);
     try {
       const updatedProduct = await prisma_default.product.update({
         where: { id: product_id },
         data: { image: imageUrl }
       });
-      console.log("[UploadProductImageService] Product updated successfully");
       return updatedProduct;
     } catch (error) {
       console.error("[UploadProductImageService] Failed:", error);
@@ -756,12 +750,9 @@ var DeleteProductImageService = class {
     }
     const imagePath = product.image.replace(`${backendUrl}/uploads/products/`, "");
     const filePath = import_path3.default.join(productsUploadDir, imagePath);
-    console.log("[DeleteProductImageService] Deleting image:", filePath);
     if (import_fs3.default.existsSync(filePath)) {
       import_fs3.default.unlinkSync(filePath);
-      console.log("[DeleteProductImageService] Image deleted successfully");
     } else {
-      console.log("[DeleteProductImageService] Image file not found");
     }
     try {
       const updatedProduct = await prisma_default.product.update({
@@ -2651,31 +2642,71 @@ var GetOrderToReceiveController = class {
 
 // src/services/orderToReceive/GetAllOrderToReceiveService.ts
 var GetAllOrderToReceiveService = class {
-  async execute() {
+  async execute(page = 1, pageSize = 10, query) {
     try {
-      const ordersToReceive = await prisma_default.orderToReceive.findMany({
-        include: {
-          order: {
-            select: {
-              code: true,
-              total: true,
-              payment_received: true,
+      const skip = (page - 1) * pageSize;
+      let whereClause = {};
+      if (query) {
+        const isNumericQuery = !isNaN(Number(query));
+        const orConditions = [
+          {
+            order: {
               client: {
-                select: {
-                  id: true,
-                  first_name: true,
-                  last_name: true,
-                  phone_number: true
-                }
+                OR: [
+                  { first_name: { contains: query, mode: "insensitive" } },
+                  { last_name: { contains: query, mode: "insensitive" } },
+                  { phone_number: { contains: query, mode: "insensitive" } }
+                ]
               }
             }
           }
-        },
-        orderBy: {
-          payment_due_date: "asc"
+        ];
+        if (isNumericQuery) {
+          orConditions.push({
+            order: {
+              code: { equals: Number(query) }
+            }
+          });
         }
-      });
-      return ordersToReceive;
+        whereClause = { OR: orConditions };
+      }
+      const [ordersToReceive, total] = await Promise.all([
+        prisma_default.orderToReceive.findMany({
+          where: whereClause,
+          include: {
+            order: {
+              select: {
+                code: true,
+                total: true,
+                payment_received: true,
+                created_at: true,
+                client: {
+                  select: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    phone_number: true
+                  }
+                }
+              }
+            }
+          },
+          orderBy: {
+            payment_due_date: "asc"
+          },
+          skip,
+          take: pageSize
+        }),
+        prisma_default.orderToReceive.count({
+          where: whereClause
+        })
+      ]);
+      return {
+        ordersToReceive,
+        total,
+        currentPage: page,
+        totalPages: Math.ceil(total / pageSize)
+      };
     } catch (error) {
       console.error("[GetAllOrderToReceiveService] Failed:", error);
       throw new BadRequestException(
@@ -2689,9 +2720,12 @@ var GetAllOrderToReceiveService = class {
 // src/controllers/orderToReceive/GetAllOrderToReceiveController.ts
 var GetAllOrderToReceiveController = class {
   async handle(req, res, next) {
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const query = req.query.query;
     const getAllOrderToReceiveService = new GetAllOrderToReceiveService();
-    const ordersToReceive = await getAllOrderToReceiveService.execute();
-    return res.json(ordersToReceive);
+    const result = await getAllOrderToReceiveService.execute(page, pageSize, query);
+    return res.json(result);
   }
 };
 
@@ -2833,6 +2867,40 @@ var DeleteOrderToReceiveController = class {
     const { id } = req.params;
     const deleteOrderToReceiveService = new DeleteOrderToReceiveService();
     const result = await deleteOrderToReceiveService.execute({ id });
+    return res.json(result);
+  }
+};
+
+// src/services/orderToReceive/CheckOrderToReceiveExistsService.ts
+var CheckOrderToReceiveExistsService = class {
+  async execute({ order_id }) {
+    if (!order_id) {
+      throw new BadRequestException(
+        "order_id is required",
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    try {
+      const orderToReceive = await prisma_default.orderToReceive.findFirst({
+        where: { order_id }
+      });
+      return { exists: !!orderToReceive };
+    } catch (error) {
+      console.error("[CheckOrderToReceiveExistsService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/orderToReceive/CheckOrderToReceiveExistsController.ts
+var CheckOrderToReceiveExistsController = class {
+  async handle(req, res, next) {
+    const { orderId } = req.params;
+    const checkOrderToReceiveExistsService = new CheckOrderToReceiveExistsService();
+    const result = await checkOrderToReceiveExistsService.execute({ order_id: orderId });
     return res.json(result);
   }
 };
@@ -3074,6 +3142,7 @@ router.post("/stockTransaction", admin_auth_default, new CreateStockTransactionC
 router.delete("/stockTransaction/:id", admin_auth_default, new DeleteStockTransactionController().handle);
 router.post("/orderToReceive", admin_auth_default, new CreateOrderToReceiveController().handle);
 router.get("/orderToReceive/all", admin_auth_default, new GetAllOrderToReceiveController().handle);
+router.get("/orderToReceive/check/:orderId", admin_auth_default, new CheckOrderToReceiveExistsController().handle);
 router.get("/orderToReceive/:id", admin_auth_default, new GetOrderToReceiveController().handle);
 router.put("/orderToReceive/:id", admin_auth_default, new UpdateOrderToReceiveController().handle);
 router.delete("/orderToReceive/:id", admin_auth_default, new DeleteOrderToReceiveController().handle);

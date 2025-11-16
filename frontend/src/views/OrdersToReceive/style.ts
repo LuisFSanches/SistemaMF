@@ -27,9 +27,15 @@ export const TotalCard = styled.div`
     display: flex;
     align-items: center;
     margin-top: 0.5rem;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
     p {
         margin-left: 0.5rem;
+        font-weight: 600;
+        color: green;
     }
 `;
 

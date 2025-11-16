@@ -31,5 +31,6 @@ export interface IOrder {
   online_order?: boolean;
   online_code?: string;
   orderItems?: any;
-  is_delivery?: boolean
+  is_delivery?: boolean;
+  created_at?: string;
 }

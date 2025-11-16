@@ -57,6 +57,7 @@ import { GetOrderToReceiveController } from './controllers/orderToReceive/GetOrd
 import { GetAllOrderToReceiveController } from './controllers/orderToReceive/GetAllOrderToReceiveController';
 import { UpdateOrderToReceiveController } from './controllers/orderToReceive/UpdateOrderToReceiveController';
 import { DeleteOrderToReceiveController } from './controllers/orderToReceive/DeleteOrderToReceiveController';
+import { CheckOrderToReceiveExistsController } from './controllers/orderToReceive/CheckOrderToReceiveExistsController';
 
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
@@ -132,6 +133,7 @@ router.delete('/stockTransaction/:id', adminAuthMiddleware, new DeleteStockTrans
 //-- ROTAS ORDER TO RECEIVE --
 router.post('/orderToReceive', adminAuthMiddleware, new CreateOrderToReceiveController().handle);
 router.get('/orderToReceive/all', adminAuthMiddleware, new GetAllOrderToReceiveController().handle);
+router.get('/orderToReceive/check/:orderId', adminAuthMiddleware, new CheckOrderToReceiveExistsController().handle);
 router.get('/orderToReceive/:id', adminAuthMiddleware, new GetOrderToReceiveController().handle);
 router.put('/orderToReceive/:id', adminAuthMiddleware, new UpdateOrderToReceiveController().handle);
 router.delete('/orderToReceive/:id', adminAuthMiddleware, new DeleteOrderToReceiveController().handle);

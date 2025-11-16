@@ -49,31 +49,71 @@ var BadRequestException = class extends HttpException {
 
 // src/services/orderToReceive/GetAllOrderToReceiveService.ts
 var GetAllOrderToReceiveService = class {
-  async execute() {
+  async execute(page = 1, pageSize = 10, query) {
     try {
-      const ordersToReceive = await prisma_default.orderToReceive.findMany({
-        include: {
-          order: {
-            select: {
-              code: true,
-              total: true,
-              payment_received: true,
+      const skip = (page - 1) * pageSize;
+      let whereClause = {};
+      if (query) {
+        const isNumericQuery = !isNaN(Number(query));
+        const orConditions = [
+          {
+            order: {
               client: {
-                select: {
-                  id: true,
-                  first_name: true,
-                  last_name: true,
-                  phone_number: true
-                }
+                OR: [
+                  { first_name: { contains: query, mode: "insensitive" } },
+                  { last_name: { contains: query, mode: "insensitive" } },
+                  { phone_number: { contains: query, mode: "insensitive" } }
+                ]
               }
             }
           }
-        },
-        orderBy: {
-          payment_due_date: "asc"
+        ];
+        if (isNumericQuery) {
+          orConditions.push({
+            order: {
+              code: { equals: Number(query) }
+            }
+          });
         }
-      });
-      return ordersToReceive;
+        whereClause = { OR: orConditions };
+      }
+      const [ordersToReceive, total] = await Promise.all([
+        prisma_default.orderToReceive.findMany({
+          where: whereClause,
+          include: {
+            order: {
+              select: {
+                code: true,
+                total: true,
+                payment_received: true,
+                created_at: true,
+                client: {
+                  select: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    phone_number: true
+                  }
+                }
+              }
+            }
+          },
+          orderBy: {
+            payment_due_date: "asc"
+          },
+          skip,
+          take: pageSize
+        }),
+        prisma_default.orderToReceive.count({
+          where: whereClause
+        })
+      ]);
+      return {
+        ordersToReceive,
+        total,
+        currentPage: page,
+        totalPages: Math.ceil(total / pageSize)
+      };
     } catch (error) {
       console.error("[GetAllOrderToReceiveService] Failed:", error);
       throw new BadRequestException(
@@ -87,9 +127,12 @@ var GetAllOrderToReceiveService = class {
 // src/controllers/orderToReceive/GetAllOrderToReceiveController.ts
 var GetAllOrderToReceiveController = class {
   async handle(req, res, next) {
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const query = req.query.query;
     const getAllOrderToReceiveService = new GetAllOrderToReceiveService();
-    const ordersToReceive = await getAllOrderToReceiveService.execute();
-    return res.json(ordersToReceive);
+    const result = await getAllOrderToReceiveService.execute(page, pageSize, query);
+    return res.json(result);
   }
 };
 // Annotate the CommonJS export names for ESM import in node:

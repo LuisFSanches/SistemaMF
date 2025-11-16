@@ -3,32 +3,77 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllOrderToReceiveService {
-    async execute() {
+    async execute(page: number = 1, pageSize: number = 10, query?: string) {
         try {
-            const ordersToReceive = await prismaClient.orderToReceive.findMany({
-                include: {
-                    order: {
-                        select: {
-                            code: true,
-                            total: true,
-                            payment_received: true,
+            const skip = (page - 1) * pageSize;
+
+            let whereClause: any = {};
+            
+            if (query) {
+                const isNumericQuery = !isNaN(Number(query));
+                const orConditions: any[] = [
+                    {
+                        order: {
                             client: {
-                                select: {
-                                    id: true,
-                                    first_name: true,
-                                    last_name: true,
-                                    phone_number: true
-                                }
+                                OR: [
+                                    { first_name: { contains: query, mode: 'insensitive' } },
+                                    { last_name: { contains: query, mode: 'insensitive' } },
+                                    { phone_number: { contains: query, mode: 'insensitive' } }
+                                ]
                             }
                         }
                     }
-                },
-                orderBy: {
-                    payment_due_date: 'asc'
-                }
-            });
+                ];
 
-            return ordersToReceive;
+                if (isNumericQuery) {
+                    orConditions.push({
+                        order: {
+                            code: { equals: Number(query) }
+                        }
+                    });
+                }
+
+                whereClause = { OR: orConditions };
+            }
+
+            const [ordersToReceive, total] = await Promise.all([
+                prismaClient.orderToReceive.findMany({
+                    where: whereClause,
+                    include: {
+                        order: {
+                            select: {
+                                code: true,
+                                total: true,
+                                payment_received: true,
+                                created_at: true,
+                                client: {
+                                    select: {
+                                        id: true,
+                                        first_name: true,
+                                        last_name: true,
+                                        phone_number: true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    orderBy: {
+                        payment_due_date: 'asc'
+                    },
+                    skip,
+                    take: pageSize
+                }),
+                prismaClient.orderToReceive.count({
+                    where: whereClause
+                })
+            ]);
+
+            return {
+                ordersToReceive,
+                total,
+                currentPage: page,
+                totalPages: Math.ceil(total / pageSize)
+            };
         } catch (error: any) {
             console.error("[GetAllOrderToReceiveService] Failed:", error);
 

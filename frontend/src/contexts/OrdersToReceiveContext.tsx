@@ -9,7 +9,8 @@ import { IOrderToReceive, ICreateOrderToReceive, IUpdateOrderToReceive } from ".
 
 interface OrdersToReceiveContextType {
   ordersToReceive: IOrderToReceive[];
-  loadOrdersToReceive: () => Promise<void>;
+  totalOrders: number;
+  loadOrdersToReceive: (page: number, pageSize: number, query: string) => Promise<void>;
   createOrderToReceive: (data: ICreateOrderToReceive) => Promise<void>;
   updateOrderToReceive: (id: string, data: IUpdateOrderToReceive) => Promise<void>;
   deleteOrderToReceive: (id: string) => Promise<void>;
@@ -20,13 +21,15 @@ const OrdersToReceiveContext = createContext<OrdersToReceiveContextType | undefi
 
 export const OrdersToReceiveProvider: React.FC = ({ children }) => {
   const [ordersToReceive, setOrdersToReceive] = useState<IOrderToReceive[]>([]);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  const loadOrdersToReceive = async () => {
+  const loadOrdersToReceive = async (page: number, pageSize: number, query: string) => {
     setIsLoading(true);
     try {
-      const data = await getAllOrdersToReceive();
-      setOrdersToReceive(data);
+      const { ordersToReceive, total } = await getAllOrdersToReceive(page, pageSize, query);
+      setOrdersToReceive(ordersToReceive);
+      setTotalOrders(total);
     } catch (error) {
       console.error("Error loading orders to receive:", error);
     } finally {
@@ -81,6 +84,7 @@ export const OrdersToReceiveProvider: React.FC = ({ children }) => {
     <OrdersToReceiveContext.Provider
       value={{
         ordersToReceive,
+        totalOrders,
         loadOrdersToReceive,
         createOrderToReceive,
         updateOrderToReceive,

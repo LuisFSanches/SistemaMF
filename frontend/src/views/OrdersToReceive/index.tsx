@@ -4,6 +4,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useOrdersToReceive } from "../../contexts/OrdersToReceiveContext";
 import { NewOrderToReceiveModal } from "../../components/NewOrderToReceiveModal";
 import { OrdersToReceiveTable } from "../../components/OrdersToReceiveTable";
+import { Pagination } from "../../components/Pagination";
 import { convertMoney } from "../../utils";
 import {
     Container,
@@ -16,19 +17,30 @@ import {
 import { PageHeader } from "../../styles/global";
 
 export function OrdersToReceivePage() {
-    const { ordersToReceive, loadOrdersToReceive } = useOrdersToReceive();
+    const { ordersToReceive, totalOrders, loadOrdersToReceive } = useOrdersToReceive();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [filter, setFilter] = useState<'active' | 'archived' | 'all'>('active');
+    const [page, setPage] = useState(1);
+    const [query, setQuery] = useState('');
+    const pageSize = 12;
 
     useEffect(() => {
-        loadOrdersToReceive();
+        loadOrdersToReceive(page, pageSize, query);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [page, query]);
+
+    const searchOrders = (text: string) => {
+        setQuery(text);
+        setPage(1);
+    }
 
     const calculateTotal = () => {
+        if (!ordersToReceive || !Array.isArray(ordersToReceive)) {
+            return 0;
+        }
         return ordersToReceive
-        .filter(order => !order.is_archived && !order.received_date)
-        .reduce((sum, order) => sum + (order.order?.total || 0), 0);
+            .filter(order => !order.is_archived && !order.received_date)
+            .reduce((sum, order) => sum + (order.order?.total || 0), 0);
     };
 
     return (
@@ -41,6 +53,24 @@ export function OrdersToReceivePage() {
                         <p>{convertMoney(calculateTotal())}</p>
                     </TotalCard>
                 </div>
+
+                <input
+                    style={{width: '250px'}}
+                    type="text"
+                    placeholder="Buscar por Cliente ou Pedido"
+                    onKeyDown={(e: any) => {
+                        if (e.key === 'Enter') {
+                            searchOrders(e.target.value);
+                        }
+                    }}
+                />
+
+                <Pagination
+                    currentPage={page}
+                    total={totalOrders}
+                    pageSize={pageSize as number}
+                    onPageChange={setPage}
+                />
 
                 <ButtonsContainer>
                     <FilterToggleContainer>
@@ -71,7 +101,13 @@ export function OrdersToReceivePage() {
                 </ButtonsContainer>
             </PageHeader>
 
-            <OrdersToReceiveTable orders={ordersToReceive} filter={filter} />
+            <OrdersToReceiveTable 
+                orders={ordersToReceive} 
+                filter={filter} 
+                page={page}
+                pageSize={pageSize}
+                query={query}
+            />
 
             <NewOrderToReceiveModal
                 isOpen={isModalOpen}

@@ -109,12 +109,9 @@ var DeleteProductImageService = class {
     }
     const imagePath = product.image.replace(`${backendUrl}/uploads/products/`, "");
     const filePath = import_path2.default.join(productsUploadDir, imagePath);
-    console.log("[DeleteProductImageService] Deleting image:", filePath);
     if (import_fs2.default.existsSync(filePath)) {
       import_fs2.default.unlinkSync(filePath);
-      console.log("[DeleteProductImageService] Image deleted successfully");
     } else {
-      console.log("[DeleteProductImageService] Image file not found");
     }
     try {
       const updatedProduct = await prisma_default.product.update({

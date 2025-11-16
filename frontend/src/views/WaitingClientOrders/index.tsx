@@ -31,7 +31,6 @@ export function WaitingClientOrders(){
     }
 
     async function handleDeleteOrder(){
-        console.log(currentOrder);
         await deleteOrder(currentOrder?.id as string);
         setDeleteOrderModal(false);
         loadWaitingOrders();

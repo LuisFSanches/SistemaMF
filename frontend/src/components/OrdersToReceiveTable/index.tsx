@@ -21,11 +21,14 @@ import {
 interface OrdersToReceiveTableProps {
     orders: IOrderToReceive[];
     filter: 'active' | 'archived' | 'all';
+    page: number;
+    pageSize: number;
+    query: string;
 }
 
 const ORDERS_TO_RECEIVE_TYPES_FORMATTED: Record<string, string> = ORDERS_TO_RECEIVE_TYPES;
 
-export function OrdersToReceiveTable({ orders, filter }: OrdersToReceiveTableProps) {
+export function OrdersToReceiveTable({ orders, filter, page, pageSize, query }: OrdersToReceiveTableProps) {
     const { updateOrderToReceive, deleteOrderToReceive, loadOrdersToReceive } = useOrdersToReceive();
     const { showSuccess } = useSuccessMessage();
     const [confirmReceiveModal, setConfirmReceiveModal] = useState(false);
@@ -58,7 +61,7 @@ export function OrdersToReceiveTable({ orders, filter }: OrdersToReceiveTablePro
                 received_date: new Date().toISOString()
             });
 
-            await loadOrdersToReceive();
+            await loadOrdersToReceive(page, pageSize, query);
             setConfirmReceiveModal(false);
             setSelectedOrderId("");
             showSuccess("Pagamento confirmado com sucesso!");
@@ -74,7 +77,7 @@ export function OrdersToReceiveTable({ orders, filter }: OrdersToReceiveTablePro
                 is_archived: true
             });
 
-            await loadOrdersToReceive();
+            await loadOrdersToReceive(page, pageSize, query);
             setConfirmArchiveModal(false);
             setSelectedOrderId("");
             showSuccess("Pedido arquivado com sucesso!");
@@ -90,7 +93,7 @@ export function OrdersToReceiveTable({ orders, filter }: OrdersToReceiveTablePro
                 is_archived: false
             });
 
-            await loadOrdersToReceive();
+            await loadOrdersToReceive(page, pageSize, query);
             setConfirmUnarchiveModal(false);
             setSelectedOrderId("");
             showSuccess("Pedido desarquivado com sucesso!");
@@ -103,7 +106,7 @@ export function OrdersToReceiveTable({ orders, filter }: OrdersToReceiveTablePro
     const handleDelete = async () => {
         try {
             await deleteOrderToReceive(selectedOrderId);
-            await loadOrdersToReceive();
+            await loadOrdersToReceive(page, pageSize, query);
             setConfirmDeleteModal(false);
             setSelectedOrderId("");
             showSuccess("Valor a receber deletado com sucesso!");
@@ -113,11 +116,11 @@ export function OrdersToReceiveTable({ orders, filter }: OrdersToReceiveTablePro
         }
     };
 
-    const filteredOrders = orders.filter(order => {
+    const filteredOrders = orders?.filter(order => {
         if (filter === 'active') return !order.is_archived;
         if (filter === 'archived') return order.is_archived;
         return true;
-    });
+    }) || [];
 
     if (filteredOrders.length === 0) {
         return (
@@ -155,7 +158,7 @@ export function OrdersToReceiveTable({ orders, filter }: OrdersToReceiveTablePro
                         <td>
                             {orderToReceive.order?.client?.first_name} {orderToReceive.order?.client?.last_name}
                         </td>
-                        <td>{moment(orderToReceive.order?.delivery_date).format('DD/MM/YYYY')}</td>
+                        <td>{moment(orderToReceive.order?.created_at).format('DD/MM/YYYY')}</td>
                         <td>{moment(orderToReceive.payment_due_date).format('DD/MM/YYYY')}</td>
                         <td>{convertMoney(orderToReceive.order?.total || 0)}</td>
                         <td>

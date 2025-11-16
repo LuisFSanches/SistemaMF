@@ -4,6 +4,7 @@ import { IOrder } from "../../interfaces/IOrder";
 import { ICreateOrderToReceive } from "../../interfaces/IOrderToReceive";
 import { Container, Orders, Header } from "./style";
 import { updateStatus, updateOrderPaymentStatus } from "../../services/orderService";
+import { checkOrderToReceiveExists } from "../../services/orderToReceiveService";
 import { OrderCard } from "../../components/OrderCard";
 import { useOrders } from "../../contexts/OrdersContext";
 import { useOrdersToReceive } from "../../contexts/OrdersToReceiveContext";
@@ -56,13 +57,32 @@ export function ServiceOrdersPage(){
 		const orderToUpdate = onGoingOrders.find(order => order.id === id);
 
 		if (status === 'DONE' && orderToUpdate && !orderToUpdate.payment_received) {
-			setCurrentOrder(orderToUpdate);
-			setPaymentStatusModal(true);
-			setShowLoader(false);
-			return;
+			try {
+				// Verifica se já existe um registro na tabela orders_to_receive
+				const existsInOrdersToReceive: any = await checkOrderToReceiveExists(id);
+				
+				if (existsInOrdersToReceive.exists) {
+					const response = await updateStatus({ id, status: 'DONE' });
+					const { data: order } = response;
+					editOrder(order);
+					setShowLoader(false);
+					return;
+				}
+				
+				setCurrentOrder(orderToUpdate);
+				setPaymentStatusModal(true);
+				setShowLoader(false);
+				return;
+			} catch (error) {
+				console.error("Error checking order to receive:", error);
+				setCurrentOrder(orderToUpdate);
+				setPaymentStatusModal(true);
+				setShowLoader(false);
+				return;
+			}
 		}
 
-		const response =await updateStatus({ id, status });
+		const response = await updateStatus({ id, status });
 		const { data: order } = response;
 		editOrder(order);
 		setShowLoader(false);
