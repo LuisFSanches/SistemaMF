@@ -10,7 +10,7 @@ import { IOrderToReceive, ICreateOrderToReceive, IUpdateOrderToReceive } from ".
 interface OrdersToReceiveContextType {
   ordersToReceive: IOrderToReceive[];
   totalOrders: number;
-  loadOrdersToReceive: (page: number, pageSize: number, query: string) => Promise<void>;
+  loadOrdersToReceive: (page: number, pageSize: number, query: string, filter?: string) => Promise<void>;
   createOrderToReceive: (data: ICreateOrderToReceive) => Promise<void>;
   updateOrderToReceive: (id: string, data: IUpdateOrderToReceive) => Promise<void>;
   deleteOrderToReceive: (id: string) => Promise<void>;
@@ -24,10 +24,10 @@ export const OrdersToReceiveProvider: React.FC = ({ children }) => {
   const [totalOrders, setTotalOrders] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  const loadOrdersToReceive = async (page: number, pageSize: number, query: string) => {
+  const loadOrdersToReceive = async (page: number, pageSize: number, query: string, filter?: string) => {
     setIsLoading(true);
     try {
-      const { ordersToReceive, total } = await getAllOrdersToReceive(page, pageSize, query);
+      const { ordersToReceive, total } = await getAllOrdersToReceive(page, pageSize, query, filter);
       setOrdersToReceive(ordersToReceive);
       setTotalOrders(total);
     } catch (error) {

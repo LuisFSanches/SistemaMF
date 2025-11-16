@@ -22,12 +22,12 @@ export function OrdersToReceivePage() {
     const [filter, setFilter] = useState<'active' | 'archived' | 'all'>('active');
     const [page, setPage] = useState(1);
     const [query, setQuery] = useState('');
-    const pageSize = 12;
+    const pageSize = 6;
 
     useEffect(() => {
-        loadOrdersToReceive(page, pageSize, query);
+        loadOrdersToReceive(page, pageSize, query, filter);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, query]);
+    }, [page, query, filter]);
 
     const searchOrders = (text: string) => {
         setQuery(text);
@@ -76,19 +76,28 @@ export function OrdersToReceivePage() {
                     <FilterToggleContainer>
                         <FilterButton
                             active={filter === 'active'}
-                            onClick={() => setFilter('active')}
+                            onClick={() => {
+                                setFilter('active');
+                                setPage(1);
+                            }}
                         >
                             Ativos
                         </FilterButton>
                         <FilterButton
                             active={filter === 'archived'}
-                            onClick={() => setFilter('archived')}
+                            onClick={() => {
+                                setFilter('archived');
+                                setPage(1);
+                            }}
                         >
                             Arquivados
                         </FilterButton>
                         <FilterButton
                             active={filter === 'all'}
-                            onClick={() => setFilter('all')}
+                            onClick={() => {
+                                setFilter('all');
+                                setPage(1);
+                            }}
                         >
                             Todos
                         </FilterButton>

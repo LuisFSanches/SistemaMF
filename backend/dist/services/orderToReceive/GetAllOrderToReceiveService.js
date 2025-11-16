@@ -49,10 +49,15 @@ var BadRequestException = class extends HttpException {
 
 // src/services/orderToReceive/GetAllOrderToReceiveService.ts
 var GetAllOrderToReceiveService = class {
-  async execute(page = 1, pageSize = 10, query) {
+  async execute(page = 1, pageSize = 10, query, filter) {
     try {
       const skip = (page - 1) * pageSize;
       let whereClause = {};
+      if (filter === "active") {
+        whereClause.is_archived = false;
+      } else if (filter === "archived") {
+        whereClause.is_archived = true;
+      }
       if (query) {
         const isNumericQuery = !isNaN(Number(query));
         const orConditions = [
@@ -75,7 +80,7 @@ var GetAllOrderToReceiveService = class {
             }
           });
         }
-        whereClause = { OR: orConditions };
+        whereClause.OR = orConditions;
       }
       const [ordersToReceive, total] = await Promise.all([
         prisma_default.orderToReceive.findMany({

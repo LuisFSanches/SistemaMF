@@ -12,8 +12,14 @@ export const createOrderToReceive = async (data: ICreateOrderToReceive) => {
   return response.data;
 };
 
-export const getAllOrdersToReceive = async (page: number, pageSize: number, query: string) => {
-  const response = await api.get(`/orderToReceive/all?page=${page}&pageSize=${pageSize}&query=${query}`, {
+export const getAllOrdersToReceive = async (page: number, pageSize: number, query: string, filter?: string) => {
+  let url = `/orderToReceive/all?page=${page}&pageSize=${pageSize}&query=${query}`;
+  
+  if (filter && filter !== 'all') {
+    url += `&filter=${filter}`;
+  }
+  
+  const response = await api.get(url, {
     headers: {
       authorization: token,
     },

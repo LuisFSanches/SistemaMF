@@ -61,7 +61,7 @@ export function OrdersToReceiveTable({ orders, filter, page, pageSize, query }: 
                 received_date: new Date().toISOString()
             });
 
-            await loadOrdersToReceive(page, pageSize, query);
+            await loadOrdersToReceive(page, pageSize, query, filter);
             setConfirmReceiveModal(false);
             setSelectedOrderId("");
             showSuccess("Pagamento confirmado com sucesso!");
@@ -77,7 +77,7 @@ export function OrdersToReceiveTable({ orders, filter, page, pageSize, query }: 
                 is_archived: true
             });
 
-            await loadOrdersToReceive(page, pageSize, query);
+            await loadOrdersToReceive(page, pageSize, query, filter);
             setConfirmArchiveModal(false);
             setSelectedOrderId("");
             showSuccess("Pedido arquivado com sucesso!");
@@ -93,7 +93,7 @@ export function OrdersToReceiveTable({ orders, filter, page, pageSize, query }: 
                 is_archived: false
             });
 
-            await loadOrdersToReceive(page, pageSize, query);
+            await loadOrdersToReceive(page, pageSize, query, filter);
             setConfirmUnarchiveModal(false);
             setSelectedOrderId("");
             showSuccess("Pedido desarquivado com sucesso!");
@@ -106,7 +106,7 @@ export function OrdersToReceiveTable({ orders, filter, page, pageSize, query }: 
     const handleDelete = async () => {
         try {
             await deleteOrderToReceive(selectedOrderId);
-            await loadOrdersToReceive(page, pageSize, query);
+            await loadOrdersToReceive(page, pageSize, query, filter);
             setConfirmDeleteModal(false);
             setSelectedOrderId("");
             showSuccess("Valor a receber deletado com sucesso!");
@@ -116,11 +116,8 @@ export function OrdersToReceiveTable({ orders, filter, page, pageSize, query }: 
         }
     };
 
-    const filteredOrders = orders?.filter(order => {
-        if (filter === 'active') return !order.is_archived;
-        if (filter === 'archived') return order.is_archived;
-        return true;
-    }) || [];
+    const filteredOrders = orders || [];
+
 
     if (filteredOrders.length === 0) {
         return (

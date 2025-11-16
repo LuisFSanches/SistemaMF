@@ -3,12 +3,20 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllOrderToReceiveService {
-    async execute(page: number = 1, pageSize: number = 10, query?: string) {
+    async execute(page: number = 1, pageSize: number = 10, query?: string, filter?: string) {
         try {
             const skip = (page - 1) * pageSize;
 
             let whereClause: any = {};
             
+            // Aplicar filtro de arquivamento
+            if (filter === 'active') {
+                whereClause.is_archived = false;
+            } else if (filter === 'archived') {
+                whereClause.is_archived = true;
+            }
+            // Se não houver filter, retorna todos (não adiciona condição de is_archived)
+
             if (query) {
                 const isNumericQuery = !isNaN(Number(query));
                 const orConditions: any[] = [
@@ -33,7 +41,7 @@ class GetAllOrderToReceiveService {
                     });
                 }
 
-                whereClause = { OR: orConditions };
+                whereClause.OR = orConditions;
             }
 
             const [ordersToReceive, total] = await Promise.all([

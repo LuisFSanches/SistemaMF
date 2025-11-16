@@ -6,10 +6,11 @@ class GetAllOrderToReceiveController {
         const page = parseInt(req.query.page as string) || 1;
         const pageSize = parseInt(req.query.pageSize as string) || 10;
         const query = req.query.query as string;
+        const filter = req.query.filter as string;
 
         const getAllOrderToReceiveService = new GetAllOrderToReceiveService();
 
-        const result = await getAllOrderToReceiveService.execute(page, pageSize, query);
+        const result = await getAllOrderToReceiveService.execute(page, pageSize, query, filter);
         
         return res.json(result);
     }
