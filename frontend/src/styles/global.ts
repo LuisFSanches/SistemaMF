@@ -478,7 +478,7 @@ export const Form = styled.form`
         list-style: none;
         padding: 0;
         margin: 0;
-        max-height: 200px;
+        max-height: 245px;
         overflow-y: auto;
     }
 
