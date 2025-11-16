@@ -52,6 +52,9 @@ import { CreateStockTransactionController } from './controllers/stockTransaction
 import { GetAllStockTransactionsController } from './controllers/stockTransaction/GetAllStockTransactionsController';
 import { DeleteStockTransactionController } from './controllers/stockTransaction/DeleteStockTransactionController';
 
+import { CreateSupplierController } from './controllers/supplier/CreateSupplierController';
+import { GetAllSuppliersController } from './controllers/supplier/GetAllSuppliersController';
+
 import { CreateOrderToReceiveController } from './controllers/orderToReceive/CreateOrderToReceiveController';
 import { GetOrderToReceiveController } from './controllers/orderToReceive/GetOrderToReceiveController';
 import { GetAllOrderToReceiveController } from './controllers/orderToReceive/GetAllOrderToReceiveController';
@@ -129,6 +132,10 @@ router.get('/statistics/top-admins', superAdminAuthMiddleware, new TopAdminsCont
 router.get('/stockTransaction/all', adminAuthMiddleware, new GetAllStockTransactionsController().handle);
 router.post('/stockTransaction', adminAuthMiddleware, new CreateStockTransactionController().handle);
 router.delete('/stockTransaction/:id', adminAuthMiddleware, new DeleteStockTransactionController().handle);
+
+//-- ROTAS SUPPLIER --
+router.post('/supplier', adminAuthMiddleware, new CreateSupplierController().handle);
+router.get('/supplier/all', adminAuthMiddleware, new GetAllSuppliersController().handle);
 
 //-- ROTAS ORDER TO RECEIVE --
 router.post('/orderToReceive', adminAuthMiddleware, new CreateOrderToReceiveController().handle);

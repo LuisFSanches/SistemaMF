@@ -3,6 +3,7 @@ import { IProduct } from "./IProduct";
 export interface IStockTransaction {
     id?: string,
     product_id: string,
+    supplier_id: string,
     supplier: string,
     unity: string,
     quantity: number,

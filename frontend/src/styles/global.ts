@@ -410,13 +410,113 @@ export const Form = styled.form`
         background: #f5f5f5;
     }
 
-    .new-product-button {
+    .custom-select-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .custom-select-button {
+        width: 100%;
+        height: 4rem;
+        padding: 12px;
+        border: 1px solid #e7b7c2;
+        border-radius: 8px;
+        font-size: 16px;
+        background: white;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        
+        &:focus {
+            outline: none;
+            border-color: #d48a9b;
+        }
+
+        &.placeholder {
+            color: #999;
+        }
+    }
+
+    .custom-select-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        border: 1px solid #e7b7c2;
+        border-radius: 8px;
+        margin-top: 4px;
+        z-index: 100;
+        padding: 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-select-search {
+        padding: 8px;
+        border-bottom: 1px solid #e7b7c2;
+        background: #fafafa;
+        border-radius: 8px 8px 0 0;
+        
+        input {
+            height: 40px;
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e7b7c2;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            
+            &:focus {
+                border-color: #d48a9b;
+            }
+        }
+    }
+
+    .custom-select-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .custom-select-list li {
+        padding: 12px;
+        cursor: pointer;
+        font-size: 16px;
+        
+        &:hover {
+            background: #f5f5f5;
+        }
+
+        &.selected {
+            background: var(--light-background);
+            font-weight: 600;
+        }
+
+        &.no-results {
+            color: #999;
+            cursor: default;
+            text-align: center;
+            font-style: italic;
+            
+            &:hover {
+                background: white;
+            }
+        }
+    }
+
+    .new-product-button, .new-supplier-button {
+        max-width: 120px;
         background: none;
         text-align: left;
-        color: var(--sideBarBackground);
+        color: #EC4899;
         font-weight: 700;
         font-size: 15px;
         margin-left: 5px;
+        margin-bottom: 10px;
     }
 `
 
@@ -460,13 +560,13 @@ export const FormFieldsContainer = styled.div`
     }
 `;
 
-export const EditFormField = styled.div<{ isShortField?: boolean }>`
+export const EditFormField = styled.div<{ isShortField?: boolean, removeMarginBottom?: boolean }>`
     width: 100% !important;
     width: ${({ isShortField }) => (isShortField ? '35%' : '85%')};
     display: flex;
     flex-direction: column;
     margin: 0 auto;
-    margin-bottom: 10px;
+    margin-bottom: ${({ removeMarginBottom }) => (removeMarginBottom ? '0' : '10px')};
 `;
 
 export const InlineFormField = styled.div<{fullWidth?: boolean}>`

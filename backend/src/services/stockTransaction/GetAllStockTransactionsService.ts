@@ -32,6 +32,7 @@ class GetAllStockTransactionsService {
                     where: filters as any,
                     include: {
                         product: true,
+                        supplierRelation: true,
                     },
                     orderBy: {
                         purchased_date: 'desc'

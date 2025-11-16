@@ -6,9 +6,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { searchProducts } from "../../services/productService";
 import { createStockTransaction } from "../../services/stockTransactionService";
+import { getAllSuppliers } from "../../services/supplierService";
 import { Loader } from "../../components/Loader";
 import { UNITIES } from "../../constants";
 import { ProductModal } from "../../components/ProductModal";
+import { SupplierModal } from "../../components/SupplierModal";
+import { ISupplier } from "../../interfaces/ISupplier";
+import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 
 interface StockTransactionModalProps{
     isOpen: boolean;
@@ -18,6 +22,7 @@ interface StockTransactionModalProps{
 }
 
 interface IStockTransaction {
+    supplier_id: string;
     supplier: string;
     unity: string;
     quantity: number;
@@ -48,7 +53,15 @@ export function StockTransactionModal({
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [productError, setProductError] = useState('');
     const [productModal, setProductModal] = useState(false);
+    const [supplierModal, setSupplierModal] = useState(false);
+    const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
+    const [showSupplierDropdown, setShowSupplierDropdown] = useState(false);
+    const [selectedSupplier, setSelectedSupplier] = useState<ISupplier | null>(null);
+    const [supplierSearchQuery, setSupplierSearchQuery] = useState('');
     const wrapperRef = useRef<HTMLDivElement>(null);
+    const supplierDropdownRef = useRef<HTMLDivElement>(null);
+    const supplierSearchInputRef = useRef<HTMLInputElement>(null);
+    const { showSuccess } = useSuccessMessage();
 
     const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -74,6 +87,26 @@ export function StockTransactionModal({
         setShowSuggestions(false);
     };
 
+    const loadSuppliers = async () => {
+        try {
+            const response = await getAllSuppliers();
+            setSuppliers(response.data);
+        } catch (error) {
+            console.error("Erro ao carregar fornecedores:", error);
+        }
+    };
+
+    const handleSelectSupplier = (supplier: ISupplier) => {
+        setSelectedSupplier(supplier);
+        setValue("supplier_id", supplier.id);
+        setShowSupplierDropdown(false);
+        setSupplierSearchQuery('');
+    };
+
+    const filteredSuppliers = suppliers.filter(supplier =>
+        supplier.name.toLowerCase().includes(supplierSearchQuery.toLowerCase())
+    );
+
     const handleStockTransaction = async (formData: IStockTransaction) => {
         if (formData.quantity === 0 || formData.unity_price === 0 || formData.total_price === 0) {
             if (formData.quantity === 0) {
@@ -96,18 +129,35 @@ export function StockTransactionModal({
         }
 
         else if (!selectedProduct) {
-            setProductError("Produto é obrigatório");
+            setProductError("Produto é obrigatório");
             return;
         }
+        
+        else if (!formData.supplier_id) {
+            setError("supplier_id", {
+                type: "required",
+                message: "Fornecedor é obrigatório",
+            });
+            return;
+        }
+
         try {
             setShowLoader(true);
-                const data = {
+            const selectedSupplier = suppliers.find(s => s.id === formData.supplier_id);
+            const data = {
                 product_id: selectedProduct.id,
-                ...formData
+                supplier_id: formData.supplier_id,
+                supplier: selectedSupplier?.name || "",
+                unity: formData.unity,
+                quantity: formData.quantity,
+                unity_price: formData.unity_price,
+                total_price: formData.total_price,
+                purchased_date: formData.purchased_date,
             }
 
             await createStockTransaction(data);
             setShowLoader(false);
+            showSuccess("Compra registrada com sucesso!");
             onRequestClose();
             loadData();
         } catch(error) {
@@ -116,6 +166,14 @@ export function StockTransactionModal({
     }
 
     useEffect(() => {
+        async function loadSuppliersOnOpen() {
+            if (isOpen) {
+                await loadSuppliers();
+            }
+        }
+        
+        loadSuppliersOnOpen();
+        setValue("supplier_id", "");
         setValue("supplier", "");
         setValue("unity", "");
         setValue("quantity", 0);
@@ -123,6 +181,9 @@ export function StockTransactionModal({
         setValue("total_price", 0);
         setValue("purchased_date", "");
         setSelectedProduct(null);
+        setSelectedSupplier(null);
+        setShowSupplierDropdown(false);
+        setSupplierSearchQuery('');
         setQuery('');
         setValue("box_value", 0);
         setValue("box_unities", 0);
@@ -147,6 +208,12 @@ export function StockTransactionModal({
             ) {
                 setShowSuggestions(false);
             }
+            if (
+                supplierDropdownRef.current &&
+                !supplierDropdownRef.current.contains(event.target as Node)
+            ) {
+                setShowSupplierDropdown(false);
+            }
         }
 
         document.addEventListener("mousedown", handleClickOutside);
@@ -154,6 +221,12 @@ export function StockTransactionModal({
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+    useEffect(() => {
+        if (showSupplierDropdown && supplierSearchInputRef.current) {
+            supplierSearchInputRef.current.focus();
+        }
+    }, [showSupplierDropdown]);
 
     return(
         <Modal 
@@ -194,6 +267,64 @@ export function StockTransactionModal({
                         className="new-product-button"
                         type="button"
                         onClick={() => setProductModal(true)}>Novo produto</button>
+                    <InlineFormField fullWidth>
+                        <EditFormField removeMarginBottom>
+                            <Label>Fornecedor<span>*</span></Label>
+                            <div className="custom-select-container" ref={supplierDropdownRef}>
+                                <input type="hidden" {...register("supplier_id", { required: "Fornecedor é obrigatório" })} />
+                                <button
+                                    type="button"
+                                    className={`custom-select-button ${!selectedSupplier ? 'placeholder' : ''}`}
+                                    onClick={() => setShowSupplierDropdown(!showSupplierDropdown)}
+                                >
+                                    <span>{selectedSupplier ? selectedSupplier.name : 'Selecione o fornecedor'}</span>
+                                    <span style={{ fontSize: '12px' }}>▼</span>
+                                </button>
+                                {showSupplierDropdown && (
+                                    <div className="custom-select-dropdown">
+                                        <div className="custom-select-search">
+                                            <input
+                                                ref={supplierSearchInputRef}
+                                                type="text"
+                                                placeholder="Buscar fornecedor..."
+                                                value={supplierSearchQuery}
+                                                onChange={(e) => setSupplierSearchQuery(e.target.value)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </div>
+                                        <ul className="custom-select-list">
+                                            {filteredSuppliers.length > 0 ? (
+                                                filteredSuppliers.map((supplier) => (
+                                                    <li
+                                                        key={supplier.id}
+                                                        onClick={() => handleSelectSupplier(supplier)}
+                                                        className={selectedSupplier?.id === supplier.id ? 'selected' : ''}
+                                                    >
+                                                        {supplier.name}
+                                                    </li>
+                                                ))
+                                            ) : (
+                                                <li className="no-results">Nenhum fornecedor encontrado</li>
+                                            )}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                            {errors.supplier_id && <ErrorMessage>{errors.supplier_id.message}</ErrorMessage>}
+                        </EditFormField>
+                        <EditFormField removeMarginBottom>
+                            <Label>Data de compra<span>*</span></Label>
+                            <Input type="date" {...register("purchased_date", {
+								required: "Data de entrega é obrigatória",
+							})} />
+                            {errors.purchased_date && <ErrorMessage>{errors.purchased_date.message}</ErrorMessage>}
+                        </EditFormField>
+                    </InlineFormField>
+                    <button
+                        className="new-supplier-button"
+                        type="button"
+                        onClick={() => setSupplierModal(true)}>Novo fornecedor</button>
+
                     <InlineFormField fullWidth>
                         <EditFormField>
                             <Label>Unidade<span>*</span></Label>
@@ -242,24 +373,6 @@ export function StockTransactionModal({
                             {errors.total_price && <ErrorMessage>{errors.total_price.message}</ErrorMessage>}
                         </EditFormField>
                     </InlineFormField>
-                    <InlineFormField fullWidth>
-                        <EditFormField>
-                            <Label>Fornecedor<span>*</span></Label>
-                            <input type="text"
-                                {...register("supplier", { required: "Fornecedor é obrigatório" })}
-                                placeholder="Fornecedor"
-                            />
-                            {errors.supplier && <ErrorMessage>{errors.supplier.message}</ErrorMessage>}
-                        </EditFormField>
-                        <EditFormField>
-                            <Label>Data de compra<span>*</span></Label>
-                            <Input type="date" {...register("purchased_date", {
-								required: "Data de entrega é obrigatória",
-							})} />
-                            {errors.purchased_date && <ErrorMessage>{errors.purchased_date.message}</ErrorMessage>}
-                        </EditFormField>
-                    </InlineFormField>
-
                     <button type="submit" className="create-button">
                         {action === "create" ? "Criar" : "Editar"}
                     </button>
@@ -278,6 +391,11 @@ export function StockTransactionModal({
                     stock: 0,
                     enabled: false
                 }}
+            />
+            <SupplierModal 
+                isOpen={supplierModal}
+                onRequestClose={() => setSupplierModal(false)}
+                loadData={loadSuppliers}
             />
         </Modal>
     )

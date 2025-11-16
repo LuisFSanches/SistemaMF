@@ -37,11 +37,15 @@ model NomeDoModelo {
 }
 ```
 
+### Execução de comandos.
+Nunca use yarn.
+Sempre use a versão nvm use v22 do node.
+
 #### 1.2. Gerar Migration
 Execute o comando Prisma para criar a migration:
 
 ```bash
-yarn prisma migrate dev --name descricao_da_alteracao
+npx prisma migrate dev --name descricao_da_alteracao
 ```
 
 **Convenção de Nomenclatura de Migrations:**
@@ -642,14 +646,10 @@ describe('NomeService', () => {
 
 ```bash
 # Rodar todos os testes
-yarn test
+npm run test
 
 # Rodar testes com coverage
-yarn coverage
-
-# Rodar em modo watch
-yarn test --watch
-```
+npm run coverage
 
 ### 5.6. Configuração do Vitest
 
@@ -793,21 +793,21 @@ Sempre use a versão mais recente do Node.js (22.18+ recomendado).
 nvm use v22
 
 # Desenvolvimento
-yarn dev                          # Iniciar servidor em modo desenvolvimento
+npm run dev                          # Iniciar servidor em modo desenvolvimento
 
 # Banco de Dados
-yarn prisma migrate dev           # Criar e aplicar migration
-yarn prisma migrate reset         # Resetar banco (desenvolvimento)
-yarn prisma studio                # Interface visual do banco
-yarn prisma generate              # Gerar Prisma Client
+npm run prisma migrate dev           # Criar e aplicar migration
+npm run prisma migrate reset         # Resetar banco (desenvolvimento)
+npm run prisma studio                # Interface visual do banco
+npm run prisma generate              # Gerar Prisma Client
 
 # Testes
-yarn test                         # Rodar todos os testes
-yarn coverage                     # Testes com cobertura
+npm run test                         # Rodar todos os testes
+npm run coverage                     # Testes com cobertura
 
 # Build e Produção
-yarn build                        # Compilar TypeScript
-yarn start                        # Iniciar servidor em produção
+npm run build                        # Compilar TypeScript
+npm run start                        # Iniciar servidor em produção
 ```
 
 ---

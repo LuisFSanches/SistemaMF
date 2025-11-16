@@ -21,20 +21,38 @@ class CreateStockTransactionService {
                 .set({ hour: 12, minute: 0, second: 0 })
                 .toDate();
 
+            // Buscar ou criar fornecedor
+            let supplierRecord = await prismaClient.supplier.findFirst({
+                where: { name: supplier.trim() }
+            });
+
+            if (!supplierRecord) {
+                supplierRecord = await prismaClient.supplier.create({
+                    data: { name: supplier.trim() }
+                });
+            }
+
             const transaction = await prismaClient.stockTransaction.create({
                 data: {
                     product_id,
-                    supplier,
+                    supplier, // Manter para compatibilidade (deprecated)
+                    supplier_id: supplierRecord.id, // Nova referência
                     unity,
                     quantity,
                     unity_price,
                     total_price,
                     purchased_date: formattedPurchasedDate,
                 },
+                include: {
+                    product: true,
+                    supplierRelation: true
+                }
             });
 
             return transaction;
         } catch (error: any) {
+            console.error("[CreateStockTransactionService] Failed:", error);
+            
             throw new BadRequestException(
                 error.message,
                 ErrorCodes.SYSTEM_ERROR

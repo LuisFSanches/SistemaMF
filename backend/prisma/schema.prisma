@@ -81,6 +81,17 @@ model Product {
   @@map("products")
 }
 
+model Supplier {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  stockTransactions StockTransaction[]
+
+  @@map("suppliers")
+}
+
 model OrderItem {
   id        String   @id @default(uuid())
   order_id  String
@@ -141,7 +152,8 @@ model Order {
 model StockTransaction {
   id             String   @id @default(uuid())
   product_id     String
-  supplier       String   // Nome do fornecedor
+  supplier       String   // Nome do fornecedor (deprecated - usar supplier_id)
+  supplier_id    String?
   unity          String   // Unidade (ex.: UN, KG, Caixa)
   quantity       Float
   unity_price    Float
@@ -151,6 +163,7 @@ model StockTransaction {
   updated_at     DateTime @updatedAt
 
   product        Product  @relation(fields: [product_id], references: [id])
+  supplierRelation Supplier? @relation(fields: [supplier_id], references: [id])
 
   @@map("stock_transactions")
 }
