@@ -18749,19 +18749,35 @@ var CreateStockTransactionService = class {
   async execute({ product_id, supplier, unity, quantity, unity_price, purchased_date, total_price }) {
     try {
       const formattedPurchasedDate = import_moment_timezone.default.utc(purchased_date).tz("America/Sao_Paulo", true).set({ hour: 12, minute: 0, second: 0 }).toDate();
+      let supplierRecord = await prisma_default.supplier.findFirst({
+        where: { name: supplier.trim() }
+      });
+      if (!supplierRecord) {
+        supplierRecord = await prisma_default.supplier.create({
+          data: { name: supplier.trim() }
+        });
+      }
       const transaction = await prisma_default.stockTransaction.create({
         data: {
           product_id,
           supplier,
+          // Manter para compatibilidade (deprecated)
+          supplier_id: supplierRecord.id,
+          // Nova referência
           unity,
           quantity,
           unity_price,
           total_price,
           purchased_date: formattedPurchasedDate
+        },
+        include: {
+          product: true,
+          supplierRelation: true
         }
       });
       return transaction;
     } catch (error) {
+      console.error("[CreateStockTransactionService] Failed:", error);
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */

@@ -74,7 +74,8 @@ var GetAllStockTransactionsService = class {
         prisma_default.stockTransaction.findMany({
           where: filters,
           include: {
-            product: true
+            product: true,
+            supplierRelation: true
           },
           orderBy: {
             purchased_date: "desc"

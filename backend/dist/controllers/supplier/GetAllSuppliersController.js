@@ -17,12 +17,12 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/services/stockTransaction/GetAllStockTransactionsService.ts
-var GetAllStockTransactionsService_exports = {};
-__export(GetAllStockTransactionsService_exports, {
-  GetAllStockTransactionsService: () => GetAllStockTransactionsService
+// src/controllers/supplier/GetAllSuppliersController.ts
+var GetAllSuppliersController_exports = {};
+__export(GetAllSuppliersController_exports, {
+  GetAllSuppliersController: () => GetAllSuppliersController
 });
-module.exports = __toCommonJS(GetAllStockTransactionsService_exports);
+module.exports = __toCommonJS(GetAllSuppliersController_exports);
 
 // src/prisma/index.ts
 var import_client = require("@prisma/client");
@@ -47,53 +47,25 @@ var BadRequestException = class extends HttpException {
   }
 };
 
-// src/services/stockTransaction/GetAllStockTransactionsService.ts
-var GetAllStockTransactionsService = class {
-  async execute(page = 1, pageSize = 10, query) {
+// src/services/supplier/GetAllSuppliersService.ts
+var GetAllSuppliersService = class {
+  async execute() {
     try {
-      const skip = (page - 1) * pageSize;
-      const filters = query ? {
-        OR: [
-          {
-            product: {
-              name: {
-                contains: query,
-                mode: "insensitive"
-              }
-            }
-          },
-          {
-            supplier: {
-              contains: query,
-              mode: "insensitive"
+      const suppliers = await prisma_default.supplier.findMany({
+        orderBy: {
+          name: "asc"
+        },
+        include: {
+          _count: {
+            select: {
+              stockTransactions: true
             }
           }
-        ]
-      } : {};
-      const [stockTransaction, total] = await Promise.all([
-        prisma_default.stockTransaction.findMany({
-          where: filters,
-          include: {
-            product: true,
-            supplierRelation: true
-          },
-          orderBy: {
-            purchased_date: "desc"
-          },
-          skip,
-          take: pageSize
-        }),
-        prisma_default.stockTransaction.count({
-          where: filters
-        })
-      ]);
-      return {
-        stockTransactions: stockTransaction,
-        total,
-        currentPage: page,
-        totalPages: Math.ceil(total / pageSize)
-      };
+        }
+      });
+      return suppliers;
     } catch (error) {
+      console.error("[GetAllSuppliersService] Failed:", error);
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */
@@ -101,7 +73,16 @@ var GetAllStockTransactionsService = class {
     }
   }
 };
+
+// src/controllers/supplier/GetAllSuppliersController.ts
+var GetAllSuppliersController = class {
+  async handle(req, res, next) {
+    const getAllSuppliersService = new GetAllSuppliersService();
+    const suppliers = await getAllSuppliersService.execute();
+    return res.json(suppliers);
+  }
+};
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  GetAllStockTransactionsService
+  GetAllSuppliersController
 });

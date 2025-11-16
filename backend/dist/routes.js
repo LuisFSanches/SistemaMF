@@ -2331,19 +2331,35 @@ var CreateStockTransactionService = class {
   async execute({ product_id, supplier, unity, quantity, unity_price, purchased_date, total_price }) {
     try {
       const formattedPurchasedDate = import_moment_timezone5.default.utc(purchased_date).tz("America/Sao_Paulo", true).set({ hour: 12, minute: 0, second: 0 }).toDate();
+      let supplierRecord = await prisma_default.supplier.findFirst({
+        where: { name: supplier.trim() }
+      });
+      if (!supplierRecord) {
+        supplierRecord = await prisma_default.supplier.create({
+          data: { name: supplier.trim() }
+        });
+      }
       const transaction = await prisma_default.stockTransaction.create({
         data: {
           product_id,
           supplier,
+          // Manter para compatibilidade (deprecated)
+          supplier_id: supplierRecord.id,
+          // Nova referência
           unity,
           quantity,
           unity_price,
           total_price,
           purchased_date: formattedPurchasedDate
+        },
+        include: {
+          product: true,
+          supplierRelation: true
         }
       });
       return transaction;
     } catch (error) {
+      console.error("[CreateStockTransactionService] Failed:", error);
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */
@@ -2397,7 +2413,8 @@ var GetAllStockTransactionsService = class {
         prisma_default.stockTransaction.findMany({
           where: filters,
           include: {
-            product: true
+            product: true,
+            supplierRelation: true
           },
           orderBy: {
             purchased_date: "desc"
@@ -2474,14 +2491,104 @@ var DeleteStockTransactionController = class {
   }
 };
 
-// src/schemas/orderToReceive/createOrderToReceive.ts
+// src/schemas/supplier/createSupplier.ts
 var import_zod3 = require("zod");
-var createOrderToReceiveSchema = import_zod3.z.object({
-  order_id: import_zod3.z.string().uuid("order_id must be a valid UUID"),
-  payment_due_date: import_zod3.z.string().datetime("payment_due_date must be a valid datetime"),
-  received_date: import_zod3.z.string().datetime("received_date must be a valid datetime").optional(),
-  type: import_zod3.z.string().nonempty("type is required"),
-  is_archived: import_zod3.z.boolean().optional()
+var createSupplierSchema = import_zod3.z.object({
+  name: import_zod3.z.string().nonempty("Supplier name is required").trim()
+});
+
+// src/services/supplier/CreateSupplierService.ts
+var CreateSupplierService = class {
+  async execute(data) {
+    const parsed = createSupplierSchema.safeParse(data);
+    if (!parsed.success) {
+      throw new BadRequestException(
+        parsed.error.errors[0].message,
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    const existingSupplier = await prisma_default.supplier.findFirst({
+      where: { name: parsed.data.name }
+    });
+    if (existingSupplier) {
+      throw new BadRequestException(
+        "Supplier already exists",
+        400 /* USER_ALREADY_EXISTS */
+      );
+    }
+    try {
+      const supplier = await prisma_default.supplier.create({
+        data: {
+          name: parsed.data.name
+        }
+      });
+      return supplier;
+    } catch (error) {
+      console.error("[CreateSupplierService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/supplier/CreateSupplierController.ts
+var CreateSupplierController = class {
+  async handle(req, res, next) {
+    const { name } = req.body;
+    const createSupplierService = new CreateSupplierService();
+    const supplier = await createSupplierService.execute({
+      name
+    });
+    return res.json(supplier);
+  }
+};
+
+// src/services/supplier/GetAllSuppliersService.ts
+var GetAllSuppliersService = class {
+  async execute() {
+    try {
+      const suppliers = await prisma_default.supplier.findMany({
+        orderBy: {
+          name: "asc"
+        },
+        include: {
+          _count: {
+            select: {
+              stockTransactions: true
+            }
+          }
+        }
+      });
+      return suppliers;
+    } catch (error) {
+      console.error("[GetAllSuppliersService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/supplier/GetAllSuppliersController.ts
+var GetAllSuppliersController = class {
+  async handle(req, res, next) {
+    const getAllSuppliersService = new GetAllSuppliersService();
+    const suppliers = await getAllSuppliersService.execute();
+    return res.json(suppliers);
+  }
+};
+
+// src/schemas/orderToReceive/createOrderToReceive.ts
+var import_zod4 = require("zod");
+var createOrderToReceiveSchema = import_zod4.z.object({
+  order_id: import_zod4.z.string().uuid("order_id must be a valid UUID"),
+  payment_due_date: import_zod4.z.string().datetime("payment_due_date must be a valid datetime"),
+  received_date: import_zod4.z.string().datetime("received_date must be a valid datetime").optional(),
+  type: import_zod4.z.string().nonempty("type is required"),
+  is_archived: import_zod4.z.boolean().optional()
 });
 
 // src/services/orderToReceive/CreateOrderToReceiveService.ts
@@ -2725,12 +2832,12 @@ var GetAllOrderToReceiveController = class {
 };
 
 // src/schemas/orderToReceive/updateOrderToReceive.ts
-var import_zod4 = require("zod");
-var updateOrderToReceiveSchema = import_zod4.z.object({
-  payment_due_date: import_zod4.z.string().datetime("payment_due_date must be a valid datetime").optional(),
-  received_date: import_zod4.z.string().datetime("received_date must be a valid datetime").optional(),
-  type: import_zod4.z.string().nonempty("type cannot be empty").optional(),
-  is_archived: import_zod4.z.boolean().optional()
+var import_zod5 = require("zod");
+var updateOrderToReceiveSchema = import_zod5.z.object({
+  payment_due_date: import_zod5.z.string().datetime("payment_due_date must be a valid datetime").optional(),
+  received_date: import_zod5.z.string().datetime("received_date must be a valid datetime").optional(),
+  type: import_zod5.z.string().nonempty("type cannot be empty").optional(),
+  is_archived: import_zod5.z.boolean().optional()
 });
 
 // src/services/orderToReceive/UpdateOrderToReceiveService.ts
@@ -3135,6 +3242,8 @@ router.get("/statistics/top-admins", super_admin_auth_default, new TopAdminsCont
 router.get("/stockTransaction/all", admin_auth_default, new GetAllStockTransactionsController().handle);
 router.post("/stockTransaction", admin_auth_default, new CreateStockTransactionController().handle);
 router.delete("/stockTransaction/:id", admin_auth_default, new DeleteStockTransactionController().handle);
+router.post("/supplier", admin_auth_default, new CreateSupplierController().handle);
+router.get("/supplier/all", admin_auth_default, new GetAllSuppliersController().handle);
 router.post("/orderToReceive", admin_auth_default, new CreateOrderToReceiveController().handle);
 router.get("/orderToReceive/all", admin_auth_default, new GetAllOrderToReceiveController().handle);
 router.get("/orderToReceive/check/:orderId", admin_auth_default, new CheckOrderToReceiveExistsController().handle);

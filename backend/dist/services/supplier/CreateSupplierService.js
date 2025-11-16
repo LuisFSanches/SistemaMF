@@ -17,12 +17,12 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/services/stockTransaction/GetAllStockTransactionsService.ts
-var GetAllStockTransactionsService_exports = {};
-__export(GetAllStockTransactionsService_exports, {
-  GetAllStockTransactionsService: () => GetAllStockTransactionsService
+// src/services/supplier/CreateSupplierService.ts
+var CreateSupplierService_exports = {};
+__export(CreateSupplierService_exports, {
+  CreateSupplierService: () => CreateSupplierService
 });
-module.exports = __toCommonJS(GetAllStockTransactionsService_exports);
+module.exports = __toCommonJS(CreateSupplierService_exports);
 
 // src/prisma/index.ts
 var import_client = require("@prisma/client");
@@ -40,6 +40,12 @@ var HttpException = class extends Error {
   }
 };
 
+// src/schemas/supplier/createSupplier.ts
+var import_zod = require("zod");
+var createSupplierSchema = import_zod.z.object({
+  name: import_zod.z.string().nonempty("Supplier name is required").trim()
+});
+
 // src/exceptions/bad-request.ts
 var BadRequestException = class extends HttpException {
   constructor(message, errorCode) {
@@ -47,53 +53,34 @@ var BadRequestException = class extends HttpException {
   }
 };
 
-// src/services/stockTransaction/GetAllStockTransactionsService.ts
-var GetAllStockTransactionsService = class {
-  async execute(page = 1, pageSize = 10, query) {
+// src/services/supplier/CreateSupplierService.ts
+var CreateSupplierService = class {
+  async execute(data) {
+    const parsed = createSupplierSchema.safeParse(data);
+    if (!parsed.success) {
+      throw new BadRequestException(
+        parsed.error.errors[0].message,
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    const existingSupplier = await prisma_default.supplier.findFirst({
+      where: { name: parsed.data.name }
+    });
+    if (existingSupplier) {
+      throw new BadRequestException(
+        "Supplier already exists",
+        400 /* USER_ALREADY_EXISTS */
+      );
+    }
     try {
-      const skip = (page - 1) * pageSize;
-      const filters = query ? {
-        OR: [
-          {
-            product: {
-              name: {
-                contains: query,
-                mode: "insensitive"
-              }
-            }
-          },
-          {
-            supplier: {
-              contains: query,
-              mode: "insensitive"
-            }
-          }
-        ]
-      } : {};
-      const [stockTransaction, total] = await Promise.all([
-        prisma_default.stockTransaction.findMany({
-          where: filters,
-          include: {
-            product: true,
-            supplierRelation: true
-          },
-          orderBy: {
-            purchased_date: "desc"
-          },
-          skip,
-          take: pageSize
-        }),
-        prisma_default.stockTransaction.count({
-          where: filters
-        })
-      ]);
-      return {
-        stockTransactions: stockTransaction,
-        total,
-        currentPage: page,
-        totalPages: Math.ceil(total / pageSize)
-      };
+      const supplier = await prisma_default.supplier.create({
+        data: {
+          name: parsed.data.name
+        }
+      });
+      return supplier;
     } catch (error) {
+      console.error("[CreateSupplierService] Failed:", error);
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */
@@ -103,5 +90,5 @@ var GetAllStockTransactionsService = class {
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  GetAllStockTransactionsService
+  CreateSupplierService
 });
