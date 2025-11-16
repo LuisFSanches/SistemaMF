@@ -22,7 +22,7 @@ export function OrdersToReceivePage() {
     const [filter, setFilter] = useState<'active' | 'archived' | 'all'>('active');
     const [page, setPage] = useState(1);
     const [query, setQuery] = useState('');
-    const pageSize = 6;
+    const pageSize = 10;
 
     useEffect(() => {
         loadOrdersToReceive(page, pageSize, query, filter);
