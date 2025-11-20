@@ -329,6 +329,7 @@ export const DiscountSwitchLabel = styled.label<{ $checked: boolean }>`
 `;
 
 export const PriceSummary = styled.div`
+    width: 100%;
     margin: 15px auto;
     padding: 15px;
     background: #f9f9f9;
