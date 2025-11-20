@@ -299,7 +299,7 @@ export function GlobalMenu({
             <ModalContainer>
                 <h1>Menu</h1>
                 <MenuList>
-                    <NavLink to="/dashboard">
+                    <NavLink to="/backoffice/dashboard">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('dashboard')}
@@ -311,7 +311,7 @@ export function GlobalMenu({
                             </span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/pedidoBalcao">
+                    <NavLink to="/backoffice/pedidoBalcao">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('pedidoBalcao')}
@@ -323,7 +323,7 @@ export function GlobalMenu({
                             </span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/pedidoOnline">
+                    <NavLink to="/backoffice/pedidoOnline">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('pedidoOnline')}
@@ -335,7 +335,7 @@ export function GlobalMenu({
                             </span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/ordensDeServico">
+                    <NavLink to="/backoffice/ordensDeServico">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('ordensDeServico')}
@@ -347,7 +347,7 @@ export function GlobalMenu({
                             </span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/aguardandoCliente">
+                    <NavLink to="/backoffice/aguardandoCliente">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('aguardandoCliente')}
@@ -359,7 +359,7 @@ export function GlobalMenu({
                             </span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/pedidos">
+                    <NavLink to="/backoffice/pedidos">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('pedidos')}
@@ -371,7 +371,7 @@ export function GlobalMenu({
                             </span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/produtos">
+                    <NavLink to="/backoffice/produtos">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('produtos')}
@@ -383,7 +383,7 @@ export function GlobalMenu({
                             </span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/estoque">
+                    <NavLink to="/backoffice/estoque">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('estoque')}
@@ -395,7 +395,7 @@ export function GlobalMenu({
                             </span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/clientes">
+                    <NavLink to="/backoffice/clientes">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('clientes')}
@@ -407,7 +407,7 @@ export function GlobalMenu({
                             </span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/administradores">
+                    <NavLink to="/backoffice/administradores">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('administradores')}
@@ -419,7 +419,7 @@ export function GlobalMenu({
                             </span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/valores-a-receber">
+                    <NavLink to="/backoffice/valores-a-receber">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('valoresAReceber')}
@@ -429,7 +429,7 @@ export function GlobalMenu({
                             <span>Ordens para receber</span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/pix">
+                    <NavLink to="/backoffice/pix">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('pix')}

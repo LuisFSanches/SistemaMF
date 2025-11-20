@@ -6,6 +6,7 @@ import { CreateAddressService } from '../../services/address/CreateAddressServic
 import { GetClientByPhoneNumberService } from '../../services/client/GetClientByPhoneNumberService';
 import { GetAllClientAddressService } from '../../services/address/GetAllClientAddressService';
 import { GetAddressByStreetAndNumberService } from "../../services/address/GetAddressByStreetAndNumberService";
+import { orderEmitter, OrderEvents } from '../../events/orderEvents';
 
 class CreateOrderController{
 	/**
@@ -27,6 +28,10 @@ class CreateOrderController{
 	handle = async (req: Request, res: Response, next: NextFunction) => {
 		const data = req.body;
 		const order = await this.orderFacade.createOrder(data);
+
+		if (!order.created_by) {
+			orderEmitter.emit(OrderEvents.StoreFrontOderReceived, order);
+		}
 
 		return res.json(order)
 	}

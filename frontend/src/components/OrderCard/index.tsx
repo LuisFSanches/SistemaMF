@@ -7,7 +7,7 @@ import { ViewCardMessage } from "../ViewCardMessage";
 import { OrderCardContainer } from "./style"
 import { HAS_CARD, TYPES_OF_DELIVERY } from "../../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faAnglesRight, faAnglesLeft, faEye, faPen, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faAnglesRight, faAnglesLeft, faEye, faPen, faEnvelope, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { formatTitleCase, formatDescription } from "../../utils";
 import { PAYMENT_METHODS } from "../../constants";
 import { PrintOrder } from "../PrintOrder";
@@ -56,9 +56,15 @@ export function OrderCard({
 				<p>Tel: (22) 99751-7940 | Itaperuna/RJ</p>
 			</div>
 			<div className="order-number">
-				{order.is_delivery &&
-					<span className={`order-type ${order.online_order ? "online" : "on_store"}`}>
-						{order.online_order ? "Online" : "Balcão"}
+				{!order.store_front_order && order.is_delivery &&
+					<span className={`order-type ${order.online_order ? "whatsapp" : "on_store"}`}>
+						{order.online_order ? "Whatsapp" : "Balcão"}
+					</span>
+				}
+
+				{order.store_front_order && 
+					<span className={`order-type on_site`}>
+						<FontAwesomeIcon icon={faGlobe} /> Site
 					</span>
 				}
 
@@ -68,7 +74,7 @@ export function OrderCard({
 					</span> 
 				}
 
-				{(!order.is_delivery && !order.online_order) &&
+				{(!order.is_delivery && !order.online_order && !order.store_front_order) &&
 					<span className={`order-type pdv`}>
 						PDV
 					</span> 
@@ -141,7 +147,7 @@ export function OrderCard({
 						{order.receiver_name ? formatTitleCase(order.receiver_name)
 							: formatTitleCase(order.client.first_name)}
 					</p>
-					<p><strong>Telefone do recebedor: </strong>
+					<p><strong>Telefone recebedor: </strong>
 						{order.receiver_name ? order.receiver_phone : order.client.phone_number}</p>
 				</div>
 			}
@@ -167,7 +173,7 @@ export function OrderCard({
 			</div>
 			<div className="address-container order-admin">
 				<p><strong>Status Pagamento: </strong>{order.payment_received ? "Pago" : "Pendente"}</p>
-				<p><strong>Responsável pelo Pedido: </strong>{order.createdBy?.name}</p>
+				<p><strong>Responsável pelo Pedido: </strong>{order.createdBy?.name || "Próprio Cliente"}</p>
 			</div>
 			<div className="order-actions">
 				{previousStatus &&
@@ -201,7 +207,7 @@ export function OrderCard({
 							color: '#666666',
 						}}
 					/>
-				{(order.has_card && order.online_order) &&
+				{((order.has_card && order.online_order) || (order.has_card && order.store_front_order)) &&
 					<button className="view-button" onClick={() => handleOpenViewCardMessage(order)}> 
 						<FontAwesomeIcon icon={faEnvelope}/>
 						<p>Cartão</p>

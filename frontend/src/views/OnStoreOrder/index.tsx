@@ -92,10 +92,10 @@ interface INewOrder {
 }
 
 interface IProduct {
-    id: string;
+    id?: string;
     name: string;
     price: number;
-    quantity: number;
+    quantity?: number;
 }
 
 export function OnStoreOrder() {
@@ -304,7 +304,7 @@ export function OnStoreOrder() {
                 setShowLoader(false);
                 setShowCompletedModal(true);
             } else {
-                navigate("/ordensDeServico");
+                navigate("/backoffice/ordensDeServico");
             }
 
         }
@@ -417,11 +417,11 @@ export function OnStoreOrder() {
 
             if (existingIndex !== -1) {
                 const existing = prev[existingIndex];
-                const newQuantity = existing.quantity + quantity;
+                const newQuantity = (existing.quantity || 0) + quantity;
 
                 // Recalcula o preço médio ponderado
                 const newPrice = (
-                    (existing.quantity * existing.price + quantity * price) /
+                    ((existing.quantity || 0) * existing.price + quantity * price) /
                     newQuantity
                 );
 

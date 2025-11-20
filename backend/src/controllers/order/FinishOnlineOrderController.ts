@@ -3,7 +3,6 @@ import { GetOrderService } from '../../services/order/GetOrderService'
 import { CreateAddressService } from '../../services/address/CreateAddressService'
 import { UpdateClientService } from '../../services/client/UpdateClientService';
 import { FinishOnlineOrderService } from '../../services/order/FinishOnlineOrderService';
-import { BadRequestException } from "../../exceptions/bad-request";
 
 import { orderEmitter, OrderEvents } from '../../events/orderEvents';
 
@@ -70,7 +69,7 @@ class FinishOnlineOrderController{
             phone_number: order.phone_number
         });
 
-        orderEmitter.emit(OrderEvents.OnlineOrderReceived, data);
+        orderEmitter.emit(OrderEvents.WhatsappOrderReceived, data);
 
         return res.json({ status: "Order successfully updated", order: data });
     }

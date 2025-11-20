@@ -19,6 +19,9 @@ import { WaitingClientOrders } from "./views/WaitingClientOrders";
 import { ProductsPage } from "./views/Products";
 import { StockPage } from "./views/Stock";
 import { OrdersToReceivePage } from "./views/OrdersToReceive";
+import { StoreFront } from "./views/StoreFront";
+import { Cart } from "./views/Cart";
+import { Checkout } from "./views/Checkout";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -30,7 +33,7 @@ function PrivateRoute({ children }: IPrivateRouteProps) {
         return null;
     }
 
-    return isAuthenticated ? children : <Navigate to="/" />;
+    return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
 function IsAuthenticatedRoutes({ children }: IPrivateRouteProps) {
@@ -38,7 +41,7 @@ function IsAuthenticatedRoutes({ children }: IPrivateRouteProps) {
     if (loading) {
         return null;
     }
-    return isAuthenticated ? <Navigate to="/pedidoBalcao" /> : children;
+    return isAuthenticated ? <Navigate to="/backoffice/pedidoBalcao" /> : children;
 }
 
 export default function routes(){
@@ -47,76 +50,85 @@ export default function routes(){
             <BrowserRouter>
                 <Routes>
                     <Route element={<SideBarLayout/>}>
-                        <Route path ="/dashboard" element={
+                        <Route path ="/backoffice/dashboard" element={
                             <PrivateRoute>
                                 <Dashboard/>
                             </PrivateRoute>
                         }/>
-                        <Route path ="/pedidoBalcao" element={
+                        <Route path ="/backoffice/pedidoBalcao" element={
                             <PrivateRoute>
                                 <OnStoreOrder/>
                             </PrivateRoute>
                         }/>
-                        <Route path="ordensDeServico" element={
+                        <Route path="/backoffice/ordensDeServico" element={
                             <PrivateRoute>
                                 <ServiceOrdersPage/>
                             </PrivateRoute>
                         }/>
-                        <Route path="pedidoOnline" element={
+                        <Route path="/backoffice/pedidoOnline" element={
                             <PrivateRoute>
                                 <OnlineOrder/>
                             </PrivateRoute>
                         }/>
-                        <Route path="aguardandoCliente" element={
+                        <Route path="/backoffice/aguardandoCliente" element={
                             <PrivateRoute>
                                 <WaitingClientOrders/>
                             </PrivateRoute>
                         }/>
-                        <Route path="produtos" element={
+                        <Route path="/backoffice/produtos" element={
                             <PrivateRoute>
                                 <ProductsPage/>
                             </PrivateRoute>
                         }/>
-                        <Route path="estoque" element={
+                        <Route path="/backoffice/estoque" element={
                             <PrivateRoute>
                                 <StockPage/>
                             </PrivateRoute>
                         }/>
-                        <Route path="clientes" element={
+                        <Route path="/backoffice/clientes" element={
                             <PrivateRoute>
                                 <UsersPage/>
                             </PrivateRoute>
                         }/>
-                        <Route path="pedidos" element={
+                        <Route path="/backoffice/pedidos" element={
                             <PrivateRoute>
                                 <OrdersPage/>
                             </PrivateRoute>
                         }/>
-                        <Route path="valores-a-receber" element={
+                        <Route path="/backoffice/valores-a-receber" element={
                             <PrivateRoute>
                                 <OrdersToReceivePage/>
                             </PrivateRoute>
                         }/>
-                        <Route path="pix" element={
+                        <Route path="/backoffice/pix" element={
                             <PrivateRoute>
                                 <PixPage/>
                             </PrivateRoute>
                         }/>
-                        <Route path="estatisticas" element={
+                        <Route path="/backoffice/estatisticas" element={
                             <PrivateRoute>
                                 <Statistics/>
                             </PrivateRoute>
                         }/>
-                        <Route path="administradores" element={
+                        <Route path="/backoffice/administradores" element={
                             <PrivateRoute>
                                 <AdminsPage/>
                             </PrivateRoute>
                         }/>
                     </Route>
+                    <Route path="/" element={<StoreFront />} />
+                    <Route path="/carrinho" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
                     <Route path="completarPedido/:id" element={
                         <CompleteOrder/>
                     }/>
-                    <Route path="/" element={
+                    <Route path="/login" element={
+                        <IsAuthenticatedRoutes>
+                            <LoginPage/>
+                        </IsAuthenticatedRoutes>
+                    }/>
+
+                    <Route path="/backoffice" element={
                         <IsAuthenticatedRoutes>
                             <LoginPage/>
                         </IsAuthenticatedRoutes>

@@ -21,7 +21,8 @@ class GetProductByIdService {
                     image: true,
                     qr_code: true,
                     created_at: true,
-                    updated_at: true
+                    updated_at: true,
+                    visible_in_store: true
                 }
             });
 

@@ -147,6 +147,10 @@ export const Header = styled.div`
         background-color: #71265D;
     }
 
+    .store-front-orders {
+        background-color: #4A90E2;
+    }
+
     .online-orders {
         background-color: #246D90;
     }

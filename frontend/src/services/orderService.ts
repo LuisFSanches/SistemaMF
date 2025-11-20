@@ -32,9 +32,13 @@ export const createOrder = async ({
 	has_card,
 	created_by,
 	online_order,
+	store_front_order,
 	online_code,
 	products,
-	is_delivery
+	is_delivery,
+	card_from,
+	card_to,
+	card_message
 }: any) => {
 	const response = await api.post("/order", {
 		clientId,
@@ -67,9 +71,14 @@ export const createOrder = async ({
 		has_card,
 		created_by,
 		online_order,
+		store_front_order,
 		online_code,
 		products,
 		is_delivery,
+		card_from,
+		card_to,
+		card_message
+	}, {
 		headers: {
 			Authorization: `${token}`,
 		}

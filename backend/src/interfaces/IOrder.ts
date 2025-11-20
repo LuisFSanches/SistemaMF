@@ -14,14 +14,15 @@ export interface IOrder {
     payment_method: string;
     payment_received: boolean;
     delivery_date: string;
-    created_by: string;
-    updated_by: string;
+    created_by?: string;
+    updated_by?: string;
     status: string;
     has_card: boolean;
     card_from?: string;
     card_to?: string;
     card_message?: string;
     online_order: boolean;
+    store_front_order: boolean;
     online_code?: string;
     products?: any,
     is_delivery?: boolean

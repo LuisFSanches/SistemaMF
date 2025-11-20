@@ -54,6 +54,10 @@ export const ProductList = styled.div`
     @media (max-width: 850px) {
         grid-template-columns: repeat(3, 1fr);
     }
+
+    @media (max-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
 `;
 
 export const Form = styled.form`
@@ -66,6 +70,7 @@ export const Form = styled.form`
     border-radius: 20px;
     box-shadow: 0.1rem 0.2rem 0.2rem var(--shadow-color);
     overflow-y: scroll;
+    padding: 0 20px;
 
     ::-webkit-scrollbar {
         width: 8px;
@@ -158,7 +163,7 @@ export const PageHeaderActions = styled.div`
 `;
 
 export const DiscountSwitch = styled.div`
-    width: 85%;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -202,7 +207,7 @@ export const DiscountSwitchLabel = styled.label<{ $checked: boolean }>`
 `;
 
 export const PriceSummary = styled.div`
-    width: 85%;
+    width: 100%;
     margin: 15px auto;
     padding: 15px;
     background: #f9f9f9;

@@ -11,22 +11,24 @@ import {
     AddButton,
     PriceInputWrapper,
     MoneySign,
+    PriceDisplay,
 } from './style';
 
 interface IProduct {
     id: string;
     name: string;
-    price: number;
+    price: number|any;
     quantity: number;
 }
 
 type ProductCardProps = {
-    product: IProduct;
+    product: IProduct|any;
     image: string;
     onAdd: (product: IProduct, quantity: number, price: number) => void;
+    editablePrice?: boolean;
 };
 
-export function ProductCard({ product, image, onAdd }: ProductCardProps){
+export function ProductCard({ product, image, onAdd, editablePrice = true }: ProductCardProps){
     const { showSuccess } = useSuccessMessage();
 
     const [quantity, setQuantity] = useState<number>(1);
@@ -44,18 +46,24 @@ export function ProductCard({ product, image, onAdd }: ProductCardProps){
             <ProductImage src={image} alt={product.name} />
             <Info>
                 <ProductName>{product.name}</ProductName>
-                <PriceInputWrapper>
-                    <MoneySign>R$</MoneySign>
-                    <PriceInput
-                        type="number"
-                        step="0.01"
-                        value={initialPrice}
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            setInitialPrice(val === "" ? "" : Number(val));
-                        }}
-                    />
+                {editablePrice ? (
+                    <PriceInputWrapper>
+                        <MoneySign>R$</MoneySign>
+                        <PriceInput
+                            type="number"
+                            step="0.01"
+                            value={initialPrice}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setInitialPrice(val === "" ? "" : Number(val));
+                            }}
+                        />
                     </PriceInputWrapper>
+                ) : (
+                    <PriceDisplay>
+                        R$ {Number(initialPrice).toFixed(2).replace('.', ',')}
+                    </PriceDisplay>
+                )}
                 <BottomActions>
                     <QuantityInput
                         type="number"

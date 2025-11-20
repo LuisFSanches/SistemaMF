@@ -35,12 +35,20 @@ export const OrderCardContainer= styled.div`
             color: white;
             font-weight: 700;
 
-            &.online {
+            svg {
+                margin-right: 5px;
+            }
+
+            &.whatsapp {
                 background: #548E8E;
             }
 
             &.on_store {
                 background: #71265D;
+            }
+
+            &.on_site {
+                background: #4A90E2;
             }
 
             &.pdv {

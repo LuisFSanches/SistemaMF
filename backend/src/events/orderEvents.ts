@@ -3,5 +3,6 @@ import { EventEmitter } from 'events';
 export const orderEmitter = new EventEmitter();
 
 export enum OrderEvents {
-    OnlineOrderReceived = 'onlineOrderReceived',
+    WhatsappOrderReceived = 'whatsappOrderReceived',
+    StoreFrontOderReceived = 'storeFrontOrderReceived'
 }

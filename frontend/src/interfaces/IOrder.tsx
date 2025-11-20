@@ -29,6 +29,7 @@ export interface IOrder {
   card_to?: string;
   type_of_delivery?: string;
   online_order?: boolean;
+  store_front_order?: boolean;
   online_code?: string;
   orderItems?: any;
   is_delivery?: boolean;

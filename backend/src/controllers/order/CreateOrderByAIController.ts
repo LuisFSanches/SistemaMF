@@ -96,6 +96,7 @@ class CreateOrderByAIController {
                 is_delivery: content["is_delivery"],
                 created_by: data.created_by,
                 online_order: true,
+                store_front_order: false,
                 products: data.products
             }
 

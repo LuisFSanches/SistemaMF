@@ -117,17 +117,26 @@ export function ServiceOrdersPage(){
 	const filterOrdersByType = (orderType: string) => {
 		setSelectedOrderType(orderType);
 		if (orderType === "counter-orders") {
-			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && !order.online_order && order.is_delivery));
-			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && !order.online_order && order.is_delivery));
-			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && !order.online_order && order.is_delivery));
-		} else if (orderType === "online-orders") {
+			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && !order.online_order
+				&& order.is_delivery && !order.store_front_order));
+			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && !order.online_order
+				&& order.is_delivery && !order.store_front_order));
+			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && !order.online_order
+				&& order.is_delivery && !order.store_front_order));
+		}
+		else if (orderType === "store-front-orders") {
+			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && order.store_front_order));
+			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && order.store_front_order));
+			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && order.store_front_order));
+		}
+		else if (orderType === "online-orders") {
 			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && order.online_order));
 			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && order.online_order));
 			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && order.online_order));
 		} else if (orderType === "store-orders") {
-			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && !order.is_delivery));
-			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && !order.is_delivery));
-			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && !order.is_delivery));
+			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && !order.is_delivery && !order.store_front_order));
+			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && !order.is_delivery && !order.store_front_order));
+			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && !order.is_delivery && !order.store_front_order));
 		}
 		else {
 			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED"));
@@ -194,13 +203,17 @@ export function ServiceOrdersPage(){
 						onClick={() => filterOrdersByType("all-orders")}>
 							Todos
 					</button>
+					<button className={`store-front-orders ${selectedOrderType === "store-front-orders" ? "active" : ""}`}
+						onClick={() => filterOrdersByType("store-front-orders")}>
+							Ordens Via Site
+					</button>
 					<button className={`counter-orders ${selectedOrderType === "counter-orders" ? "active" : ""}`}
 						onClick={() => filterOrdersByType("counter-orders")}>
 							Ordens Balcão
 					</button>
 					<button className={`online-orders ${selectedOrderType === "online-orders" ? "active" : ""}`}
 						onClick={() => filterOrdersByType("online-orders")}>
-							Ordens Online
+							Ordens Whatsapp
 					</button>
 					<button className={`store-orders ${selectedOrderType === "store-orders" ? "active" : ""}`}
 						onClick={() => filterOrdersByType("store-orders")}>

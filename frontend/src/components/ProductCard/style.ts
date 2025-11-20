@@ -9,6 +9,10 @@ export const Card = styled.div`
     display: flex;
     flex-direction: column;
     background: #fff;
+
+    @media (max-width: 768px) {
+        width: 100%;
+    }
 `;
 
 export const ProductImage = styled.img`
@@ -21,6 +25,10 @@ export const ProductImage = styled.img`
 export const Info = styled.div`
     padding: 16px;
     flex-grow: 1;
+
+    @media (max-width: 768px) {
+        padding: 12px;
+    }
 `;
 
 export const ProductName = styled.h3`
@@ -42,6 +50,13 @@ export const PriceInput = styled.input`
     padding-left: 30px; /* Espaço para o $ */
     margin-bottom: 12px;
     width: 100%;
+`;
+
+export const PriceDisplay = styled.div`
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #EC4899;
+    margin-bottom: 12px;
 `;
 
 export const MoneySign = styled.span`

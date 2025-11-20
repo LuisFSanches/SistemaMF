@@ -13,8 +13,13 @@ dotenv.config();
 import { router } from './routes';
 import { errorMiddleware } from './middlewares/errors';
 
-orderEmitter.on(OrderEvents.OnlineOrderReceived, (data) => {
-  io.emit(OrderEvents.OnlineOrderReceived, data);
+orderEmitter.on(OrderEvents.WhatsappOrderReceived, (data) => {
+  io.emit(OrderEvents.WhatsappOrderReceived, data);
+
+});
+
+orderEmitter.on(OrderEvents.StoreFrontOderReceived, (data) => {
+  io.emit(OrderEvents.StoreFrontOderReceived, data);
 });
 
 const app = express();

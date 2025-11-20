@@ -25,7 +25,8 @@ import {
     QRCodeImageBox,
     QRCodeActions,
     QRCodeButton,
-    QRCodeInfo
+    QRCodeInfo,
+    SwitchActions
 } from './style';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark, faCloudArrowUp, faQrcode, faPrint, faDownload } from "@fortawesome/free-solid-svg-icons";
@@ -179,6 +180,7 @@ export function ProductModal({
                     unity: formData.unity,
                     stock: formData.stock,
                     enabled: formData.enabled,
+                    visible_in_store: formData.visible_in_store,
                 });
 
                 if (imageFile && productData.id) {
@@ -198,7 +200,8 @@ export function ProductModal({
                     price: formData.price,
                     unity: formData.unity,
                     stock: formData.stock,
-                    enabled: formData.enabled
+                    enabled: formData.enabled,
+                    visible_in_store: formData.visible_in_store,
                 });
 
                 if (imageFile && currentProduct.id) {
@@ -224,6 +227,7 @@ export function ProductModal({
         setValue("unity", currentProduct.unity);
         setValue("stock", currentProduct.stock);
         setValue("enabled", currentProduct.enabled);
+        setValue("visible_in_store", currentProduct.visible_in_store);
         
         if (currentProduct.image) {
             setImagePreview(currentProduct.image);
@@ -253,6 +257,27 @@ export function ProductModal({
             <ModalContainer>
                 <Form onSubmit={handleSubmit(handleProduct)}>
                     <h2>{action === "create" ? "Novo" : "Editar"} Produto</h2>
+                    <SwitchActions>
+                        <Switch>
+                            <span>
+                                {watch("enabled") ? "Ativado" : "Desativado"}
+                            </span>
+                            <Input id="switch" type="checkbox" defaultChecked placeholder='Ativo' {...register("enabled")}/>
+                            <StyledSwitch htmlFor="switch" $checked={watch("enabled")} />
+                        </Switch>
+
+                        <Switch>
+                            <span>
+                                {watch("visible_in_store") ? "Visível para o cliente" : "Oculto para o cliente"}
+                            </span>
+                            <Input
+                                id="switch-visible"
+                                type="checkbox"
+                                defaultChecked placeholder='Visível na Loja' {...register("visible_in_store")}/>
+                            <StyledSwitch htmlFor="switch-visible" $checked={watch("visible_in_store") ?? false} />
+                        </Switch>
+                    </SwitchActions>
+
                     <Input placeholder='Nome' {...register("name", {required: "Nome inválido"})}/>
                     {errors.name && <ErrorMessage>{errors.name.message}</ErrorMessage>}
                     <Input type="number" step="0.01" placeholder='Preço' {...register("price", { required: "Preço inválido" })}/>
@@ -356,16 +381,6 @@ export function ProductModal({
                             </QRCodeActions>
                         </QRCodeContainer>
                     )}
-
-                    <Switch>
-                        <span>
-                            {watch("enabled") ? "Ativado" : "Desativado"}
-                        </span>
-                        <Input id="switch" type="checkbox" defaultChecked placeholder='Ativo' {...register("enabled")}/>
-                        <StyledSwitch htmlFor="switch" $checked={watch("enabled")} />
-                    </Switch>
-                    
-                    
                     <button type="submit" className="create-button">
                         {action === "create" ? "Criar" : "Editar"}
                     </button>

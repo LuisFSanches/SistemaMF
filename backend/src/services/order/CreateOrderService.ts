@@ -7,7 +7,7 @@ import { BadRequestException } from "../../exceptions/bad-request";
 class CreateOrderService{
 	async execute(data: IOrder, products: any) {
 		const { delivery_date } = data;
-		
+				
 		try {
 			const formattedDeliveryDate = moment.utc(delivery_date)
 				.tz('America/Sao_Paulo', true)
@@ -36,6 +36,7 @@ class CreateOrderService{
 		return order;
 
 		} catch(error: any) {
+			console.error("[CreateOrderService] Failed:", error);
 			throw new BadRequestException(
                 error.message,
                 ErrorCodes.SYSTEM_ERROR

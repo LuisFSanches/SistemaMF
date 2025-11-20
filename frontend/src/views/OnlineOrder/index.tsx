@@ -209,7 +209,7 @@ export function OnlineOrder() {
             response = responseData;
             addOrder(response);
             setShowLoader(false);
-            navigate("/ordensDeServico");
+            navigate("/backoffice/ordensDeServico");
             return;
         }
 

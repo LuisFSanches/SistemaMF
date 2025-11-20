@@ -31,7 +31,7 @@ export function OrdersTable({ orders }: { orders: any[] }) {
                     ))}
                 </tbody>
             </Table>
-            <a href="/pedidos" style={{ display: 'block' }}>
+            <a href="/backoffice/pedidos" style={{ display: 'block' }}>
                 Ver todos os pedidos
             </a>
         </TableContainer>

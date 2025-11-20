@@ -5,5 +5,6 @@ export interface IProduct {
     unity: string;
     stock: number;
     enabled: boolean;
-    image?: string
+    image?: string;
+    visible_in_store?: boolean;
 }

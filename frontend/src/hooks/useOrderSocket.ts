@@ -7,13 +7,17 @@ const socket = io(baseUrl, {
     transports: ['websocket'], 
 });
 
-export const useOrderSocket = (onOrderReceived: (data: any) => void) => {
+export const useOrderSocket = (onOrderReceived: (data: any, eventType: string) => void) => {
     useEffect(() => {
         try {
             socket.on('connect', () => {});
     
-            socket.on('onlineOrderReceived', (data) => {
-                onOrderReceived(data);
+            socket.on('whatsappOrderReceived', (data) => {
+                onOrderReceived(data, 'whatsappOrder');
+            });
+
+            socket.on('storeFrontOrderReceived', (data) => {
+                onOrderReceived(data, 'storeFrontOrder');
             });
         } catch (error) {
             console.error('Erro ao conectar ao WebSocket:', error);

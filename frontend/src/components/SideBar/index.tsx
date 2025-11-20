@@ -286,7 +286,7 @@ export function SideBar(){
     return(
         <Container isMinimizedActive={true}>
             <InternalContainer isMinimizedActive={true}>
-                <NavLink to="/dashboard" style={{display: 'none'}}>
+                <NavLink to="/backoffice/dashboard" style={{display: 'none'}}>
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('dashboard')}>
                         <SideBarButton
                             isActive={isActive['dashboard']}
@@ -298,7 +298,7 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
 
-                <NavLink to="/pedidoBalcao">
+                <NavLink to="/backoffice/pedidoBalcao">
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidoBalcao')}>
                         <SideBarButton
                             isActive={isActive['pedidoBalcao']}
@@ -311,7 +311,7 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
 
-                <NavLink to="/pedidoOnline">
+                <NavLink to="/backoffice/pedidoOnline">
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidoOnline')}>
                         <SideBarButton
                             isActive={isActive['pedidoOnline']}
@@ -324,7 +324,7 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
 
-                <NavLink to="/ordensDeServico" >
+                <NavLink to="/backoffice/ordensDeServico" >
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('ordensDeServico')}>
                         <SideBarButton
                             isActive={isActive['ordensDeServico']}
@@ -338,7 +338,7 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
 
-                <NavLink to="/aguardandoCliente">
+                <NavLink to="/backoffice/aguardandoCliente">
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('aguardandoCliente')}>
                         <SideBarButton
                             isActive={isActive['aguardandoCliente']}
@@ -351,7 +351,7 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
 
-                <NavLink to="/pedidos">
+                <NavLink to="/backoffice/pedidos">
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidos')}>
                         <SideBarButton
                             isActive={isActive['pedidos']}
@@ -364,7 +364,7 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
 
-                <NavLink to="/produtos">
+                <NavLink to="/backoffice/produtos">
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('produtos')}>
                         <SideBarButton
                             isActive={isActive['produtos']}
@@ -377,7 +377,7 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
                 
-                <NavLink to="/estoque" style={{ display: 'none'}}>
+                <NavLink to="/backoffice/estoque" style={{ display: 'none'}}>
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('estoque')}>
                         <SideBarButton
                             isActive={isActive['estoque']}
@@ -390,7 +390,7 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
 
-                <NavLink to="/valores-a-receber">
+                <NavLink to="/backoffice/valores-a-receber">
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('valoresAReceber')}>
                         <SideBarButton
                             isActive={isActive['valoresAReceber']}
@@ -403,7 +403,7 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
 
-                <NavLink to="/pix">
+                <NavLink to="/backoffice/pix">
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('pix')}>
                         <SideBarButton
                             isActive={isActive['pix']}

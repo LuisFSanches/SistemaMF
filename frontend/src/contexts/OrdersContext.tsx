@@ -66,17 +66,30 @@ export const OrdersProvider: React.FC = ({ children }) => {
     );
   };
 
-    useOrderSocket((data: any) => {
-      if (!window.location.href.includes('completarPedido')) {
+    useOrderSocket((data: any, eventType: string) => {
+      console.log('New order received via socket:', data);
+      
+      if (eventType === 'whatsappOrder' && window.location.href.includes('backoffice')) {
           window.dispatchEvent(new CustomEvent('new-order', {
             detail: {
-              message: '💐 Pedido online recebido!',
+              message: '💐 Novo Pedido via link recebido!',
               orderCode: `#${data.code}`,
               clientName: `${data.client.first_name} ${data.client.last_name}`,
             }
         }));
-        loadOnGoingOrders(true);
       }
+
+        if (eventType === 'storeFrontOrder' && !window.location.href.includes('completarPedido')) {
+          window.dispatchEvent(new CustomEvent('new-order', {
+            detail: {
+              message: '💐 Novo Pedido via loja online recebido!',
+              orderCode: `#${data.code}`,
+              clientName: `${data.client.first_name} ${data.client.last_name}`,
+            }
+        }));
+      }
+
+        loadOnGoingOrders(true);
     })
 
   useEffect(() => {

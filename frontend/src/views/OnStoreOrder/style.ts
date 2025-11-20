@@ -87,6 +87,10 @@ export const ProductList = styled.div`
     @media (max-width: 850px) {
         grid-template-columns: repeat(3, 1fr);
     }
+
+    @media (max-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
 `;
 
 export const FormContainer = styled.div`
@@ -127,6 +131,7 @@ export const Form = styled.form<{ step?: number }>`
     border-radius: 20px;
     box-shadow: 0.1rem 0.2rem 0.2rem var(--shadow-color);
     overflow-y: scroll;
+    padding: 0 20px;
 
     ::-webkit-scrollbar {
         width: 8px;
@@ -155,7 +160,6 @@ export const Form = styled.form<{ step?: number }>`
 `
 
 export const InlineFormField = styled.div`
-    width: 85%;
     display: flex;
     justify-content: space-between;
 
@@ -325,7 +329,6 @@ export const DiscountSwitchLabel = styled.label<{ $checked: boolean }>`
 `;
 
 export const PriceSummary = styled.div`
-    width: 85%;
     margin: 15px auto;
     padding: 15px;
     background: #f9f9f9;

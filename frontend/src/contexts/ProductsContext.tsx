@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { listProducts } from "../services/productService";
 import { IProduct } from "../interfaces/IProduct";
 
@@ -18,13 +18,11 @@ export const ProductsProvider: React.FC = ({ children }) => {
     const [totalProducts, setTotalProducts] = useState(0);
     const token = localStorage.getItem("token");
 
-    const loadAvailableProducts = async (page: number, pageSize: number, query: string) => {
-        if (true) {
+    const loadAvailableProducts = useCallback(async (page: number, pageSize: number, query: string) => {
         const { data: { products, total } } = await listProducts(page, pageSize, query);
-            setProducts(products);
-            setTotalProducts(total);
-        }
-    };
+        setProducts(products);
+        setTotalProducts(total);
+    }, []);
 
     const addProduct = (product: IProduct) => {
         setProducts((prevProducts) => [...prevProducts, product]);

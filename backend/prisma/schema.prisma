@@ -64,16 +64,17 @@ model Address {
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  name        String
-  price       Float
-  unity       String
-  stock       Float
-  enabled     Boolean
-  image       String?
-  qr_code     String?
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  name               String
+  price              Float
+  unity              String
+  stock              Float
+  enabled            Boolean
+  visible_in_store   Boolean  @default(false)
+  image              String?
+  qr_code            String?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
 
   orderItems OrderItem[]
   stockTransactions StockTransaction[]
@@ -123,8 +124,8 @@ model Order {
   payment_method    String?
   payment_received  Boolean      @default(false)
   delivery_date     DateTime     @default(now())
-  created_by        String
-  updated_by        String
+  created_by        String?
+  updated_by        String?
   status            String        @default("Opened")
   has_card          Boolean       @default(false)
   card_message      String?
@@ -136,9 +137,10 @@ model Order {
   client            Client        @relation(fields: [client_id], references: [id])
   clientAddress     Address @relation(fields: [client_address_id], references: [id])
 
-  createdBy         Admin         @relation("createdBy", fields: [created_by], references: [id])
-  updatedBy         Admin         @relation("updatedBy", fields: [updated_by], references: [id])
+  createdBy         Admin?         @relation("createdBy", fields: [created_by], references: [id])
+  updatedBy         Admin?         @relation("updatedBy", fields: [updated_by], references: [id])
   online_order      Boolean       @default(false)
+  store_front_order Boolean       @default(false)
   online_code       String?
   type_of_delivery  String?
   is_delivery       Boolean       @default(true)

@@ -521,13 +521,10 @@ export const Form = styled.form`
 `
 
 export const FormField = styled.div<{ isShortField?: boolean }>`
-    width: 85%;
-    width: ${({ isShortField }) => (isShortField ? '35%' : '85%')};
+    width: ${({ isShortField }) => (isShortField ? '35%' : '95%')};
     display: flex;
     flex-direction: column;
-    margin: 0 auto;
-    margin-bottom: 10px;
-    margin-top: 20px;
+    margin: 20px 0 10px 0;
     position: relative;
 
     @media (max-width:768px) {
@@ -547,7 +544,7 @@ export const FormFieldTitle = styled.div`
 `;
 
 export const FormFieldsContainer = styled.div`
-    width: 90%;
+    width: 95%;
     display: flex;
     flex-direction: column;
     border: 1px solid #ccc;
@@ -570,7 +567,7 @@ export const EditFormField = styled.div<{ isShortField?: boolean, removeMarginBo
 `;
 
 export const InlineFormField = styled.div<{fullWidth?: boolean}>`
-    width: ${({ fullWidth }) => (fullWidth ? '100%' : '85%')};
+    width: ${({ fullWidth }) => (fullWidth ? '100%' : '95%')};
     display: flex;
     justify-content: space-between;
 
@@ -588,11 +585,11 @@ export const InlineFormField = styled.div<{fullWidth?: boolean}>`
     }
 `
 
-export const Label = styled.label`
+export const Label = styled.label<{ noMargin?: boolean }>`
     font-size: 16px;
     color: #5B5B5B;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: ${({ noMargin }) => (noMargin ? '0' : '8px')};
 
     span {
         color: red;
@@ -739,6 +736,41 @@ export const PrimaryButton = styled.button`
     }
 `;
 
+export const SecondaryButton = styled.button`
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    margin: 0 auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 12px; 
+    border: 2px solid #EC4899;
+    border-radius: 0.8rem;
+    background: transparent;
+    color: #EC4899;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        background: #EC4899; 
+        color: #fff;
+        transform: translateY(-2px); 
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); 
+    }
+
+    &:active {
+        transform: translateY(0); 
+        box-shadow: 0 3px 4px rgba(0, 0, 0, 0.2); 
+    }
+    
+    @media (max-width: 768px) {
+        margin-top: 0px;
+        margin-bottom: 10px;
+    }
+`;
+
 export const PasswordContainer = styled.div`
     position: relative;
 
@@ -764,6 +796,7 @@ export const AddButton = styled.button`
         
     }
 `
+
 export const PageHeader = styled.div`
     display: flex;
     justify-content: space-between;
@@ -823,6 +856,7 @@ export const Switch = styled.div`
         opacity: 0;
         width: 0;
         height: 0;
+        display: none;
     }
 `;
 

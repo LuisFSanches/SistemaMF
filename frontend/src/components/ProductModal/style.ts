@@ -7,6 +7,12 @@ export const ImageUploadContainer = styled.div`
     margin: 1rem 0;
 `;
 
+export const SwitchActions = styled.div`
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 10px 0;
+`;
+
 export const ImagePreviewBox = styled.div`
     width: 100%;
     min-height: 150px;

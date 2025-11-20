@@ -80,11 +80,14 @@ export function CompleteOrder() {
     const [cardModalShowed, setCardModalShowed] = useState(false);
     const [showToolTipModal, setShowToolTipModal] = useState(false);
     const cardSectionRef = useRef<HTMLDivElement>(null);
+    const hasShownWelcomeModal = useRef(false);
+    const [identifiedUser, setIdentifiedUser] = useState("");
     const tooltipMessage = `Para entregas em outras regiões,
         por favor entre em contato conosco pelo whatsapp.`
 
     const [errorMessage, setErrorMessage] = useState("");
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
+    const discount = currentOrder?.discount || 0;
 
     const url = window.location.href;
     const urlParts = url.split('/');
@@ -191,7 +194,7 @@ export function CompleteOrder() {
         const fetchClientData = async () => {
             const phoneNumber = rawTelephone(phone_number);
 
-            if (phoneNumber && phoneNumber.length >= 10) {
+            if (phoneNumber && phoneNumber.length >= 10 && phoneNumber !== identifiedUser) {
                 try {
                     setShowLoader(true);
                     const response = await getClientByPhone(phoneNumber);
@@ -214,7 +217,12 @@ export function CompleteOrder() {
                             setAddresses(addresses);
                         }
                         setShowLoader(false);
-                        setShowWelcomeModal(true);
+                        
+                        if (!hasShownWelcomeModal.current || identifiedUser !== client.phone_number) {
+                            setIdentifiedUser(client.phone_number);
+                            setShowWelcomeModal(true);
+                            hasShownWelcomeModal.current = true;
+                        }
                     }
                 } catch (error) {
                     setClientId("");
@@ -223,7 +231,9 @@ export function CompleteOrder() {
             }
         };
         
-        fetchClientData();
+        setTimeout(() => {
+            fetchClientData();
+        }, 900);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [phone_number, setValue, setError]);
 
@@ -237,7 +247,7 @@ export function CompleteOrder() {
             } else {
                 setReceiverMask("(99) 99999-9999");
             }
-        }, 800);
+        }, 900);
 
         return () => clearTimeout(timeout);
     }, [watchReceiverPhone, watch, setReceiverMask]);
@@ -252,7 +262,7 @@ export function CompleteOrder() {
             } else {
                 setMask("(99) 99999-9999");
             }
-        }, 800);
+        }, 1000);
 
         return () => clearTimeout(timeout);
     }, [watchPhoneNumber, watch, setMask]);
@@ -416,11 +426,12 @@ export function CompleteOrder() {
                                 currentOrder?.products_value  &&
                                 convertMoney(currentOrder?.products_value as number)
                             }</p>
-                            {currentOrder?.discount && currentOrder?.discount > 0 &&
-                                <p><strong>Desconto: </strong> {
-                                    currentOrder?.discount &&
-                                    convertMoney(currentOrder?.discount as number)
-                                }</p>
+                            {(discount > 0) &&
+                                <p><strong>Desconto: </strong>
+                                    {
+                                        convertMoney(currentOrder?.discount as number)
+                                    }
+                                </p>
                             }
                             <p><strong>Taxa de entrega: </strong> {
                                 currentOrder?.delivery_fee &&
@@ -521,7 +532,7 @@ export function CompleteOrder() {
                                     </FormField>
                                     <FormField>
                                         <Label>
-                                            Telefone do recebedor
+                                            Telefone recebedor
                                             <span>*</span>
                                         </Label>
                                         <InputMask

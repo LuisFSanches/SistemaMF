@@ -48,7 +48,7 @@ export function LoginPage(){
             }
         }
         setShowLoader(false);
-        navigate("/pedidoBalcao");
+        navigate("/backoffice/pedidoBalcao");
     };
 
     return (

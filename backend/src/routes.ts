@@ -16,6 +16,7 @@ import { SearchProductsController } from './controllers/product/SearchProductsCo
 import { UploadProductImageController } from './controllers/product/UploadProductImageController';
 import { DeleteProductImageController } from './controllers/product/DeleteProductImageController';
 import { GenerateProductQRCodeController } from './controllers/product/GenerateProductQRCodeController';
+import { GetStoreFrontProductsController } from './controllers/product/GetStoreFrontProductsController';
 
 import { CreateAddressController } from './controllers/address/CreateAddressController';
 import { GetAllClientAddressController } from './controllers/address/GetAllClientAddressController';
@@ -43,10 +44,6 @@ import { UpdateAdminController } from './controllers/admin/UpdateAdminController
 import { GetPixController } from './controllers/inter/GetPixController';
 // import { RegisterWebhookController } from './controllers/inter/RegisterWebhookController';
 import { WebhookPixController } from './controllers/inter/WebhookPixController';
-
-import { TopClientsController } from './controllers/statistics/TopClientsController';
-import { DailySalesController } from './controllers/statistics/DailySalesController';
-import { TopAdminsController } from './controllers/statistics/TopAdminsController';
 
 import { CreateStockTransactionController } from './controllers/stockTransaction/CreateStockTransactionController';
 import { GetAllStockTransactionsController } from './controllers/stockTransaction/GetAllStockTransactionsController';
@@ -110,6 +107,9 @@ router.post('/product/:id/image', adminAuthMiddleware, upload.single('image'), h
 router.delete('/product/:id/image', adminAuthMiddleware, new DeleteProductImageController().handle)
 router.post('/product/:id/qrcode', adminAuthMiddleware, new GenerateProductQRCodeController().handle)
 
+//-- ROTAS STOREFRONT (PÚBLICAS) --
+router.get('/storefront/products', new GetStoreFrontProductsController().handle)
+
 //-- ROTAS ADMIN --
 router.post('/admin', superAdminAuthMiddleware, new CreateAdminController().handle)
 router.post('/admins/login', new LoginAdminController().handle)
@@ -122,11 +122,6 @@ router.put('/admin/:id', superAdminAuthMiddleware, new UpdateAdminController().h
 router.get('/pix', superAdminAuthMiddleware, new GetPixController().handle)
 router.post('/webhook/pix', superAdminAuthMiddleware,  new WebhookPixController().handle)
 // router.put('/create/webhook', new RegisterWebhookController().handle)
-
-//-- ROTAS STATISTICS --
-router.get('/statistics/top-clients', superAdminAuthMiddleware, new TopClientsController().handle);
-router.get('/statistics/daily-sales', superAdminAuthMiddleware, new DailySalesController().handle);
-router.get('/statistics/top-admins', superAdminAuthMiddleware, new TopAdminsController().handle);
 
 //-- ROTAS STOCK TRANSACTION --
 router.get('/stockTransaction/all', adminAuthMiddleware, new GetAllStockTransactionsController().handle);

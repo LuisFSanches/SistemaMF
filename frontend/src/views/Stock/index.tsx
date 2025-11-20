@@ -119,7 +119,7 @@ export function StockPage(){
                     {stockTransactions?.map(transaction => (
                         <tr key={transaction.id}>
                             <td>
-                                <a href="/estoque">
+                                <a href="/backoffice/estoque">
                                     {transaction.product?.name}
                                 </a>
                             </td>

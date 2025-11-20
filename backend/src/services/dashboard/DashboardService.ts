@@ -57,13 +57,16 @@ export class DashboardService {
             CARD: orders.filter((o) => o.payment_method === 'CARD').length,
         }
 
-        // Top administradores
+        // Top administradores (filtra pedidos online sem admin)
         const topAdmins = await prismaClient.order.groupBy({
             by: ['created_by'],
             where: {
                 created_at: {
                     gte: startDate,
                     lte: now,
+                },
+                created_by: {
+                    not: null,
                 },
             },
             _count: {
@@ -78,7 +81,7 @@ export class DashboardService {
 
         const adminsDetails = await prismaClient.admin.findMany({
             where: {
-                id: { in: topAdmins.map((admin) => admin.created_by) },
+                id: { in: topAdmins.map((admin) => admin.created_by).filter((id): id is string => id !== null) },
             },
             select: {
                 id: true,
@@ -87,15 +90,17 @@ export class DashboardService {
             },
         })
 
-        const admins = topAdmins.map((admin) => {
-            const adminData = adminsDetails.find((a) => a.id === admin.created_by)
-            return {
-                id: admin.created_by,
-                name: adminData?.name || 'Desconhecido',
-                username: adminData?.username || 'Desconhecido',
-                orders_count: admin._count.id,
-            }
-        })
+        const admins = topAdmins
+            .filter((admin) => admin.created_by !== null)
+            .map((admin) => {
+                const adminData = adminsDetails.find((a) => a.id === admin.created_by)
+                return {
+                    id: admin.created_by!,
+                    name: adminData?.name || 'Desconhecido',
+                    username: adminData?.username || 'Desconhecido',
+                    orders_count: admin._count.id,
+                }
+            })
 
         return {
             totalOrders,
