@@ -17,12 +17,12 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/services/product/GetAllProductService.ts
-var GetAllProductService_exports = {};
-__export(GetAllProductService_exports, {
-  GetAllProductService: () => GetAllProductService
+// src/services/product/GetStoreFrontProductsService.ts
+var GetStoreFrontProductsService_exports = {};
+__export(GetStoreFrontProductsService_exports, {
+  GetStoreFrontProductsService: () => GetStoreFrontProductsService
 });
-module.exports = __toCommonJS(GetAllProductService_exports);
+module.exports = __toCommonJS(GetStoreFrontProductsService_exports);
 
 // src/prisma/index.ts
 var import_client = require("@prisma/client");
@@ -47,8 +47,8 @@ var BadRequestException = class extends HttpException {
   }
 };
 
-// src/services/product/GetAllProductService.ts
-var GetAllProductService = class {
+// src/services/product/GetStoreFrontProductsService.ts
+var GetStoreFrontProductsService = class {
   async execute(page = 1, pageSize = 8, query) {
     try {
       const skip = (page - 1) * pageSize;
@@ -59,9 +59,10 @@ var GetAllProductService = class {
         ).join(" AND ");
         const products2 = await prisma_default.$queryRawUnsafe(
           `
-						SELECT id, name, image, price, unity, stock, enabled, qr_code, visible_in_store
+						SELECT id, name, image, price, unity, stock, enabled, qr_code
 						FROM "products"
 						WHERE enabled = true
+						AND visible_in_store = true
 						AND ${conditions}
 						ORDER BY created_at DESC
 						LIMIT $${searchTerms.length + 1} OFFSET $${searchTerms.length + 2}
@@ -75,6 +76,7 @@ var GetAllProductService = class {
 						SELECT COUNT(*) as count
 						FROM "products"
 						WHERE enabled = true
+						AND visible_in_store = true
 						AND ${conditions}
 					`,
           ...searchTerms
@@ -89,7 +91,10 @@ var GetAllProductService = class {
       }
       const [products, total] = await Promise.all([
         prisma_default.product.findMany({
-          where: { enabled: true },
+          where: {
+            enabled: true,
+            visible_in_store: true
+          },
           skip,
           take: pageSize,
           select: {
@@ -100,15 +105,17 @@ var GetAllProductService = class {
             unity: true,
             stock: true,
             enabled: true,
-            qr_code: true,
-            visible_in_store: true
+            qr_code: true
           },
           orderBy: {
             created_at: "desc"
           }
         }),
         prisma_default.product.count({
-          where: { enabled: true }
+          where: {
+            enabled: true,
+            visible_in_store: true
+          }
         })
       ]);
       return {
@@ -127,5 +134,5 @@ var GetAllProductService = class {
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  GetAllProductService
+  GetStoreFrontProductsService
 });

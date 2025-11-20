@@ -27,7 +27,8 @@ module.exports = __toCommonJS(orderEvents_exports);
 var import_events = require("events");
 var orderEmitter = new import_events.EventEmitter();
 var OrderEvents = /* @__PURE__ */ ((OrderEvents2) => {
-  OrderEvents2["OnlineOrderReceived"] = "onlineOrderReceived";
+  OrderEvents2["WhatsappOrderReceived"] = "whatsappOrderReceived";
+  OrderEvents2["StoreFrontOderReceived"] = "storeFrontOrderReceived";
   return OrderEvents2;
 })(OrderEvents || {});
 // Annotate the CommonJS export names for ESM import in node:

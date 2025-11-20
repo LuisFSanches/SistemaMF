@@ -77,6 +77,9 @@ var DashboardService = class {
         created_at: {
           gte: startDate,
           lte: now
+        },
+        created_by: {
+          not: null
         }
       },
       _count: {
@@ -90,7 +93,7 @@ var DashboardService = class {
     });
     const adminsDetails = await prisma_default.admin.findMany({
       where: {
-        id: { in: topAdmins.map((admin) => admin.created_by) }
+        id: { in: topAdmins.map((admin) => admin.created_by).filter((id) => id !== null) }
       },
       select: {
         id: true,
@@ -98,7 +101,7 @@ var DashboardService = class {
         username: true
       }
     });
-    const admins = topAdmins.map((admin) => {
+    const admins = topAdmins.filter((admin) => admin.created_by !== null).map((admin) => {
       const adminData = adminsDetails.find((a) => a.id === admin.created_by);
       return {
         id: admin.created_by,

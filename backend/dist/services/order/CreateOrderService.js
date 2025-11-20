@@ -83,6 +83,7 @@ var CreateOrderService = class {
       });
       return order;
     } catch (error) {
+      console.error("[CreateOrderService] Failed:", error);
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */

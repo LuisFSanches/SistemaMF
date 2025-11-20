@@ -108,6 +108,7 @@ var OrderFacade = class {
         card_to: data.card_to,
         card_message: data.card_message,
         online_order: data.online_order,
+        store_front_order: data.store_front_order,
         online_code: data.online_code,
         is_delivery: data.is_delivery
       },

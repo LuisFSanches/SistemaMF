@@ -120,6 +120,7 @@ var OrderFacade = class {
         card_to: data.card_to,
         card_message: data.card_message,
         online_order: data.online_order,
+        store_front_order: data.store_front_order,
         online_code: data.online_code,
         is_delivery: data.is_delivery
       },
@@ -180,6 +181,7 @@ var CreateOrderService = class {
       });
       return order;
     } catch (error) {
+      console.error("[CreateOrderService] Failed:", error);
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */
@@ -306,12 +308,19 @@ var GetAddressByStreetAndNumberService = class {
   }
 };
 
+// src/events/orderEvents.ts
+var import_events = require("events");
+var orderEmitter = new import_events.EventEmitter();
+
 // src/controllers/order/CreateOrderController.ts
 var CreateOrderController = class {
   constructor() {
     this.handle = async (req, res, next) => {
       const data = req.body;
       const order = await this.orderFacade.createOrder(data);
+      if (!order.created_by) {
+        orderEmitter.emit("storeFrontOrderReceived" /* StoreFrontOderReceived */, order);
+      }
       return res.json(order);
     };
     this.orderFacade = new OrderFacade(

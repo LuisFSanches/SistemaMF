@@ -49,7 +49,7 @@ var BadRequestException = class extends HttpException {
 
 // src/services/product/UpdateProductService.ts
 var UpdateProductService = class {
-  async execute({ id, name, price, unity, stock, enabled, image }) {
+  async execute({ id, name, price, unity, stock, enabled, image, visible_in_store }) {
     try {
       let data = {
         name,
@@ -57,7 +57,8 @@ var UpdateProductService = class {
         unity,
         stock,
         enabled,
-        image
+        image,
+        visible_in_store
       };
       const updatedProduct = await prisma_default.product.update({
         where: {

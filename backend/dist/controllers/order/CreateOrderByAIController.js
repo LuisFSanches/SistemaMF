@@ -144,6 +144,7 @@ var CreateOrderService = class {
       });
       return order;
     } catch (error) {
+      console.error("[CreateOrderService] Failed:", error);
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */
@@ -326,6 +327,7 @@ var OrderFacade = class {
         card_to: data.card_to,
         card_message: data.card_message,
         online_order: data.online_order,
+        store_front_order: data.store_front_order,
         online_code: data.online_code,
         is_delivery: data.is_delivery
       },
@@ -418,6 +420,7 @@ var CreateOrderByAIController = class {
           is_delivery: content["is_delivery"],
           created_by: data.created_by,
           online_order: true,
+          store_front_order: false,
           products: data.products
         };
         const order = await this.orderFacade.createOrder(orderData);

@@ -210,7 +210,7 @@ var FinishOnlineOrderController = class {
       last_name: order.last_name,
       phone_number: order.phone_number
     });
-    orderEmitter.emit("onlineOrderReceived" /* OnlineOrderReceived */, data);
+    orderEmitter.emit("whatsappOrderReceived" /* WhatsappOrderReceived */, data);
     return res.json({ status: "Order successfully updated", order: data });
   }
 };

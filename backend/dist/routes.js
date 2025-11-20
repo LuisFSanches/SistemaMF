@@ -88,6 +88,9 @@ var DashboardService = class {
         created_at: {
           gte: startDate,
           lte: now
+        },
+        created_by: {
+          not: null
         }
       },
       _count: {
@@ -101,7 +104,7 @@ var DashboardService = class {
     });
     const adminsDetails = await prisma_default.admin.findMany({
       where: {
-        id: { in: topAdmins.map((admin) => admin.created_by) }
+        id: { in: topAdmins.map((admin) => admin.created_by).filter((id) => id !== null) }
       },
       select: {
         id: true,
@@ -109,7 +112,7 @@ var DashboardService = class {
         username: true
       }
     });
-    const admins = topAdmins.map((admin) => {
+    const admins = topAdmins.filter((admin) => admin.created_by !== null).map((admin) => {
       const adminData = adminsDetails.find((a) => a.id === admin.created_by);
       return {
         id: admin.created_by,
@@ -413,7 +416,7 @@ var GetAllProductService = class {
         ).join(" AND ");
         const products2 = await prisma_default.$queryRawUnsafe(
           `
-						SELECT id, name, image, price, unity, stock, enabled, qr_code
+						SELECT id, name, image, price, unity, stock, enabled, qr_code, visible_in_store
 						FROM "products"
 						WHERE enabled = true
 						AND ${conditions}
@@ -454,7 +457,8 @@ var GetAllProductService = class {
             unity: true,
             stock: true,
             enabled: true,
-            qr_code: true
+            qr_code: true,
+            visible_in_store: true
           },
           orderBy: {
             created_at: "desc"
@@ -509,7 +513,8 @@ var GetProductByIdService = class {
           image: true,
           qr_code: true,
           created_at: true,
-          updated_at: true
+          updated_at: true,
+          visible_in_store: true
         }
       });
       if (!product) {
@@ -544,7 +549,7 @@ var GetProductByIdController = class {
 
 // src/services/product/UpdateProductService.ts
 var UpdateProductService = class {
-  async execute({ id, name, price, unity, stock, enabled, image }) {
+  async execute({ id, name, price, unity, stock, enabled, image, visible_in_store }) {
     try {
       let data = {
         name,
@@ -552,7 +557,8 @@ var UpdateProductService = class {
         unity,
         stock,
         enabled,
-        image
+        image,
+        visible_in_store
       };
       const updatedProduct = await prisma_default.product.update({
         where: {
@@ -573,7 +579,7 @@ var UpdateProductService = class {
 // src/controllers/product/UpdateProductController.ts
 var UpdateProductController = class {
   async handle(req, res, next) {
-    const { name, price, unity, stock, enabled, image } = req.body;
+    const { name, price, unity, stock, enabled, image, visible_in_store } = req.body;
     const id = req.params.id;
     const updateProductService = new UpdateProductService();
     const admin = await updateProductService.execute({
@@ -583,7 +589,8 @@ var UpdateProductController = class {
       unity,
       stock,
       enabled,
-      image
+      image,
+      visible_in_store
     });
     return res.json(admin);
   }
@@ -820,6 +827,106 @@ var GenerateProductQRCodeController = class {
   }
 };
 
+// src/services/product/GetStoreFrontProductsService.ts
+var GetStoreFrontProductsService = class {
+  async execute(page = 1, pageSize = 8, query) {
+    try {
+      const skip = (page - 1) * pageSize;
+      if (query && query.trim()) {
+        const searchTerms = query.trim().split(/\s+/).filter((term) => term.length > 0);
+        const conditions = searchTerms.map(
+          (_, index) => `replace(unaccent(lower(name)), ' ', '') LIKE '%' || replace(unaccent(lower($${index + 1})), ' ', '') || '%'`
+        ).join(" AND ");
+        const products2 = await prisma_default.$queryRawUnsafe(
+          `
+						SELECT id, name, image, price, unity, stock, enabled, qr_code
+						FROM "products"
+						WHERE enabled = true
+						AND visible_in_store = true
+						AND ${conditions}
+						ORDER BY created_at DESC
+						LIMIT $${searchTerms.length + 1} OFFSET $${searchTerms.length + 2}
+					`,
+          ...searchTerms,
+          pageSize,
+          skip
+        );
+        const totalResult = await prisma_default.$queryRawUnsafe(
+          `
+						SELECT COUNT(*) as count
+						FROM "products"
+						WHERE enabled = true
+						AND visible_in_store = true
+						AND ${conditions}
+					`,
+          ...searchTerms
+        );
+        const total2 = Number(totalResult[0].count);
+        return {
+          products: products2,
+          total: total2,
+          currentPage: page,
+          totalPages: Math.ceil(total2 / pageSize)
+        };
+      }
+      const [products, total] = await Promise.all([
+        prisma_default.product.findMany({
+          where: {
+            enabled: true,
+            visible_in_store: true
+          },
+          skip,
+          take: pageSize,
+          select: {
+            id: true,
+            name: true,
+            image: true,
+            price: true,
+            unity: true,
+            stock: true,
+            enabled: true,
+            qr_code: true
+          },
+          orderBy: {
+            created_at: "desc"
+          }
+        }),
+        prisma_default.product.count({
+          where: {
+            enabled: true,
+            visible_in_store: true
+          }
+        })
+      ]);
+      return {
+        products,
+        total,
+        currentPage: page,
+        totalPages: Math.ceil(total / pageSize)
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/product/GetStoreFrontProductsController.ts
+var GetStoreFrontProductsController = class {
+  async handle(req, res, next) {
+    const { page = "1", pageSize = "10", query = "" } = req.query;
+    const getStoreFrontProductsService = new GetStoreFrontProductsService();
+    const products = await getStoreFrontProductsService.execute(
+      Number(page),
+      Number(pageSize),
+      String(query)
+    );
+    return res.json(products);
+  }
+};
+
 // src/services/address/CreateAddressService.ts
 var CreateAddressService = class {
   async execute(data) {
@@ -1037,6 +1144,7 @@ var OrderFacade = class {
         card_to: data.card_to,
         card_message: data.card_message,
         online_order: data.online_order,
+        store_front_order: data.store_front_order,
         online_code: data.online_code,
         is_delivery: data.is_delivery
       },
@@ -1072,6 +1180,7 @@ var CreateOrderService = class {
       });
       return order;
     } catch (error) {
+      console.error("[CreateOrderService] Failed:", error);
       throw new BadRequestException(
         error.message,
         500 /* SYSTEM_ERROR */
@@ -1101,12 +1210,19 @@ var GetAddressByStreetAndNumberService = class {
   }
 };
 
+// src/events/orderEvents.ts
+var import_events = require("events");
+var orderEmitter = new import_events.EventEmitter();
+
 // src/controllers/order/CreateOrderController.ts
 var CreateOrderController = class {
   constructor() {
     this.handle = async (req, res, next) => {
       const data = req.body;
       const order = await this.orderFacade.createOrder(data);
+      if (!order.created_by) {
+        orderEmitter.emit("storeFrontOrderReceived" /* StoreFrontOderReceived */, order);
+      }
       return res.json(order);
     };
     this.orderFacade = new OrderFacade(
@@ -1234,6 +1350,7 @@ var CreateOrderByAIController = class {
           is_delivery: content["is_delivery"],
           created_by: data.created_by,
           online_order: true,
+          store_front_order: false,
           products: data.products
         };
         const order = await this.orderFacade.createOrder(orderData);
@@ -1451,8 +1568,8 @@ var UpdateAddressService = class {
 };
 
 // src/controllers/order/UpdateOrderController.ts
-var import_events = require("events");
-var orderEmitter = new import_events.EventEmitter();
+var import_events2 = require("events");
+var orderEmitter2 = new import_events2.EventEmitter();
 var UpdateOrderController = class {
   async handle(req, res, next) {
     const { order } = req.body;
@@ -1488,7 +1605,7 @@ var UpdateOrderController = class {
     order.is_delivery = is_delivery;
     const updateOrderService = new UpdateOrderService();
     const data = await updateOrderService.execute(order);
-    orderEmitter.emit("orderUpdated", { data });
+    orderEmitter2.emit("orderUpdated", { data });
     return res.json(data);
   }
 };
@@ -1646,10 +1763,6 @@ var FinishOnlineOrderService = class {
   }
 };
 
-// src/events/orderEvents.ts
-var import_events2 = require("events");
-var orderEmitter2 = new import_events2.EventEmitter();
-
 // src/controllers/order/FinishOnlineOrderController.ts
 var FinishOnlineOrderController = class {
   async handle(req, res, next) {
@@ -1704,7 +1817,7 @@ var FinishOnlineOrderController = class {
       last_name: order.last_name,
       phone_number: order.phone_number
     });
-    orderEmitter2.emit("onlineOrderReceived" /* OnlineOrderReceived */, data);
+    orderEmitter.emit("whatsappOrderReceived" /* WhatsappOrderReceived */, data);
     return res.json({ status: "Order successfully updated", order: data });
   }
 };
@@ -2160,168 +2273,6 @@ var WebhookPixController = class {
       console.error("Erro ao processar notifica\xE7\xE3o Pix:", error);
       return res.status(500).send("Erro ao processar notifica\xE7\xE3o");
     }
-  }
-};
-
-// src/services/statistics/TopClientsService.ts
-var TopClientsService = class {
-  async execute(initial_date, final_date, limit) {
-    const start = new Date(initial_date);
-    const end = new Date(final_date);
-    try {
-      const topClients = await prisma_default.order.groupBy({
-        by: ["client_id"],
-        where: {
-          created_at: {
-            gte: start,
-            lte: end
-          }
-        },
-        _count: {
-          id: true
-        },
-        orderBy: {
-          _count: {
-            id: "desc"
-          }
-        },
-        take: parseInt(limit)
-      });
-      const result = await Promise.all(
-        topClients.map(async (item) => {
-          const client = await prisma_default.client.findUnique({
-            where: { id: item.client_id },
-            select: {
-              first_name: true,
-              last_name: true,
-              phone_number: true
-            }
-          });
-          return {
-            ...client,
-            totalOrders: item._count.id
-          };
-        })
-      );
-      return result;
-    } catch (error) {
-      return { error: true, message: error.message, code: 500 /* SYSTEM_ERROR */ };
-    }
-  }
-};
-
-// src/controllers/statistics/TopClientsController.ts
-var TopClientsController = class {
-  async handle(req, res) {
-    const { initial_date, final_date, limit } = req.query;
-    const topClientsService = new TopClientsService();
-    const clients = await topClientsService.execute(initial_date, final_date, limit);
-    return res.json(clients);
-  }
-};
-
-// src/services/statistics/DailySalesService.ts
-var DailySalesService = class {
-  async execute(initial_date, final_date) {
-    const start = new Date(initial_date);
-    const end = new Date(final_date);
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      throw new Error("Invalid date format");
-    }
-    const [startDate, endDate] = start > end ? [end, start] : [start, end];
-    try {
-      const orders = await prisma_default.order.findMany({
-        where: {
-          created_at: {
-            gte: startDate,
-            lte: endDate
-          }
-        },
-        select: {
-          created_at: true
-        }
-      });
-      const dayCount = {
-        "segunda-feira": 0,
-        "ter\xE7a-feira": 0,
-        "quarta-feira": 0,
-        "quinta-feira": 0,
-        "sexta-feira": 0,
-        s\u00E1bado: 0,
-        domingo: 0
-      };
-      orders.forEach((order) => {
-        const day = new Date(order.created_at).toLocaleString("pt-BR", {
-          weekday: "long"
-        });
-        if (day in dayCount) {
-          dayCount[day] += 1;
-        }
-      });
-      return dayCount;
-    } catch (error) {
-      return { error: true, message: error.message, code: "SYSTEM_ERROR" };
-    }
-  }
-};
-
-// src/controllers/statistics/DailySalesController.ts
-var DailySalesController = class {
-  async handle(req, res) {
-    const { initial_date, final_date } = req.query;
-    const dailySalesService = new DailySalesService();
-    const sales = await dailySalesService.execute(initial_date, final_date);
-    return res.json(sales);
-  }
-};
-
-// src/services/statistics/TopAdminsService.ts
-var TopAdminsService = class {
-  async execute() {
-    try {
-      const topAdmins = await prisma_default.order.groupBy({
-        by: ["created_by"],
-        _count: {
-          id: true
-        },
-        orderBy: {
-          _count: {
-            id: "desc"
-          }
-        }
-      });
-      const adminsDetails = await prisma_default.admin.findMany({
-        where: {
-          id: { in: topAdmins.map((admin) => admin.created_by) }
-        },
-        select: {
-          id: true,
-          name: true,
-          username: true
-        }
-      });
-      const result = topAdmins.map((admin) => {
-        const adminData = adminsDetails.find((a) => a.id === admin.created_by);
-        return {
-          id: admin.created_by,
-          name: adminData?.name || "Unknown",
-          username: adminData?.username || "Unknown",
-          orders_count: admin._count.id
-        };
-      });
-      return result;
-    } catch (error) {
-      return { error: true, message: error.message, code: 500 /* SYSTEM_ERROR */ };
-    }
-  }
-};
-
-// src/controllers/statistics/TopAdminsController.ts
-var TopAdminsController = class {
-  async handle(req, res) {
-    const topAdminsService = new TopAdminsService();
-    const admins = await topAdminsService.execute();
-    return res.json(admins);
   }
 };
 
@@ -3228,6 +3179,7 @@ router.put("/product/:id", super_admin_auth_default, new UpdateProductController
 router.post("/product/:id/image", admin_auth_default, upload.single("image"), handleMulterError, processImage, new UploadProductImageController().handle);
 router.delete("/product/:id/image", admin_auth_default, new DeleteProductImageController().handle);
 router.post("/product/:id/qrcode", admin_auth_default, new GenerateProductQRCodeController().handle);
+router.get("/storefront/products", new GetStoreFrontProductsController().handle);
 router.post("/admin", super_admin_auth_default, new CreateAdminController().handle);
 router.post("/admins/login", new LoginAdminController().handle);
 router.get("/admins/admin", admin_auth_default, new GetAdminController().handle);
@@ -3236,9 +3188,6 @@ router.delete("/admins/delete/:id", super_admin_auth_default, new DeleteAdminCon
 router.put("/admin/:id", super_admin_auth_default, new UpdateAdminController().handle);
 router.get("/pix", super_admin_auth_default, new GetPixController().handle);
 router.post("/webhook/pix", super_admin_auth_default, new WebhookPixController().handle);
-router.get("/statistics/top-clients", super_admin_auth_default, new TopClientsController().handle);
-router.get("/statistics/daily-sales", super_admin_auth_default, new DailySalesController().handle);
-router.get("/statistics/top-admins", super_admin_auth_default, new TopAdminsController().handle);
 router.get("/stockTransaction/all", admin_auth_default, new GetAllStockTransactionsController().handle);
 router.post("/stockTransaction", admin_auth_default, new CreateStockTransactionController().handle);
 router.delete("/stockTransaction/:id", admin_auth_default, new DeleteStockTransactionController().handle);

@@ -59,7 +59,7 @@ var GetAllProductService = class {
         ).join(" AND ");
         const products2 = await prisma_default.$queryRawUnsafe(
           `
-						SELECT id, name, image, price, unity, stock, enabled, qr_code
+						SELECT id, name, image, price, unity, stock, enabled, qr_code, visible_in_store
 						FROM "products"
 						WHERE enabled = true
 						AND ${conditions}
@@ -100,7 +100,8 @@ var GetAllProductService = class {
             unity: true,
             stock: true,
             enabled: true,
-            qr_code: true
+            qr_code: true,
+            visible_in_store: true
           },
           orderBy: {
             created_at: "desc"
