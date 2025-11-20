@@ -390,6 +390,21 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
 
+                <NavLink to="/backoffice/estoque">
+                    <SideBarItemContainer
+                        onClick={() => handleActiveMenuButton('estoque')}
+                    >
+                        <SideBarButton
+                            isActive={isActive['estoque']}
+                            isMinimizedActive
+                            title="Valores a Receber"
+                        >
+                            <FontAwesomeIcon icon={faWarehouse} className="Side-Bar-Icon"/>
+                            <span>Estoque</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
+
                 <NavLink to="/backoffice/valores-a-receber">
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('valoresAReceber')}>
                         <SideBarButton
