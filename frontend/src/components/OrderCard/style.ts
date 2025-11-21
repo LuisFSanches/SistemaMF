@@ -1,18 +1,24 @@
 import styled from 'styled-components'
 
 export const OrderCardContainer= styled.div`
-    margin-bottom: 20px;
     padding: 0.5rem 0.7rem;
     border-radius: 0.3rem;
     color: var(--text-body);
     position: relative;
+    border: 2px solid #DFE0E1;
+    box-shadow: 4px 2px 8px var(--shadow-color);
+    margin-bottom: 25px;
 
     .order-header {
         display: none;
     }
 
     h3 {
-        font-size: 17px;
+        font-size: 16px;
+    }
+
+    p, span, strong {
+        font-size: 16px;
     }
 
     .order-number {
@@ -96,19 +102,91 @@ export const OrderCardContainer= styled.div`
         width: 100%;
         display: flex;
         justify-content: space-between;
+        background: #f8f8f8;
+        padding: 8px;
+        border-radius: 10px;
+
+        .order-items {
+            p {
+                margin-bottom: 4px;
+            }
+        }
     }
-    .order-actions{
+    .move-order {
         width: 100%;
         display: flex;
         justify-content: space-around;
         padding: 0.5rem;
+
+        button {
+            width: 48%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
     }
 
-    .address-container, .value-container {
-        margin: 10px 0;
+    .order-actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        padding: 0.5rem;
+
+        button {
+            width: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 5px;
+            font-weight: 700;
+
+            svg {
+                margin-right: 5px;
+            }
+        }
+
+        .whatsapp-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #198754;
+            color: white;
+            font-weight: 700;
+        }
+    }
+
+    .order-card-container, .value-container {
+        margin: 8px 0;
 
         p {
             margin: 5px 0;
+        }
+    }
+
+    .order-card-container {
+        &.address {
+            padding: 8px;
+            background: #f8f8f8;
+            border-radius: 10px;
+        }
+
+        &.order-values {
+            padding: 8px;
+            background: #DFE0E1;
+            border-radius: 10px;
+
+            .total-value {
+                color: green;
+                font-weight: 700;
+            }
+        }
+
+        &.observation {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 8px;
+            border-radius: 8px;
         }
     }
 

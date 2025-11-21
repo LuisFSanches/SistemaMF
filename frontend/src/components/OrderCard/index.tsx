@@ -12,6 +12,8 @@ import { formatTitleCase, formatDescription } from "../../utils";
 import { PAYMENT_METHODS } from "../../constants";
 import { PrintOrder } from "../PrintOrder";
 import { useAdmins } from "../../contexts/AdminsContext";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
+import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 
 export function OrderCard({
 	order,
@@ -28,6 +30,7 @@ export function OrderCard({
 	const [orderDetailModal, setOrderDetailModal] = useState(false);
 	const [viewCardMessage, setViewCardMessage] = useState(false);
 	const { admins } = useAdmins();
+	const { showSuccess } = useSuccessMessage();
 
 	function handleOpenOrderDetailModal(order: IOrder){
         setOrderDetailModal(true);
@@ -42,6 +45,80 @@ export function OrderCard({
 
 	function handleCloseViewCardMessage(){
 		setViewCardMessage(false);
+	}
+
+	function handleOpenWhatsApp() {
+		const clientName = formatTitleCase(`${order.client.first_name} ${order.client.last_name}`);
+		
+		// Formatar data de entrega
+		const deliveryDate = moment(order.delivery_date)
+			.locale('pt-br')
+			.utc()
+			.format("D [de] MMMM [de] YYYY [(]dddd[)]");
+		
+		// Formatar endereço
+		let address = "";
+		if (!order.pickup_on_store && order.is_delivery) {
+			address = `${formatTitleCase(order.clientAddress.street)}, ${order.clientAddress.street_number}, ${formatTitleCase(order.clientAddress.complement)} ${formatTitleCase(order.clientAddress.neighborhood)}, ${formatTitleCase(order.clientAddress.city)}`;
+			if (order.clientAddress.reference_point) {
+				address += ` Ponto de referência: ${formatTitleCase(order.clientAddress.reference_point)}`;
+			}
+		} else {
+			address = "Retirar na loja";
+		}
+		
+		// Formatar produtos
+		const products = formatDescription(order.description)
+			.map(line => `• ${line}`)
+			.join('\n');
+		
+		let message = "";
+		
+		switch (order.status) {
+			case "OPENED":
+				message = `📋Pedido #${order.code}*\n\n`;
+				message += `✅ Olá ${clientName}, Pedido confirmado! Qualquer dúvida, estamos à disposição.🌸💝\n\n`;
+				message += `📅 Data de Entrega:* ${deliveryDate}\n`;
+				message += `📍 Endereço:* ${address}\n\n`;
+				message += `💐 Produtos:*\n${products}\n\n`;
+				message += `💰 Valores:*\n`;
+				message += `• Produtos: R$ ${order.products_value}\n`;
+				if (order.discount > 0) {
+					message += `• Desconto: R$ ${order.discount}\n`;
+				}
+				message += `• Taxa de entrega: R$ ${order.delivery_fee}\n\n`;
+				message += `💵 Total: R$ ${order.total}*\n`;
+				message += `💳 Pagamento: ${PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS]}`;
+				break;
+			
+			case "IN_PROGRESS":
+				message = `📋 Pedido #${order.code}*\n\n`;
+				message += `✅ Olá ${clientName}, seu pedido já está sendo preparado por nossa equipe.🎁🎁\n\n`;
+				message += `💐 Produtos:*\n${products}\n\n`;
+				message += `📅 *Data de Entrega:* ${deliveryDate}`
+				break;
+			
+			case "IN_DELIVERY":
+				message = `📋 Pedido #${order.code}*\n\n`;
+				message += `✅ Olá ${clientName}, seu pedido saiu para entrega.🛵🛵\n\n`;
+				message += `💐 Produtos:*\n${products}\n\n`;
+				message += `📅 *Data de Entrega:* ${deliveryDate}`
+				break;
+			
+			default:
+				message = `*Pedido #${order.code}*\n\n`;
+				message += `Olá ${clientName}, entramos em contato sobre o seu pedido.`;
+				break;
+		}
+		
+		// Copiar mensagem para área de transferência
+		navigator.clipboard.writeText(message)
+			.then(() => {
+				showSuccess('Mensagem copiada para área de transferência!');
+			})
+			.catch(() => {
+				showSuccess('Erro ao copiar mensagem. Tente novamente.');
+			});
 	}
 
 	if (!order) {
@@ -93,7 +170,7 @@ export function OrderCard({
 						<p><strong>Telefone do Cliente: </strong>{order.client.phone_number}</p>
 					}
 				</div>
-				<p className="delivery-date"><strong>Data de entrega: </strong> 
+				<p className="delivery-date"><strong>📅 Data de entrega: </strong> 
 					{moment(order.delivery_date)
 						.locale('pt-br')
 						.utc()
@@ -103,18 +180,18 @@ export function OrderCard({
 			</div>
 			<div className="order-content">
 				<div className="order-items">
-					<h3>Descrição do pedido:</h3>
+					<h3>📋 Descrição do pedido:</h3>
 					{formatDescription(order.description).map((line, idx) => (
 						<p key={idx}>{line}</p>
 					))}
 				</div>
-				<div className="order-observation">
-					<h3>Observação: </h3>
-					<p>{formatTitleCase(order.additional_information)}</p>
-				</div>
 			</div>
-			<div className="address-container">
-				<h3><strong>Endereço de entrega:</strong></h3>
+			<div className="order-card-container observation">
+				<h3>Observação: </h3>
+				<p>{formatTitleCase(order.additional_information)}</p>
+			</div>
+			<div className="order-card-container address">
+				<h3><strong>📍Endereço de entrega:</strong></h3>
 				{(!order.pickup_on_store && order.is_delivery) && 
 					<>
 						<p>{formatTitleCase(order.clientAddress.street)}, {order.clientAddress.street_number},
@@ -136,13 +213,13 @@ export function OrderCard({
 				}
 	
 			</div>
-			<div className="address-container">
-				<p><strong>Tipo de Entrega: </strong>
+			<div className="order-card-container type-of-delivery">
+				<p><strong>🛵 Tipo de Entrega: </strong>
 					{TYPES_OF_DELIVERY[order.type_of_delivery as keyof typeof TYPES_OF_DELIVERY]}
 				</p>
 			</div>
 			{order.is_delivery &&
-				<div className="address-container">
+				<div className="order-card-container receiver">
 					<p><strong>Entregar para: </strong>
 						{order.receiver_name ? formatTitleCase(order.receiver_name)
 							: formatTitleCase(order.client.first_name)}
@@ -152,30 +229,30 @@ export function OrderCard({
 				</div>
 			}
 
-			<div className="card-container">
+			<div className="order-card-container card">
 				<p><strong>Cartão: </strong>
 					{HAS_CARD[order.has_card.toString() as keyof typeof HAS_CARD]}
 				</p>
 			</div>
-			<div className="address-container order-values">
-				<h3><strong>Valores do pedido: </strong></h3>
+			<div className="order-card-container order-values">
+				<h3><strong>💰 Valores do pedido: </strong></h3>
 				<p><strong>Valor dos produtos: </strong>R$ {order.products_value}</p>
 				{order.discount > 0 &&
 					<p><strong>Desconto: </strong>R$ {order.discount || 0}</p>
 				}
 				<p><strong>Taxa de entrega: </strong>R$ {order.delivery_fee}</p>
-				<p><strong>Total: </strong>R$ {order.total}</p>
+				<p className="total-value"><strong>Total: </strong>R$ {order.total}</p>
 			</div>
-			<div className="address-container">
+			<div className="order-card-container payment-method">
 				<p><strong>Método de pagamento: </strong>
 					{PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS]}
 				</p>
 			</div>
-			<div className="address-container order-admin">
+			<div className="order-card-container order-admin">
 				<p><strong>Status Pagamento: </strong>{order.payment_received ? "Pago" : "Pendente"}</p>
 				<p><strong>Responsável pelo Pedido: </strong>{order.createdBy?.name || "Próprio Cliente"}</p>
 			</div>
-			<div className="order-actions">
+			<div className="move-order">
 				{previousStatus &&
 					<button className={previousButtonStatus} onClick={() => handleOrderStatus(order.id, previousStatus)}>
 						<FontAwesomeIcon icon={faAnglesLeft}/>
@@ -190,6 +267,10 @@ export function OrderCard({
 			</div>
 
 			<div className="order-actions">
+				<button className="whatsapp-button" onClick={handleOpenWhatsApp}>
+					<FontAwesomeIcon icon={faWhatsapp as any}/>
+					Whatsapp
+				</button>
 				<button className="view-button" onClick={() => handleOpenOrderDetailModal(order)}>
 					<FontAwesomeIcon icon={faEye}/>
 					Pedido
@@ -203,7 +284,7 @@ export function OrderCard({
 						buttonLabel={'Imprimir'}
 						style={{
 							background: 'white',
-							border: 'none',
+							border: '1px solid black',
 							color: '#666666',
 						}}
 					/>

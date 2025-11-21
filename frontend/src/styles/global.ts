@@ -25,7 +25,7 @@ export const GlobalStyle = createGlobalStyle`
     --text-food-title:#ccac00;
 
     --order-blue:#377BD1;
-    --order-yellow:#EADC93;
+    --order-yellow: #f4d47c;
     --order-green:#6aa84f;
 
     --shadow-color: #abb5bc

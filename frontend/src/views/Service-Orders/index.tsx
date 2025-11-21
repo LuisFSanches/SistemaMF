@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import moment from "moment";
 import { IOrder } from "../../interfaces/IOrder";
 import { ICreateOrderToReceive } from "../../interfaces/IOrderToReceive";
-import { Container, Orders, Header } from "./style";
+import { Container, Orders, Header, OrderContainer } from "./style";
 import { updateStatus, updateOrderPaymentStatus } from "../../services/orderService";
 import { checkOrderToReceiveExists } from "../../services/orderToReceiveService";
 import { OrderCard } from "../../components/OrderCard";
@@ -241,7 +241,7 @@ export function ServiceOrdersPage(){
 				</div>
  			</Header>
 			<Orders>
-				<div className="order-container opened">
+				<OrderContainer className="opened">
 					<header className="opened-order">
 						Ordem Aberta
 					</header>
@@ -259,8 +259,8 @@ export function ServiceOrdersPage(){
 							/>
 						</div>
 					))}
-				</div>
-				<div className="order-container in_progress">
+				</OrderContainer>
+				<OrderContainer className="in_progress">
 					<header className="in-progress-order">
 						Em produção
 					</header>
@@ -278,8 +278,8 @@ export function ServiceOrdersPage(){
 							/>
 						</div>
 					))}
-				</div>
-				<div className="order-container in_delivery">
+				</OrderContainer>
+				<OrderContainer className="in_delivery">
 					<header className="finished-order">
 						Rota de Entrega
 					</header>
@@ -297,7 +297,7 @@ export function ServiceOrdersPage(){
 							/>
 						</div>
 					))}
-				</div>
+				</OrderContainer>
 			</Orders>
 
 			<EditOrderModal

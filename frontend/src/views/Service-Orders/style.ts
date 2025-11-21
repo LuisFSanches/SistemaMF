@@ -1,38 +1,9 @@
 import styled from 'styled-components'
 
 export const Container = styled.div`
-
     display: flex;
     flex-direction: column;
     flex: 1;
-
-    .order-container {
-        display: flex;
-        flex-direction: column;
-        height: 95vh;
-        border: 1px solid var(--shadow-color);
-        border-radius: 0.5rem;
-        background-color: #fff !important;
-        box-shadow: 0.3rem 0.3rem 0.2rem var(--shadow-color);
-        overflow-y: auto;
-
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 8px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            border-radius: 8px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a1a1a1;
-        }
-    }
 
     .order-container.opened::-webkit-scrollbar-thumb {
         background: #FFD700;
@@ -65,19 +36,6 @@ export const Container = styled.div`
         background: var(--order-green);
     }
 
-    .opened {
-        background: #f8f4de;
-        box-shadow:0.1rem 0.2rem var(--shadow-color)
-    }
-    .in_progress{
-        background:#c3d7f1;
-        box-shadow: 0.1rem 0.2rem var(--shadow-color);
-    }
-    .in_delivery {
-        background:#d2e4ca;
-        box-shadow: 0.1rem 0.2rem var(--shadow-color);
-    }
-
     @media (max-width: 1250px){
         grid-template-columns: 1fr 1fr;
     }
@@ -96,11 +54,49 @@ export const Container = styled.div`
     }
 `
 
+export const OrderContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    height: 95vh;
+    border: 1px solid var(--shadow-color);
+    border-radius: 0.5rem;
+    background-color: #fff !important;
+    box-shadow: 0.3rem 0.3rem 0.2rem var(--shadow-color);
+    overflow-y: auto;
+
+    ::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+
+    .opened {
+        border-left: 8px solid var(--order-yellow);
+    }
+    .in_progress{
+        border-left: 8px solid var(--order-blue);
+    }
+    .in_delivery {
+        border-left: 8px solid var(--order-green);
+    }
+`
+
 export const Orders = styled.div`
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     padding: 1rem;
-    grid-gap: 1.1rem;
+    grid-gap: 2.1rem;
 `
 export const Header = styled.div`
     display: flex;
