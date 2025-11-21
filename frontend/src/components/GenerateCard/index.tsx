@@ -22,8 +22,8 @@ import {
     PrintButton
 } from "./style";
 
-const pdfModel = `./cartao_limpo.pdf`;
-const emojiFontVariable = `./noto_emoji_variable.ttf`;
+const pdfModel = `${process.env.PUBLIC_URL}/cartao_limpo.pdf`;
+const emojiFontVariable = `${process.env.PUBLIC_URL}/noto_emoji_variable.ttf`;
 
 export function GenerateCard() {
     const { showSuccess } = useSuccessMessage();

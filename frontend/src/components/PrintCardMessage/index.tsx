@@ -8,8 +8,8 @@ import { faPrint } from "@fortawesome/free-solid-svg-icons";
 
 import { Button } from "./style";
 
-const pdfModel = `./pdf_model.pdf`;
-const emojiFontVariable = `./noto_emoji_variable.ttf`;
+const pdfModel = `${process.env.PUBLIC_URL}/pdf_model.pdf`;
+const emojiFontVariable = `${process.env.PUBLIC_URL}/noto_emoji_variable.ttf`;
 
 export const PrintCardMessage = ({ card_message, card_from, card_to, order_code }: any) => {
     const emojiRegex = /\p{Emoji}/u;
