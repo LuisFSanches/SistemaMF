@@ -48,14 +48,20 @@ export function GenerateCard() {
     function splitTextByFont(text: string) {
         const segments = [];
         let currentSegment = '';
-        let isEmoji = emojiRegex.test(text[0]);
+        let isEmoji = false;
+
+        if (text.length > 0) {
+            isEmoji = emojiRegex.test(text[0]) && text[0].codePointAt(0)! > 255;
+        }
 
         for (const char of text) {
-            const charIsEmoji = emojiRegex.test(char);
+            const charIsEmoji = emojiRegex.test(char) && char.codePointAt(0)! > 255;
             if (charIsEmoji === isEmoji) {
                 currentSegment += char;
             } else {
-                segments.push({ text: currentSegment, isEmoji });
+                if (currentSegment) {
+                    segments.push({ text: currentSegment, isEmoji });
+                }
                 currentSegment = char;
                 isEmoji = charIsEmoji;
             }
@@ -155,7 +161,7 @@ export function GenerateCard() {
             const regularFont = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic);
             const emojiFont = await pdfDoc.embedFont(emojiFontBytes);
             const lineHeight = fontSize * 1.6; // Altura da linha proporcional ao tamanho da fonte
-            const maxWidth = 455; // Largura máxima disponível no PDF (595 - 120 de margem esquerda - 20 de margem direita)
+            const maxWidth = 400; // Largura máxima disponível no PDF (595 - 120 de margem esquerda - 40 de margem direita)
 
             const pages = pdfDoc.getPages();
             const firstPage = pages[0];
