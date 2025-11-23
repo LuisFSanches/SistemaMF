@@ -28,7 +28,8 @@ import { searchProducts } from "../../services/productService";
 import { getPickupAddress } from "../../services/addressService";
 import { Loader } from "../Loader";
 import { ConfirmPopUp } from "../ConfirmPopUp";
-import { ModalHeader, CancelButton } from "./style";
+import { ChangeClientModal } from "../ChangeClientModal";
+import { ModalHeader, CancelButton, EditClientButton } from "./style";
 
 interface IEditOrderModal{
 	isOpen: boolean;
@@ -46,6 +47,7 @@ export function EditOrderModal({
 
 	const [editAddress, setEditAddress] = useState(false);
 	const [pickupAddress, setPickupAddress] = useState(order?.pickup_on_store);
+	const [isChangeClientModalOpen, setIsChangeClientModalOpen] = useState(false);
     const {
         register,
         handleSubmit,
@@ -187,6 +189,13 @@ export function EditOrderModal({
 			setPickupAddress(false);
         }
     }
+
+	const handleSelectClient = (client: any) => {
+		setValue("client.first_name", client.first_name);
+		setValue("client.last_name", client.last_name);
+		setValue("client.phone_number", client.phone_number);
+		order.client_id = client.id;
+	};
 
 	const updateProducts = (index: number, param: string, value: any) => {
 		setProducts((prev: any[]) => {
@@ -445,6 +454,9 @@ export function EditOrderModal({
 						<EditFormField isShortField>
 							<Label>Nome do Cliente</Label>
 							<Input {...register("client.first_name", {required: "Descrição inválida"})} disabled/>
+							<EditClientButton type="button" onClick={() => setIsChangeClientModalOpen(true)}>
+								Editar Cliente
+							</EditClientButton>
 						</EditFormField>
 						<EditFormField isShortField>
 							<Label>Telefone do Cliente</Label>
@@ -645,6 +657,12 @@ export function EditOrderModal({
 				handleAction={handleCancelOrder}
 				actionLabel="Tem certeza que deseja cancelar este pedido?"
 				label="Sim, cancelar pedido"
+			/>
+
+			<ChangeClientModal
+				isOpen={isChangeClientModalOpen}
+				onRequestClose={() => setIsChangeClientModalOpen(false)}
+				onSelectClient={handleSelectClient}
 			/>
         </Modal>
     )

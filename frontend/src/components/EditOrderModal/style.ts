@@ -31,3 +31,19 @@ export const CancelButton = styled.button`
         transform: translateY(0);
     }
 `;
+
+export const EditClientButton = styled.button`
+    background: none;
+    border: none;
+    color: #EC4899;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    margin-top: 0px;
+    transition: opacity 0.2s;
+
+    &:hover {
+        opacity: 0.7;
+    }
+`;

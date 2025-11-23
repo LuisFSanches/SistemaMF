@@ -74,9 +74,9 @@ export function ProductModal({
                 alert("A imagem deve ter no máximo 100KB. Escolha outra imagem por favor.");
             }
 
-            const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
             if (!validTypes.includes(file.type)) {
-                alert("Formato inválido. Use JPEG, JPG, PNG.");
+                alert("Formato inválido. Use JPEG, JPG, PNG, WEBP.");
                 return;
             }
 
@@ -226,8 +226,8 @@ export function ProductModal({
         setValue("price", currentProduct.price || null);
         setValue("unity", currentProduct.unity);
         setValue("stock", currentProduct.stock);
-        setValue("enabled", currentProduct.enabled);
-        setValue("visible_in_store", currentProduct.visible_in_store);
+        setValue("enabled", Boolean(currentProduct.enabled));
+        setValue("visible_in_store", Boolean(currentProduct.visible_in_store));
         
         if (currentProduct.image) {
             setImagePreview(currentProduct.image);
@@ -262,7 +262,13 @@ export function ProductModal({
                             <span>
                                 {watch("enabled") ? "Ativado" : "Desativado"}
                             </span>
-                            <Input id="switch" type="checkbox" defaultChecked placeholder='Ativo' {...register("enabled")}/>
+                            <Input 
+                                id="switch" 
+                                type="checkbox" 
+                                checked={watch("enabled")}
+                                placeholder='Ativo' 
+                                {...register("enabled")}
+                            />
                             <StyledSwitch htmlFor="switch" $checked={watch("enabled")} />
                         </Switch>
 
@@ -273,7 +279,10 @@ export function ProductModal({
                             <Input
                                 id="switch-visible"
                                 type="checkbox"
-                                defaultChecked placeholder='Visível na Loja' {...register("visible_in_store")}/>
+                                checked={watch("visible_in_store") ?? false}
+                                placeholder='Visível na Loja' 
+                                {...register("visible_in_store")}
+                            />
                             <StyledSwitch htmlFor="switch-visible" $checked={watch("visible_in_store") ?? false} />
                         </Switch>
                     </SwitchActions>
