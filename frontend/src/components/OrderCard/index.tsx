@@ -77,31 +77,29 @@ export function OrderCard({
 		switch (order.status) {
 			case "OPENED":
 				message = `📋Pedido #${order.code}*\n\n`;
-				message += `✅ Olá ${clientName}, Pedido confirmado! Qualquer dúvida, estamos à disposição.🌸💝\n\n`;
+				message += `✅ Olá ${clientName}, Pedido confirmado! Qualquer dúvida, estamos à disposição.🌸💝\n`;
 				message += `📅 Data de Entrega:* ${deliveryDate}\n`;
-				message += `📍 Endereço:* ${address}\n\n`;
-				message += `💐 Produtos:*\n${products}\n\n`;
+				message += `📍 Endereço:* ${address}\n`;
+				message += `💐 Produtos:*\n${products}\n`;
 				message += `💰 Valores:*\n`;
 				message += `• Produtos: R$ ${order.products_value}\n`;
 				if (order.discount > 0) {
 					message += `• Desconto: R$ ${order.discount}\n`;
 				}
-				message += `• Taxa de entrega: R$ ${order.delivery_fee}\n\n`;
+				message += `• Taxa de entrega: R$ ${order.delivery_fee}\n`;
 				message += `💵 Total: R$ ${order.total}*\n`;
 				message += `💳 Pagamento: ${PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS]}`;
 				break;
 			
 			case "IN_PROGRESS":
-				message = `📋 Pedido #${order.code}*\n\n`;
-				message += `✅ Olá ${clientName}, seu pedido já está sendo preparado por nossa equipe.🎁🎁\n\n`;
-				message += `💐 Produtos:*\n${products}\n\n`;
+				message = `📋 Pedido #${order.code}*\n`;
+				message += `✅ Olá ${clientName}, seu pedido já está sendo preparado por nossa equipe.🎁\n`;
 				message += `📅 *Data de Entrega:* ${deliveryDate}`
 				break;
 			
 			case "IN_DELIVERY":
-				message = `📋 Pedido #${order.code}*\n\n`;
-				message += `✅ Olá ${clientName}, seu pedido saiu para entrega.🛵🛵\n\n`;
-				message += `💐 Produtos:*\n${products}\n\n`;
+				message = `📋 Pedido #${order.code}*\n`;
+				message += `✅ Seu pedido está em rota de entrega.🛵🛵\n`;
 				message += `📅 *Data de Entrega:* ${deliveryDate}`
 				break;
 			

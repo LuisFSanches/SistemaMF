@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import moment from 'moment';
 import { ConfirmPopUp } from "../../components/ConfirmPopUp";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -12,6 +13,7 @@ import { getStockTransactions, deleteStockTransaction } from "../../services/sto
 import { IStockTransaction } from "../../interfaces/IStockTransaction";
 
 export function StockPage(){
+    const navigate = useNavigate();
     const [clientModalModal, setClientModal] = useState(false);
     const [action, setAction] = useState("");
     const [stockTransactions, setStockTransactions] = useState<IStockTransaction[]>([]);
@@ -119,9 +121,12 @@ export function StockPage(){
                     {stockTransactions?.map(transaction => (
                         <tr key={transaction.id}>
                             <td>
-                                <a href="/backoffice/estoque">
+                                <span 
+                                    onClick={() => navigate(`/backoffice/estoque/produto/${transaction.product?.id}`)}
+                                    style={{ color: 'rgb(236, 72, 153)', fontWeight: 'bold', cursor: 'pointer' }}
+                                >
                                     {transaction.product?.name}
-                                </a>
+                                </span>
                             </td>
                             <td>{transaction.quantity}</td>
                             <td>{transaction.unity}</td>

@@ -47,6 +47,7 @@ import { WebhookPixController } from './controllers/inter/WebhookPixController';
 
 import { CreateStockTransactionController } from './controllers/stockTransaction/CreateStockTransactionController';
 import { GetAllStockTransactionsController } from './controllers/stockTransaction/GetAllStockTransactionsController';
+import { GetProductStockDetailsController } from './controllers/stockTransaction/GetProductStockDetailsController';
 import { DeleteStockTransactionController } from './controllers/stockTransaction/DeleteStockTransactionController';
 
 import { CreateSupplierController } from './controllers/supplier/CreateSupplierController';
@@ -125,6 +126,7 @@ router.post('/webhook/pix', superAdminAuthMiddleware,  new WebhookPixController(
 
 //-- ROTAS STOCK TRANSACTION --
 router.get('/stockTransaction/all', adminAuthMiddleware, new GetAllStockTransactionsController().handle);
+router.get('/stockTransaction/product/:id', adminAuthMiddleware, new GetProductStockDetailsController().handle);
 router.post('/stockTransaction', adminAuthMiddleware, new CreateStockTransactionController().handle);
 router.delete('/stockTransaction/:id', adminAuthMiddleware, new DeleteStockTransactionController().handle);
 

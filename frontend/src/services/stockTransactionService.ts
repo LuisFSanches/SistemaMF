@@ -47,3 +47,13 @@ export const deleteStockTransaction = async (id: string) => {
     
     return response;
 };
+
+export const getProductStockTransactions = async (productId: string) => {
+    const response = await api.get(`/stockTransaction/product/${productId}`, {
+        headers: {
+            Authorization: `${token}`,
+        }
+    });
+    
+    return response;
+};

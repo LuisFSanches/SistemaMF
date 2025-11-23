@@ -170,14 +170,14 @@ export function GenerateCard() {
             // Adicionar "De" se existir
             if (cardFrom) {
                 const sanitizedFrom = sanitizeText(`De: ${cardFrom}`);
-                write(true, firstPage, regularFont, emojiFont, sanitizedFrom, 120, currentY, fontSize);
+                write(true, firstPage, regularFont, emojiFont, sanitizedFrom, 100, currentY, fontSize);
             }
 
             // Adicionar "Para" se existir
 
             if (cardTo) {
                 const sanitizedTo = sanitizeText(`Para: ${cardTo}`);
-                write(true, firstPage, regularFont, emojiFont, sanitizedTo, 120, 685, fontSize);
+                write(true, firstPage, regularFont, emojiFont, sanitizedTo, 100, 685, fontSize);
                 currentY -= lineHeight * 2;
             }
 
@@ -186,7 +186,7 @@ export function GenerateCard() {
                 const sanitizedCardMessage = sanitizeText(cardMessage);
                 const message_formatted = wrapMultilineText(sanitizedCardMessage, regularFont, fontSize, maxWidth);
                 message_formatted.forEach((line, index) => {
-                    write(true, firstPage, regularFont, emojiFont, line, 120, (650 - (index * lineHeight)), fontSize);
+                    write(true, firstPage, regularFont, emojiFont, line, 100, (650 - (index * lineHeight)), fontSize);
                 });
                 currentY -= (message_formatted.length * lineHeight) + lineHeight;
             }

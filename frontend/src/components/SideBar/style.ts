@@ -17,7 +17,6 @@ const getSidebarWidth = ({ isMinimizedActive }: SidebarProps) =>
 export const Container = styled.div<SidebarProps>`
   flex: 0;
   max-height: 100%;
-  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

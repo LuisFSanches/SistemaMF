@@ -8,7 +8,7 @@ import { faPrint } from "@fortawesome/free-solid-svg-icons";
 
 import { Button } from "./style";
 
-const pdfModel = `${process.env.PUBLIC_URL}/pdf_model.pdf`;
+const pdfModel = `${process.env.PUBLIC_URL}/cartao_limpo.pdf`;
 const emojiFontVariable = `${process.env.PUBLIC_URL}/noto_emoji_variable.ttf`;
 
 export const PrintCardMessage = ({ card_message, card_from, card_to, order_code }: any) => {
@@ -19,14 +19,20 @@ export const PrintCardMessage = ({ card_message, card_from, card_to, order_code 
     function splitTextByFont(text: string) {
         const segments = [];
         let currentSegment = '';
-        let isEmoji = emojiRegex.test(text[0]);
+        let isEmoji = false;
+
+        if (text.length > 0) {
+            isEmoji = emojiRegex.test(text[0]) && text[0].codePointAt(0)! > 255;
+        }
 
         for (const char of text) {
-            const charIsEmoji = emojiRegex.test(char);
+            const charIsEmoji = emojiRegex.test(char) && char.codePointAt(0)! > 255;
             if (charIsEmoji === isEmoji) {
                 currentSegment += char;
             } else {
-                segments.push({ text: currentSegment, isEmoji });
+                if (currentSegment) {
+                    segments.push({ text: currentSegment, isEmoji });
+                }
                 currentSegment = char;
                 isEmoji = charIsEmoji;
             }
@@ -130,20 +136,22 @@ export const PrintCardMessage = ({ card_message, card_from, card_to, order_code 
             const firstPage = pages[0];
 
             const sanitized_card_from = sanitizeText(card_from);
-            const card_from_formatted = wrapText(sanitized_card_from, maxLineLength);
+            let card_from_formatted = wrapText(sanitized_card_from, maxLineLength);
+            card_from_formatted = `De: ${card_from_formatted.join(' ')}`.split('\n');
             card_from_formatted.forEach((line, index) => {
-                write(true, firstPage, regularFont, emojiFont, line, 160, (692 - (index * lineHeight)), 14);
+                write(true, firstPage, regularFont, emojiFont, line, 110, (692 - (index * lineHeight)), 14);
             });
 
             const sanitized_card_to = sanitizeText(card_to);
-            const card_to_formatted = wrapText(sanitized_card_to, maxLineLength);
+            let card_to_formatted = wrapText(sanitized_card_to, maxLineLength);
+            card_to_formatted = `Para: ${card_to_formatted.join(' ')}`.split('\n');
             card_to_formatted.forEach((line, index) => {
-                write(true, firstPage, regularFont, emojiFont, line, 165, (658 - (index * lineHeight)), 14);
+                write(true, firstPage, regularFont, emojiFont, line, 110, (658 - (index * lineHeight)), 14);
             });
             const sanitizedCardMessage = sanitizeText(card_message);
             const message_formatted = wrapMultilineText(sanitizedCardMessage, 65);
             message_formatted.forEach((line, index) => {
-                write(true, firstPage, regularFont, emojiFont, line, 120, (620 - (index * lineHeight)), 14);
+                write(true, firstPage, regularFont, emojiFont, line, 100, (620 - (index * lineHeight)), 14);
             });
 
             const order_code_message = `Pedido #${order_code}`;

@@ -18,6 +18,7 @@ import { CompleteOrder } from "./views/CompleteOrder";
 import { WaitingClientOrders } from "./views/WaitingClientOrders";
 import { ProductsPage } from "./views/Products";
 import { StockPage } from "./views/Stock";
+import { ProductStockDetail } from "./views/ProductStockDetail";
 import { OrdersToReceivePage } from "./views/OrdersToReceive";
 import { StoreFront } from "./views/StoreFront";
 import { Cart } from "./views/Cart";
@@ -83,6 +84,11 @@ export default function routes(){
                         <Route path="/backoffice/estoque" element={
                             <PrivateRoute>
                                 <StockPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/estoque/produto/:id" element={
+                            <PrivateRoute>
+                                <ProductStockDetail/>
                             </PrivateRoute>
                         }/>
                         <Route path="/backoffice/clientes" element={

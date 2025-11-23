@@ -2406,6 +2406,94 @@ var GetAllStockTransactionsController = class {
   }
 };
 
+// src/services/stockTransaction/GetProductStockDetailsService.ts
+var GetProductStockDetailsService = class {
+  async execute(product_id) {
+    try {
+      const product = await prisma_default.product.findUnique({
+        where: { id: product_id },
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          stock: true,
+          price: true
+        }
+      });
+      if (!product) {
+        throw new BadRequestException(
+          "Product not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+      const transactions = await prisma_default.stockTransaction.findMany({
+        where: { product_id },
+        include: {
+          supplierRelation: true
+        },
+        orderBy: {
+          purchased_date: "desc"
+        }
+      });
+      const formattedTransactions = transactions.map((transaction) => ({
+        id: transaction.id,
+        purchased_date: transaction.purchased_date,
+        supplier: transaction.supplierRelation?.name || transaction.supplier,
+        unity: transaction.unity,
+        quantity: transaction.quantity,
+        unity_price: transaction.unity_price,
+        total_price: transaction.total_price
+      }));
+      const priceHistory = transactions.map((transaction) => ({
+        date: transaction.purchased_date,
+        unity_price: transaction.unity_price
+      })).sort((a, b) => a.date.getTime() - b.date.getTime());
+      const totalQuantityPurchased = transactions.reduce(
+        (sum, transaction) => sum + transaction.quantity,
+        0
+      );
+      const averagePrice = transactions.length > 0 ? transactions.reduce((sum, transaction) => sum + transaction.unity_price, 0) / transactions.length : 0;
+      const lastPurchaseDate = transactions.length > 0 ? transactions[0].purchased_date : null;
+      const metrics = {
+        total_quantity_purchased: totalQuantityPurchased,
+        current_stock: product.stock,
+        average_price: averagePrice,
+        last_purchase_date: lastPurchaseDate
+      };
+      return {
+        product_info: {
+          id: product.id,
+          name: product.name,
+          image: product.image,
+          price: product.price
+        },
+        transactions: formattedTransactions,
+        price_history: priceHistory,
+        metrics
+      };
+    } catch (error) {
+      console.error("[GetProductStockDetailsService] Failed:", error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/stockTransaction/GetProductStockDetailsController.ts
+var GetProductStockDetailsController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const getProductStockDetailsService = new GetProductStockDetailsService();
+    const stockDetails = await getProductStockDetailsService.execute(id);
+    return res.json(stockDetails);
+  }
+};
+
 // src/services/stockTransaction/DeleteStockTransactionService.ts
 var DeleteStockTransactionService = class {
   async execute(id) {
@@ -3189,6 +3277,7 @@ router.put("/admin/:id", super_admin_auth_default, new UpdateAdminController().h
 router.get("/pix", super_admin_auth_default, new GetPixController().handle);
 router.post("/webhook/pix", super_admin_auth_default, new WebhookPixController().handle);
 router.get("/stockTransaction/all", admin_auth_default, new GetAllStockTransactionsController().handle);
+router.get("/stockTransaction/product/:id", admin_auth_default, new GetProductStockDetailsController().handle);
 router.post("/stockTransaction", admin_auth_default, new CreateStockTransactionController().handle);
 router.delete("/stockTransaction/:id", admin_auth_default, new DeleteStockTransactionController().handle);
 router.post("/supplier", admin_auth_default, new CreateSupplierController().handle);
