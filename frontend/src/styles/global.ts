@@ -544,10 +544,9 @@ export const FormFieldTitle = styled.div`
 `;
 
 export const FormFieldsContainer = styled.div`
-    width: 95%;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    border: 1px solid #ccc;
     border-radius: 10px;
     padding: 10px 15px;
     margin-top: 20px;

@@ -14,7 +14,7 @@ import { TooltipModal } from "../../components/Tooltip";
 import { RememberCardModal } from "../../components/RememberCardModal";
 import { formatDescription } from "../../utils";
 import { ErrorAlert } from "../../components/ErrorAlert";
-import logoFull from '../../assets/images/logo.png'
+import transparentLogo from '../../assets/images/transparent_logo.png'
 import { convertMoney } from "../../utils";
 import {
     FormField,
@@ -27,7 +27,6 @@ import {
     Checkbox,
     ErrorMessage,
     PrimaryButton,
-    FormFieldTitle,
     FormFieldsContainer
 } from "../../styles/global";
 import { TYPES_OF_DELIVERY, STATES } from "../../constants";
@@ -233,7 +232,7 @@ export function CompleteOrder() {
         
         setTimeout(() => {
             fetchClientData();
-        }, 900);
+        }, 600);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [phone_number, setValue, setError]);
 
@@ -393,7 +392,7 @@ export function CompleteOrder() {
             {errorMessage && <ErrorAlert message={errorMessage} />}
             {(!isWaitingForClienteOrder && !showLoader ) &&
                 <CompletedOrder>
-                    <img src={logoFull} alt="" />
+                    <img src={transparentLogo} alt="" />
                     <h1>Seu pedido foi enviado para a loja!</h1>
                     {!currentOrder?.payment_received &&
                         <>
@@ -411,40 +410,49 @@ export function CompleteOrder() {
             {isWaitingForClienteOrder &&
                 <Form onSubmit={handleSubmit(submitOrder)}>
                     <FormHeader>
-                        <img src={logoFull} alt="" />
+                        <img src={transparentLogo} alt="" />
+                        <p>Mirai Flores</p>
+                        <span>CNPJ: 33.861.078/0001-50</span>
+                        <span>Tel: (22) 99751-7940</span>
                     </FormHeader>
                     <OrderReview>
                         <h1>Resumo do pedido</h1>
-                        <div>
-                            <p><strong>Descrição: </strong>
-                                {formatDescription(currentOrder?.description).map((line, idx) => (
-                                    <p key={idx}>{line}</p>
-                                ))}
-                            </p>
-                            <p><strong>Observação:</strong> {currentOrder?.additional_information}</p>
-                            <p><strong>Valor dos Produtos: </strong> {
-                                currentOrder?.products_value  &&
-                                convertMoney(currentOrder?.products_value as number)
-                            }</p>
-                            {(discount > 0) &&
-                                <p><strong>Desconto: </strong>
-                                    {
-                                        convertMoney(currentOrder?.discount as number)
-                                    }
+                        <div className="order-info-container">
+                            <div className="description-container">
+                                <p><strong>DESCRIÇÃO: </strong>
+                                    {formatDescription(currentOrder?.description).map((line, idx) => (
+                                        <p key={idx}>{line}</p>
+                                    ))}
                                 </p>
-                            }
-                            <p><strong>Taxa de entrega: </strong> {
-                                currentOrder?.delivery_fee &&
-                                convertMoney(currentOrder?.delivery_fee as number)
-                            }</p>
-                            <p><strong>Valor Total: </strong> {
-                                currentOrder?.total &&
-                                convertMoney(currentOrder?.total as number)
-                            }</p>
+                                <p className="observation"><strong>OBSERVAÇÃO:</strong> {currentOrder?.additional_information}</p>
+                            </div>
+                            <div className="price-container">
+                                <p><strong>Valor dos Produtos: </strong> {
+                                    currentOrder?.products_value  &&
+                                    convertMoney(currentOrder?.products_value as number)
+                                }</p>
+                                {(discount > 0) &&
+                                    <p className="discount-value"><strong>Desconto: </strong>
+                                        {
+                                            convertMoney(currentOrder?.discount as number)
+                                        }
+                                    </p>
+                                }
+                                <p><strong>Taxa de entrega: </strong> {
+                                    currentOrder?.delivery_fee &&
+                                    convertMoney(currentOrder?.delivery_fee as number)
+                                }</p>
+                                <p className="total-value"><strong>Valor Total: </strong> {
+                                    currentOrder?.total &&
+                                    convertMoney(currentOrder?.total as number)
+                                }</p>
+                            </div>
+                            
                         </div>
                     </OrderReview>
-                    <FormFieldsContainer>
-                        <FormFieldTitle>Dados do Comprador</FormFieldTitle>
+                    <div className="spacer"></div>
+                    <h1 className="client-container-title">Dados do Comprador</h1>
+                    <FormFieldsContainer style={{ marginTop: "0px" }}>
                         <FormField>
                             <Label>
                                 Seu telefone
@@ -495,7 +503,11 @@ export function CompleteOrder() {
                             </FormField>
                         </InlineFormField>
                         {!client_id &&
-                            <PrimaryButton className="next-button" type="button" onClick={handleCreateUser}>
+                            <PrimaryButton
+                                style={{width: "50%"}}
+                                className="next-button"
+                                type="button"
+                                onClick={handleCreateUser}>
                                 Continuar
                             </PrimaryButton>
                         }

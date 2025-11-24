@@ -8,6 +8,7 @@ export const Container = styled.div`
     align-items: center;
     overflow-y: hidden;
     overflow-x: hidden;
+    padding-left: 7px;
 
     @media (max-width:1450px){
         overflow-y: scroll;
@@ -20,16 +21,35 @@ export const Container = styled.div`
 
 export const Form = styled.form`
     width: 700px;
-    height: 800px;
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-top: 30px;
-    background: white;
     border-radius: 20px;
-    box-shadow: 0.1rem 0.2rem 0.2rem var(--shadow-color);
     overflow-y: scroll;
     overflow-x: hidden;
+    background: #FFFFFF;
+
+    .spacer {
+        width: 100%;
+        height: 30px;
+        background: #f7f2f2;
+        padding: 7px;
+    }
+
+    .client-container-title {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+        font-size: 22px;
+        font-weight: bold;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 230, 240, 0.7),
+            #faf6ff
+        );
+    }
 
     ::-webkit-scrollbar {
         width: 8px;
@@ -63,21 +83,30 @@ export const FormHeader = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    background: rgba(247,214,218,0.5);
+    background: #f7f2f2;
+    padding-bottom: 20px;
+    padding-top: 10px;
 
     img {
-        width: 150px;
-        height: 50px;
+        width: 70px;
+        height: 70px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -4px rgba(0, 0, 0, 0.1);
     }
 
-    h1 {
-        font-size: 28px;
-        font-family: "Parisienne", sans-serif;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        text-align: center;
-        color: #505050;
+    p {
+        font-size: 23px;
+        font-style: italic;
+        font-family: 'Montserrat', sans-serif;
+        margin-top: 8px;
+    }
+
+    span {
+        font-style: italic;
+        padding-bottom: 3px;
     }
 `
 export const CompletedOrder = styled.div`
@@ -88,10 +117,16 @@ export const CompletedOrder = styled.div`
     align-items: center;
     justify-content: center;
     font-size: 18px;
+    padding: 20px;
 
     img {
-        width: 225px;
-        height: 80px;
+        width: 100px;
+        height: 100px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -4px rgba(0, 0, 0, 0.1);
     }
 
     h1, h2 {
@@ -116,11 +151,54 @@ export const OrderReview = styled.div`
     align-items: center;
     justify-content: center;
     border-bottom: 1px solid #E0DAD8;
-    padding: 10px;
-    background: rgba(247, 214, 218, 0.5);
+    background: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
 
     div {
         align-self: flex-start;
+    }
+
+    .order-info-container {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .description-container {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #E0DAD8;
+
+        p {
+            margin: 5px 0;
+        }
+
+        strong {
+            font-size: 14px;
+        }
+
+        .observation {
+            margin-top: 10px;
+            padding-bottom: 10px;
+        }
+    }
+
+    .price-container {
+        p {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+        }
+
+        .discount-value {
+            color: #EC4899;
+        }
+
+        .total-value {
+            border-top: 1px solid #E0DAD8;
+            padding-top: 10px;
+            color: #EC4899;
+            font-weight: bold;
+        }
     }
 
     strong, p {
@@ -128,13 +206,20 @@ export const OrderReview = styled.div`
         font-size: 16px;
     }
 
-    p {
-        margin-bottom: 5px;
+    strong {
+        color: #8C737B;
     }
 
     h1 {
-        font-size: 26px;
-        font-family: "Parisienne", sans-serif;
-        color: #6B6B6B;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+        font-size: 22px;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 230, 240, 0.7),
+            #faf6ff
+        );
     }
 `
