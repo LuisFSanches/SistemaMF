@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { Container } from "./style";
 import { AddButton, PageHeader } from "../../styles/global";
@@ -10,6 +11,7 @@ import { useClients } from "../../contexts/ClientsContext";
 
 export function UsersPage(){
     const { clients, loadAvailableClients, totalClients } = useClients();
+    const navigate = useNavigate();
 
     const [clientModalModal, setClientModal] = useState(false);
     const [action, setAction] = useState("");
@@ -90,7 +92,17 @@ export function UsersPage(){
                 <tbody>
                     {clients?.map(client => (
                         <tr key={client.id}>
-                            <td>{client.first_name}</td>
+                            <td 
+                                style={{ 
+                                    cursor: 'pointer', 
+                                    color: '#EC4899', 
+                                    fontWeight: '600',
+                                    textDecoration: 'underline'
+                                }}
+                                onClick={() => navigate(`/backoffice/clientes/${client.id}`)}
+                            >
+                                {client.first_name}
+                            </td>
                             <td>{client.last_name}</td>
                             <td>{client.phone_number}</td>
                             <td className="table-icon">

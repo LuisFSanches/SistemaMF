@@ -7,6 +7,16 @@ export const getClientByPhone = async (params = "") => {
   return response;
 };
 
+export const getClientDetails = async (id: string) => {
+  const response = await api.get(`/client/${id}`, {
+    headers: {
+      Authorization: `${token}`,
+    }
+  });
+  
+  return response;
+}
+
 
 export const listClients = async (page: number, pageSize: number, query: string) => {
   const response = await api.get(`/clients/all?page=${page}&pageSize=${pageSize}&query=${query}`, {
