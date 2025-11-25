@@ -212,7 +212,7 @@ export const TableSection = styled.div`
                 color: #374151;
                 font-size: 0.9rem;
                 border-bottom: 2px solid #e5e7eb;
-                text-align: left;
+                text-align: center;
             }
         }
 
