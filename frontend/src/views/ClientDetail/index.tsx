@@ -224,16 +224,23 @@ export function ClientDetail() {
     // Get order type badges
     const getOrderTypeBadges = (order: any) => {
         const badges = [];
-        if (order.online_order) badges.push(<span key="online" className="badge online">Online</span>);
-        if (order.store_front_order) badges.push(<span key="store" className="badge store">Loja</span>);
-        if (order.pickup_on_store) badges.push(<span key="pickup" className="badge pickup">Retirada</span>);
+        if (!order.is_delivery && !order.online_order && !order.store_front_order) {
+            badges.push(<span key="store" className="badge pdv">PDV</span>);
+        }
+        if (order.is_delivery && order.online_order) {
+            badges.push(<span key="whatsapp" className="badge whatsapp">Whatsapp</span>);
+        }
+        if (order.store_front_order) badges.push(<span key="store" className="badge site">Site</span>);
+        if (order.is_delivery && !order.online_order && !order.store_front_order) {
+            badges.push(<span key="whatsapp" className="badge balcao">Balcão</span>);
+        }
         return badges;
     };
 
     return (
         <Container>
             <Header>
-                <button className="back-button" onClick={() => navigate('/backoffice/clientes')}>
+                <button className="back-button" onClick={() => navigate(-1)}>
                     <FontAwesomeIcon icon={faArrowLeft} />
                 </button>
                 <div className="client-info">
@@ -343,21 +350,21 @@ export function ClientDetail() {
                         <tbody>
                             {orders.map(order => (
                                 <tr key={order.id}>
-                                    <td className="order-code">#{order.code}</td>
-                                    <td>{moment(order.date).format('DD/MM/YYYY')}</td>
-                                    <td>{order.description}</td>
-                                    <td>
+                                    <td className="order-code" data-label="Pedido">#{order.code}</td>
+                                    <td data-label="Data">{moment(order.date).format('DD/MM/YYYY')}</td>
+                                    <td data-label="Descrição">{order.description}</td>
+                                    <td data-label="Tipo">
                                         <div className="order-type">
                                             {getOrderTypeBadges(order)}
                                         </div>
                                     </td>
-                                    <td>{PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS] || order.payment_method}</td>
-                                    <td>
+                                    <td data-label="Pagamento">{PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS] || order.payment_method}</td>
+                                    <td data-label="Status">
                                         <span className={`status-badge ${getStatusClass(order.status)}`}>
                                             {STATUS_LABEL[order.status as keyof typeof STATUS_LABEL] || order.status}
                                         </span>
                                     </td>
-                                    <td className="total-price">{convertMoney(order.total)}</td>
+                                    <td className="total-price" data-label="Total">{convertMoney(order.total)}</td>
                                 </tr>
                             ))}
                         </tbody>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { IOrder } from "../../interfaces/IOrder";
 import moment from "moment";
 import 'moment/locale/pt-br';
@@ -31,6 +32,7 @@ export function OrderCard({
 	const [viewCardMessage, setViewCardMessage] = useState(false);
 	const { admins } = useAdmins();
 	const { showSuccess } = useSuccessMessage();
+	const navigate = useNavigate();
 
 	function handleOpenOrderDetailModal(order: IOrder){
         setOrderDetailModal(true);
@@ -163,7 +165,13 @@ export function OrderCard({
 			</div>
 			<div className="client-info">
 				<div>
-					<p><strong>Cliente:</strong> {formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}</p>
+					<p className="client-name"
+						onClick={() => navigate(`/backoffice/clientes/${order.client.id}`)}>
+						<strong>Cliente:</strong>
+						<span>
+							{formatTitleCase(order.client.first_name)} {formatTitleCase(order.client.last_name)}
+						</span>
+					</p>
 					{order.is_delivery &&
 						<p><strong>Telefone do Cliente: </strong>{order.client.phone_number}</p>
 					}

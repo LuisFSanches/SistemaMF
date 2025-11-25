@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Container } from "./style";
 import { AddButton, PageHeader } from "../../styles/global";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faEye, faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
 import { ClientModal } from "../../components/ClientModal";
 import { Pagination } from "../../components/Pagination";
 import { useClients } from "../../contexts/ClientsContext";
@@ -84,9 +84,7 @@ export function UsersPage(){
                         <th>Nome</th>
                         <th>Sobrenome</th>
                         <th>Telefone</th>
-                        <th>Endereços</th>
                         <th>Editar</th>
-                        <th>Deletar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -106,18 +104,8 @@ export function UsersPage(){
                             <td>{client.last_name}</td>
                             <td>{client.phone_number}</td>
                             <td className="table-icon">
-                                <button className="view-button">
-                                    <span>Visualizar</span> <FontAwesomeIcon icon={faEye}/>
-                                </button>
-                            </td>
-                            <td className="table-icon">
                                 <button className="edit-button" onClick={() => handleOpenClientModal("edit", client)}>
                                     <span>Editar</span> <FontAwesomeIcon icon={faPen}/>
-                                </button>
-                            </td>
-                            <td className="table-icon">
-                                <button className="del-button">
-                                    <span>Excluir</span> <FontAwesomeIcon icon={faTrash}/>
                                 </button>
                             </td>
                         </tr>

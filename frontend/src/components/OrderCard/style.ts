@@ -85,6 +85,15 @@ export const OrderCardContainer= styled.div`
         justify-content: space-between;
         margin-bottom: 0.6rem;
 
+        .client-name {
+            cursor: pointer;
+
+            span {
+                text-decoration: underline;
+                margin-left: 5px;
+            }
+        }
+
         .delivery-date {
             margin-top:10px;
         }

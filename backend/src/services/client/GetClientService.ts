@@ -31,6 +31,7 @@ class GetClientService{
                     payment_method: true,
                     payment_received: true,
                     pickup_on_store: true,
+                    is_delivery: true,
                     online_order: true,
                     store_front_order: true,
                 },
@@ -79,6 +80,7 @@ class GetClientService{
                     pickup_on_store: order.pickup_on_store,
                     online_order: order.online_order,
                     store_front_order: order.store_front_order,
+                    is_delivery: order.is_delivery,
                 })),
                 spendingHistory,
                 addresses: addresses.map(address => ({
