@@ -64,6 +64,9 @@ var GetOrderService = class {
       const order = await prisma_default.order.findFirst({
         where: {
           id
+        },
+        include: {
+          client: true
         }
       });
       if (!order) {

@@ -9,6 +9,7 @@ import { AdminsProvider } from './contexts/AdminsContext';
 import { ProductsProvider } from './contexts/ProductsContext';
 import { SuccessMessageProvider } from './contexts/SuccessMessageContext';
 import { OrdersToReceiveProvider } from './contexts/OrdersToReceiveContext';
+import { OrderDeliveriesProvider } from './contexts/OrderDeliveriesContext';
 import { CartProvider } from './contexts/CartContext';
 
 ReactDOM.render(
@@ -18,13 +19,15 @@ ReactDOM.render(
 				<ClientsProvider>
 					<OrdersProvider>
 						<OrdersToReceiveProvider>
-							<ProductsProvider>
-								<CartProvider>
-									<SuccessMessageProvider>
-										<Routes/>
-									</SuccessMessageProvider>
-								</CartProvider>
-							</ProductsProvider>
+							<OrderDeliveriesProvider>
+								<ProductsProvider>
+									<CartProvider>
+										<SuccessMessageProvider>
+											<Routes/>
+										</SuccessMessageProvider>
+									</CartProvider>
+								</ProductsProvider>
+							</OrderDeliveriesProvider>
 						</OrdersToReceiveProvider>
 					</OrdersProvider>
 				</ClientsProvider>

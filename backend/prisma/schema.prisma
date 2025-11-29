@@ -147,6 +147,7 @@ model Order {
 
   orderItems OrderItem[]
   ordersToReceive OrderToReceive[]
+  orderDeliveries OrderDelivery[]
 
   @@map("orders")
 }
@@ -183,4 +184,32 @@ model OrderToReceive {
   order            Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
 
   @@map("orders_to_receive")
+}
+
+model DeliveryMan {
+  id           String   @id @default(uuid())
+  name         String
+  phone_number String
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  orderDeliveries OrderDelivery[]
+
+  @@map("delivery_men")
+}
+
+model OrderDelivery {
+  id              String    @id @default(uuid())
+  order_id        String
+  delivery_man_id String
+  delivery_date   DateTime
+  is_paid         Boolean   @default(false)
+  is_archived     Boolean   @default(false)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  order           Order     @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  deliveryMan     DeliveryMan @relation(fields: [delivery_man_id], references: [id], onDelete: Cascade)
+
+  @@map("order_deliveries")
 }

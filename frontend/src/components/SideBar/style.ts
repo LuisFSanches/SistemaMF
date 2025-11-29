@@ -67,7 +67,7 @@ export const InternalContainer = styled.div<SidebarProps>`
 
 export const SideBarItemContainer = styled.div`
   width: 100%;
-  padding: 0.7rem 1rem;
+  padding: 7px 1rem;
 `;
 
 export const LogoContainer = styled.div<SidebarProps>`

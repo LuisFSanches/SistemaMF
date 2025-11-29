@@ -1,10 +1,12 @@
 import moment from "moment";
 import 'moment/locale/pt-br';
+import { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { IAdmin } from "../../interfaces/IAdmin";
 import { PAYMENT_METHODS } from "../../constants";
 import { formatTitleCase, formatDescriptionWithPrice, convertMoney } from "../../utils";
+import { Loader } from "../Loader";
 import { PrintButton } from "./style";
 
 moment.locale('pt-br');
@@ -29,14 +31,38 @@ export const PrintOrder = ({
     style
 }: IReceiptPrintProps) => {
     const date = moment();
+    const baseUrl = process.env.REACT_APP_URL || "https://sistema-mf.vercel.app";
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handlePrint = () => {
-        // Status do pagamento
-        const paymentStatus = order.payment_received ? "Pago" : "Pendente";
-        const paymentMethodKey = order.payment_method?.toUpperCase() as keyof typeof PAYMENT_METHODS;
-        const paymentMethod = PAYMENT_METHODS[paymentMethodKey] || order.payment_method;
+    const preloadImage = (url: string): Promise<void> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+            img.src = url;
+        });
+    };
 
-        const receiptHTML = `
+    const handlePrint = async () => {
+        setIsLoading(true);
+
+        try {
+            // Status do pagamento
+            const paymentStatus = order.payment_received ? "Pago" : "Pendente";
+            const paymentMethodKey = order.payment_method?.toUpperCase() as keyof typeof PAYMENT_METHODS;
+            const paymentMethod = PAYMENT_METHODS[paymentMethodKey] || order.payment_method;
+
+            // URL para concluir entrega
+            const deliveryUrl = `${baseUrl}concluirEntrega/${order.id}`;
+            // URL do QR Code usando API pública
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(deliveryUrl)}`;
+
+            // Aguardar o carregamento do QR Code se o pedido tiver entrega
+            if (order.is_delivery) {
+                await preloadImage(qrCodeUrl);
+            }
+
+            const receiptHTML = `
             <html>
                 <head>
                     <title>Comprovante</title>
@@ -131,6 +157,12 @@ export const PrintOrder = ({
                     }
 
                     <p><strong>Cartão:</strong> ${order.has_card ? 'Contém cartão' : 'Não contém cartão'}</p>
+                    ${order.is_delivery &&
+                        `<div class="center" style="margin-top: 15px;">
+                            <img src="${qrCodeUrl}" alt="QR Code Entrega" style="width: 150px; height: 150px;" />
+                            <div style="font-size: 12px; margin-top: 5px;">Escaneie para concluir entrega</div>
+                        </div>`
+                    }
 
                     <div class="footer">
                         <div>OBRIGADO PELA PREFERÊNCIA!</div>
@@ -141,19 +173,51 @@ export const PrintOrder = ({
             </html>
         `;
 
-        const printWindow = window.open('', '', 'height=840,width=1100');
-        if (printWindow) {
-            printWindow.document.write(receiptHTML);
-            printWindow.document.close();
-            printWindow.focus();
-            printWindow.print();
+            const printWindow = window.open('', '', 'height=840,width=1100');
+            if (printWindow) {
+                printWindow.document.write(receiptHTML);
+                printWindow.document.close();
+                printWindow.focus();
+
+                // Aguardar todas as imagens carregarem na janela de impressão
+                if (order.is_delivery) {
+                    const images = printWindow.document.images;
+                    const imagePromises = Array.from(images).map(img => {
+                        return new Promise((resolve) => {
+                            if (img.complete) {
+                                resolve(true);
+                            } else {
+                                img.onload = () => resolve(true);
+                                img.onerror = () => resolve(true);
+                            }
+                        });
+                    });
+
+                    await Promise.all(imagePromises);
+                }
+
+                // Aguardar um pouco mais para garantir a renderização
+                setTimeout(() => {
+                    printWindow.print();
+                    setIsLoading(false);
+                }, 300);
+            } else {
+                setIsLoading(false);
+            }
+        } catch (error) {
+            console.error("Erro ao carregar QR Code:", error);
+            alert("Não foi possível carregar o QR Code. Tente novamente.");
+            setIsLoading(false);
         }
     };
 
     return (
-        <PrintButton onClick={handlePrint} style={style}>
-            {buttonLabel && <span>{buttonLabel}</span>}
-            <FontAwesomeIcon icon={faPrint} />
-        </PrintButton>
+        <>
+            <Loader show={isLoading} />
+            <PrintButton onClick={handlePrint} style={style}>
+                {buttonLabel && <span>{buttonLabel}</span>}
+                <FontAwesomeIcon icon={faPrint} />
+            </PrintButton>
+        </>
     );
 };

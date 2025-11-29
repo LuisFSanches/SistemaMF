@@ -22,10 +22,10 @@ export const NavButton = styled.button<MenuButtonProps>`
 
     span {
         font-size: 16px;
-        
-        svg {
-            margin-right: 8px;
-            font-size: 20px;
-        }
+    }
+
+    svg {
+        margin-right: 8px;
+        font-size: 18px;
     }
 `;

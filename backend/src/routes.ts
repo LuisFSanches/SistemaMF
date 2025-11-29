@@ -53,6 +53,19 @@ import { DeleteStockTransactionController } from './controllers/stockTransaction
 import { CreateSupplierController } from './controllers/supplier/CreateSupplierController';
 import { GetAllSuppliersController } from './controllers/supplier/GetAllSuppliersController';
 
+import { CreateDeliveryManController } from './controllers/deliveryMan/CreateDeliveryManController';
+import { GetAllDeliveryMenController } from './controllers/deliveryMan/GetAllDeliveryMenController';
+import { GetDeliveryManController } from './controllers/deliveryMan/GetDeliveryManController';
+import { GetDeliveryManByPhoneController } from './controllers/deliveryMan/GetDeliveryManByPhoneController';
+import { UpdateDeliveryManController } from './controllers/deliveryMan/UpdateDeliveryManController';
+import { DeleteDeliveryManController } from './controllers/deliveryMan/DeleteDeliveryManController';
+
+import { CreateOrderDeliveryController } from './controllers/orderDelivery/CreateOrderDeliveryController';
+import { GetAllOrderDeliveriesController } from './controllers/orderDelivery/GetAllOrderDeliveriesController';
+import { GetOrderDeliveryController } from './controllers/orderDelivery/GetOrderDeliveryController';
+import { UpdateOrderDeliveryController } from './controllers/orderDelivery/UpdateOrderDeliveryController';
+import { DeleteOrderDeliveryController } from './controllers/orderDelivery/DeleteOrderDeliveryController';
+
 import { CreateOrderToReceiveController } from './controllers/orderToReceive/CreateOrderToReceiveController';
 import { GetOrderToReceiveController } from './controllers/orderToReceive/GetOrderToReceiveController';
 import { GetAllOrderToReceiveController } from './controllers/orderToReceive/GetAllOrderToReceiveController';
@@ -133,6 +146,21 @@ router.delete('/stockTransaction/:id', adminAuthMiddleware, new DeleteStockTrans
 //-- ROTAS SUPPLIER --
 router.post('/supplier', adminAuthMiddleware, new CreateSupplierController().handle);
 router.get('/supplier/all', adminAuthMiddleware, new GetAllSuppliersController().handle);
+
+//-- ROTAS DELIVERY MEN --
+router.post('/deliveryMan', adminAuthMiddleware, new CreateDeliveryManController().handle);
+router.get('/deliveryMan/all', adminAuthMiddleware, new GetAllDeliveryMenController().handle);
+router.get('/deliveryMan/phone_number', new GetDeliveryManByPhoneController().handle);
+router.get('/deliveryMan/:id', adminAuthMiddleware, new GetDeliveryManController().handle);
+router.put('/deliveryMan/:id', adminAuthMiddleware, new UpdateDeliveryManController().handle);
+router.delete('/deliveryMan/:id', adminAuthMiddleware, new DeleteDeliveryManController().handle);
+
+//-- ROTAS ORDER DELIVERIES --
+router.post('/orderDelivery', adminAuthMiddleware, new CreateOrderDeliveryController().handle);
+router.get('/orderDelivery/all', adminAuthMiddleware, new GetAllOrderDeliveriesController().handle);
+router.get('/orderDelivery/:id', adminAuthMiddleware, new GetOrderDeliveryController().handle);
+router.put('/orderDelivery/:id', adminAuthMiddleware, new UpdateOrderDeliveryController().handle);
+router.delete('/orderDelivery/:id', adminAuthMiddleware, new DeleteOrderDeliveryController().handle);
 
 //-- ROTAS ORDER TO RECEIVE --
 router.post('/orderToReceive', adminAuthMiddleware, new CreateOrderToReceiveController().handle);

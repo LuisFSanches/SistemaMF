@@ -20,10 +20,14 @@ import { ProductsPage } from "./views/Products";
 import { StockPage } from "./views/Stock";
 import { ProductStockDetail } from "./views/ProductStockDetail";
 import { OrdersToReceivePage } from "./views/OrdersToReceive";
+import { OrderDeliveriesPage } from "./views/OrderDeliveries";
+import { CompleteDelivery } from "./views/CompleteDelivery";
 import { StoreFront } from "./views/StoreFront";
 import { Cart } from "./views/Cart";
 import { Checkout } from "./views/Checkout";
 import { ClientDetail } from "./views/ClientDetail";
+import { DeliveryMenPage } from "./views/DeliveryMen";
+import { DeliveryManDetail } from "./views/DeliveryManDetail";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -102,6 +106,16 @@ export default function routes(){
                                 <ClientDetail/>
                             </PrivateRoute>
                         }/>
+                        <Route path="/backoffice/motoboys" element={
+                            <PrivateRoute>
+                                <DeliveryMenPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/motoboy/:id" element={
+                            <PrivateRoute>
+                                <DeliveryManDetail/>
+                            </PrivateRoute>
+                        }/>
                         <Route path="/backoffice/pedidos" element={
                             <PrivateRoute>
                                 <OrdersPage/>
@@ -110,6 +124,11 @@ export default function routes(){
                         <Route path="/backoffice/valores-a-receber" element={
                             <PrivateRoute>
                                 <OrdersToReceivePage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/entregas" element={
+                            <PrivateRoute>
+                                <OrderDeliveriesPage/>
                             </PrivateRoute>
                         }/>
                         <Route path="/backoffice/pix" element={
@@ -133,6 +152,9 @@ export default function routes(){
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="completarPedido/:id" element={
                         <CompleteOrder/>
+                    }/>
+                    <Route path="concluirEntrega/:id" element={
+                        <CompleteDelivery/>
                     }/>
                     <Route path="/login" element={
                         <IsAuthenticatedRoutes>

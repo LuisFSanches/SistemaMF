@@ -253,6 +253,7 @@ var GetClientService = class {
           payment_method: true,
           payment_received: true,
           pickup_on_store: true,
+          is_delivery: true,
           online_order: true,
           store_front_order: true
         },
@@ -293,7 +294,8 @@ var GetClientService = class {
           payment_received: order.payment_received,
           pickup_on_store: order.pickup_on_store,
           online_order: order.online_order,
-          store_front_order: order.store_front_order
+          store_front_order: order.store_front_order,
+          is_delivery: order.is_delivery
         })),
         spendingHistory,
         addresses: addresses.map((address) => ({
@@ -1821,6 +1823,9 @@ var GetOrderService = class {
       const order = await prisma_default.order.findFirst({
         where: {
           id
+        },
+        include: {
+          client: true
         }
       });
       if (!order) {
@@ -2735,14 +2740,792 @@ var GetAllSuppliersController = class {
   }
 };
 
-// src/schemas/orderToReceive/createOrderToReceive.ts
+// src/schemas/deliveryMan/createDeliveryMan.ts
 var import_zod4 = require("zod");
-var createOrderToReceiveSchema = import_zod4.z.object({
-  order_id: import_zod4.z.string().uuid("order_id must be a valid UUID"),
-  payment_due_date: import_zod4.z.string().datetime("payment_due_date must be a valid datetime"),
-  received_date: import_zod4.z.string().datetime("received_date must be a valid datetime").optional(),
-  type: import_zod4.z.string().nonempty("type is required"),
-  is_archived: import_zod4.z.boolean().optional()
+var createDeliveryManSchema = import_zod4.z.object({
+  name: import_zod4.z.string().nonempty("name is required"),
+  phone_number: import_zod4.z.string().nonempty("phone_number is required")
+});
+
+// src/services/deliveryMan/CreateDeliveryManService.ts
+var CreateDeliveryManService = class {
+  async execute(data) {
+    const parsed = createDeliveryManSchema.safeParse(data);
+    if (!parsed.success) {
+      throw new BadRequestException(
+        parsed.error.errors[0].message,
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    const existingDeliveryMan = await prisma_default.deliveryMan.findFirst({
+      where: { phone_number: parsed.data.phone_number }
+    });
+    if (existingDeliveryMan) {
+      throw new BadRequestException(
+        "Delivery man with this phone number already exists",
+        400 /* USER_ALREADY_EXISTS */
+      );
+    }
+    try {
+      const deliveryMan = await prisma_default.deliveryMan.create({
+        data: {
+          name: parsed.data.name,
+          phone_number: parsed.data.phone_number
+        }
+      });
+      return deliveryMan;
+    } catch (error) {
+      console.error("[CreateDeliveryManService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/deliveryMan/CreateDeliveryManController.ts
+var CreateDeliveryManController = class {
+  async handle(req, res, next) {
+    const { name, phone_number } = req.body;
+    const createDeliveryManService = new CreateDeliveryManService();
+    const deliveryMan = await createDeliveryManService.execute({
+      name,
+      phone_number
+    });
+    return res.json(deliveryMan);
+  }
+};
+
+// src/services/deliveryMan/GetAllDeliveryMenService.ts
+var GetAllDeliveryMenService = class {
+  async execute(page = 1, pageSize = 10, query) {
+    try {
+      const skip = (page - 1) * pageSize;
+      const filters = query ? {
+        OR: [
+          { name: { contains: query, mode: "insensitive" } },
+          { phone_number: { contains: query, mode: "insensitive" } }
+        ]
+      } : {};
+      const [deliveryMen, total] = await Promise.all([
+        prisma_default.deliveryMan.findMany({
+          where: filters,
+          skip,
+          take: pageSize,
+          orderBy: {
+            name: "asc"
+          }
+        }),
+        prisma_default.deliveryMan.count({ where: filters })
+      ]);
+      return {
+        deliveryMen,
+        total,
+        currentPage: page,
+        totalPages: Math.ceil(total / pageSize)
+      };
+    } catch (error) {
+      console.error("[GetAllDeliveryMenService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/deliveryMan/GetAllDeliveryMenController.ts
+var GetAllDeliveryMenController = class {
+  async handle(req, res, next) {
+    const { page = "1", pageSize = "10", query = "" } = req.query;
+    const getAllDeliveryMenService = new GetAllDeliveryMenService();
+    const deliveryMen = await getAllDeliveryMenService.execute(Number(page), Number(pageSize), String(query));
+    return res.json(deliveryMen);
+  }
+};
+
+// src/services/deliveryMan/GetDeliveryManService.ts
+var GetDeliveryManService = class {
+  async execute({ id }) {
+    try {
+      const deliveryMan = await prisma_default.deliveryMan.findFirst({
+        where: { id }
+      });
+      if (!deliveryMan) {
+        throw new BadRequestException(
+          "Delivery man not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+      const orderDeliveries = await prisma_default.orderDelivery.findMany({
+        where: {
+          delivery_man_id: id,
+          is_archived: false
+        },
+        include: {
+          order: {
+            select: {
+              code: true,
+              delivery_fee: true
+            }
+          }
+        },
+        orderBy: {
+          delivery_date: "desc"
+        }
+      });
+      const deliveries = orderDeliveries.map((delivery) => ({
+        id: delivery.id,
+        order_code: delivery.order.code,
+        delivery_date: delivery.delivery_date,
+        delivery_fee: delivery.order.delivery_fee,
+        is_paid: delivery.is_paid
+      }));
+      const historyMap = /* @__PURE__ */ new Map();
+      orderDeliveries.forEach((delivery) => {
+        const dateKey = delivery.delivery_date.toISOString().split("T")[0];
+        const existing = historyMap.get(dateKey) || { count: 0, total: 0 };
+        historyMap.set(dateKey, {
+          count: existing.count + 1,
+          total: existing.total + delivery.order.delivery_fee
+        });
+      });
+      const deliveryHistory = Array.from(historyMap.entries()).map(([date, data]) => ({
+        date,
+        count: data.count,
+        total: data.total
+      })).sort((a, b) => a.date.localeCompare(b.date));
+      const totalDeliveries = orderDeliveries.length;
+      const totalPaid = orderDeliveries.filter((d) => d.is_paid).reduce((sum, d) => sum + d.order.delivery_fee, 0);
+      const pendingPayment = orderDeliveries.filter((d) => !d.is_paid).reduce((sum, d) => sum + d.order.delivery_fee, 0);
+      return {
+        deliveryMan: {
+          name: deliveryMan.name,
+          phone_number: deliveryMan.phone_number
+        },
+        deliveries,
+        deliveryHistory,
+        summary: {
+          total_deliveries: totalDeliveries,
+          total_paid: totalPaid,
+          pending_payment: pendingPayment
+        }
+      };
+    } catch (error) {
+      console.error("[GetDeliveryManService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/deliveryMan/GetDeliveryManController.ts
+var GetDeliveryManController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const getDeliveryManService = new GetDeliveryManService();
+    const deliveryMan = await getDeliveryManService.execute({ id });
+    return res.json(deliveryMan);
+  }
+};
+
+// src/services/deliveryMan/GetDeliveryManByPhoneService.ts
+var GetDeliveryManByPhoneService = class {
+  async execute({ phone_number }) {
+    if (!phone_number) {
+      throw new BadRequestException(
+        "phone_number is required",
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    try {
+      const deliveryMan = await prisma_default.deliveryMan.findFirst({
+        where: { phone_number }
+      });
+      if (!deliveryMan) {
+        throw new BadRequestException(
+          "Delivery man not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+      return deliveryMan;
+    } catch (error) {
+      console.error("[GetDeliveryManByPhoneService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/deliveryMan/GetDeliveryManByPhoneController.ts
+var GetDeliveryManByPhoneController = class {
+  async handle(req, res, next) {
+    const { phone_number } = req.query;
+    const getDeliveryManByPhoneService = new GetDeliveryManByPhoneService();
+    const deliveryMan = await getDeliveryManByPhoneService.execute({
+      phone_number
+    });
+    return res.json(deliveryMan);
+  }
+};
+
+// src/schemas/deliveryMan/updateDeliveryMan.ts
+var import_zod5 = require("zod");
+var updateDeliveryManSchema = import_zod5.z.object({
+  name: import_zod5.z.string().optional(),
+  phone_number: import_zod5.z.string().optional()
+});
+
+// src/services/deliveryMan/UpdateDeliveryManService.ts
+var UpdateDeliveryManService = class {
+  async execute({ id, ...data }) {
+    const parsed = updateDeliveryManSchema.safeParse(data);
+    if (!parsed.success) {
+      throw new BadRequestException(
+        parsed.error.errors[0].message,
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    const existingDeliveryMan = await prisma_default.deliveryMan.findFirst({
+      where: { id }
+    });
+    if (!existingDeliveryMan) {
+      throw new BadRequestException(
+        "Delivery man not found",
+        400 /* USER_NOT_FOUND */
+      );
+    }
+    if (parsed.data.phone_number && parsed.data.phone_number !== existingDeliveryMan.phone_number) {
+      const phoneInUse = await prisma_default.deliveryMan.findFirst({
+        where: {
+          phone_number: parsed.data.phone_number,
+          id: { not: id }
+        }
+      });
+      if (phoneInUse) {
+        throw new BadRequestException(
+          "Phone number already in use by another delivery man",
+          400 /* USER_ALREADY_EXISTS */
+        );
+      }
+    }
+    try {
+      const deliveryMan = await prisma_default.deliveryMan.update({
+        where: { id },
+        data: parsed.data
+      });
+      return deliveryMan;
+    } catch (error) {
+      console.error("[UpdateDeliveryManService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/deliveryMan/UpdateDeliveryManController.ts
+var UpdateDeliveryManController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const { name, phone_number } = req.body;
+    const updateDeliveryManService = new UpdateDeliveryManService();
+    const deliveryMan = await updateDeliveryManService.execute({
+      id,
+      name,
+      phone_number
+    });
+    return res.json(deliveryMan);
+  }
+};
+
+// src/services/deliveryMan/DeleteDeliveryManService.ts
+var DeleteDeliveryManService = class {
+  async execute({ id }) {
+    const existingDeliveryMan = await prisma_default.deliveryMan.findFirst({
+      where: { id }
+    });
+    if (!existingDeliveryMan) {
+      throw new BadRequestException(
+        "Delivery man not found",
+        400 /* USER_NOT_FOUND */
+      );
+    }
+    try {
+      await prisma_default.deliveryMan.delete({
+        where: { id }
+      });
+      return { message: "Delivery man deleted successfully" };
+    } catch (error) {
+      console.error("[DeleteDeliveryManService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/deliveryMan/DeleteDeliveryManController.ts
+var DeleteDeliveryManController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const deleteDeliveryManService = new DeleteDeliveryManService();
+    const result = await deleteDeliveryManService.execute({ id });
+    return res.json(result);
+  }
+};
+
+// src/schemas/orderDelivery/createOrderDelivery.ts
+var import_zod6 = require("zod");
+var createOrderDeliverySchema = import_zod6.z.object({
+  order_id: import_zod6.z.string().uuid("order_id must be a valid UUID"),
+  delivery_man_id: import_zod6.z.string().uuid("delivery_man_id must be a valid UUID"),
+  delivery_date: import_zod6.z.string().datetime("delivery_date must be a valid datetime"),
+  is_paid: import_zod6.z.boolean().optional(),
+  is_archived: import_zod6.z.boolean().optional()
+});
+
+// src/services/orderDelivery/CreateOrderDeliveryService.ts
+var CreateOrderDeliveryService = class {
+  async execute(data) {
+    const parsed = createOrderDeliverySchema.safeParse({
+      ...data,
+      delivery_date: data.delivery_date instanceof Date ? data.delivery_date.toISOString() : data.delivery_date
+    });
+    if (!parsed.success) {
+      throw new BadRequestException(
+        parsed.error.errors[0].message,
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    const orderExists = await prisma_default.order.findFirst({
+      where: { id: parsed.data.order_id }
+    });
+    if (!orderExists) {
+      throw new BadRequestException(
+        "Order not found",
+        400 /* USER_NOT_FOUND */
+      );
+    }
+    const deliveryManExists = await prisma_default.deliveryMan.findFirst({
+      where: { id: parsed.data.delivery_man_id }
+    });
+    if (!deliveryManExists) {
+      throw new BadRequestException(
+        "Delivery man not found",
+        400 /* USER_NOT_FOUND */
+      );
+    }
+    const existingDelivery = await prisma_default.orderDelivery.findFirst({
+      where: { order_id: parsed.data.order_id }
+    });
+    if (existingDelivery) {
+      throw new BadRequestException(
+        "Delivery already exists for this order",
+        400 /* USER_ALREADY_EXISTS */
+      );
+    }
+    try {
+      const orderDelivery = await prisma_default.orderDelivery.create({
+        data: {
+          order_id: parsed.data.order_id,
+          delivery_man_id: parsed.data.delivery_man_id,
+          delivery_date: new Date(parsed.data.delivery_date),
+          is_paid: parsed.data.is_paid,
+          is_archived: parsed.data.is_archived
+        },
+        include: {
+          order: {
+            select: {
+              code: true,
+              total: true,
+              client: {
+                select: {
+                  first_name: true,
+                  last_name: true,
+                  phone_number: true
+                }
+              },
+              clientAddress: {
+                select: {
+                  street: true,
+                  street_number: true,
+                  neighborhood: true,
+                  city: true
+                }
+              }
+            }
+          },
+          deliveryMan: {
+            select: {
+              name: true,
+              phone_number: true
+            }
+          }
+        }
+      });
+      return orderDelivery;
+    } catch (error) {
+      console.error("[CreateOrderDeliveryService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/orderDelivery/CreateOrderDeliveryController.ts
+var CreateOrderDeliveryController = class {
+  async handle(req, res, next) {
+    const { order_id, delivery_man_id, delivery_date, is_paid, is_archived } = req.body;
+    const createOrderDeliveryService = new CreateOrderDeliveryService();
+    const orderDelivery = await createOrderDeliveryService.execute({
+      order_id,
+      delivery_man_id,
+      delivery_date: new Date(delivery_date),
+      is_paid,
+      is_archived
+    });
+    orderEmitter.emit("orderDelivered" /* orderDelivered */, orderDelivery);
+    return res.json(orderDelivery);
+  }
+};
+
+// src/services/orderDelivery/GetAllOrderDeliveriesService.ts
+var GetAllOrderDeliveriesService = class {
+  async execute(page = 1, pageSize = 10, query, filter) {
+    try {
+      const skip = (page - 1) * pageSize;
+      let whereClause = {};
+      if (filter === "active") {
+        whereClause.is_archived = false;
+      } else if (filter === "archived") {
+        whereClause.is_archived = true;
+      }
+      if (query) {
+        const isNumericQuery = !isNaN(Number(query));
+        const orConditions = [
+          {
+            deliveryMan: {
+              OR: [
+                { name: { contains: query, mode: "insensitive" } },
+                { phone_number: { contains: query, mode: "insensitive" } }
+              ]
+            }
+          }
+        ];
+        if (isNumericQuery) {
+          orConditions.push({
+            order: {
+              code: { equals: Number(query) }
+            }
+          });
+        }
+        whereClause.OR = orConditions;
+      }
+      const [orderDeliveries, total] = await Promise.all([
+        prisma_default.orderDelivery.findMany({
+          where: whereClause,
+          include: {
+            order: {
+              select: {
+                code: true,
+                delivery_fee: true,
+                client: {
+                  select: {
+                    first_name: true,
+                    last_name: true,
+                    phone_number: true
+                  }
+                },
+                clientAddress: {
+                  select: {
+                    street: true,
+                    street_number: true,
+                    neighborhood: true,
+                    city: true
+                  }
+                }
+              }
+            },
+            deliveryMan: {
+              select: {
+                name: true,
+                phone_number: true,
+                id: true
+              }
+            }
+          },
+          orderBy: {
+            delivery_date: "asc"
+          },
+          skip,
+          take: pageSize
+        }),
+        prisma_default.orderDelivery.count({
+          where: whereClause
+        })
+      ]);
+      return {
+        orderDeliveries,
+        total,
+        currentPage: page,
+        totalPages: Math.ceil(total / pageSize)
+      };
+    } catch (error) {
+      console.error("[GetAllOrderDeliveriesService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/orderDelivery/GetAllOrderDeliveriesController.ts
+var GetAllOrderDeliveriesController = class {
+  async handle(req, res, next) {
+    const { page = "1", pageSize = "10", query = "", filter } = req.query;
+    const getAllOrderDeliveriesService = new GetAllOrderDeliveriesService();
+    const orderDeliveries = await getAllOrderDeliveriesService.execute(
+      Number(page),
+      Number(pageSize),
+      String(query),
+      filter
+    );
+    return res.json(orderDeliveries);
+  }
+};
+
+// src/services/orderDelivery/GetOrderDeliveryService.ts
+var GetOrderDeliveryService = class {
+  async execute({ id }) {
+    try {
+      const orderDelivery = await prisma_default.orderDelivery.findFirst({
+        where: { id },
+        include: {
+          order: {
+            select: {
+              code: true,
+              total: true,
+              delivery_fee: true,
+              client: {
+                select: {
+                  first_name: true,
+                  last_name: true,
+                  phone_number: true
+                }
+              },
+              clientAddress: {
+                select: {
+                  street: true,
+                  street_number: true,
+                  complement: true,
+                  neighborhood: true,
+                  reference_point: true,
+                  city: true,
+                  state: true
+                }
+              }
+            }
+          },
+          deliveryMan: {
+            select: {
+              name: true,
+              phone_number: true
+            }
+          }
+        }
+      });
+      if (!orderDelivery) {
+        throw new BadRequestException(
+          "Order delivery not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+      return orderDelivery;
+    } catch (error) {
+      console.error("[GetOrderDeliveryService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/orderDelivery/GetOrderDeliveryController.ts
+var GetOrderDeliveryController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const getOrderDeliveryService = new GetOrderDeliveryService();
+    const orderDelivery = await getOrderDeliveryService.execute({ id });
+    return res.json(orderDelivery);
+  }
+};
+
+// src/schemas/orderDelivery/updateOrderDelivery.ts
+var import_zod7 = require("zod");
+var updateOrderDeliverySchema = import_zod7.z.object({
+  delivery_man_id: import_zod7.z.string().uuid("delivery_man_id must be a valid UUID").optional(),
+  delivery_date: import_zod7.z.string().datetime("delivery_date must be a valid datetime").optional(),
+  is_paid: import_zod7.z.boolean().optional(),
+  is_archived: import_zod7.z.boolean().optional()
+});
+
+// src/services/orderDelivery/UpdateOrderDeliveryService.ts
+var UpdateOrderDeliveryService = class {
+  async execute({ id, ...data }) {
+    const parsed = updateOrderDeliverySchema.safeParse({
+      ...data,
+      delivery_date: data.delivery_date ? data.delivery_date instanceof Date ? data.delivery_date.toISOString() : data.delivery_date : void 0
+    });
+    if (!parsed.success) {
+      throw new BadRequestException(
+        parsed.error.errors[0].message,
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    const existingOrderDelivery = await prisma_default.orderDelivery.findFirst({
+      where: { id }
+    });
+    if (!existingOrderDelivery) {
+      throw new BadRequestException(
+        "Order delivery not found",
+        400 /* USER_NOT_FOUND */
+      );
+    }
+    if (parsed.data.delivery_man_id) {
+      const deliveryManExists = await prisma_default.deliveryMan.findFirst({
+        where: { id: parsed.data.delivery_man_id }
+      });
+      if (!deliveryManExists) {
+        throw new BadRequestException(
+          "Delivery man not found",
+          400 /* USER_NOT_FOUND */
+        );
+      }
+    }
+    try {
+      const orderDelivery = await prisma_default.orderDelivery.update({
+        where: { id },
+        data: {
+          delivery_man_id: parsed.data.delivery_man_id,
+          delivery_date: parsed.data.delivery_date ? new Date(parsed.data.delivery_date) : void 0,
+          is_paid: parsed.data.is_paid,
+          is_archived: parsed.data.is_archived
+        },
+        include: {
+          order: {
+            select: {
+              code: true,
+              total: true,
+              client: {
+                select: {
+                  first_name: true,
+                  last_name: true,
+                  phone_number: true
+                }
+              },
+              clientAddress: {
+                select: {
+                  street: true,
+                  street_number: true,
+                  neighborhood: true,
+                  city: true
+                }
+              }
+            }
+          },
+          deliveryMan: {
+            select: {
+              name: true,
+              phone_number: true
+            }
+          }
+        }
+      });
+      return orderDelivery;
+    } catch (error) {
+      console.error("[UpdateOrderDeliveryService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/orderDelivery/UpdateOrderDeliveryController.ts
+var UpdateOrderDeliveryController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const { delivery_man_id, delivery_date, is_paid, is_archived } = req.body;
+    const updateOrderDeliveryService = new UpdateOrderDeliveryService();
+    const orderDelivery = await updateOrderDeliveryService.execute({
+      id,
+      delivery_man_id,
+      delivery_date: delivery_date ? new Date(delivery_date) : void 0,
+      is_paid,
+      is_archived
+    });
+    return res.json(orderDelivery);
+  }
+};
+
+// src/services/orderDelivery/DeleteOrderDeliveryService.ts
+var DeleteOrderDeliveryService = class {
+  async execute({ id }) {
+    const existingOrderDelivery = await prisma_default.orderDelivery.findFirst({
+      where: { id }
+    });
+    if (!existingOrderDelivery) {
+      throw new BadRequestException(
+        "Order delivery not found",
+        400 /* USER_NOT_FOUND */
+      );
+    }
+    try {
+      await prisma_default.orderDelivery.delete({
+        where: { id }
+      });
+      return { message: "Order delivery deleted successfully" };
+    } catch (error) {
+      console.error("[DeleteOrderDeliveryService] Failed:", error);
+      throw new BadRequestException(
+        error.message,
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/orderDelivery/DeleteOrderDeliveryController.ts
+var DeleteOrderDeliveryController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const deleteOrderDeliveryService = new DeleteOrderDeliveryService();
+    const result = await deleteOrderDeliveryService.execute({ id });
+    return res.json(result);
+  }
+};
+
+// src/schemas/orderToReceive/createOrderToReceive.ts
+var import_zod8 = require("zod");
+var createOrderToReceiveSchema = import_zod8.z.object({
+  order_id: import_zod8.z.string().uuid("order_id must be a valid UUID"),
+  payment_due_date: import_zod8.z.string().datetime("payment_due_date must be a valid datetime"),
+  received_date: import_zod8.z.string().datetime("received_date must be a valid datetime").optional(),
+  type: import_zod8.z.string().nonempty("type is required"),
+  is_archived: import_zod8.z.boolean().optional()
 });
 
 // src/services/orderToReceive/CreateOrderToReceiveService.ts
@@ -2986,12 +3769,12 @@ var GetAllOrderToReceiveController = class {
 };
 
 // src/schemas/orderToReceive/updateOrderToReceive.ts
-var import_zod5 = require("zod");
-var updateOrderToReceiveSchema = import_zod5.z.object({
-  payment_due_date: import_zod5.z.string().datetime("payment_due_date must be a valid datetime").optional(),
-  received_date: import_zod5.z.string().datetime("received_date must be a valid datetime").optional(),
-  type: import_zod5.z.string().nonempty("type cannot be empty").optional(),
-  is_archived: import_zod5.z.boolean().optional()
+var import_zod9 = require("zod");
+var updateOrderToReceiveSchema = import_zod9.z.object({
+  payment_due_date: import_zod9.z.string().datetime("payment_due_date must be a valid datetime").optional(),
+  received_date: import_zod9.z.string().datetime("received_date must be a valid datetime").optional(),
+  type: import_zod9.z.string().nonempty("type cannot be empty").optional(),
+  is_archived: import_zod9.z.boolean().optional()
 });
 
 // src/services/orderToReceive/UpdateOrderToReceiveService.ts
@@ -3397,6 +4180,17 @@ router.post("/stockTransaction", admin_auth_default, new CreateStockTransactionC
 router.delete("/stockTransaction/:id", admin_auth_default, new DeleteStockTransactionController().handle);
 router.post("/supplier", admin_auth_default, new CreateSupplierController().handle);
 router.get("/supplier/all", admin_auth_default, new GetAllSuppliersController().handle);
+router.post("/deliveryMan", admin_auth_default, new CreateDeliveryManController().handle);
+router.get("/deliveryMan/all", admin_auth_default, new GetAllDeliveryMenController().handle);
+router.get("/deliveryMan/phone_number", new GetDeliveryManByPhoneController().handle);
+router.get("/deliveryMan/:id", admin_auth_default, new GetDeliveryManController().handle);
+router.put("/deliveryMan/:id", admin_auth_default, new UpdateDeliveryManController().handle);
+router.delete("/deliveryMan/:id", admin_auth_default, new DeleteDeliveryManController().handle);
+router.post("/orderDelivery", admin_auth_default, new CreateOrderDeliveryController().handle);
+router.get("/orderDelivery/all", admin_auth_default, new GetAllOrderDeliveriesController().handle);
+router.get("/orderDelivery/:id", admin_auth_default, new GetOrderDeliveryController().handle);
+router.put("/orderDelivery/:id", admin_auth_default, new UpdateOrderDeliveryController().handle);
+router.delete("/orderDelivery/:id", admin_auth_default, new DeleteOrderDeliveryController().handle);
 router.post("/orderToReceive", admin_auth_default, new CreateOrderToReceiveController().handle);
 router.get("/orderToReceive/all", admin_auth_default, new GetAllOrderToReceiveController().handle);
 router.get("/orderToReceive/check/:orderId", admin_auth_default, new CheckOrderToReceiveExistsController().handle);
@@ -3422,6 +4216,9 @@ orderEmitter.on("whatsappOrderReceived" /* WhatsappOrderReceived */, (data) => {
 });
 orderEmitter.on("storeFrontOrderReceived" /* StoreFrontOderReceived */, (data) => {
   io.emit("storeFrontOrderReceived" /* StoreFrontOderReceived */, data);
+});
+orderEmitter.on("orderDelivered" /* orderDelivered */, (data) => {
+  io.emit("orderDelivered" /* orderDelivered */, data);
 });
 var app = (0, import_express2.default)();
 app.use((0, import_cors.default)({

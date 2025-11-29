@@ -3,6 +3,20 @@ export const rawTelephone = (phoneNumber: string,) => {
     return numericValue;
 };
 
+export const formatTelephone = (phoneNumber: string,) => {
+    if (!phoneNumber) return "";
+
+    const numericValue = phoneNumber.replace(/[^0-9]/g, "");
+
+    if (numericValue.length === 11) {
+        return `(${numericValue.slice(0, 2)}) ${numericValue.slice(2, 7)}-${numericValue.slice(7)}`;
+    } else if (numericValue.length === 10) {
+        return `(${numericValue.slice(0, 2)}) ${numericValue.slice(2, 6)}-${numericValue.slice(6)}`;
+    } else {
+        return phoneNumber;
+    }
+}
+
 export const convertMoney = (value: number) => {
     const numericValue = typeof value === "string" ? parseFloat(value) : value
     const formatedValue = numericValue.toLocaleString("pt-BR", {

@@ -68,6 +68,7 @@ export const OrdersProvider: React.FC = ({ children }) => {
 
     useOrderSocket((data: any, eventType: string) => {
       console.log('New order received via socket:', data);
+      console.log('Event type:', eventType);
       
       if (eventType === 'whatsappOrder' && window.location.href.includes('backoffice')) {
           window.dispatchEvent(new CustomEvent('new-order', {
@@ -85,6 +86,17 @@ export const OrdersProvider: React.FC = ({ children }) => {
               message: '💐 Novo Pedido via loja online recebido!',
               orderCode: `#${data.code}`,
               clientName: `${data.client.first_name} ${data.client.last_name}`,
+            }
+        }));
+      }
+
+        if (eventType === 'orderDelivered' && window.location.href.includes('backoffice')) {
+          window.dispatchEvent(new CustomEvent('order-delivered', {
+            detail: {
+              message: '✅ Pedido entregue pelo motoboy! 🛵',
+              orderCode: `#${data.order.code}`,
+              deliveryMan: `${data.deliveryMan.name}`,
+              clientName: `${data.order.client.first_name} ${data.order.client.last_name}`,
             }
         }));
       }

@@ -19,6 +19,10 @@ export const useOrderSocket = (onOrderReceived: (data: any, eventType: string) =
             socket.on('storeFrontOrderReceived', (data) => {
                 onOrderReceived(data, 'storeFrontOrder');
             });
+
+            socket.on('orderDelivered', (data) => {
+                onOrderReceived(data, 'orderDelivered');
+            });
         } catch (error) {
             console.error('Erro ao conectar ao WebSocket:', error);
         }

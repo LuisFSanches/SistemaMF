@@ -12,7 +12,7 @@ import {
     faUserShield
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faXmark, faMotorcycle } from "@fortawesome/free-solid-svg-icons";
 import { NavLink} from 'react-router-dom'
 import Modal from 'react-modal';
 import { ModalContainer } from "../../styles/global";
@@ -37,7 +37,9 @@ export function GlobalMenu({
         pedidoOnline: false,
         aguardandoCliente: false,
         estoque: false,
-        valoresAReceber: false
+        valoresAReceber: false,
+        entregas: false,
+        motoboys: false
     })
 
     const handleActiveMenuButton = useCallback((name:string) => {
@@ -56,7 +58,9 @@ export function GlobalMenu({
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
             case 'pedidoBalcao':
@@ -73,7 +77,9 @@ export function GlobalMenu({
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
             case 'ordensDeServico':
@@ -90,7 +96,9 @@ export function GlobalMenu({
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
             case 'statistics':
@@ -107,7 +115,9 @@ export function GlobalMenu({
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
             case 'pedidos':
@@ -124,7 +134,9 @@ export function GlobalMenu({
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -142,7 +154,9 @@ export function GlobalMenu({
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -160,7 +174,9 @@ export function GlobalMenu({
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -179,7 +195,9 @@ export function GlobalMenu({
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -198,7 +216,9 @@ export function GlobalMenu({
                     "pedidoOnline": true,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
             case 'aguardandoCliente':
@@ -216,7 +236,9 @@ export function GlobalMenu({
                     "pedidoOnline": false,
                     "aguardandoCliente": true,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -235,7 +257,9 @@ export function GlobalMenu({
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -254,7 +278,9 @@ export function GlobalMenu({
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": true
+                    "valoresAReceber": true,
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -273,7 +299,51 @@ export function GlobalMenu({
                     'pix': false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": false
+                })
+            break;
+
+            case 'entregas':
+                setActive({...isActive,
+                    'estoque':false,
+                    'dashboard':false,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false,
+                    "valoresAReceber": false,
+                    "entregas": true,
+                    "motoboys": false
+                })
+            break;
+
+            case 'motoboys':
+                setActive({...isActive,
+                    'estoque':false,
+                    'dashboard':false,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false,
+                    "valoresAReceber": false,
+                    "entregas": false,
+                    "motoboys": true
                 })
             break;
         }
@@ -427,6 +497,26 @@ export function GlobalMenu({
                         >
                             <i className="material-icons">account_balance_wallet</i>
                             <span>Ordens para receber</span>
+                        </NavButton>
+                    </NavLink>
+                    <NavLink to="/backoffice/valores-a-receber">
+                        <NavButton
+                            type="button"
+                            onClick={() => handleActiveMenuButton('entregas')}
+                            isActive={isActive['entregas']}
+                        >
+                            <i className="material-icons">delivery_dining</i>
+                            <span>Entregas</span>
+                        </NavButton>
+                    </NavLink>
+                    <NavLink to="/backoffice/motoboys">
+                        <NavButton
+                            type="button"
+                            onClick={() => handleActiveMenuButton('motoboys')}
+                            isActive={isActive['motoboys']}
+                        >
+                            <FontAwesomeIcon icon={faMotorcycle} className="Side-Bar-Icon"/>
+                            <span> Motoboys</span>
                         </NavButton>
                     </NavLink>
                     <NavLink to="/backoffice/pix">

@@ -34,7 +34,8 @@ export function SideBar(){
         pedidoOnline: false,
         aguardandoCliente: false,
         estoque: false,
-        valoresAReceber: false
+        valoresAReceber: false,
+        entregas: false
     })
     
     const handleActiveMenuButton = useCallback((name:string) => {
@@ -53,7 +54,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
             case 'pedidoBalcao':
@@ -70,7 +72,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
             case 'ordensDeServico':
@@ -87,7 +90,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
             case 'statistics':
@@ -104,7 +108,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
             case 'pedidos':
@@ -121,7 +126,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
 
@@ -139,7 +145,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
 
@@ -157,7 +164,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
 
@@ -176,7 +184,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
 
@@ -195,7 +204,8 @@ export function SideBar(){
                     "pedidoOnline": true,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
             case 'aguardandoCliente':
@@ -213,7 +223,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": true,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
 
@@ -232,7 +243,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "estoque": false,
-                    "valoresAReceber": false
+                    "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
 
@@ -252,6 +264,7 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "valoresAReceber": false,
+                    "entregas": false
                 })
             break;
 
@@ -270,7 +283,28 @@ export function SideBar(){
                     "administradores": false,
                     'pix': false,
                     "pedidoOnline": false,
-                    "aguardandoCliente": false
+                    "aguardandoCliente": false,
+                    "entregas": false
+                })
+            break;
+
+            case 'entregas':
+                setActive({...isActive,
+                    'valoresAReceber':false,
+                    'estoque':false,
+                    'dashboard':false,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false,
+                    "entregas": true
                 })
             break;
         }
@@ -414,6 +448,18 @@ export function SideBar(){
                         >
                             <i className="material-icons">account_balance_wallet</i>
                             <span>Ordens para receber</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
+                <NavLink to="/backoffice/entregas">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('entregas')}>
+                        <SideBarButton
+                            isActive={isActive['entregas']}
+                            isMinimizedActive
+                            title="Entregas"
+                        >
+                            <i className="material-icons">delivery_dining</i>
+                            <span>Entregas</span>
                         </SideBarButton>
                     </SideBarItemContainer>
                 </NavLink>

@@ -22,6 +22,10 @@ orderEmitter.on(OrderEvents.StoreFrontOderReceived, (data) => {
   io.emit(OrderEvents.StoreFrontOderReceived, data);
 });
 
+orderEmitter.on(OrderEvents.orderDelivered, (data) => {
+  io.emit(OrderEvents.orderDelivered, data);
+});
+
 const app = express();
 
 app.use(cors({

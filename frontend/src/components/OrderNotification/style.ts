@@ -7,13 +7,13 @@ export const Container = styled.div`
     right: 0;
 `;
 
-export const AlertContent = styled.div`
+export const AlertContent = styled.div <{ isDelivery?: boolean }>`
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    background: #DDFFE9;
-    border: 2px solid #84998B;
+    background: ${({ isDelivery }) => (isDelivery ? '#FFEEDD' : '#DDFFE9')};
+    border: 2px solid ${({ isDelivery }) => (isDelivery ? '#FFCCAA' : '#AAFFBB')};
     border-radius: 15px;
     padding: 15px;
 

@@ -8,6 +8,9 @@ class GetOrderService {
             const order = await prismaClient.order.findFirst({
                 where: {
                     id: id
+                },
+                include: {
+                    client: true,
                 }
             });
 
