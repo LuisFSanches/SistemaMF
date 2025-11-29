@@ -2849,8 +2849,7 @@ var GetDeliveryManService = class {
       }
       const orderDeliveries = await prisma_default.orderDelivery.findMany({
         where: {
-          delivery_man_id: id,
-          is_archived: false
+          delivery_man_id: id
         },
         include: {
           order: {
