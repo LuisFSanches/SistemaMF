@@ -20,7 +20,7 @@ import {
     faGifts
 } from "@fortawesome/free-solid-svg-icons";
 import { getOrderById } from "../../services/orderService";
-import { convertMoney, formatTitleCase, formatTelephone, formatDescription } from "../../utils";
+import { convertMoney, formatTitleCase, formatTelephone, formatDescriptionWithPrice } from "../../utils";
 import { Loader } from "../../components/Loader";
 import { STATUS_LABEL, PAYMENT_METHODS } from "../../constants";
 import {
@@ -182,7 +182,7 @@ export function OrderDetail() {
                     Descrição do Pedido
                 </h2>
                 <div className="description-items">
-                    {formatDescription(orderInfo.description).map((item, index) => (
+                    {formatDescriptionWithPrice(orderInfo.description).map((item, index) => (
                         <div key={index} className="description-item">
                             {item}
                         </div>
