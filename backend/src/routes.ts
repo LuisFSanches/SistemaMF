@@ -156,7 +156,7 @@ router.put('/deliveryMan/:id', adminAuthMiddleware, new UpdateDeliveryManControl
 router.delete('/deliveryMan/:id', adminAuthMiddleware, new DeleteDeliveryManController().handle);
 
 //-- ROTAS ORDER DELIVERIES --
-router.post('/orderDelivery', adminAuthMiddleware, new CreateOrderDeliveryController().handle);
+router.post('/orderDelivery', new CreateOrderDeliveryController().handle);
 router.get('/orderDelivery/all', adminAuthMiddleware, new GetAllOrderDeliveriesController().handle);
 router.get('/orderDelivery/:id', adminAuthMiddleware, new GetOrderDeliveryController().handle);
 router.put('/orderDelivery/:id', adminAuthMiddleware, new UpdateOrderDeliveryController().handle);

@@ -4184,7 +4184,7 @@ router.get("/deliveryMan/phone_code", new GetDeliveryManByPhoneController().hand
 router.get("/deliveryMan/:id", admin_auth_default, new GetDeliveryManController().handle);
 router.put("/deliveryMan/:id", admin_auth_default, new UpdateDeliveryManController().handle);
 router.delete("/deliveryMan/:id", admin_auth_default, new DeleteDeliveryManController().handle);
-router.post("/orderDelivery", admin_auth_default, new CreateOrderDeliveryController().handle);
+router.post("/orderDelivery", new CreateOrderDeliveryController().handle);
 router.get("/orderDelivery/all", admin_auth_default, new GetAllOrderDeliveriesController().handle);
 router.get("/orderDelivery/:id", admin_auth_default, new GetOrderDeliveryController().handle);
 router.put("/orderDelivery/:id", admin_auth_default, new UpdateOrderDeliveryController().handle);
