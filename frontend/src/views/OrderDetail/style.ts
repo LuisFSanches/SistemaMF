@@ -272,6 +272,22 @@ export const InfoSection = styled.div`
         margin-bottom: 1.5rem;
     }
 
+    .description-items {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+
+        .description-item {
+            padding: 0.75rem 1rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #4B5462;
+            border-left: 3px solid #ec4899;
+        }
+    }
+
     .info-grid {
         display: grid;
         grid-template-columns: 1fr;

@@ -16,10 +16,11 @@ import {
     faInbox,
     faCreditCard,
     faEnvelope,
-    faShoppingBag
+    faShoppingBag,
+    faGifts
 } from "@fortawesome/free-solid-svg-icons";
 import { getOrderById } from "../../services/orderService";
-import { convertMoney, formatTitleCase, formatTelephone } from "../../utils";
+import { convertMoney, formatTitleCase, formatTelephone, formatDescription } from "../../utils";
 import { Loader } from "../../components/Loader";
 import { STATUS_LABEL, PAYMENT_METHODS } from "../../constants";
 import {
@@ -157,7 +158,6 @@ export function OrderDetail() {
                             <span className="order-code">#{orderInfo.code}</span>
                             {getOrderTypeBadge()}
                         </h1>
-                        <p className="description">{formatTitleCase(orderInfo.description)}</p>
                         <div className="order-meta">
                             <p className="delivery-date">
                                 <FontAwesomeIcon icon={faCalendarAlt} />
@@ -175,6 +175,20 @@ export function OrderDetail() {
                     </div>
                 </div>
             </Header>
+
+            <InfoSection>
+                <h2>
+                    <FontAwesomeIcon icon={faGifts} />
+                    Descrição do Pedido
+                </h2>
+                <div className="description-items">
+                    {formatDescription(orderInfo.description).map((item, index) => (
+                        <div key={index} className="description-item">
+                            {item}
+                        </div>
+                    ))}
+                </div>
+            </InfoSection>
 
             <MetricsGrid>
                 <MetricCard color="#ec4899">
