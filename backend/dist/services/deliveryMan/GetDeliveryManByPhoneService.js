@@ -49,20 +49,30 @@ var BadRequestException = class extends HttpException {
 
 // src/services/deliveryMan/GetDeliveryManByPhoneService.ts
 var GetDeliveryManByPhoneService = class {
-  async execute({ phone_number }) {
-    if (!phone_number) {
+  async execute({ phone_code }) {
+    if (!phone_code) {
       throw new BadRequestException(
-        "phone_number is required",
+        "phone_code is required",
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    if (phone_code.length !== 4) {
+      throw new BadRequestException(
+        "phone_code must have exactly 4 digits",
         400 /* VALIDATION_ERROR */
       );
     }
     try {
       const deliveryMan = await prisma_default.deliveryMan.findFirst({
-        where: { phone_number }
+        where: {
+          phone_number: {
+            endsWith: phone_code
+          }
+        }
       });
       if (!deliveryMan) {
         throw new BadRequestException(
-          "Delivery man not found",
+          "Delivery man not found with these last 4 digits",
           400 /* USER_NOT_FOUND */
         );
       }

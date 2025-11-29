@@ -3,12 +3,12 @@ import { GetDeliveryManByPhoneService } from '../../services/deliveryMan/GetDeli
 
 class GetDeliveryManByPhoneController {
     async handle(req: Request, res: Response, next: NextFunction) {
-        const { phone_number } = req.query;
+        const { phone_code } = req.query;
 
         const getDeliveryManByPhoneService = new GetDeliveryManByPhoneService();
 
         const deliveryMan = await getDeliveryManByPhoneService.execute({ 
-            phone_number: phone_number as string 
+            phone_code: phone_code as string 
         });
         
         return res.json(deliveryMan);

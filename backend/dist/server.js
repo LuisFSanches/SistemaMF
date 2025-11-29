@@ -2934,20 +2934,30 @@ var GetDeliveryManController = class {
 
 // src/services/deliveryMan/GetDeliveryManByPhoneService.ts
 var GetDeliveryManByPhoneService = class {
-  async execute({ phone_number }) {
-    if (!phone_number) {
+  async execute({ phone_code }) {
+    if (!phone_code) {
       throw new BadRequestException(
-        "phone_number is required",
+        "phone_code is required",
+        400 /* VALIDATION_ERROR */
+      );
+    }
+    if (phone_code.length !== 4) {
+      throw new BadRequestException(
+        "phone_code must have exactly 4 digits",
         400 /* VALIDATION_ERROR */
       );
     }
     try {
       const deliveryMan = await prisma_default.deliveryMan.findFirst({
-        where: { phone_number }
+        where: {
+          phone_number: {
+            endsWith: phone_code
+          }
+        }
       });
       if (!deliveryMan) {
         throw new BadRequestException(
-          "Delivery man not found",
+          "Delivery man not found with these last 4 digits",
           400 /* USER_NOT_FOUND */
         );
       }
@@ -2965,10 +2975,10 @@ var GetDeliveryManByPhoneService = class {
 // src/controllers/deliveryMan/GetDeliveryManByPhoneController.ts
 var GetDeliveryManByPhoneController = class {
   async handle(req, res, next) {
-    const { phone_number } = req.query;
+    const { phone_code } = req.query;
     const getDeliveryManByPhoneService = new GetDeliveryManByPhoneService();
     const deliveryMan = await getDeliveryManByPhoneService.execute({
-      phone_number
+      phone_code
     });
     return res.json(deliveryMan);
   }
@@ -3586,7 +3596,6 @@ var CreateOrderToReceiveService = class {
           }
         }
       });
-      console.log("created orderToReceive:", orderToReceive);
       return orderToReceive;
     } catch (error) {
       console.error("[CreateOrderToReceiveService] Failed:", error);
@@ -4182,7 +4191,7 @@ router.post("/supplier", admin_auth_default, new CreateSupplierController().hand
 router.get("/supplier/all", admin_auth_default, new GetAllSuppliersController().handle);
 router.post("/deliveryMan", admin_auth_default, new CreateDeliveryManController().handle);
 router.get("/deliveryMan/all", admin_auth_default, new GetAllDeliveryMenController().handle);
-router.get("/deliveryMan/phone_number", new GetDeliveryManByPhoneController().handle);
+router.get("/deliveryMan/phone_code", new GetDeliveryManByPhoneController().handle);
 router.get("/deliveryMan/:id", admin_auth_default, new GetDeliveryManController().handle);
 router.put("/deliveryMan/:id", admin_auth_default, new UpdateDeliveryManController().handle);
 router.delete("/deliveryMan/:id", admin_auth_default, new DeleteDeliveryManController().handle);

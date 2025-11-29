@@ -75,8 +75,6 @@ class CreateOrderToReceiveService {
                     }
                 }
             });
-
-            console.log('created orderToReceive:', orderToReceive);
             
             return orderToReceive;
         } catch (error: any) {

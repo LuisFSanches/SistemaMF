@@ -150,7 +150,7 @@ router.get('/supplier/all', adminAuthMiddleware, new GetAllSuppliersController()
 //-- ROTAS DELIVERY MEN --
 router.post('/deliveryMan', adminAuthMiddleware, new CreateDeliveryManController().handle);
 router.get('/deliveryMan/all', adminAuthMiddleware, new GetAllDeliveryMenController().handle);
-router.get('/deliveryMan/phone_number', new GetDeliveryManByPhoneController().handle);
+router.get('/deliveryMan/phone_code', new GetDeliveryManByPhoneController().handle);
 router.get('/deliveryMan/:id', adminAuthMiddleware, new GetDeliveryManController().handle);
 router.put('/deliveryMan/:id', adminAuthMiddleware, new UpdateDeliveryManController().handle);
 router.delete('/deliveryMan/:id', adminAuthMiddleware, new DeleteDeliveryManController().handle);

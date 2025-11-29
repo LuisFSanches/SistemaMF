@@ -125,7 +125,6 @@ var CreateOrderToReceiveService = class {
           }
         }
       });
-      console.log("created orderToReceive:", orderToReceive);
       return orderToReceive;
     } catch (error) {
       console.error("[CreateOrderToReceiveService] Failed:", error);

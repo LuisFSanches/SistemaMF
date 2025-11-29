@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import InputMask from "react-input-mask";
 import Modal from "react-modal";
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import transparentLogo from '../../assets/images/transparent_logo.png'
-import { getDeliveryManByPhoneNumber } from "../../services/deliveryManService";
+import { getDeliveryManByPhoneCode } from "../../services/deliveryManService";
 import { getOrder, updateStatus } from "../../services/orderService";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
-import { rawTelephone, convertMoney, formatTelephone } from "../../utils";
+import { convertMoney, formatTelephone } from "../../utils";
 import { Loader } from "../../components/Loader";
 import { ErrorAlert } from "../../components/ErrorAlert";
 import { IOrder } from "../../interfaces/IOrder";
@@ -30,7 +29,7 @@ import {
 import { ErrorMessage } from "../../styles/global";
 
 interface IDeliveryForm {
-    phone_number: string;
+    phone_code: string;
     delivery_date: string;
 }
 
@@ -38,7 +37,6 @@ export function CompleteDelivery() {
     const { id: orderId } = useParams<{ id: string }>();
     const { createOrderDelivery } = useOrderDeliveries();
     const [showLoader, setShowLoader] = useState(true);
-    const [mask, setMask] = useState("(99) 99999-9999");
     const [errorMessage, setErrorMessage] = useState("");
     const [deliveryMan, setDeliveryMan] = useState<IDeliveryMan | null>(null);
     const [order, setOrder] = useState<IOrder | null>(null);
@@ -56,7 +54,7 @@ export function CompleteDelivery() {
         }
     });
 
-    const phone_number = watch("phone_number");
+    const phone_code = watch("phone_code");
 
     useEffect(() => {
         const fetchOrderData = async () => {
@@ -82,12 +80,12 @@ export function CompleteDelivery() {
 
     useEffect(() => {
         const fetchDeliveryManData = async () => {
-            const phoneNumber = rawTelephone(phone_number);
+            const code = phone_code?.replace(/\D/g, '');
 
-            if (phoneNumber && phoneNumber.length >= 10) {
+            if (code && code.length === 4) {
                 try {
                     setShowLoader(true);
-                    const response = await getDeliveryManByPhoneNumber(phoneNumber);
+                    const response = await getDeliveryManByPhoneCode(code);
                     const { data: deliveryManData } = response;
 
                     if (deliveryManData) {
@@ -111,22 +109,7 @@ export function CompleteDelivery() {
         }, 600);
 
         return () => clearTimeout(timeout);
-    }, [phone_number]);
-
-    useEffect(() => {
-        const phoneNumber = watch("phone_number") || "";
-        const numericValue = rawTelephone(phoneNumber);
-
-        const timeout = setTimeout(() => {
-            if (numericValue.length === 10) {
-                setMask("(99) 9999-9999");
-            } else {
-                setMask("(99) 99999-9999");
-            }
-        }, 1500);
-
-        return () => clearTimeout(timeout);
-    }, [phone_number, watch]);
+    }, [phone_code]);
 
     const onSubmit = async (data: IDeliveryForm) => {
         if (!deliveryMan) {
@@ -188,10 +171,10 @@ export function CompleteDelivery() {
                 <div style={{ padding: '20px', textAlign: 'center' }}>
                     <h2 style={{ marginBottom: '15px', color: '#e74c3c' }}>Motoboy não encontrado</h2>
                     <p style={{ fontSize: '16px', color: '#666' }}>
-                        Nenhum motoboy foi encontrado com o telefone informado.
+                        Nenhum motoboy foi encontrado com o código informado.
                     </p>
                     <p style={{ fontSize: '14px', color: '#999', marginTop: '10px' }}>
-                        Verifique o número e tente novamente.
+                        Verifique o código e tente novamente.
                     </p>
                 </div>
             </Modal>
@@ -242,28 +225,29 @@ export function CompleteDelivery() {
                                 </div>
                             </DeliveryManInfo>
                         )}
+
                         <FormField>
                             <Label>
-                                Telefone do Motoboy
+                                Código do Motoboy
                                 <span>*</span>
                             </Label>
-                            <InputMask
+                            <Input
                                 autoComplete="off"
-                                mask={mask}
-                                alwaysShowMask={false}
-                                placeholder='Telefone'
-                                value={watch("phone_number") || ""}
-                                {...register("phone_number", {
-                                    required: "Telefone inválido",
+                                type="text"
+                                placeholder='Digite o código de 4 dígitos'
+                                maxLength={4}
+                                {...register("phone_code", {
+                                    required: "Código é obrigatório",
                                     validate: (value) => {
-                                        if (value.replace(/[^0-9]/g, "").length < 10) {
-                                            return "Telefone inválido";
+                                        const code = value.replace(/\D/g, '');
+                                        if (code.length !== 4) {
+                                            return "Código deve ter 4 dígitos";
                                         }
                                         return true;
                                     }
                                 })}
                             />
-                            {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
+                            {errors.phone_code && <ErrorMessage>{errors.phone_code.message}</ErrorMessage>}
                         </FormField>
 
                         <FormField>

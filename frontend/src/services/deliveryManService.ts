@@ -21,9 +21,9 @@ export const getDeliveryManDetails = async (id: string) => {
     return response;
 };
 
-export const getDeliveryManByPhoneNumber = async (phone_number: string) => {
-    console.log('phone_number', phone_number);
-    const response = await api.get(`/deliveryMan/phone_number?phone_number=${phone_number}`);
+export const getDeliveryManByPhoneCode = async (phone_code: string) => {
+    console.log('phone_code', phone_code);
+    const response = await api.get(`/deliveryMan/phone_code?phone_code=${phone_code}`);
 
     return response;
 };
