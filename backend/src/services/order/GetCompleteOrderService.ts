@@ -2,7 +2,7 @@ import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
-class GetOrderService {
+class GetCompleteOrderService {
     async execute(id: any) {
         try {
             const order = await prismaClient.order.findFirst({
@@ -29,4 +29,4 @@ class GetOrderService {
     }
 }
 
-export { GetOrderService };
+export { GetCompleteOrderService };

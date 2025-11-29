@@ -29,7 +29,8 @@ import { GetAllOrderController } from './controllers/order/GetAllOrderController
 import { UpdateOrderController } from './controllers/order/UpdateOrderController';
 import { UpdateOrderStatusController } from './controllers/order/UpdateOrderStatusController';
 import { UpdateOrderPaymentController } from './controllers/order/UpdateOrderPaymentController';
-import { GetOrderController } from './controllers/order/GetOrderController';
+import { GetCompleteOrderController } from './controllers/order/GetCompleteOrderController';
+import { GetOrderDetailsController } from './controllers/order/GetOrderDetailsController';
 import { FinishOnlineOrderController } from './controllers/order/FinishOnlineOrderController';
 import { GetWaitingOnlineOrderController } from './controllers/order/GetWaitingOnlineOrderController';
 import { DeleteOrderController } from './controllers/order/DeleteOrderController';
@@ -99,7 +100,8 @@ router.get('/address/pickup', adminAuthMiddleware, new GetPickUpAddressControlle
 router.get('/address/:client_id', new GetAllClientAddressController().handle)
 
 //-- ROTAS ORDER --
-router.get('/order/completedOrder/:id', new GetOrderController().handle);
+router.get('/order/detail/:id', adminAuthMiddleware, new GetOrderDetailsController().handle);
+router.get('/order/completedOrder/:id', new GetCompleteOrderController().handle);
 router.get('/order/ongoing', adminAuthMiddleware, new GetOnGoingOrderController().handle);
 router.get('/order/all', adminAuthMiddleware, new GetAllOrderController().handle);
 router.get('/order/waitingForClient', adminAuthMiddleware, new GetWaitingOnlineOrderController().handle);

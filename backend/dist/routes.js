@@ -1805,8 +1805,8 @@ var UpdateOrderPaymentController = class {
   }
 };
 
-// src/services/order/GetOrderService.ts
-var GetOrderService = class {
+// src/services/order/GetCompleteOrderService.ts
+var GetCompleteOrderService = class {
   async execute(id) {
     try {
       const order = await prisma_default.order.findFirst({
@@ -1830,13 +1830,110 @@ var GetOrderService = class {
   }
 };
 
-// src/controllers/order/GetOrderController.ts
-var GetOrderController = class {
+// src/controllers/order/GetCompleteOrderController.ts
+var GetCompleteOrderController = class {
   async handle(req, res) {
     const { id } = req.params;
-    const getOrder = new GetOrderService();
+    const getOrder = new GetCompleteOrderService();
     const order = await getOrder.execute(id);
     return res.json(order);
+  }
+};
+
+// src/services/order/GetOrderDetailsService.ts
+var GetOrderDetailsService = class {
+  async execute(id) {
+    try {
+      const order = await prisma_default.order.findFirst({
+        where: {
+          id
+        },
+        include: {
+          client: true,
+          clientAddress: true,
+          createdBy: true,
+          orderDeliveries: {
+            include: {
+              deliveryMan: true
+            }
+          }
+        }
+      });
+      if (!order) {
+        throw new BadRequestException(
+          "Order not found",
+          404 /* BAD_REQUEST */
+        );
+      }
+      const orderDetails = {
+        orderInfo: {
+          code: order.code,
+          description: order.description,
+          additional_information: order.additional_information,
+          delivery_date: order.delivery_date,
+          status: order.status,
+          is_delivery: order.is_delivery,
+          online_order: order.online_order,
+          store_front_order: order.store_front_order
+        },
+        orderValues: {
+          products_value: order.products_value,
+          discount: order.discount,
+          delivery_fee: order.delivery_fee,
+          total: order.total,
+          payment_method: order.payment_method,
+          payment_received: order.payment_received
+        },
+        cardDetails: order.has_card ? {
+          card_from: order.card_from,
+          card_to: order.card_to,
+          card_message: order.card_message
+        } : null,
+        clientInfo: {
+          id: order.client.id,
+          first_name: order.client.first_name,
+          last_name: order.client.last_name,
+          phone_number: order.client.phone_number,
+          address: {
+            street: order.clientAddress.street,
+            street_number: order.clientAddress.street_number,
+            complement: order.clientAddress.complement,
+            neighborhood: order.clientAddress.neighborhood,
+            reference_point: order.clientAddress.reference_point,
+            city: order.clientAddress.city,
+            state: order.clientAddress.state,
+            postal_code: order.clientAddress.postal_code
+          }
+        },
+        deliveryManInfo: order.is_delivery && order.orderDeliveries.length > 0 ? {
+          id: order.orderDeliveries[0].deliveryMan.id,
+          name: order.orderDeliveries[0].deliveryMan.name,
+          phone_number: order.orderDeliveries[0].deliveryMan.phone_number
+        } : null,
+        createdBy: order.createdBy ? {
+          id: order.createdBy.id,
+          name: order.createdBy.name,
+          username: order.createdBy.username
+        } : null
+      };
+      return orderDetails;
+    } catch (error) {
+      console.error("[GetOrderDetailsService] Failed:", error);
+      throw new BadRequestException(
+        error.message || "Failed to get order details",
+        500 /* SYSTEM_ERROR */
+      );
+    }
+  }
+};
+
+// src/controllers/order/GetOrderDetailsController.ts
+var GetOrderDetailsController = class {
+  async handle(req, res, next) {
+    const { id } = req.params;
+    const getOrderDetailsService = new GetOrderDetailsService();
+    const orderDetails = await getOrderDetailsService.execute(id);
+    return res.json(orderDetails);
   }
 };
 
@@ -1878,7 +1975,7 @@ var FinishOnlineOrderController = class {
     const { order } = req.body;
     let client_id = order.client_id;
     let client_address_id = order.clientAddress.id;
-    const getOrder = new GetOrderService();
+    const getOrder = new GetCompleteOrderService();
     const orderFound = await getOrder.execute(order.id);
     if ("error" in orderFound) {
       return res.status(400).json(orderFound);
@@ -2866,6 +2963,7 @@ var GetDeliveryManService = class {
       const deliveries = orderDeliveries.map((delivery) => ({
         id: delivery.id,
         order_code: delivery.order.code,
+        order_id: delivery.order_id,
         delivery_date: delivery.delivery_date,
         delivery_fee: delivery.order.delivery_fee,
         is_paid: delivery.is_paid
@@ -4143,7 +4241,8 @@ router.put("/client/:id", admin_auth_default, new UpdateClientController().handl
 router.post("/address", admin_auth_default, new CreateAddressController().handle);
 router.get("/address/pickup", admin_auth_default, new GetPickUpAddressController().handle);
 router.get("/address/:client_id", new GetAllClientAddressController().handle);
-router.get("/order/completedOrder/:id", new GetOrderController().handle);
+router.get("/order/detail/:id", admin_auth_default, new GetOrderDetailsController().handle);
+router.get("/order/completedOrder/:id", new GetCompleteOrderController().handle);
 router.get("/order/ongoing", admin_auth_default, new GetOnGoingOrderController().handle);
 router.get("/order/all", admin_auth_default, new GetAllOrderController().handle);
 router.get("/order/waitingForClient", admin_auth_default, new GetWaitingOnlineOrderController().handle);

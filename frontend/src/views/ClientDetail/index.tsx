@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import moment from 'moment';
 import 'moment/locale/pt-br';
@@ -338,9 +339,9 @@ export function ClientDetail() {
                     <table>
                         <thead>
                             <tr>
-                                <th>Código</th>
+                                <th>Pedido</th>
                                 <th>Data</th>
-                                <th>Descrição</th>
+                                <th className="description">Descrição</th>
                                 <th>Tipo</th>
                                 <th>Forma de Pagamento</th>
                                 <th>Status</th>
@@ -350,9 +351,13 @@ export function ClientDetail() {
                         <tbody>
                             {orders.map(order => (
                                 <tr key={order.id}>
-                                    <td className="order-code" data-label="Pedido">#{order.code}</td>
+                                    <td>
+                                        <Link to={`/backoffice/pedido/${order.id}`} className="order-code-link">
+                                            #{order.code}
+                                        </Link>
+                                    </td>
                                     <td data-label="Data">{moment(order.date).format('DD/MM/YYYY')}</td>
-                                    <td data-label="Descrição">{order.description}</td>
+                                    <td data-label="Descrição" className="description">{order.description}</td>
                                     <td data-label="Tipo">
                                         <div className="order-type">
                                             {getOrderTypeBadges(order)}

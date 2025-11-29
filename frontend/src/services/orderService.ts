@@ -93,11 +93,22 @@ export const createOrderByAi = async (data: any) => {
 	return response;
 }
 
-export const getOrder = async (id: string) => {
+export const getCompletedOrder = async (id: string) => {
 	const response = api.get(`/order/completedOrder/${id}`);
 
 	return response;
 }
+
+
+export const getOrderById = async(id: string) => {
+	const response = await api.get(`/order/detail/${id}`, {
+		headers: {
+			Authorization: `${token}`,
+		}
+	});
+
+	return response;
+};
 
 export const getOnGoingOrders = async () => {
 	const response = await api.get("/order/ongoing", {

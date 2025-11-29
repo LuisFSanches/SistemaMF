@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import moment from 'moment';
 import 'moment/locale/pt-br';
 import { Line } from 'react-chartjs-2';
@@ -59,6 +60,7 @@ interface IDeliveryManData {
     };
     deliveries: Array<{
         id: string;
+        order_id: string;
         order_code: number;
         delivery_date: string;
         delivery_fee: number;
@@ -301,7 +303,12 @@ export function DeliveryManDetail() {
                         <tbody>
                             {deliveries.map(delivery => (
                                 <tr key={delivery.id}>
-                                    <td className="order-code" data-label="Pedido">#{delivery.order_code}</td>
+                                    <td className="order-code" data-label="Pedido">
+                                        <Link to={`/backoffice/pedido/${delivery.order_id}`} className="order-code-link">
+                                            #{delivery.order_code}
+                                        </Link>
+                                    </td>
+                                    
                                     <td data-label="Data">{moment(delivery.delivery_date).format('DD/MM/YYYY')}</td>
                                     <td className="delivery-fee" data-label="Taxa">{convertMoney(delivery.delivery_fee)}</td>
                                     <td data-label="Pagamento">

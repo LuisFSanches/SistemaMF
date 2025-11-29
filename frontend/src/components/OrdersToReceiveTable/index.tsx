@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import moment from "moment";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen, faCheck, faEnvelopeCircleCheck, faTrash, faBoxOpen } from "@fortawesome/free-solid-svg-icons";
@@ -151,7 +152,11 @@ export function OrdersToReceiveTable({ orders, filter, page, pageSize, query }: 
                         key={orderToReceive.id} 
                         className={isOverdue(orderToReceive) ? 'overdue' : ''}
                         >
-                        <td>#{orderToReceive.order?.code}</td>
+                        <td>
+                            <Link to={`/backoffice/pedido/${orderToReceive.order_id}`} className="order-code-link">
+                                #{orderToReceive.order?.code}
+                            </Link>
+                        </td>
                         <td>
                             {orderToReceive.order?.client?.first_name} {orderToReceive.order?.client?.last_name}
                         </td>

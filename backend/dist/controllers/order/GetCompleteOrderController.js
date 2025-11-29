@@ -17,12 +17,12 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/controllers/order/GetOrderController.ts
-var GetOrderController_exports = {};
-__export(GetOrderController_exports, {
-  GetOrderController: () => GetOrderController
+// src/controllers/order/GetCompleteOrderController.ts
+var GetCompleteOrderController_exports = {};
+__export(GetCompleteOrderController_exports, {
+  GetCompleteOrderController: () => GetCompleteOrderController
 });
-module.exports = __toCommonJS(GetOrderController_exports);
+module.exports = __toCommonJS(GetCompleteOrderController_exports);
 
 // src/prisma/index.ts
 var import_client = require("@prisma/client");
@@ -47,8 +47,8 @@ var BadRequestException = class extends HttpException {
   }
 };
 
-// src/services/order/GetOrderService.ts
-var GetOrderService = class {
+// src/services/order/GetCompleteOrderService.ts
+var GetCompleteOrderService = class {
   async execute(id) {
     try {
       const order = await prisma_default.order.findFirst({
@@ -72,16 +72,16 @@ var GetOrderService = class {
   }
 };
 
-// src/controllers/order/GetOrderController.ts
-var GetOrderController = class {
+// src/controllers/order/GetCompleteOrderController.ts
+var GetCompleteOrderController = class {
   async handle(req, res) {
     const { id } = req.params;
-    const getOrder = new GetOrderService();
+    const getOrder = new GetCompleteOrderService();
     const order = await getOrder.execute(id);
     return res.json(order);
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  GetOrderController
+  GetCompleteOrderController
 });

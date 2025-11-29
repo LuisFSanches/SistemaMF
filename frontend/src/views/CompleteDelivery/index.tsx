@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import transparentLogo from '../../assets/images/transparent_logo.png'
 import { getDeliveryManByPhoneCode } from "../../services/deliveryManService";
-import { getOrder, updateStatus } from "../../services/orderService";
+import { getCompletedOrder, updateStatus } from "../../services/orderService";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
 import { convertMoney, formatTelephone } from "../../utils";
 import { Loader } from "../../components/Loader";
@@ -65,7 +65,7 @@ export function CompleteDelivery() {
             }
 
             try {
-                const { data: orderData } = await getOrder(orderId);
+                const { data: orderData } = await getCompletedOrder(orderId);
                 setOrder(orderData);
             } catch (error) {
                 console.error("Error fetching order:", error);

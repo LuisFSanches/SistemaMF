@@ -17,12 +17,12 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/services/order/GetOrderService.ts
-var GetOrderService_exports = {};
-__export(GetOrderService_exports, {
-  GetOrderService: () => GetOrderService
+// src/services/order/GetCompleteOrderService.ts
+var GetCompleteOrderService_exports = {};
+__export(GetCompleteOrderService_exports, {
+  GetCompleteOrderService: () => GetCompleteOrderService
 });
-module.exports = __toCommonJS(GetOrderService_exports);
+module.exports = __toCommonJS(GetCompleteOrderService_exports);
 
 // src/prisma/index.ts
 var import_client = require("@prisma/client");
@@ -47,8 +47,8 @@ var BadRequestException = class extends HttpException {
   }
 };
 
-// src/services/order/GetOrderService.ts
-var GetOrderService = class {
+// src/services/order/GetCompleteOrderService.ts
+var GetCompleteOrderService = class {
   async execute(id) {
     try {
       const order = await prisma_default.order.findFirst({
@@ -73,5 +73,5 @@ var GetOrderService = class {
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  GetOrderService
+  GetCompleteOrderService
 });

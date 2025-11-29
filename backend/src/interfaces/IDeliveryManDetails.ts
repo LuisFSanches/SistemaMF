@@ -15,6 +15,7 @@ export interface IDeliveryManDetails {
 export interface IDeliveryItem {
     id: string
     order_code: number
+    order_id: string
     delivery_date: Date
     delivery_fee: number
     is_paid: boolean

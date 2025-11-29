@@ -57,8 +57,8 @@ var BadRequestException = class extends HttpException {
   }
 };
 
-// src/services/order/GetOrderService.ts
-var GetOrderService = class {
+// src/services/order/GetCompleteOrderService.ts
+var GetCompleteOrderService = class {
   async execute(id) {
     try {
       const order = await prisma_default.order.findFirst({
@@ -165,7 +165,7 @@ var FinishOnlineOrderController = class {
     const { order } = req.body;
     let client_id = order.client_id;
     let client_address_id = order.clientAddress.id;
-    const getOrder = new GetOrderService();
+    const getOrder = new GetCompleteOrderService();
     const orderFound = await getOrder.execute(order.id);
     if ("error" in orderFound) {
       return res.status(400).json(orderFound);

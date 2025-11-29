@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { IOrder } from "../../interfaces/IOrder";
 import { Container } from "./style";
 import { PageHeader } from "../../styles/global";
@@ -92,21 +93,23 @@ export function OrdersPage(){
                 <thead className="head">
                     <tr>
                         <th>Pedido</th>
-                        <th>Descrição</th>
+                        <th className="description">Descrição</th>
                         <th>Cliente</th>
                         <th>Status</th>
                         <th>Total</th>
-                        <th>Editar</th>
-                        <th>Visualizar</th>
-                        <th>Imprimir</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {orders?.map(order => (
                         <>
                             <tr key={order.id} className={order.status === 'CANCELED' ? 'canceled-order' : ''}>
-                                <td>#{order.code}</td>
-                                <td>{formatTitleCase(order.description)}</td>
+                                <td>
+                                    <Link to={`/backoffice/pedido/${order.id}`} className="order-code-link">
+                                        #{order.code}
+                                    </Link>
+                                </td>
+                                <td className="description">{formatTitleCase(order.description)}</td>
                                 <td>
                                     {order.status !== "WAITING_FOR_CLIENT"
                                         ? `${formatTitleCase(order.client.first_name)} ${formatTitleCase(order.client.last_name)}`
@@ -118,15 +121,9 @@ export function OrdersPage(){
                                     <button className="edit-button" onClick={() => handleOpenEditOrderModal(order)}>
                                         <FontAwesomeIcon icon={faPen}/>
                                     </button>
-                                </td>
-
-                                <td className="table-icon">
                                     <button className="view-button" onClick={() => handleOpenOrderDetailModal(order)}>
                                         <FontAwesomeIcon icon={faEye}/>
                                     </button>
-                                </td>
-
-                                <td className="table-icon">
                                     <PrintOrder
                                         order={order}
                                         orderCode={order.code}

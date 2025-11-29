@@ -1,5 +1,5 @@
 import {Request, Response, NextFunction} from 'express';
-import { GetOrderService } from '../../services/order/GetOrderService'
+import { GetCompleteOrderService } from '../../services/order/GetCompleteOrderService'
 import { CreateAddressService } from '../../services/address/CreateAddressService'
 import { UpdateClientService } from '../../services/client/UpdateClientService';
 import { FinishOnlineOrderService } from '../../services/order/FinishOnlineOrderService';
@@ -13,7 +13,7 @@ class FinishOnlineOrderController{
         let client_id = order.client_id;
         let client_address_id = order.clientAddress.id;
 
-        const getOrder = new GetOrderService();
+        const getOrder = new GetCompleteOrderService();
 
         const orderFound = await getOrder.execute(order.id);
 

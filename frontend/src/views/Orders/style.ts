@@ -19,6 +19,19 @@ export const Container = styled.div`
         background-color: rgba(220, 53, 69, 0.25);
     }
 
+    .order-code-link {
+        color: #EC4899;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-block;
+
+        &:hover {
+            color: #DB2777;
+            transform: translateX(2px);
+        }
+    }
+
     @media (max-width:750px) {
         padding: 0.4rem;
     }

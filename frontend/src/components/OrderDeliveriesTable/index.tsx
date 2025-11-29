@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -132,7 +133,11 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
                             >
                                 {delivery.deliveryMan?.name || 'N/A'}
                             </td>
-                            <td>#{delivery.order?.code || 'N/A'}</td>
+                            <td>
+                                <Link to={`/backoffice/pedido/${delivery.order_id}`} className="order-code-link">
+                                    #{delivery.order?.code || 'N/A'}
+                                </Link>
+                            </td>
                             <td>{convertMoney(delivery.order?.delivery_fee || 0)}</td>
                             <td>{moment(delivery.delivery_date).format('DD/MM/YYYY HH:mm')}</td>
                             <td>

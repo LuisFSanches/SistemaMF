@@ -44,6 +44,7 @@ class GetDeliveryManService {
             const deliveries: IDeliveryItem[] = orderDeliveries.map(delivery => ({
                 id: delivery.id,
                 order_code: delivery.order.code,
+                order_id: delivery.order_id,
                 delivery_date: delivery.delivery_date,
                 delivery_fee: delivery.order.delivery_fee,
                 is_paid: delivery.is_paid

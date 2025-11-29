@@ -101,6 +101,10 @@ table{
             word-break:break-all
         }
 
+        .description {
+            width: 25%;
+        }
+
         .table-item-id{
             width: 5%;
         }
@@ -140,6 +144,7 @@ table{
             padding:0.5rem 0.5rem;
             font-size: 1.03rem;
             border-radius: 0.4rem;
+            margin-right: 5px;
         }
 
         img{
@@ -165,6 +170,7 @@ table{
             };
             .table-icon{
                 width: 4.2%;
+
                 span{
                     display: none;
                 }

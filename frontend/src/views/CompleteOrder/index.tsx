@@ -6,7 +6,7 @@ import { getClientByPhone } from "../../services/clientService";
 import { getClientAddresses } from "../../services/addressService";
 import { getPickupAddress } from "../../services/addressService";
 import { finishOnlineOrder } from "../../services/orderService";
-import { getOrder } from "../../services/orderService";
+import { getCompletedOrder } from "../../services/orderService";
 import { useOrders } from "../../contexts/OrdersContext";
 import { Loader } from '../../components/Loader';
 import { WelcomeBackModal } from "../../components/WelcomeBackModal";
@@ -178,7 +178,7 @@ export function CompleteOrder() {
 
     useEffect(() => {
         const fetchOrderData = async () => {
-            const { data: order } = await getOrder(orderId);
+            const { data: order } = await getCompletedOrder(orderId);
             if (order.status === "WAITING_FOR_CLIENT") {
                 setIsWaitingForClienteOrder(true);
                 setCurrentOrder(order);
