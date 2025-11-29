@@ -499,7 +499,7 @@ export function GlobalMenu({
                             <span>Ordens para receber</span>
                         </NavButton>
                     </NavLink>
-                    <NavLink to="/backoffice/valores-a-receber">
+                    <NavLink to="/backoffice/entregas">
                         <NavButton
                             type="button"
                             onClick={() => handleActiveMenuButton('entregas')}
