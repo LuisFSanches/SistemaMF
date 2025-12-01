@@ -109,7 +109,7 @@ router.post('/order', adminAuthMiddleware, new CreateOrderController().handle);
 router.post('/order/ai', adminAuthMiddleware, new CreateOrderByAIController().handle);
 router.put('/order/:id', adminAuthMiddleware, new UpdateOrderController().handle);
 router.put('/order/finish/:id', new FinishOnlineOrderController().handle);
-router.patch('/order/:id', adminAuthMiddleware, new UpdateOrderStatusController().handle);
+router.patch('/order/:id', new UpdateOrderStatusController().handle);
 router.patch('/order/:id/payment', adminAuthMiddleware, new UpdateOrderPaymentController().handle);
 router.delete('/order/:id', adminAuthMiddleware, new DeleteOrderController().handle);
 
