@@ -8,10 +8,15 @@ export const Container = styled.div`
     @media (max-width:750px) {
         padding: 0.4rem;
     }
+
+    .pagination-container {
+        margin-bottom: 10px !important;
+    }
 `;
 
 export const ButtonsContainer = styled.div`
     display: flex;
+    justify-content: space-between;
     gap: 1rem;
     align-items: center;
 
@@ -26,7 +31,7 @@ export const AddButton = styled.button`
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
-    background-color: var(--primary-color);
+    background-color: #EC4899;
     color: white;
     border: none;
     border-radius: 0.5rem;
@@ -36,7 +41,6 @@ export const AddButton = styled.button`
     transition: all 0.2s;
 
     &:hover {
-        background-color: var(--primary-hover);
         transform: translateY(-1px);
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
@@ -64,12 +68,13 @@ export const FilterButton = styled.button<{ active: boolean }>`
     transition: all 0.2s;
 
     ${props => props.active ? `
-        background-color: white;
-        color: var(--primary-color);
+        background-color: #e7b7c2;
+        color: white;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        font-weight: bold;
     ` : `
-        background-color: transparent;
-        color: #6b7280;
+        background-color: #F4E5E8;
+        color: #000000;
 
         &:hover {
             color: var(--text-color);

@@ -43,7 +43,7 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, total, page
 };
 
     return (
-        <PaginationContainer>
+        <PaginationContainer className="pagination-container">
             <PageButton onClick={handlePrev} disabled={currentPage === 1}>
                 Anterior
             </PageButton>

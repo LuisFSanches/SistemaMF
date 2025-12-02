@@ -454,7 +454,7 @@ export function CompleteOrder() {
                     <h1 className="client-container-title">Dados do Comprador</h1>
                     <FormFieldsContainer style={{ marginTop: "0px" }}>
                         <FormField>
-                            <Label>
+                            <Label translate="no">
                                 Seu telefone
                                 <span>*</span>
                             </Label>
@@ -478,7 +478,7 @@ export function CompleteOrder() {
                         </FormField>
                         <InlineFormField>
                             <FormField>
-                                <Label>
+                                <Label translate="no">
                                     Seu nome
                                     <span>*</span>
                                 </Label>
@@ -490,11 +490,11 @@ export function CompleteOrder() {
                                 {errors.first_name && <ErrorMessage>{errors.first_name.message}</ErrorMessage>}
                             </FormField>
                             <FormField>
-                                <Label>
+                                <Label translate="no">
                                     Seu sobrenome
                                     <span>*</span>
                                 </Label>
-                                <Input type="text" placeholder="Digite seu sobrenome" 
+                                <Input translate="no" type="text" placeholder="Digite seu sobrenome" 
                                     {...register("last_name", {
                                         required: "Sobrenome inválido",
                                     })}
@@ -531,7 +531,7 @@ export function CompleteOrder() {
                             {typeOfDelivery === "SOMEONES_GIFT" &&
                                 <InlineFormField>
                                     <FormField>
-                                        <Label>
+                                        <Label translate="no">
                                             Recebedor
                                             <span>*</span>
                                         </Label>
@@ -543,7 +543,7 @@ export function CompleteOrder() {
                                         {errors.receiver_name && <ErrorMessage>{errors.receiver_name.message}</ErrorMessage>}
                                     </FormField>
                                     <FormField>
-                                        <Label>
+                                        <Label translate="no">
                                             Telefone recebedor
                                             <span>*</span>
                                         </Label>

@@ -256,7 +256,7 @@ export const InfoSection = styled.div`
     h2 {
         font-size: 1.25rem;
         color: #111827;
-        margin-bottom: 1.5rem;
+        margin-bottom: 5px;
         display: flex;
         align-items: center;
         gap: 0.75rem;
@@ -264,6 +264,12 @@ export const InfoSection = styled.div`
         svg {
             color: #ec4899;
         }
+    }
+
+    button {
+        margin-bottom: 10px;
+        font-weight: 600;
+        background-color: #FAFAFA;
     }
 
     .subtitle {

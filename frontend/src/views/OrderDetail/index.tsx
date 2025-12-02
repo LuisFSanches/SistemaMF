@@ -22,6 +22,7 @@ import {
 import { getOrderById } from "../../services/orderService";
 import { convertMoney, formatTitleCase, formatTelephone, formatDescriptionWithPrice } from "../../utils";
 import { Loader } from "../../components/Loader";
+import { PrintCardMessage } from "../../components/PrintCardMessage";
 import { STATUS_LABEL, PAYMENT_METHODS } from "../../constants";
 import {
     Container,
@@ -353,6 +354,12 @@ export function OrderDetail() {
                         <FontAwesomeIcon icon={faEnvelope} />
                         Mensagem do Cartão
                     </h2>
+                    <PrintCardMessage
+                        card_message={cardDetails.card_message}
+                        card_from={cardDetails.card_from}
+                        card_to={cardDetails.card_to}
+                        order_code={orderInfo.code}
+                    />
                     <div className="card-message-block">
                         <div className="card-header">Mensagem:</div>
                         <div className="card-message">"{cardDetails.card_message}"</div>

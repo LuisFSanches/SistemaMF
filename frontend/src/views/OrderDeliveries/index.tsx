@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import moment from "moment";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
@@ -20,6 +21,8 @@ export function OrderDeliveriesPage() {
     const [filter, setFilter] = useState<'active' | 'archived' | 'all'>('active');
     const [page, setPage] = useState(1);
     const [query, setQuery] = useState('');
+    const [selectedDate, setSelectedDate] = useState("all-dates");
+    const [filteredDeliveries, setFilteredDeliveries] = useState(orderDeliveries);
     const pageSize = 30;
 
     useEffect(() => {
@@ -27,9 +30,36 @@ export function OrderDeliveriesPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, query, filter]);
 
+    useEffect(() => {
+        applyDateFilter();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [orderDeliveries, selectedDate]);
+
+    const applyDateFilter = () => {
+        if (selectedDate === "all-dates") {
+            setFilteredDeliveries(orderDeliveries);
+        } else if (selectedDate === "today") {
+            setFilteredDeliveries(
+                orderDeliveries.filter(delivery =>
+                    moment(delivery.delivery_date).isSame(moment(), "day")
+                )
+            );
+        } else if (selectedDate === "week") {
+            setFilteredDeliveries(
+                orderDeliveries.filter(delivery =>
+                    moment(delivery.delivery_date).isSame(moment(), "week")
+                )
+            );
+        }
+    };
+
     const searchDeliveries = (text: string) => {
         setQuery(text);
         setPage(1);
+    }
+
+    const filterOrderDeliveriesByDate = (type: string) => {
+        setSelectedDate(type);
     }
 
     return (
@@ -37,25 +67,17 @@ export function OrderDeliveriesPage() {
             <PageHeader>
                 <div>
                     <h1>Entregas de Pedidos</h1>
+                    <input
+                        style={{width: '250px'}}
+                        type="text"
+                        placeholder="Buscar por Motoboy ou Pedido"
+                        onKeyDown={(e: any) => {
+                            if (e.key === 'Enter') {
+                                searchDeliveries(e.target.value);
+                            }
+                        }}
+                    />
                 </div>
-
-                <input
-                    style={{width: '250px'}}
-                    type="text"
-                    placeholder="Buscar por Motoboy ou Pedido"
-                    onKeyDown={(e: any) => {
-                        if (e.key === 'Enter') {
-                            searchDeliveries(e.target.value);
-                        }
-                    }}
-                />
-
-                <Pagination
-                    currentPage={page}
-                    total={totalDeliveries}
-                    pageSize={pageSize as number}
-                    onPageChange={setPage}
-                />
 
                 <ButtonsContainer>
                     <FilterToggleContainer>
@@ -88,15 +110,44 @@ export function OrderDeliveriesPage() {
                         </FilterButton>
                     </FilterToggleContainer>
 
+                    <FilterToggleContainer>
+                        <FilterButton
+                            active={selectedDate === 'all-dates'}
+                            onClick={() => filterOrderDeliveriesByDate('all-dates')}
+                        >
+                            Qualquer data
+                        </FilterButton>
+                        <FilterButton
+                            active={selectedDate === 'today'}
+                            onClick={() => filterOrderDeliveriesByDate('today')}
+                        >
+                            Hoje
+                        </FilterButton>
+                        <FilterButton
+                            active={selectedDate === 'week'}
+                            onClick={() => filterOrderDeliveriesByDate('week')}
+                        >
+                            Essa semana
+                        </FilterButton>
+                    </FilterToggleContainer>
+                </ButtonsContainer>
+                <div>
+                    <Pagination
+                        currentPage={page}
+                        total={totalDeliveries}
+                        pageSize={pageSize as number}
+                        onPageChange={setPage}
+                    />
                     <AddButton onClick={() => setIsModalOpen(true)}>
                         <FontAwesomeIcon icon={faPlus} />
                         <span>Nova Entrega</span>
                     </AddButton>
-                </ButtonsContainer>
+                </div>
+
             </PageHeader>
 
             <OrderDeliveriesTable 
-                deliveries={orderDeliveries} 
+                deliveries={filteredDeliveries} 
                 filter={filter} 
                 page={page}
                 pageSize={pageSize}
