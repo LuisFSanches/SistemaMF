@@ -53,3 +53,15 @@ export const deleteOrderDelivery = async (id: string) => {
     });
     return response.data;
 };
+
+export const bulkUpdateOrderDeliveries = async (ids: string[], data: IUpdateOrderDelivery) => {
+    const response = await api.patch("/orderDelivery/bulk-update", {
+        ids,
+        ...data
+    }, {
+        headers: {
+            authorization: token,
+        },
+    });
+    return response.data;
+};

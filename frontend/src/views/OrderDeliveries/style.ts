@@ -81,3 +81,28 @@ export const FilterButton = styled.button<{ active: boolean }>`
         }
     `}
 `;
+
+export const MassActionsContainer = styled.div`
+    display: flex;
+    margin-bottom: 1rem;
+    button {
+        margin-right: 10px;
+        border-radius: 5px;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 14px;
+
+        svg {
+            margin-right: 5px;
+        }
+    }
+
+    .archive-button {
+        background-color: #66c1df;
+    }
+
+    .pay-button {
+        background-color: #6aa84f;
+    }
+`;

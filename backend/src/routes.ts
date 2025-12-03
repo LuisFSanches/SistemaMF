@@ -65,6 +65,7 @@ import { CreateOrderDeliveryController } from './controllers/orderDelivery/Creat
 import { GetAllOrderDeliveriesController } from './controllers/orderDelivery/GetAllOrderDeliveriesController';
 import { GetOrderDeliveryController } from './controllers/orderDelivery/GetOrderDeliveryController';
 import { UpdateOrderDeliveryController } from './controllers/orderDelivery/UpdateOrderDeliveryController';
+import { UpdateMultipleOrderDeliveriesController } from './controllers/orderDelivery/UpdateMultipleOrderDeliveriesController';
 import { DeleteOrderDeliveryController } from './controllers/orderDelivery/DeleteOrderDeliveryController';
 
 import { CreateOrderToReceiveController } from './controllers/orderToReceive/CreateOrderToReceiveController';
@@ -162,6 +163,7 @@ router.post('/orderDelivery', new CreateOrderDeliveryController().handle);
 router.get('/orderDelivery/all', adminAuthMiddleware, new GetAllOrderDeliveriesController().handle);
 router.get('/orderDelivery/:id', adminAuthMiddleware, new GetOrderDeliveryController().handle);
 router.put('/orderDelivery/:id', adminAuthMiddleware, new UpdateOrderDeliveryController().handle);
+router.patch('/orderDelivery/bulk-update', adminAuthMiddleware, new UpdateMultipleOrderDeliveriesController().handle);
 router.delete('/orderDelivery/:id', adminAuthMiddleware, new DeleteOrderDeliveryController().handle);
 
 //-- ROTAS ORDER TO RECEIVE --

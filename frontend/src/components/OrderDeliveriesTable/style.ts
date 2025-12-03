@@ -4,6 +4,40 @@ export const Container = styled.div`
     background: white;
     border-radius: 0.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    /* Custom checkbox styling */
+    input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #d1d5db;
+        border-radius: 4px;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s;
+
+        &:hover {
+            border-color: #EC4899;
+        }
+
+        &:checked {
+            background-color: #EC4899;
+            border-color: #EC4899;
+        }
+
+        &:checked::after {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 4px;
+            width: 6px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+    }
 `;
 
 export const StatusBadge = styled.span<{ status: string }>`

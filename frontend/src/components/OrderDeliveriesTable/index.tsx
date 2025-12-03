@@ -23,9 +23,12 @@ interface OrderDeliveriesTableProps {
     page: number;
     pageSize: number;
     query: string;
+    selectedIds: string[];
+    onSelectDelivery: (id: string) => void;
+    onSelectAll: (checked: boolean) => void;
 }
 
-export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query }: OrderDeliveriesTableProps) {
+export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query, selectedIds, onSelectDelivery, onSelectAll }: OrderDeliveriesTableProps) {
     const { updateOrderDelivery, deleteOrderDelivery, loadOrderDeliveries } = useOrderDeliveries();
     const { showSuccess } = useSuccessMessage();
     const [confirmPayModal, setConfirmPayModal] = useState(false);
@@ -116,6 +119,14 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
             <table>
                 <thead>
                     <tr>
+                        <th>
+                            <input
+                                type="checkbox"
+                                checked={filteredDeliveries.length > 0 && selectedIds.length === filteredDeliveries.length}
+                                onChange={(e) => onSelectAll(e.target.checked)}
+                                style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                            />
+                        </th>
                         <th>Motoboy</th>
                         <th>Nº Pedido</th>
                         <th>Taxa de Entrega</th>
@@ -127,6 +138,14 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
                 <tbody>
                     {filteredDeliveries.map((delivery) => (
                         <tr key={delivery.id}>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    checked={selectedIds.includes(delivery.id!)}
+                                    onChange={() => onSelectDelivery(delivery.id!)}
+                                    style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                                />
+                            </td>
                             <td
                                 style={{ cursor: 'pointer', color: '#EC4899', fontWeight: '600' }}
                                 onClick={() => navigate(`/backoffice/motoboy/${delivery.deliveryMan?.id}`)}

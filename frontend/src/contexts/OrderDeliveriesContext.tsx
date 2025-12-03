@@ -3,7 +3,8 @@ import {
     getAllOrderDeliveries, 
     createOrderDelivery as createOrderDeliveryService,
     updateOrderDelivery as updateOrderDeliveryService,
-    deleteOrderDelivery as deleteOrderDeliveryService
+    deleteOrderDelivery as deleteOrderDeliveryService,
+    bulkUpdateOrderDeliveries as bulkUpdateOrderDeliveriesService
 } from "../services/orderDeliveryService";
 import { IOrderDelivery, ICreateOrderDelivery, IUpdateOrderDelivery } from "../interfaces/IOrderDelivery";
 
@@ -14,6 +15,7 @@ interface OrderDeliveriesContextType {
     createOrderDelivery: (data: ICreateOrderDelivery) => Promise<void>;
     updateOrderDelivery: (id: string, data: IUpdateOrderDelivery) => Promise<void>;
     deleteOrderDelivery: (id: string) => Promise<void>;
+    bulkUpdateOrderDeliveries: (ids: string[], data: IUpdateOrderDelivery) => Promise<void>;
     isLoading: boolean;
 }
 
@@ -80,6 +82,24 @@ export const OrderDeliveriesProvider: React.FC = ({ children }) => {
         }
     };
 
+    const bulkUpdateOrderDeliveries = async (ids: string[], data: IUpdateOrderDelivery) => {
+        setIsLoading(true);
+        try {
+            const { orderDeliveries: updatedDeliveries } = await bulkUpdateOrderDeliveriesService(ids, data);
+            setOrderDeliveries((prev) =>
+                prev.map((delivery) => {
+                    const updated = updatedDeliveries.find((d: IOrderDelivery) => d.id === delivery.id);
+                    return updated ? updated : delivery;
+                })
+            );
+        } catch (error) {
+            console.error("Error bulk updating order deliveries:", error);
+            throw error;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <OrderDeliveriesContext.Provider
             value={{
@@ -89,6 +109,7 @@ export const OrderDeliveriesProvider: React.FC = ({ children }) => {
                 createOrderDelivery,
                 updateOrderDelivery,
                 deleteOrderDelivery,
+                bulkUpdateOrderDeliveries,
                 isLoading,
             }}
         >

@@ -1,56 +1,78 @@
 import { useState, useEffect } from "react";
 import moment from "moment";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faCheck, faEnvelopeCircleCheck, faBoxOpen } from "@fortawesome/free-solid-svg-icons";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
+import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { NewOrderDeliveryModal } from "../../components/NewOrderDeliveryModal";
 import { OrderDeliveriesTable } from "../../components/OrderDeliveriesTable";
 import { Pagination } from "../../components/Pagination";
+import { DateRangePicker } from "../../components/DateRangePicker";
+import { ConfirmPopUp } from "../../components/ConfirmPopUp";
 import {
     Container,
     ButtonsContainer,
     AddButton,
     FilterToggleContainer,
-    FilterButton
+    FilterButton,
+    MassActionsContainer
 } from "./style";
 import { PageHeader } from "../../styles/global";
 
 export function OrderDeliveriesPage() {
-    const { orderDeliveries, totalDeliveries, loadOrderDeliveries } = useOrderDeliveries();
+    const { orderDeliveries, totalDeliveries, loadOrderDeliveries, bulkUpdateOrderDeliveries } = useOrderDeliveries();
+    const { showSuccess } = useSuccessMessage();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [filter, setFilter] = useState<'active' | 'archived' | 'all'>('active');
     const [page, setPage] = useState(1);
     const [query, setQuery] = useState('');
-    const [selectedDate, setSelectedDate] = useState("all-dates");
+    const [startDate, setStartDate] = useState<string | null>(null);
+    const [endDate, setEndDate] = useState<string | null>(null);
+    const [dateFilterType, setDateFilterType] = useState<string>("all-dates");
     const [filteredDeliveries, setFilteredDeliveries] = useState(orderDeliveries);
-    const pageSize = 30;
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [confirmBulkPayModal, setConfirmBulkPayModal] = useState(false);
+    const [confirmBulkArchiveModal, setConfirmBulkArchiveModal] = useState(false);
+    const [confirmBulkUnarchiveModal, setConfirmBulkUnarchiveModal] = useState(false);
+    const pageSize = 45;
 
     useEffect(() => {
         loadOrderDeliveries(page, pageSize, query, filter);
+        setSelectedIds([]);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, query, filter]);
 
     useEffect(() => {
         applyDateFilter();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [orderDeliveries, selectedDate]);
+    }, [orderDeliveries, startDate, endDate, dateFilterType]);
 
     const applyDateFilter = () => {
-        if (selectedDate === "all-dates") {
+        if (!startDate && !endDate) {
             setFilteredDeliveries(orderDeliveries);
-        } else if (selectedDate === "today") {
-            setFilteredDeliveries(
-                orderDeliveries.filter(delivery =>
-                    moment(delivery.delivery_date).isSame(moment(), "day")
-                )
-            );
-        } else if (selectedDate === "week") {
-            setFilteredDeliveries(
-                orderDeliveries.filter(delivery =>
-                    moment(delivery.delivery_date).isSame(moment(), "week")
-                )
-            );
+            return;
         }
+
+        const filterByDate = (delivery: any) => {
+            const deliveryDate = moment(delivery.delivery_date);
+            
+            if (dateFilterType === "today" || dateFilterType === "yesterday") {
+                return deliveryDate.isSame(moment(startDate), "day");
+            } else if (dateFilterType === "week") {
+                return deliveryDate.isBetween(moment(startDate), moment(endDate), "day", "[]");
+            } else if (dateFilterType === "custom" && startDate && endDate) {
+                return deliveryDate.isBetween(moment(startDate), moment(endDate), "day", "[]");
+            }
+            return true;
+        };
+
+        setFilteredDeliveries(orderDeliveries.filter(filterByDate));
+    };
+
+    const handleDateRangeChange = (start: string | null, end: string | null, filterType: string) => {
+        setStartDate(start);
+        setEndDate(end);
+        setDateFilterType(filterType);
     };
 
     const searchDeliveries = (text: string) => {
@@ -58,9 +80,58 @@ export function OrderDeliveriesPage() {
         setPage(1);
     }
 
-    const filterOrderDeliveriesByDate = (type: string) => {
-        setSelectedDate(type);
-    }
+    const handleSelectDelivery = (id: string) => {
+        setSelectedIds(prev => 
+            prev.includes(id) ? prev.filter(selectedId => selectedId !== id) : [...prev, id]
+        );
+    };
+
+    const handleSelectAll = (checked: boolean) => {
+        if (checked) {
+            setSelectedIds(filteredDeliveries.map(d => d.id!));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleBulkPay = async () => {
+        try {
+            await bulkUpdateOrderDeliveries(selectedIds, { is_paid: true });
+            await loadOrderDeliveries(page, pageSize, query, filter);
+            setSelectedIds([]);
+            setConfirmBulkPayModal(false);
+            showSuccess(`${selectedIds.length} entrega(s) marcada(s) como paga(s)!`);
+        } catch (error) {
+            console.error("Error in bulk payment:", error);
+            alert("Erro ao confirmar pagamentos. Tente novamente.");
+        }
+    };
+
+    const handleBulkArchive = async () => {
+        try {
+            await bulkUpdateOrderDeliveries(selectedIds, { is_archived: true });
+            await loadOrderDeliveries(page, pageSize, query, filter);
+            setSelectedIds([]);
+            setConfirmBulkArchiveModal(false);
+            showSuccess(`${selectedIds.length} entrega(s) arquivada(s)!`);
+        } catch (error) {
+            console.error("Error in bulk archive:", error);
+            alert("Erro ao arquivar entregas. Tente novamente.");
+        }
+    };
+
+    const handleBulkUnarchive = async () => {
+        try {
+            await bulkUpdateOrderDeliveries(selectedIds, { is_archived: false });
+            await loadOrderDeliveries(page, pageSize, query, filter);
+            setSelectedIds([]);
+            setConfirmBulkUnarchiveModal(false);
+            showSuccess(`${selectedIds.length} entrega(s) desarquivada(s)!`);
+        } catch (error) {
+            console.error("Error in bulk unarchive:", error);
+            alert("Erro ao desarquivar entregas. Tente novamente.");
+        }
+    };
 
     return (
         <Container>
@@ -110,26 +181,7 @@ export function OrderDeliveriesPage() {
                         </FilterButton>
                     </FilterToggleContainer>
 
-                    <FilterToggleContainer>
-                        <FilterButton
-                            active={selectedDate === 'all-dates'}
-                            onClick={() => filterOrderDeliveriesByDate('all-dates')}
-                        >
-                            Qualquer data
-                        </FilterButton>
-                        <FilterButton
-                            active={selectedDate === 'today'}
-                            onClick={() => filterOrderDeliveriesByDate('today')}
-                        >
-                            Hoje
-                        </FilterButton>
-                        <FilterButton
-                            active={selectedDate === 'week'}
-                            onClick={() => filterOrderDeliveriesByDate('week')}
-                        >
-                            Essa semana
-                        </FilterButton>
-                    </FilterToggleContainer>
+                    <DateRangePicker onDateRangeChange={handleDateRangeChange} />
                 </ButtonsContainer>
                 <div>
                     <Pagination
@@ -143,15 +195,46 @@ export function OrderDeliveriesPage() {
                         <span>Nova Entrega</span>
                     </AddButton>
                 </div>
-
             </PageHeader>
-
+            <MassActionsContainer>
+                {selectedIds.length > 0 && (
+                    <>
+                        {filter === 'archived' ? (
+                            <button
+                                className="archive-button"
+                                onClick={() => setConfirmBulkUnarchiveModal(true)}
+                            >
+                                <FontAwesomeIcon icon={faBoxOpen} />
+                                <span>Desarquivar Selecionados ({selectedIds.length})</span>
+                            </button>
+                        ) : (
+                            <button
+                                className="archive-button"
+                                onClick={() => setConfirmBulkArchiveModal(true)}
+                            >
+                                <FontAwesomeIcon icon={faEnvelopeCircleCheck} />
+                                <span>Arquivar Selecionados ({selectedIds.length})</span>
+                            </button>
+                        )}
+                        <button
+                            className="pay-button"
+                            onClick={() => setConfirmBulkPayModal(true)}
+                        >
+                            <FontAwesomeIcon icon={faCheck} />
+                            <span>Confirmar Pagamento ({selectedIds.length})</span>
+                        </button>
+                    </>
+                )}
+            </MassActionsContainer>
             <OrderDeliveriesTable 
                 deliveries={filteredDeliveries} 
                 filter={filter} 
                 page={page}
                 pageSize={pageSize}
                 query={query}
+                selectedIds={selectedIds}
+                onSelectDelivery={handleSelectDelivery}
+                onSelectAll={handleSelectAll}
             />
 
             <NewOrderDeliveryModal
@@ -159,6 +242,30 @@ export function OrderDeliveriesPage() {
                 onRequestClose={() => setIsModalOpen(false)}
                 action="create"
                 currentOrderDelivery={null}
+            />
+
+            <ConfirmPopUp
+                isOpen={confirmBulkPayModal}
+                onRequestClose={() => setConfirmBulkPayModal(false)}
+                handleAction={handleBulkPay}
+                actionLabel={`Confirmar pagamento de ${selectedIds.length} entrega(s)?`}
+                label="Confirmar"
+            />
+
+            <ConfirmPopUp
+                isOpen={confirmBulkArchiveModal}
+                onRequestClose={() => setConfirmBulkArchiveModal(false)}
+                handleAction={handleBulkArchive}
+                actionLabel={`Arquivar ${selectedIds.length} entrega(s)?`}
+                label="Arquivar"
+            />
+
+            <ConfirmPopUp
+                isOpen={confirmBulkUnarchiveModal}
+                onRequestClose={() => setConfirmBulkUnarchiveModal(false)}
+                handleAction={handleBulkUnarchive}
+                actionLabel={`Desarquivar ${selectedIds.length} entrega(s)?`}
+                label="Desarquivar"
             />
         </Container>
     );

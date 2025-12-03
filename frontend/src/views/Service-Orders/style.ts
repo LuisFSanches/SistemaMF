@@ -4,6 +4,7 @@ export const Container = styled.div`
     display: flex;
     flex-direction: column;
     flex: 1;
+    overflow: visible;
 
     .order-container.opened::-webkit-scrollbar-thumb {
         background: #FFD700;
@@ -101,28 +102,29 @@ export const Orders = styled.div`
 export const Header = styled.div`
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     margin-left: 15px;
     margin-top: 10px;
+    margin-bottom: 20px;
+    gap: 15px;
+    position: relative;
+    z-index: 10;
 
-    div {
-        display: flex;
-    }
 
     .type-filters {
-        flex: 1;
-    }
-
-    .date-filters {
         display: flex;
-        justify-content: flex-end;
+        flex: 1;
+        flex-wrap: wrap;
+        align-items: center;
     }
 
-    button {
+    .type-filters button {
         padding: 10px;
         margin-right: 10px;
         border-radius: 5px;
         color: white;
         font-weight: 600;
+        border: none;
 
         &.active {
             border: 3px solid pink;
@@ -135,33 +137,62 @@ export const Header = styled.div`
         }
     }
 
-    .all-orders {
+    .type-filters .all-orders {
         background-color: #979795;
     }
 
-    .counter-orders {
+    .type-filters .counter-orders {
         background-color: #71265D;
     }
 
-    .store-front-orders {
+    .type-filters .store-front-orders {
         background-color: #4A90E2;
     }
 
-    .online-orders {
+    .type-filters .online-orders {
         background-color: #246D90;
     }
 
-    .store-orders {
+    .type-filters .store-orders {
         background-color: #EC4899;
     }
 
-    input {
+    .type-filters input {
         max-width: 310px;
         margin-left: 15px;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
     }
 
-    .all-dates {
-        background-color: #F4E5E8;
-        color: #000000;
+    .date-filters {
+        display: flex;
+        align-items: center;
+
+        input {
+            width: 300px;
+            margin-left: 15px;
+        }
+    }
+
+    @media (max-width: 1024px) {
+        flex-direction: column;
+        gap: 10px;
+
+        .type-filters {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .date-filters {
+            display: flex;
+        }
+
+        input {
+            margin-left: 0;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 100%;
+        }
     }
 `

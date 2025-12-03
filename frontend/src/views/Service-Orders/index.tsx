@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import moment from "moment";
 import { IOrder } from "../../interfaces/IOrder";
+import { DateRangePicker } from "../../components/DateRangePicker";
 import { ICreateOrderToReceive } from "../../interfaces/IOrderToReceive";
 import { Container, Orders, Header, OrderContainer } from "./style";
 import { updateStatus, updateOrderPaymentStatus } from "../../services/orderService";
@@ -25,10 +26,11 @@ export function ServiceOrdersPage(){
 	const [requestOrders, setRequestOrders] = useState(false);
     const [editOrderModal, setEditOrderModal] = useState(false);
     const [paymentStatusModal, setPaymentStatusModal] = useState(false);
-    const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
+	const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 	const [selectedOrderType, setSelectedOrderType] = useState("all-orders");
-	const [selectedDate, setSelectedDate] = useState("all-dates");
-
+	const [startDate, setStartDate] = useState<string | null>(null);
+	const [endDate, setEndDate] = useState<string | null>(null);
+	const [dateFilterType, setDateFilterType] = useState<string>("all-dates");
 
     function handleOpenEditOrderModal(order: IOrder){
         setEditOrderModal(true);
@@ -51,6 +53,11 @@ export function ServiceOrdersPage(){
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [onGoingOrders]);
+
+	useEffect(() => {
+		applyDateAndTypeFilters();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [onGoingOrders, startDate, endDate, dateFilterType, selectedOrderType]);
 
 	const handleOrderStatus = async (id: string, status: string) => {
 		setShowLoader(true);
@@ -114,35 +121,44 @@ export function ServiceOrdersPage(){
 		setCurrentOrder(null);
 	};
 
+	const applyDateAndTypeFilters = () => {
+		const filterByDate = (order: IOrder) => {
+			if (!startDate && !endDate) return true;
+			const orderDate = moment(order.delivery_date);
+			
+			if (dateFilterType === "today" || dateFilterType === "yesterday") {
+				return orderDate.isSame(moment(startDate), "day");
+			} else if (dateFilterType === "week") {
+				return orderDate.isBetween(moment(startDate), moment(endDate), "day", "[]");
+			} else if (dateFilterType === "custom" && startDate && endDate) {
+				return orderDate.isBetween(moment(startDate), moment(endDate), "day", "[]");
+			}
+			return true;
+		};
+
+		let filteredOrders = onGoingOrders;
+
+		if (selectedOrderType === "counter-orders") {
+			filteredOrders = onGoingOrders.filter((order: IOrder) => 
+				!order.online_order && order.is_delivery && !order.store_front_order
+			);
+		} else if (selectedOrderType === "store-front-orders") {
+			filteredOrders = onGoingOrders.filter((order: IOrder) => order.store_front_order);
+		} else if (selectedOrderType === "online-orders") {
+			filteredOrders = onGoingOrders.filter((order: IOrder) => order.online_order);
+		} else if (selectedOrderType === "store-orders") {
+			filteredOrders = onGoingOrders.filter((order: IOrder) => 
+				!order.is_delivery && !order.store_front_order
+			);
+		}
+
+		setOpenedOrders(filteredOrders.filter(order => order.status === "OPENED" && filterByDate(order)));
+		setInProgressOrders(filteredOrders.filter(order => order.status === "IN_PROGRESS" && filterByDate(order)));
+		setInDeliveryOrders(filteredOrders.filter(order => order.status === "IN_DELIVERY" && filterByDate(order)));
+	};
+
 	const filterOrdersByType = (orderType: string) => {
 		setSelectedOrderType(orderType);
-		if (orderType === "counter-orders") {
-			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && !order.online_order
-				&& order.is_delivery && !order.store_front_order));
-			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && !order.online_order
-				&& order.is_delivery && !order.store_front_order));
-			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && !order.online_order
-				&& order.is_delivery && !order.store_front_order));
-		}
-		else if (orderType === "store-front-orders") {
-			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && order.store_front_order));
-			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && order.store_front_order));
-			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && order.store_front_order));
-		}
-		else if (orderType === "online-orders") {
-			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && order.online_order));
-			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && order.online_order));
-			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && order.online_order));
-		} else if (orderType === "store-orders") {
-			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && !order.is_delivery && !order.store_front_order));
-			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && !order.is_delivery && !order.store_front_order));
-			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && !order.is_delivery && !order.store_front_order));
-		}
-		else {
-			setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED"));
-			setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS"));
-			setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY"));
-		}
 	};
 
 	const filterOrdersByNameOrPhone = (text: string) => {
@@ -163,34 +179,10 @@ export function ServiceOrdersPage(){
 		setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && matches(order)));
 	};
 
-	const filterOrdersByDate = (type: string) => {
-		setSelectedDate(type);
-	
-		if (type === "all-dates") {
-			setOpenedOrders(onGoingOrders.filter(order => order.status === "OPENED"));
-			setInProgressOrders(onGoingOrders.filter(order => order.status === "IN_PROGRESS"));
-			setInDeliveryOrders(onGoingOrders.filter(order => order.status === "IN_DELIVERY"));
-		} else if (type === "week") {
-			setOpenedOrders(onGoingOrders.filter(order =>
-				order.status === "OPENED" && moment(order.delivery_date).isSame(moment(), "week")
-			));
-			setInProgressOrders(onGoingOrders.filter(order =>
-				order.status === "IN_PROGRESS" && moment(order.delivery_date).isSame(moment(), "week")
-			));
-			setInDeliveryOrders(onGoingOrders.filter(order =>
-				order.status === "IN_DELIVERY" && moment(order.delivery_date).isSame(moment(), "week")
-			));
-		} else if (type === "today") {
-			setOpenedOrders(onGoingOrders.filter(order =>
-				order.status === "OPENED" && moment(order.delivery_date).isSame(moment(), "day")
-			));
-			setInProgressOrders(onGoingOrders.filter(order =>
-				order.status === "IN_PROGRESS" && moment(order.delivery_date).isSame(moment(), "day")
-			));
-			setInDeliveryOrders(onGoingOrders.filter(order =>
-				order.status === "IN_DELIVERY" && moment(order.delivery_date).isSame(moment(), "day")
-			));
-		}
+	const handleDateRangeChange = (start: string | null, end: string | null, filterType: string) => {
+		setStartDate(start);
+		setEndDate(end);
+		setDateFilterType(filterType);
 	};
 	
 	
@@ -219,25 +211,13 @@ export function ServiceOrdersPage(){
 						onClick={() => filterOrdersByType("store-orders")}>
 						Ordens PDV
 					</button>
-
+				</div>
+				<div className="date-filters">
+					<DateRangePicker onDateRangeChange={handleDateRangeChange} />
 					<input
 						type="text"
 						placeholder="Buscar por Nome, Telefone ou Código"
 						onChange={(e) => filterOrdersByNameOrPhone(e.target.value)} />
-				</div>
-				<div className="date-filters">
-					<button className={`all-dates ${selectedDate === "all-dates" ? "active-date" : ""}`}
-						onClick={() => filterOrdersByDate("all-dates")}>
-							Qualquer data
-					</button>
-					<button className={`all-dates ${selectedDate === "today" ? "active-date" : ""}`}
-						onClick={() => filterOrdersByDate("today")}>
-							Hoje
-					</button>
-					<button className={`all-dates ${selectedDate === "week" ? "active-date" : ""}`}
-						onClick={() => filterOrdersByDate("week")}>
-							Essa semana
-					</button>
 				</div>
  			</Header>
 			<Orders>
