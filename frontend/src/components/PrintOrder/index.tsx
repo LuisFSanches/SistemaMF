@@ -157,11 +157,12 @@ export const PrintOrder = ({
                     }
 
                     <p><strong>Cartão:</strong> ${order.has_card ? 'Contém cartão' : 'Não contém cartão'}</p>
-                    ${order.is_delivery &&
-                        `<div class="center" style="margin-top: 15px;">
+                    ${order.is_delivery === true
+                        ? `<div class="center" style="margin-top: 15px;">
                             <img src="${qrCodeUrl}" alt="QR Code Entrega" style="width: 150px; height: 150px;" />
                             <div style="font-size: 12px; margin-top: 5px;">Escaneie para concluir entrega</div>
-                        </div>`
+                            </div>`
+                        : ''
                     }
 
                     <div class="footer">

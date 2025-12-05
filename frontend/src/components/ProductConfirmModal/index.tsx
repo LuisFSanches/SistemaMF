@@ -24,7 +24,7 @@ interface ProductConfirmModalProps {
     isOpen: boolean;
     onRequestClose: () => void;
     product: any;
-    onConfirm: (quantity: number, price: number) => void;
+    onConfirm: (quantity: number, price: number, image: string) => void;
     productImage?: string;
 }
 
@@ -47,7 +47,7 @@ export function ProductConfirmModal({
 
     const handleConfirm = () => {
         if (quantity > 0 && price > 0) {
-            onConfirm(quantity, price);
+            onConfirm(quantity, price, productImage || product.image);
             onRequestClose();
         } else {
             alert("Quantidade e preço devem ser maiores que zero.");

@@ -5,6 +5,7 @@ export const Container = styled.div`
     position: fixed;
     top: 5px;
     right: 0;
+    z-index: 1000;
 `;
 
 export const AlertContent = styled.div <{ isDelivery?: boolean }>`

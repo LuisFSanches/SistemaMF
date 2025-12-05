@@ -212,6 +212,10 @@ export const Button = styled.button`
     svg {
         margin-right: 8px;
     }
+
+    @media (max-width: 768px) {
+        padding: 6px 12px;
+    }
 `;
 
 export const PrintButton = styled(Button)`

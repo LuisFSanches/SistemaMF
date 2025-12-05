@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const Card = styled.div`
-    width: 240px;
+    width: 220px;
     border: 1px solid #ddd;
     border-radius: 12px;
     overflow: hidden;
@@ -10,9 +10,15 @@ export const Card = styled.div`
     flex-direction: column;
     background: #fff;
 
+    &:hover {
+        border-color: #EC4899;
+        transform: translateY(-2px);
+    }
+
     @media (max-width: 768px) {
         width: 100%;
     }
+        
 `;
 
 export const ProductImage = styled.img`
@@ -35,6 +41,11 @@ export const ProductName = styled.h3`
     min-height: 42px;
     font-size: 16px;
     margin: 0 0 8px;
+
+    @media (max-width: 768px) {
+        font-size: 14px;
+        min-height: 36px;
+    }
 `;
 
 export const PriceInputWrapper = styled.div`
@@ -95,4 +106,9 @@ export const BottomActions = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 8px;
+    }
 `;
