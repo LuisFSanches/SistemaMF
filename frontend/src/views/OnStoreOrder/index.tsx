@@ -400,12 +400,10 @@ export function OnStoreOrder() {
                         setValue("last_name", client.last_name);
                         setClientId(client.id);
                         
-                        if (is_delivery) {
-                            const { data: addresses } = await getClientAddresses(client.id);
-                        
-                            if (addresses) {
-                                setAddresses(addresses);
-                            }
+                        const { data: addresses } = await getClientAddresses(client.id);
+                    
+                        if (addresses) {
+                            setAddresses(addresses);
                         }
                     }
                 } catch (error) {
@@ -586,13 +584,19 @@ export function OnStoreOrder() {
             setSteps(["Produtos", "Pedido", "Cliente", "Resumo"]);
             setPickupOnStore(false);
             setValue("payment_received", false);
+            
+            if (client_id) {
+                getClientAddresses(client_id).then(({ data: addresses }) => {
+                    if (addresses) {
+                        setAddresses(addresses);
+                    }
+                });
+            }
         } else {
             setSteps(["Produtos", "Pedido", "Cliente", "Resumo"]);
             setValue("delivery_date", today);
             setPickupOnStore(true);
             setValue("payment_received", true);
-            // Limpa campos de cliente quando desativa entrega
-            setAddresses([]);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [is_delivery]);
@@ -1170,18 +1174,26 @@ export function OnStoreOrder() {
                                                         />
                                                     </FormField>
                                                 </InlineFormField>
-
-                                                <FormField>
-                                                    <Label>Bairro</Label>
-                                                    <Input 
-                                                        type="text" 
-                                                        placeholder="Bairro" 
-                                                        {...register("neighborhood", {
-                                                            required: is_delivery && !pickupOnStore ? "Bairro é obrigatório" : false,
-                                                        })} 
-                                                    />
-                                                    {errors.neighborhood && <ErrorMessage>{errors.neighborhood.message}</ErrorMessage>}
-                                                </FormField>
+                                                <InlineFormField>
+                                                    <FormField>
+                                                        <Label>Bairro</Label>
+                                                        <Input 
+                                                            type="text" 
+                                                            placeholder="Bairro" 
+                                                            {...register("neighborhood", {
+                                                                required: is_delivery && !pickupOnStore ? "Bairro é obrigatório" : false,
+                                                            })} 
+                                                        />
+                                                        {errors.neighborhood && <ErrorMessage>{errors.neighborhood.message}</ErrorMessage>}
+                                                    </FormField>
+                                                    <FormField>
+                                                        <Label>Ponto de referência</Label>
+                                                        <Input type="text" placeholder="Ponto de referência" {...register("reference_point")}
+                                                            disabled={(addresses.length > 0 && !newAddress) ? true : false}
+                                                        />
+                                                    </FormField>
+                                                </InlineFormField>
+                                                
 
                                                 <InlineFormField>
                                                     <FormField>
@@ -1278,6 +1290,7 @@ export function OnStoreOrder() {
                                             <div>{watch('street')}, {watch('street_number')}</div>
                                             {watch('complement') && <div>{watch('complement')}</div>}
                                             <div>{watch('neighborhood')}</div>
+                                            <div>Ponto de Referência: {watch('reference_point')}</div>
                                             <div>{watch('city')} - {watch('state')}</div>
                                             <div>CEP: {watch('postal_code')}</div>
                                         </SummaryInfoText>
