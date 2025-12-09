@@ -34,17 +34,24 @@ class GetDeliveryManService {
             };
 
             if (startDate && endDate) {
+                const start = new Date(startDate + 'T00:00:00-03:00');
+                const end = new Date(endDate + 'T23:59:59-03:00');
+                
                 whereClause.delivery_date = {
-                    gte: new Date(startDate),
-                    lte: new Date(endDate)
+                    gte: start,
+                    lte: end
                 };
             } else if (startDate) {
+                const start = new Date(startDate + 'T00:00:00-03:00');
+                
                 whereClause.delivery_date = {
-                    gte: new Date(startDate)
+                    gte: start
                 };
             } else if (endDate) {
+                const end = new Date(endDate + 'T23:59:59-03:00');
+                
                 whereClause.delivery_date = {
-                    lte: new Date(endDate)
+                    lte: end
                 };
             }
 
