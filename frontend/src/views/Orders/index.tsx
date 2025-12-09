@@ -8,6 +8,7 @@ import { faEye, faPen } from "@fortawesome/free-solid-svg-icons";
 import { OrderDetailModal } from "../../components/OrderDetailModal";
 import { EditOrderModal } from "../../components/EditOrderModal";
 import { Pagination } from "../../components/Pagination";
+import { DateRangePicker } from "../../components/DateRangePicker";
 import { PrintOrder } from '../../components/PrintOrder';
 import { useOrders } from "../../contexts/OrdersContext";
 import { useAdmins } from "../../contexts/AdminsContext";
@@ -23,6 +24,8 @@ export function OrdersPage(){
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
     const [page, setPage] = useState(1);
     const [query, setQuery] = useState('');
+    const [startDate, setStartDate] = useState<string | null>(null);
+    const [endDate, setEndDate] = useState<string | null>(null);
     const pageSize = 15;
 
     function handleOpenOrderDetailModal(order: IOrder){
@@ -41,16 +44,22 @@ export function OrdersPage(){
     const searchOrders = (query: string) => {
         setQuery(query);
         setPage(1);
-        loadAvailableOrders(page, pageSize, query);
+        loadAvailableOrders(page, pageSize, query, startDate, endDate);
     }
 
     const resetSearch = (query: string) => {
         if (query === '') {
             setQuery('');
             setPage(1);
-            loadAvailableOrders(page, pageSize, '');
+            loadAvailableOrders(page, pageSize, '', startDate, endDate);
         }
     }
+
+    const handleDateRangeChange = (start: string | null, end: string | null, filterType: string) => {
+        setStartDate(start);
+        setEndDate(end);
+        setPage(1);
+    };
 
     const getName = (first_name: string, last_name: string) => {
         if (first_name === 'Cliente') {
@@ -61,9 +70,9 @@ export function OrdersPage(){
     }
 
     useEffect(() => {
-        loadAvailableOrders(page, pageSize, query);
+        loadAvailableOrders(page, pageSize, query, startDate, endDate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page]);
+    }, [page, startDate, endDate]);
 
     return(
         <Container>
@@ -81,6 +90,7 @@ export function OrdersPage(){
                         }}
                         onChange={(e) => resetSearch(e.target.value)}
                     />
+                    <DateRangePicker onDateRangeChange={handleDateRangeChange} />
                 </div>
                 <Pagination 
                     currentPage={page}

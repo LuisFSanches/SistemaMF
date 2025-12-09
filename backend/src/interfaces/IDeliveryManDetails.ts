@@ -10,6 +10,11 @@ export interface IDeliveryManDetails {
         total_paid: number
         pending_payment: number
     }
+    pagination: {
+        total: number
+        currentPage: number
+        totalPages: number
+    }
 }
 
 export interface IDeliveryItem {

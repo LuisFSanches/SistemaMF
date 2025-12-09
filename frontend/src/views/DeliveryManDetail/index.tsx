@@ -30,6 +30,8 @@ import {
 import { getDeliveryManDetails } from "../../services/deliveryManService";
 import { convertMoney } from "../../utils";
 import { Loader } from "../../components/Loader";
+import { DateRangePicker } from "../../components/DateRangePicker";
+import { Pagination } from "../../components/Pagination";
 import {
     Container,
     Header,
@@ -37,6 +39,10 @@ import {
     MetricCard,
     ChartSection,
     TableSection,
+    TableHeader,
+    TableTitle,
+    TableFilters,
+    TableContent,
     EmptyState
 } from "./style";
 
@@ -66,6 +72,10 @@ interface IDeliveryManData {
         delivery_fee: number;
         is_paid: boolean;
     }>;
+    pagination: {
+        total: number;
+        currentPage: number;
+    };
     deliveryHistory: Array<{
         date: string;
         count: number;
@@ -83,12 +93,16 @@ export function DeliveryManDetail() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [deliveryManData, setDeliveryManData] = useState<IDeliveryManData | null>(null);
+    const [page, setPage] = useState(1);
+    const [startDate, setStartDate] = useState<string | null>(null);
+    const [endDate, setEndDate] = useState<string | null>(null);
+    const pageSize = 25;
 
     useEffect(() => {
         const fetchDeliveryManData = async () => {
             try {
                 setLoading(true);
-                const response = await getDeliveryManDetails(id as string);
+                const response = await getDeliveryManDetails(id as string, page, pageSize, startDate, endDate);
                 setDeliveryManData(response.data);
             } catch (error) {
                 console.error("Error fetching delivery man data:", error);
@@ -100,7 +114,14 @@ export function DeliveryManDetail() {
         if (id) {
             fetchDeliveryManData();
         }
-    }, [id]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, page, startDate, endDate]);
+
+    const handleDateRangeChange = (start: string | null, end: string | null, filterType: string) => {
+        setStartDate(start);
+        setEndDate(end);
+        setPage(1);
+    };
 
     if (loading) {
         return <Loader show />;
@@ -120,7 +141,8 @@ export function DeliveryManDetail() {
         );
     }
 
-    const { deliveryMan, deliveries, deliveryHistory, summary } = deliveryManData;
+    const { deliveryMan, deliveries, deliveryHistory, summary, pagination } = deliveryManData;
+    const { total } = pagination;
 
     // Get initials for avatar
     const getInitials = () => {
@@ -200,18 +222,23 @@ export function DeliveryManDetail() {
                     <FontAwesomeIcon icon={faArrowLeft} />
                 </button>
                 <div className="client-info">
-                    <div className="avatar delivery">
-                        {getInitials()}
+                    <div className="info-left">
+                        <div className="avatar delivery">
+                            {getInitials()}
+                        </div>
+                        <div>
+                            <h1>{deliveryMan.name}</h1>
+                            <p className="phone">
+                                <FontAwesomeIcon icon={faPhone} />
+                                {deliveryMan.phone_number}
+                            </p>
+                            <p className="member-since">
+                                Motoboy Parceiro
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <h1>{deliveryMan.name}</h1>
-                        <p className="phone">
-                            <FontAwesomeIcon icon={faPhone} />
-                            {deliveryMan.phone_number}
-                        </p>
-                        <p className="member-since">
-                            Motoboy Parceiro
-                        </p>
+                    <div className="info-right">
+                        <DateRangePicker onDateRangeChange={handleDateRangeChange}/>
                     </div>
                 </div>
             </Header>
@@ -284,14 +311,27 @@ export function DeliveryManDetail() {
             )}
 
             <TableSection>
-                <h2>
-                    <FontAwesomeIcon icon={faHistory} />
-                    Todas as Entregas
-                </h2>
-                <p className="subtitle">Histórico completo de entregas realizadas</p>
+                <TableHeader>
+                    <TableTitle>
+                        <h2>
+                            <FontAwesomeIcon icon={faHistory} />
+                            Todas as Entregas
+                        </h2>
+                        <p className="subtitle">Histórico completo de entregas realizadas</p>
+                    </TableTitle>
+                    <TableFilters>
+                        <Pagination
+                            currentPage={page}
+                            total={total}
+                            pageSize={pageSize}
+                            onPageChange={setPage}
+                        />
+                    </TableFilters>
+                </TableHeader>
 
-                {deliveries.length > 0 ? (
-                    <table>
+                <TableContent>
+                    {deliveries.length > 0 ? (
+                        <table>
                         <thead>
                             <tr>
                                 <th>Pedido</th>
@@ -329,6 +369,7 @@ export function DeliveryManDetail() {
                         <p>Este motoboy ainda não realizou nenhuma entrega</p>
                     </EmptyState>
                 )}
+                </TableContent>
             </TableSection>
         </Container>
     );

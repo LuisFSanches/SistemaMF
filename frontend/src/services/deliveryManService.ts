@@ -11,8 +11,20 @@ export const listDeliveryMen = async (page: number, pageSize: number, query: str
     return response;
 };
 
-export const getDeliveryManDetails = async (id: string) => {
-    const response = await api.get(`/deliveryMan/${id}`, {
+export const getDeliveryManDetails = async (id: string, page?: number, pageSize?: number, startDate?: string | null, endDate?: string | null) => {
+    let url = `/deliveryMan/${id}`;
+    
+    const params = new URLSearchParams();
+    if (page) params.append('page', page.toString());
+    if (pageSize) params.append('pageSize', pageSize.toString());
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    
+    if (params.toString()) {
+        url += `?${params.toString()}`;
+    }
+    
+    const response = await api.get(url, {
         headers: {
             Authorization: `${token}`,
         }

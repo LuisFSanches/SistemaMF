@@ -818,6 +818,10 @@ export const PageHeader = styled.div`
         }
     }
 
+    input {
+        margin-right: 10px;
+    }
+
     @media (max-width: 1100px) {
         flex-direction: column;
 

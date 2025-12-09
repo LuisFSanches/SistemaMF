@@ -12,11 +12,19 @@ export const createOrderDelivery = async (data: ICreateOrderDelivery) => {
     return response.data;
 };
 
-export const getAllOrderDeliveries = async (page: number, pageSize: number, query: string, filter?: string) => {
+export const getAllOrderDeliveries = async (page: number, pageSize: number, query: string, filter?: string, startDate?: string | null, endDate?: string | null) => {
     let url = `/orderDelivery/all?page=${page}&pageSize=${pageSize}&query=${query}`;
     
     if (filter && filter !== 'all') {
         url += `&filter=${filter}`;
+    }
+    
+    if (startDate) {
+        url += `&startDate=${startDate}`;
+    }
+    
+    if (endDate) {
+        url += `&endDate=${endDate}`;
     }
     
     const response = await api.get(url, {

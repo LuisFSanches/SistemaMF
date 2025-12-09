@@ -20,6 +20,7 @@ export const Header = styled.div`
     background: white;
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
 
     .back-button {
         background: #EC4899;
@@ -46,6 +47,17 @@ export const Header = styled.div`
         align-items: center;
         gap: 1.5rem;
         flex: 1;
+        justify-content: space-between;
+
+        .info-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .info-right {
+            margin-right: 90px;
+        }
 
         .avatar {
             width: 80px;
@@ -218,6 +230,25 @@ export const TableSection = styled.div`
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
 
+    @media (max-width: 768px) {
+        padding: 1.5rem;
+    }
+`;
+
+export const TableHeader = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+`;
+
+export const TableTitle = styled.div`
     h2 {
         font-size: 1.4rem;
         color: #1f2937;
@@ -234,8 +265,22 @@ export const TableSection = styled.div`
     .subtitle {
         color: #6b7280;
         font-size: 0.9rem;
-        margin: 0 0 1.5rem 0;
+        margin: 0;
     }
+`;
+
+export const TableFilters = styled.div`
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+
+    @media (max-width: 768px) {
+        width: 100%;
+        flex-direction: column;
+    }
+`;
+
+export const TableContent = styled.div`
 
     table {
         width: 100%;
@@ -303,6 +348,7 @@ export const TableSection = styled.div`
     @media (max-width: 768px) {
         padding: 1.5rem;
         overflow-x: auto;
+        padding-top: 0px;
 
         table {
             display: block;

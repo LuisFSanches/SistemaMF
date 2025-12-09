@@ -120,8 +120,18 @@ export const getOnGoingOrders = async () => {
 	return response;
 };
 
-export const getAllOrders = async (page: number, pageSize: number, query: string) => {
-	const response = await api.get(`/order/all?page=${page}&pageSize=${pageSize}&query=${query}`, {
+export const getAllOrders = async (page: number, pageSize: number, query: string, startDate?: string | null, endDate?: string | null) => {
+	let url = `/order/all?page=${page}&pageSize=${pageSize}&query=${query}`;
+	
+	if (startDate) {
+		url += `&startDate=${startDate}`;
+	}
+	
+	if (endDate) {
+		url += `&endDate=${endDate}`;
+	}
+	
+	const response = await api.get(url, {
 		headers: {
 			Authorization: `${token}`,
 		}

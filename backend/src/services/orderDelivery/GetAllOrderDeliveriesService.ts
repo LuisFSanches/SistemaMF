@@ -3,7 +3,7 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllOrderDeliveriesService {
-    async execute(page: number = 1, pageSize: number = 10, query?: string, filter?: string) {
+    async execute(page: number = 1, pageSize: number = 10, query?: string, filter?: string, startDate?: string, endDate?: string) {
         try {
             const skip = (page - 1) * pageSize;
 
@@ -13,6 +13,21 @@ class GetAllOrderDeliveriesService {
                 whereClause.is_archived = false;
             } else if (filter === 'archived') {
                 whereClause.is_archived = true;
+            }
+
+            if (startDate && endDate) {
+                whereClause.delivery_date = {
+                    gte: new Date(startDate),
+                    lte: new Date(endDate)
+                };
+            } else if (startDate) {
+                whereClause.delivery_date = {
+                    gte: new Date(startDate)
+                };
+            } else if (endDate) {
+                whereClause.delivery_date = {
+                    lte: new Date(endDate)
+                };
             }
 
             if (query) {

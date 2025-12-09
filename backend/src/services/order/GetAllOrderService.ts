@@ -3,34 +3,51 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllOrderService {
-    async execute(page: number = 1, pageSize: number = 10, query?: string) {
+    async execute(page: number = 1, pageSize: number = 10, query?: string, startDate?: string, endDate?: string) {
         try {
             const skip = (page - 1) * pageSize;
 
-            const filters = query
-                ? {
-                    OR: [
-                        {
-                            client: {
-                                OR: [
-                                    { first_name: { contains: query, mode: 'insensitive' } },
-                                    { last_name: { contains: query, mode: 'insensitive' } },
-                                    { phone_number: { contains: query, mode: 'insensitive' } }
-                                ]
-                            }
-                        },
-                        {
-                            code: {
-                                equals: isNaN(Number(query)) ? undefined : Number(query)
-                            }
+            let filters: any = {};
+
+            // Filtro por data
+            if (startDate && endDate) {
+                filters.delivery_date = {
+                    gte: new Date(startDate),
+                    lte: new Date(endDate)
+                };
+            } else if (startDate) {
+                filters.delivery_date = {
+                    gte: new Date(startDate)
+                };
+            } else if (endDate) {
+                filters.delivery_date = {
+                    lte: new Date(endDate)
+                };
+            }
+
+            // Filtro por query (busca de texto)
+            if (query) {
+                filters.OR = [
+                    {
+                        client: {
+                            OR: [
+                                { first_name: { contains: query, mode: 'insensitive' } },
+                                { last_name: { contains: query, mode: 'insensitive' } },
+                                { phone_number: { contains: query, mode: 'insensitive' } }
+                            ]
                         }
-                    ]
-                }
-                : {};
+                    },
+                    {
+                        code: {
+                            equals: isNaN(Number(query)) ? undefined : Number(query)
+                        }
+                    }
+                ];
+            }
 
             const [orders, total] = await Promise.all([
                 prismaClient.order.findMany({
-                    where: filters as any,
+                    where: filters,
                     include: {
                         client: true,
                         clientAddress: true,
@@ -48,7 +65,7 @@ class GetAllOrderService {
                     take: pageSize
                 }),
                 prismaClient.order.count({
-                    where: filters as any
+                    where: filters
                 })
             ]);
 

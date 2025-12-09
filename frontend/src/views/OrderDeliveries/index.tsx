@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import moment from "moment";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faCheck, faEnvelopeCircleCheck, faBoxOpen } from "@fortawesome/free-solid-svg-icons";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
@@ -28,8 +27,6 @@ export function OrderDeliveriesPage() {
     const [query, setQuery] = useState('');
     const [startDate, setStartDate] = useState<string | null>(null);
     const [endDate, setEndDate] = useState<string | null>(null);
-    const [dateFilterType, setDateFilterType] = useState<string>("all-dates");
-    const [filteredDeliveries, setFilteredDeliveries] = useState(orderDeliveries);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [confirmBulkPayModal, setConfirmBulkPayModal] = useState(false);
     const [confirmBulkArchiveModal, setConfirmBulkArchiveModal] = useState(false);
@@ -37,42 +34,16 @@ export function OrderDeliveriesPage() {
     const pageSize = 45;
 
     useEffect(() => {
-        loadOrderDeliveries(page, pageSize, query, filter);
+        loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate);
         setSelectedIds([]);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, query, filter]);
+    }, [page, query, filter, startDate, endDate]);
 
-    useEffect(() => {
-        applyDateFilter();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [orderDeliveries, startDate, endDate, dateFilterType]);
 
-    const applyDateFilter = () => {
-        if (!startDate && !endDate) {
-            setFilteredDeliveries(orderDeliveries);
-            return;
-        }
-
-        const filterByDate = (delivery: any) => {
-            const deliveryDate = moment(delivery.delivery_date);
-            
-            if (dateFilterType === "today" || dateFilterType === "yesterday") {
-                return deliveryDate.isSame(moment(startDate), "day");
-            } else if (dateFilterType === "week") {
-                return deliveryDate.isBetween(moment(startDate), moment(endDate), "day", "[]");
-            } else if (dateFilterType === "custom" && startDate && endDate) {
-                return deliveryDate.isBetween(moment(startDate), moment(endDate), "day", "[]");
-            }
-            return true;
-        };
-
-        setFilteredDeliveries(orderDeliveries.filter(filterByDate));
-    };
 
     const handleDateRangeChange = (start: string | null, end: string | null, filterType: string) => {
         setStartDate(start);
         setEndDate(end);
-        setDateFilterType(filterType);
     };
 
     const searchDeliveries = (text: string) => {
@@ -88,7 +59,7 @@ export function OrderDeliveriesPage() {
 
     const handleSelectAll = (checked: boolean) => {
         if (checked) {
-            setSelectedIds(filteredDeliveries.map(d => d.id!));
+            setSelectedIds(orderDeliveries.map(d => d.id!));
         } else {
             setSelectedIds([]);
         }
@@ -97,7 +68,7 @@ export function OrderDeliveriesPage() {
     const handleBulkPay = async () => {
         try {
             await bulkUpdateOrderDeliveries(selectedIds, { is_paid: true });
-            await loadOrderDeliveries(page, pageSize, query, filter);
+            await loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate);
             setSelectedIds([]);
             setConfirmBulkPayModal(false);
             showSuccess(`${selectedIds.length} entrega(s) marcada(s) como paga(s)!`);
@@ -110,7 +81,7 @@ export function OrderDeliveriesPage() {
     const handleBulkArchive = async () => {
         try {
             await bulkUpdateOrderDeliveries(selectedIds, { is_archived: true });
-            await loadOrderDeliveries(page, pageSize, query, filter);
+            await loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate);
             setSelectedIds([]);
             setConfirmBulkArchiveModal(false);
             showSuccess(`${selectedIds.length} entrega(s) arquivada(s)!`);
@@ -123,7 +94,7 @@ export function OrderDeliveriesPage() {
     const handleBulkUnarchive = async () => {
         try {
             await bulkUpdateOrderDeliveries(selectedIds, { is_archived: false });
-            await loadOrderDeliveries(page, pageSize, query, filter);
+            await loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate);
             setSelectedIds([]);
             setConfirmBulkUnarchiveModal(false);
             showSuccess(`${selectedIds.length} entrega(s) desarquivada(s)!`);
@@ -227,7 +198,7 @@ export function OrderDeliveriesPage() {
                 )}
             </MassActionsContainer>
             <OrderDeliveriesTable 
-                deliveries={filteredDeliveries} 
+                deliveries={orderDeliveries} 
                 filter={filter} 
                 page={page}
                 pageSize={pageSize}
