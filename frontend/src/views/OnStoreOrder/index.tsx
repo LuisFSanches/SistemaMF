@@ -583,7 +583,6 @@ export function OnStoreOrder() {
         if (is_delivery) {
             setSteps(["Produtos", "Pedido", "Cliente", "Resumo"]);
             setPickupOnStore(false);
-            setValue("payment_received", false);
             
             if (client_id) {
                 getClientAddresses(client_id).then(({ data: addresses }) => {
