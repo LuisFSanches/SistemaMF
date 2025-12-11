@@ -230,7 +230,8 @@ export function OnStoreOrder() {
             city: "Itaperuna",
             state: "RJ",
             country: "Brasil"
-        }
+        },
+        shouldFocusError: false
     });
 
     // Calcula o desconto absoluto baseado no tipo (% ou valor)
@@ -932,10 +933,10 @@ export function OnStoreOrder() {
                                     </CheckboxContainer>
                                 </InlineFormField>
 
-                                {/* Hidden fields */}
-                                <Input type="number" {...register("products_value")} style={{ display: 'none' }} />
-                                <Input type="number" {...register("discount")} style={{ display: 'none' }} />
-                                <Input type="number" {...register("delivery_fee")} style={{ display: 'none' }} />
+                                {/* Hidden fields - não causam erro de foco com shouldFocusError: false */}
+                                <input type="hidden" {...register("products_value")} />
+                                <input type="hidden" {...register("discount")} />
+                                <input type="hidden" {...register("delivery_fee")} />
                             </>
                         )}
 
