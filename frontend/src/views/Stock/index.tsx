@@ -108,10 +108,11 @@ export function StockPage(){
                 <thead className="head">
                     <tr>
                         <th>Produto</th>
-                        <th>Qtd</th>
-                        <th>Unidade</th>
+                        <th className="smallColumn">Qtd</th>
+                        <th className="smallColumn">Unidade</th>
                         <th>Preço Unit</th>
                         <th>Preço Total</th>
+                        <th>Preço Venda</th>
                         <th>Fornecedor</th>
                         <th>Data compra</th>
                         <th>Excluir</th>
@@ -128,10 +129,11 @@ export function StockPage(){
                                     {transaction.product?.name}
                                 </span>
                             </td>
-                            <td>{transaction.quantity}</td>
-                            <td>{transaction.unity}</td>
+                            <td className="smallColumn">{transaction.quantity}</td>
+                            <td className="smallColumn">{transaction.unity}</td>
                             <td>{convertMoney(transaction.unity_price)}</td>
                             <td>{convertMoney(transaction.total_price)}</td>
+                            <td>{convertMoney(transaction.product?.price as number)}</td>
                             <td>{transaction.supplier}</td>
                             <td>{moment(transaction.purchased_date).format("DD/MM/YYYY")}</td>
                             <td className="delete-icon">
