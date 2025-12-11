@@ -110,9 +110,9 @@ export function OrderDeliveriesPage() {
                 <div>
                     <h1>Entregas de Pedidos</h1>
                     <input
-                        style={{width: '250px'}}
+                        style={{width: '330px'}}
                         type="text"
-                        placeholder="Buscar por Motoboy ou Pedido"
+                        placeholder="Buscar por Motoboy, Pedido ou Cliente..."
                         onKeyDown={(e: any) => {
                             if (e.key === 'Enter') {
                                 searchDeliveries(e.target.value);

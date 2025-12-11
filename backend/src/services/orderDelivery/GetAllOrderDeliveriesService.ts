@@ -47,6 +47,17 @@ class GetAllOrderDeliveriesService {
                                 { phone_number: { contains: query, mode: 'insensitive' } }
                             ]
                         }
+                    },
+                    {
+                        order: {
+                            client: {
+                                OR: [
+                                    { first_name: { contains: query, mode: 'insensitive' } },
+                                    { last_name: { contains: query, mode: 'insensitive' } },
+                                    { phone_number: { contains: query, mode: 'insensitive' } }
+                                ]
+                            }
+                        }
                     }
                 ];
 
@@ -76,14 +87,6 @@ class GetAllOrderDeliveriesService {
                                         phone_number: true
                                     }
                                 },
-                                clientAddress: {
-                                    select: {
-                                        street: true,
-                                        street_number: true,
-                                        neighborhood: true,
-                                        city: true
-                                    }
-                                }
                             }
                         },
                         deliveryMan: {

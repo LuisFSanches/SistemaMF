@@ -48,7 +48,7 @@ export function ServiceOrdersPage(){
 	useEffect(() => {
 		fetchOrders();
 		if (onGoingOrders.length === 0 && !requestOrders) {
-			loadOnGoingOrders();
+			loadOnGoingOrders(false);
 			setRequestOrders(true);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps

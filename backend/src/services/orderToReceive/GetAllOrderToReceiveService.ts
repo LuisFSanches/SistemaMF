@@ -9,13 +9,11 @@ class GetAllOrderToReceiveService {
 
             let whereClause: any = {};
             
-            // Aplicar filtro de arquivamento
             if (filter === 'active') {
                 whereClause.is_archived = false;
             } else if (filter === 'archived') {
                 whereClause.is_archived = true;
             }
-            // Se não houver filter, retorna todos (não adiciona condição de is_archived)
 
             if (query) {
                 const isNumericQuery = !isNaN(Number(query));
@@ -44,7 +42,7 @@ class GetAllOrderToReceiveService {
                 whereClause.OR = orConditions;
             }
 
-            const [ordersToReceive, total] = await Promise.all([
+            const [ordersToReceive, total, totalToReceiveResult] = await Promise.all([
                 prismaClient.orderToReceive.findMany({
                     where: whereClause,
                     include: {
@@ -73,12 +71,32 @@ class GetAllOrderToReceiveService {
                 }),
                 prismaClient.orderToReceive.count({
                     where: whereClause
+                }),
+                prismaClient.orderToReceive.findMany({
+                    where: {
+                        is_archived: false,
+                        order: {
+                            payment_received: false
+                        }
+                    },
+                    select: {
+                        order: {
+                            select: {
+                                total: true
+                            }
+                        }
+                    }
                 })
             ]);
+
+            const totalToReceive = totalToReceiveResult.reduce((sum, item) => {
+                return sum + (item.order.total || 0);
+            }, 0);
 
             return {
                 ordersToReceive,
                 total,
+                totalToReceive,
                 currentPage: page,
                 totalPages: Math.ceil(total / pageSize)
             };

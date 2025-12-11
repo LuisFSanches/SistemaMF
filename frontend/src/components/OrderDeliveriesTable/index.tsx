@@ -5,7 +5,7 @@ import moment from "moment";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faEnvelopeCircleCheck, faTrash, faBoxOpen } from "@fortawesome/free-solid-svg-icons";
 import { IOrderDelivery } from "../../interfaces/IOrderDelivery";
-import { convertMoney } from "../../utils";
+import { convertMoney, formatTelephone } from "../../utils";
 import { ConfirmPopUp } from "../ConfirmPopUp";
 import { NewOrderDeliveryModal } from "../NewOrderDeliveryModal";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
@@ -119,7 +119,7 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
             <table>
                 <thead>
                     <tr>
-                        <th>
+                        <th className="smallColumn">
                             <input
                                 type="checkbox"
                                 checked={filteredDeliveries.length > 0 && selectedIds.length === filteredDeliveries.length}
@@ -129,6 +129,8 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
                         </th>
                         <th>Motoboy</th>
                         <th>Nº Pedido</th>
+                        <th>Cliente</th>
+                        <th>Telefone</th>
                         <th>Taxa de Entrega</th>
                         <th>Data de Entrega</th>
                         <th>Pagamento</th>
@@ -138,7 +140,7 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
                 <tbody>
                     {filteredDeliveries.map((delivery) => (
                         <tr key={delivery.id}>
-                            <td>
+                            <td className="smallColumn">
                                 <input
                                     type="checkbox"
                                     checked={selectedIds.includes(delivery.id!)}
@@ -157,6 +159,8 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
                                     #{delivery.order?.code || 'N/A'}
                                 </Link>
                             </td>
+                            <td>{delivery.order?.client ? `${delivery.order.client.first_name} ${delivery.order.client.last_name}` : 'N/A'}</td>
+                            <td>{formatTelephone(delivery.order?.client.phone_number as string) || 'N/A'}</td>
                             <td>{convertMoney(delivery.order?.delivery_fee || 0)}</td>
                             <td>{moment(delivery.delivery_date).format('DD/MM/YYYY HH:mm')}</td>
                             <td>

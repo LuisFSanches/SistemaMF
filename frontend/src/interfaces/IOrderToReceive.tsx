@@ -10,6 +10,7 @@ export interface IOrderToReceive {
   created_at?: string;
   updated_at?: string;
   order?: IOrder;
+  totalToReceive?: number;
 }
 
 export interface ICreateOrderToReceive {

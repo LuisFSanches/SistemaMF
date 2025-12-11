@@ -17,7 +17,7 @@ import {
 import { PageHeader } from "../../styles/global";
 
 export function OrdersToReceivePage() {
-    const { ordersToReceive, totalOrders, loadOrdersToReceive } = useOrdersToReceive();
+    const { ordersToReceive, totalOrders, loadOrdersToReceive, totalToReceive } = useOrdersToReceive();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [filter, setFilter] = useState<'active' | 'archived' | 'all'>('active');
     const [page, setPage] = useState(1);
@@ -34,15 +34,6 @@ export function OrdersToReceivePage() {
         setPage(1);
     }
 
-    const calculateTotal = () => {
-        if (!ordersToReceive || !Array.isArray(ordersToReceive)) {
-            return 0;
-        }
-        return ordersToReceive
-            .filter(order => !order.is_archived && !order.received_date)
-            .reduce((sum, order) => sum + (order.order?.total || 0), 0);
-    };
-
     return (
         <Container>
             <PageHeader>
@@ -50,7 +41,7 @@ export function OrdersToReceivePage() {
                     <h1>Valores a Receber</h1>
                     <TotalCard>
                         <h3>Total a receber: </h3>
-                        <p>{convertMoney(calculateTotal())}</p>
+                        <p>{convertMoney(totalToReceive)}</p>
                     </TotalCard>
                 </div>
 

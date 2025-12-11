@@ -6,6 +6,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
 import { useOrders } from "../../contexts/OrdersContext";
 import { listDeliveryMen } from "../../services/deliveryManService";
+import { updateStatus } from "../../services/orderService";
 import { IOrder } from "../../interfaces/IOrder";
 import { IOrderDelivery } from "../../interfaces/IOrderDelivery";
 import { IDeliveryMan } from "../../interfaces/IDeliveryMan";
@@ -37,7 +38,7 @@ interface FormData {
 
 export function NewOrderDeliveryModal({ isOpen, onRequestClose, action, currentOrderDelivery }: NewOrderDeliveryModalProps) {
     const { createOrderDelivery, updateOrderDelivery, isLoading } = useOrderDeliveries();
-    const { loadAvailableOrders } = useOrders();
+    const { loadAvailableOrders, loadOnGoingOrders } = useOrders();
     const [query, setQuery] = useState("");
     const [orderSuggestions, setOrderSuggestions] = useState<IOrder[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -142,6 +143,13 @@ export function NewOrderDeliveryModal({ isOpen, onRequestClose, action, currentO
                     order_id: selectedOrder!.id!,
                     ...data
                 });
+
+                await updateStatus({
+                    id: selectedOrder!.id!,
+                    status: 'DONE'
+                });
+
+                await loadOnGoingOrders(true);
             } else if (action === "edit" && currentOrderDelivery?.id) {
                 await updateOrderDelivery(currentOrderDelivery.id, data);
             }

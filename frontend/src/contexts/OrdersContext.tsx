@@ -10,7 +10,7 @@ interface OrdersContextType {
   addOrder: (client: IOrder) => void;
   editOrder: (client: IOrder) => void;
   onGoingOrders: IOrder[];
-  loadOnGoingOrders: () => Promise<void>;
+  loadOnGoingOrders: (forceLoad: boolean) => Promise<void>;
   loadWaitingOrders: () => Promise<void>;
   waitingOrders: IOrder[]
 }
