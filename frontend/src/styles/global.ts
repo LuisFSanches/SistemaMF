@@ -101,6 +101,10 @@ table{
             word-break:break-all
         }
 
+        .smallColumn {
+            width: 5%;
+        }
+
         .description {
             width: 25%;
         }
