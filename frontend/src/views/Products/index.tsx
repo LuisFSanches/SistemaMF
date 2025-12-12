@@ -12,7 +12,7 @@ import placeholder_products from '../../assets/images/placeholder_products.png';
 
 
 export function ProductsPage(){
-    const { products, loadAvailableProducts, totalProducts } = useProducts();
+    const { products, loadAvailableProducts, totalProducts, refreshProducts } = useProducts();
     
     const [productModal, setProductModal] = useState(false);
     const [action, setAction] = useState("");
@@ -228,7 +228,7 @@ export function ProductsPage(){
             <ProductModal 
                 isOpen={productModal}
                 onRequestClose={handleCloseProductModal}
-                loadData={() => {}}
+                loadData={refreshProducts}
                 action={action}
                 currentProduct={currentProduct}
             />

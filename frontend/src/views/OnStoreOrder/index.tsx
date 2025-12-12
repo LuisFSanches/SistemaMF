@@ -140,7 +140,7 @@ interface IProduct {
 export function OnStoreOrder() {
     const { addOrder } = useOrders();
     const { admins } = useAdmins();
-    const { products: availableProducts, loadAvailableProducts, totalProducts } = useProducts();
+    const { products: availableProducts, loadAvailableProducts, totalProducts, refreshProducts } = useProducts();
     const { showSuccess } = useSuccessMessage();
 
     const [step, setStep] = useState(1);
@@ -571,14 +571,17 @@ export function OnStoreOrder() {
     }, [description]);
 
     useEffect(() => {
-        setShowLoader(true);
-        setTimeout(() => {
-            loadAvailableProducts(page, pageSize, query).then(() => {
-                setShowLoader(false);
-            });
-        }, 300);
+        // Verifica se já está no step 1 (produtos) antes de carregar
+        if (step === 1) {
+            setShowLoader(true);
+            setTimeout(() => {
+                loadAvailableProducts(page, pageSize, query).then(() => {
+                    setShowLoader(false);
+                });
+            }, 300);
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, pageSize, query]);
+    }, [page, pageSize, query, step]);
 
     useEffect(() => {
         if (is_delivery) {
@@ -631,7 +634,7 @@ export function OnStoreOrder() {
             <ProductModal 
                 isOpen={productModal}
                 onRequestClose={handleCloseProductModal}
-                loadData={() => {}}
+                loadData={refreshProducts}
                 action={"create"}
                 currentProduct={{
                     id: "",

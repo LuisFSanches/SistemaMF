@@ -77,7 +77,7 @@ interface IProduct {
 }
 
 export function OnlineOrder() {
-    const { products: availableProducts, loadAvailableProducts, totalProducts } = useProducts();
+    const { products: availableProducts, loadAvailableProducts, totalProducts, refreshProducts } = useProducts();
     const { showSuccess } = useSuccessMessage();
 
     const navigate = useNavigate();
@@ -363,7 +363,7 @@ export function OnlineOrder() {
             <ProductModal 
                 isOpen={productModal}
                 onRequestClose={handleCloseProductModal}
-                loadData={() => {}}
+                loadData={refreshProducts}
                 action={"create"}
                 currentProduct={{
                     id: "",

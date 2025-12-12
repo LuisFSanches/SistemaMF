@@ -98,7 +98,7 @@ export function ProductModal({
                 setImagePreview("");
                 setImageFile(null);
                 setValue("image", "");
-                loadAvailableProducts(1, 400, "");
+                loadAvailableProducts(1, 30, "");
                 setShowLoader(false);
             } catch (error) {
                 setShowLoader(false);
@@ -188,8 +188,8 @@ export function ProductModal({
                 }
 
                 addProduct(productData);
-                loadAvailableProducts(1, 400, "");
                 showSuccess("Produto criado com sucesso!");
+                await loadData();
                 onRequestClose();
             }
 
@@ -209,8 +209,8 @@ export function ProductModal({
                 }
 
                 editProduct(productData);
-                loadAvailableProducts(1, 400, "");
                 showSuccess("Produto atualizado com sucesso!");
+                await loadData();
                 onRequestClose();
             }
 
