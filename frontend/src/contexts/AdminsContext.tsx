@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { listAdmins } from "../services/adminService";
 import { IAdmin } from "../interfaces/IAdmin";
+import { PUBLIC_ROUTES } from "../constants";
 
 interface AdminsContextType {
   admins: IAdmin[];
@@ -36,7 +37,11 @@ export const AdminsProvider: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    if (token) {
+    const isPublicRoute = PUBLIC_ROUTES.some(route => 
+      window.location.pathname === '/' || window.location.pathname.includes(route)
+    );
+    
+    if (token && !isPublicRoute) {
       loadAvailableAdmins();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { listProducts } from "../services/productService";
 import { IProduct } from "../interfaces/IProduct";
+import { PUBLIC_ROUTES } from "../constants";
 
 
 interface ProductsContextType {
@@ -92,7 +93,11 @@ export const ProductsProvider: React.FC = ({ children }) => {
     }, []);
 
     useEffect(() => {
-        if (token) {
+        const isPublicRoute = PUBLIC_ROUTES.some(route => 
+            window.location.pathname === '/' || window.location.pathname.includes(route)
+        );
+        
+        if (token && !isPublicRoute) {
             loadAvailableProducts(1, 10, "");
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { getAllOrders, getOnGoingOrders, getWaitingOrders } from "../services/orderService";
 import { useOrderSocket } from '../hooks/useOrderSocket';
 import { IOrder } from "../interfaces/IOrder";
+import { PUBLIC_ROUTES } from "../constants";
 
 interface OrdersContextType {
   orders: IOrder[];
@@ -105,8 +106,11 @@ export const OrdersProvider: React.FC = ({ children }) => {
     })
 
   useEffect(() => {
-    if (token) {
-
+    const isPublicRoute = PUBLIC_ROUTES.some(route => 
+      window.location.pathname === '/' || window.location.pathname.includes(route)
+    );
+    
+    if (token && !isPublicRoute) {
       if (!window.location.pathname.includes('ordensDeServico')) {
         loadOnGoingOrders();
       }
