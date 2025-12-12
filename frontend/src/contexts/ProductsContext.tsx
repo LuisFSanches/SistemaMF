@@ -20,7 +20,7 @@ export const ProductsProvider: React.FC = ({ children }) => {
     const [totalProducts, setTotalProducts] = useState(0);
     const cacheRef = useRef<Map<string, { products: IProduct[], total: number, timestamp: number }>>(new Map());
     const lastParamsRef = useRef<{ page: number, pageSize: number, query: string } | null>(null);
-    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+    const CACHE_DURATION = 240 * 60 * 1000; // 240 minutos
     const token = localStorage.getItem("token");
 
     const loadAvailableProducts = useCallback(async (
