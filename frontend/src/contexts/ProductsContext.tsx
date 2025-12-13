@@ -1,9 +1,6 @@
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
+import { createContext, useContext, useState, useCallback, useRef } from "react";
 import { listProducts } from "../services/productService";
 import { IProduct } from "../interfaces/IProduct";
-import { PUBLIC_ROUTES } from "../constants";
-
-
 interface ProductsContextType {
     products: IProduct[];
     loadAvailableProducts: (page: number, pageSize: number, query: string, forceRefresh?: boolean) => Promise<void>;
@@ -21,7 +18,6 @@ export const ProductsProvider: React.FC = ({ children }) => {
     const cacheRef = useRef<Map<string, { products: IProduct[], total: number, timestamp: number }>>(new Map());
     const lastParamsRef = useRef<{ page: number, pageSize: number, query: string } | null>(null);
     const CACHE_DURATION = 240 * 60 * 1000; // 240 minutos
-    const token = localStorage.getItem("token");
 
     const loadAvailableProducts = useCallback(async (
         page: number, 
@@ -90,17 +86,6 @@ export const ProductsProvider: React.FC = ({ children }) => {
         
         // Limpa o cache para forçar atualização na próxima busca
         cacheRef.current.clear();
-    }, []);
-
-    useEffect(() => {
-        const isPublicRoute = PUBLIC_ROUTES.some(route => 
-            window.location.pathname === '/' || window.location.pathname.includes(route)
-        );
-        
-        if (token && !isPublicRoute) {
-            loadAvailableProducts(1, 10, "");
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

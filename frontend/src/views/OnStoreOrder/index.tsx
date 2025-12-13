@@ -157,8 +157,19 @@ export function OnStoreOrder() {
     const [query, setQuery] = useState('');
     const [products, setProducts] = useState<IProduct[]>([]);
     const [productModal, setProductModal] = useState(false);
+    // Calcula o pageSize inicial baseado na largura da tela
+    const getInitialPageSize = () => {
+        const width = window.innerWidth;
+        if (width < 800) return 4;
+        if (width < 1300) return 4;
+        if (width < 1600) return 8;
+        if (width < 1900) return 10;
+        if (width < 2250) return 12;
+        return 14;
+    };
+
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(8);
+    const [pageSize] = useState(getInitialPageSize());
     const [steps, setSteps] = useState(["Produtos", "Pedido", "Cliente", "Resumo"]);
     const [is_delivery, setIsDelivery] = useState(false);
     const [orderStatus, setOrderStatus] = useState<"OPENED" | "DONE">("OPENED");
@@ -603,30 +614,6 @@ export function OnStoreOrder() {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [is_delivery]);
-
-    useEffect(() => {
-        function handleResize() {
-            const width = window.innerWidth;
-            if (width < 800) {
-                setPageSize(4);
-            } else if (width < 1300) {
-                setPageSize(4);
-            } 
-            else if (width < 1600) {
-                setPageSize(8);
-            }
-            else if (width < 1900) {
-                setPageSize(10);
-            } else if (width < 2250) {
-                setPageSize(12);
-            } else {
-                setPageSize(14);
-            }
-        }
-
-        // Executa ao montar
-        handleResize();
-    }, []);
     
     return(
         <Container>
