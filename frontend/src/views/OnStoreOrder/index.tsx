@@ -578,7 +578,7 @@ export function OnStoreOrder() {
                 loadAvailableProducts(page, pageSize, query).then(() => {
                     setShowLoader(false);
                 });
-            }, 300);
+            }, 120);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, pageSize, query, step]);
