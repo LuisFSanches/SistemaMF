@@ -62,4 +62,10 @@ export const io = new Server(server, {
   },
 });
 
-io.on('connection', (socket) => {});
+io.on('connection', (socket) => {
+  console.log('Novo cliente conectado:', socket.id);
+
+  socket.on('disconnect', () => {
+    console.log('WS desconectado:', socket.id);
+  });
+});
