@@ -80,8 +80,10 @@ export const ORDERS_TO_RECEIVE_TYPES = {
 }
 
 export const PUBLIC_ROUTES = [
+  '/',
   'completarPedido',
   'concluirEntrega',
   '/carrinho',
-  '/checkout'
+  '/checkout',
+  '/login',
 ]
