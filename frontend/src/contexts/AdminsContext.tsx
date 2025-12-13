@@ -37,9 +37,13 @@ export const AdminsProvider: React.FC = ({ children }) => {
   };
 
   useEffect(() => {
-    const isPublicRoute = PUBLIC_ROUTES.some(route => 
-      window.location.pathname === '/' || window.location.pathname.includes(route)
-    );
+    const currentPath = window.location.pathname;
+    const isPublicRoute = PUBLIC_ROUTES.some(route => {
+          if (route === '/') {
+              return currentPath === '/';
+          }
+          return currentPath.includes(route);
+      });
     
     if (token && !isPublicRoute) {
       loadAvailableAdmins();

@@ -68,9 +68,7 @@ export const OrdersProvider: React.FC = ({ children }) => {
   };
 
     useOrderSocket((data: any, eventType: string) => {
-      console.log('New order received via socket:', data);
-      console.log('Event type:', eventType);
-      
+
       if (eventType === 'whatsappOrder' && window.location.href.includes('backoffice')) {
           window.dispatchEvent(new CustomEvent('new-order', {
             detail: {
@@ -106,9 +104,13 @@ export const OrdersProvider: React.FC = ({ children }) => {
     })
 
   useEffect(() => {
-    const isPublicRoute = PUBLIC_ROUTES.some(route => 
-      window.location.pathname === '/' || window.location.pathname.includes(route)
-    );
+    const currentPath = window.location.pathname;
+    const isPublicRoute = PUBLIC_ROUTES.some(route => {
+        if (route === '/') {
+            return currentPath === '/';
+        }
+        return currentPath.includes(route);
+    });
     
     if (token && !isPublicRoute) {
       if (!window.location.pathname.includes('ordensDeServico')) {
