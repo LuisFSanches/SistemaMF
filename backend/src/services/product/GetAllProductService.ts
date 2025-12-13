@@ -16,14 +16,11 @@ class GetAllProductService{
 
 				const productsRaw = await prismaClient.$queryRawUnsafe<any[]>(
 					`
-						SELECT p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store,
-						       COALESCE(COUNT(DISTINCT oi.order_id), 0) as sales_count
+						SELECT p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store, p.sales_count
 						FROM "products" p
-						LEFT JOIN "order_items" oi ON p.id = oi.product_id
 						WHERE p.enabled = true
 						AND ${conditions}
-						GROUP BY p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store
-						ORDER BY sales_count DESC, p.created_at DESC
+						ORDER BY p.sales_count DESC, p.created_at DESC
 						LIMIT $${searchTerms.length + 1} OFFSET $${searchTerms.length + 2}
 					`,
 					...searchTerms,
@@ -58,13 +55,10 @@ class GetAllProductService{
 
 			const [productsRaw, total] = await Promise.all([
 				prismaClient.$queryRaw<any[]>`
-					SELECT p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store,
-					       COALESCE(COUNT(DISTINCT oi.order_id), 0) as sales_count
+					SELECT p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store, p.sales_count
 					FROM "products" p
-					LEFT JOIN "order_items" oi ON p.id = oi.product_id
 					WHERE p.enabled = true
-					GROUP BY p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store
-					ORDER BY sales_count DESC, p.created_at DESC
+					ORDER BY p.sales_count DESC, p.created_at DESC
 					LIMIT ${pageSize} OFFSET ${skip}
 				`,
 				prismaClient.product.count({
