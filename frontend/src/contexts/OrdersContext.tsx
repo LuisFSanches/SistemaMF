@@ -3,6 +3,7 @@ import { getAllOrders, getOnGoingOrders, getWaitingOrders } from "../services/or
 import { useOrderSocket } from '../hooks/useOrderSocket';
 import { IOrder } from "../interfaces/IOrder";
 import { PUBLIC_ROUTES } from "../constants";
+import { checkPublicRoute } from "../utils";
 
 interface OrdersContextType {
   orders: IOrder[];
@@ -67,6 +68,9 @@ export const OrdersProvider: React.FC = ({ children }) => {
     );
   };
 
+  if (!checkPublicRoute(window.location.pathname, PUBLIC_ROUTES)) {
+    console.log('Iniciando WebSocket para ordens...');
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useOrderSocket((data: any, eventType: string) => {
 
       if (eventType === 'whatsappOrder' && window.location.href.includes('backoffice')) {
@@ -102,15 +106,12 @@ export const OrdersProvider: React.FC = ({ children }) => {
 
         loadOnGoingOrders(true);
     })
+  }
+
 
   useEffect(() => {
     const currentPath = window.location.pathname;
-    const isPublicRoute = PUBLIC_ROUTES.some(route => {
-        if (route === '/') {
-            return currentPath === '/';
-        }
-        return currentPath.includes(route);
-    });
+    const isPublicRoute = checkPublicRoute(currentPath, PUBLIC_ROUTES);
     
     if (token && !isPublicRoute) {
       if (!window.location.pathname.includes('ordensDeServico')) {

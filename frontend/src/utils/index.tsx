@@ -56,3 +56,12 @@ export const formatDescriptionWithPrice = (description: string|undefined): strin
         .map(line => line.trim())
         .filter(Boolean);
 }
+
+export const checkPublicRoute = (currentPath: string, PUBLIC_ROUTES: string[]): boolean => {
+    return PUBLIC_ROUTES.some(route => {
+        if (route === '/') {
+            return currentPath === '/';
+        }
+        return currentPath.includes(route);
+    });
+}

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { listAdmins } from "../services/adminService";
 import { IAdmin } from "../interfaces/IAdmin";
 import { PUBLIC_ROUTES } from "../constants";
+import { checkPublicRoute } from "../utils";
 
 interface AdminsContextType {
   admins: IAdmin[];
@@ -38,12 +39,7 @@ export const AdminsProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     const currentPath = window.location.pathname;
-    const isPublicRoute = PUBLIC_ROUTES.some(route => {
-          if (route === '/') {
-              return currentPath === '/';
-          }
-          return currentPath.includes(route);
-      });
+    const isPublicRoute = checkPublicRoute(currentPath, PUBLIC_ROUTES);
     
     if (token && !isPublicRoute) {
       loadAvailableAdmins();
