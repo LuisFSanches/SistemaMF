@@ -73,6 +73,7 @@ model Product {
   visible_in_store   Boolean  @default(false)
   image              String?
   qr_code            String?
+  sales_count        Int      @default(0)
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
 
