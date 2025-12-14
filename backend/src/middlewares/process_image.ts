@@ -20,9 +20,6 @@ export const processImage = async (
     const outputFilename = `optimized-${date.getTime()}-${req.file.filename}`;
     const outputPath = path.join(productsUploadDir, outputFilename);
 
-    console.log('[processImage] Input path:', inputPath);
-    console.log('[processImage] Output path:', outputPath);
-
     try {
         await sharp(inputPath)
             .resize(800, 800, {

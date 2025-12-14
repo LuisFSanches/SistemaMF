@@ -35,26 +35,20 @@ class UploadProductImageService {
         let imageUrl: string;
 
         try {
-            if (useR2) {
-                console.log('[UploadProductImageService] Using R2 storage');
-                
+            if (useR2) {                
                 const r2Service = new CloudflareR2Service();
                 const localFilePath = path.join(productsUploadDir, filename);
 
                 imageUrl = await r2Service.uploadFromPath(localFilePath, 'products');
 
                 if (product.image && product.image.includes(process.env.R2_PUBLIC_URL || '')) {
-                    console.log('[UploadProductImageService] Deleting old image from R2');
                     await r2Service.delete({ fileUrl: product.image });
                 }
 
                 if (fs.existsSync(localFilePath)) {
                     fs.unlinkSync(localFilePath);
-                    console.log('[UploadProductImageService] Local file deleted after R2 upload');
                 }
-            } else {
-                console.log('[UploadProductImageService] Using local storage');
-                
+            } else {                
                 const backendUrl = process.env.BACKEND_URL || 'http://localhost:3334';
 
                 if (product.image && !product.image.includes(process.env.R2_PUBLIC_URL || '')) {
@@ -63,7 +57,6 @@ class UploadProductImageService {
 
                     if (fs.existsSync(oldFilePath)) {
                         fs.unlinkSync(oldFilePath);
-                        console.log('[UploadProductImageService] Old local file deleted');
                     }
                 }
 
