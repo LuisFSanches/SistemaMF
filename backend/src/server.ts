@@ -35,7 +35,13 @@ app.use(cors({
 
 app.use(express.json());
 
-// app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
+// Servir uploads localmente apenas se não estiver usando R2
+if (process.env.USE_R2_STORAGE !== 'true') {
+  app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
+  console.log('[Server] Serving uploads from local filesystem');
+} else {
+  console.log('[Server] Using Cloudflare R2 for file storage');
+}
 
 app.use(router);
 app.use(errorMiddleware);

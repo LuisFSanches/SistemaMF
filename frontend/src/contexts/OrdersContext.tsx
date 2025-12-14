@@ -68,46 +68,48 @@ export const OrdersProvider: React.FC = ({ children }) => {
     );
   };
 
-  if (!checkPublicRoute(window.location.pathname, PUBLIC_ROUTES)) {
-    console.log('Iniciando WebSocket para ordens...');
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useOrderSocket((data: any, eventType: string) => {
+  // Inicializa o WebSocket apenas uma vez, independente de rotas
+  useOrderSocket((data: any, eventType: string) => {
+    const currentPath = window.location.pathname;
+    const isPublicRoute = checkPublicRoute(currentPath, PUBLIC_ROUTES);
+    console.log(' isPublicRoute:', isPublicRoute);
 
-      if (eventType === 'whatsappOrder' && window.location.href.includes('backoffice')) {
-          window.dispatchEvent(new CustomEvent('new-order', {
-            detail: {
-              message: '💐 Novo Pedido via link recebido!',
-              orderCode: `#${data.code}`,
-              clientName: `${data.client.first_name} ${data.client.last_name}`,
-            }
-        }));
-      }
+    // Só processa eventos se não estiver em rota pública
+    if (isPublicRoute) return;
 
-        if (eventType === 'storeFrontOrder' && !window.location.href.includes('completarPedido')) {
-          window.dispatchEvent(new CustomEvent('new-order', {
-            detail: {
-              message: '💐 Novo Pedido via loja online recebido!',
-              orderCode: `#${data.code}`,
-              clientName: `${data.client.first_name} ${data.client.last_name}`,
-            }
-        }));
-      }
+    if (eventType === 'whatsappOrder' && window.location.href.includes('backoffice')) {
+        window.dispatchEvent(new CustomEvent('new-order', {
+          detail: {
+            message: '💐 Novo Pedido via link recebido!',
+            orderCode: `#${data.code}`,
+            clientName: `${data.client.first_name} ${data.client.last_name}`,
+          }
+      }));
+    }
 
-        if (eventType === 'orderDelivered' && window.location.href.includes('backoffice')) {
-          window.dispatchEvent(new CustomEvent('order-delivered', {
-            detail: {
-              message: '✅ Pedido entregue pelo motoboy! 🛵',
-              orderCode: `#${data.order.code}`,
-              deliveryMan: `${data.deliveryMan.name}`,
-              clientName: `${data.order.client.first_name} ${data.order.client.last_name}`,
-            }
-        }));
-      }
+    if (eventType === 'storeFrontOrder' && !window.location.href.includes('completarPedido')) {
+        window.dispatchEvent(new CustomEvent('new-order', {
+          detail: {
+            message: '💐 Novo Pedido via loja online recebido!',
+            orderCode: `#${data.code}`,
+            clientName: `${data.client.first_name} ${data.client.last_name}`,
+          }
+      }));
+    }
 
-        loadOnGoingOrders(true);
-    })
-  }
+    if (eventType === 'orderDelivered' && window.location.href.includes('backoffice')) {
+        window.dispatchEvent(new CustomEvent('order-delivered', {
+          detail: {
+            message: '✅ Pedido entregue pelo motoboy! 🛵',
+            orderCode: `#${data.order.code}`,
+            deliveryMan: `${data.deliveryMan.name}`,
+            clientName: `${data.order.client.first_name} ${data.order.client.last_name}`,
+          }
+      }));
+    }
 
+    loadOnGoingOrders(true);
+  });
 
   useEffect(() => {
     const currentPath = window.location.pathname;

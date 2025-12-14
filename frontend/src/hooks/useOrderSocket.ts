@@ -1,42 +1,79 @@
 import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { PUBLIC_ROUTES } from '../constants';
+import { checkPublicRoute } from '../utils';
 
 const baseUrl = process.env.REACT_APP_API_URL || "http://localhost:3334";
+
+// Singleton: mantém uma única instância do socket para toda a aplicação
+let globalSocket: Socket | null = null;
+let isSocketInitialized = false;
 
 export const useOrderSocket = (
     onOrderReceived: (data: any, eventType: string) => void
 ) => {
-    const socketRef = useRef<Socket | null>(null);
+    const callbackRef = useRef(onOrderReceived);
 
     useEffect(() => {
-        socketRef.current = io(baseUrl, {
+        callbackRef.current = onOrderReceived;
+    }, [onOrderReceived]);
+
+    useEffect(() => {
+        const currentPath = window.location.pathname;
+        const isPublicRoute = checkPublicRoute(currentPath, PUBLIC_ROUTES);
+
+        if (isPublicRoute) {
+            return;
+        }
+
+        if (isSocketInitialized && globalSocket) {
+            
+            globalSocket.off('whatsappOrderReceived');
+            globalSocket.off('storeFrontOrderReceived');
+            globalSocket.off('orderDelivered');
+
+            globalSocket.on('whatsappOrderReceived', (data) => {
+                callbackRef.current(data, 'whatsappOrder');
+            });
+
+            globalSocket.on('storeFrontOrderReceived', (data) => {
+                callbackRef.current(data, 'storeFrontOrder');
+            });
+
+            globalSocket.on('orderDelivered', (data) => {
+                callbackRef.current(data, 'orderDelivered');
+            });
+
+            return;
+        }
+
+        console.log('Inicializando WebSocket pela primeira vez...');
+        globalSocket = io(baseUrl, {
             transports: ['websocket'],
             reconnection: true,
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
         });
 
-        const socket = socketRef.current;
+        isSocketInitialized = true;
 
-        socket.on('connect', () => {
-            console.log('WS conectado:', socket.id);
+        globalSocket.on('connect', () => {
+            console.log('WS conectado:', globalSocket?.id);
         });
 
-        socket.on('whatsappOrderReceived', (data) => {
-            onOrderReceived(data, 'whatsappOrder');
+        globalSocket.on('whatsappOrderReceived', (data) => {
+            callbackRef.current(data, 'whatsappOrder');
         });
 
-        socket.on('storeFrontOrderReceived', (data) => {
-            onOrderReceived(data, 'storeFrontOrder');
+        globalSocket.on('storeFrontOrderReceived', (data) => {
+            callbackRef.current(data, 'storeFrontOrder');
         });
 
-        socket.on('orderDelivered', (data) => {
-            onOrderReceived(data, 'orderDelivered');
+        globalSocket.on('orderDelivered', (data) => {
+            callbackRef.current(data, 'orderDelivered');
         });
 
         return () => {
-            socket.removeAllListeners();
-            socket.disconnect();
         };
-    }, [onOrderReceived]);
+    }, []);
 };

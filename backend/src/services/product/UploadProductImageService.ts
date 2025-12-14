@@ -4,6 +4,7 @@ import { ErrorCodes } from "../../exceptions/root";
 import fs from 'fs';
 import path from 'path';
 import { productsUploadDir } from "../../config/paths";
+import { CloudflareR2Service } from "../storage/CloudflareR2Service";
 
 interface IUploadProductImage {
     product_id: string;
@@ -12,9 +13,7 @@ interface IUploadProductImage {
 
 class UploadProductImageService {
     async execute({ product_id, filename }: IUploadProductImage) {
-        const backendUrl = process.env.BACKEND_URL || 'http://localhost:3334';
-        // console.log('[UploadProductImageService] Backend URL:', backendUrl);
-        // console.log('[UploadProductImageService] Upload directory:', productsUploadDir);
+        const useR2 = process.env.USE_R2_STORAGE === 'true';
         
         const product = await prismaClient.product.findFirst({
             where: { id: product_id },
@@ -33,36 +32,54 @@ class UploadProductImageService {
             );
         }
 
-        // console.log('[UploadProductImageService] Product found:', product.id);
-
-        if (product.image) {
-            const oldImagePath = product.image.replace(`${backendUrl}/uploads/products/`, '');
-            const oldFilePath = path.join(productsUploadDir, oldImagePath);
-
-            // console.log('[UploadProductImageService] Removing old image:', oldFilePath);
-
-            if (fs.existsSync(oldFilePath)) {
-                fs.unlinkSync(oldFilePath);
-            }
-        }
-
-        const imageUrl = `${backendUrl}/uploads/products/${filename}`;
-        // console.log('[UploadProductImageService] New image URL:', imageUrl);
+        let imageUrl: string;
 
         try {
+            if (useR2) {
+                console.log('[UploadProductImageService] Using R2 storage');
+                
+                const r2Service = new CloudflareR2Service();
+                const localFilePath = path.join(productsUploadDir, filename);
+
+                imageUrl = await r2Service.uploadFromPath(localFilePath, 'products');
+
+                if (product.image && product.image.includes(process.env.R2_PUBLIC_URL || '')) {
+                    console.log('[UploadProductImageService] Deleting old image from R2');
+                    await r2Service.delete({ fileUrl: product.image });
+                }
+
+                if (fs.existsSync(localFilePath)) {
+                    fs.unlinkSync(localFilePath);
+                    console.log('[UploadProductImageService] Local file deleted after R2 upload');
+                }
+            } else {
+                console.log('[UploadProductImageService] Using local storage');
+                
+                const backendUrl = process.env.BACKEND_URL || 'http://localhost:3334';
+
+                if (product.image && !product.image.includes(process.env.R2_PUBLIC_URL || '')) {
+                    const oldImagePath = product.image.replace(`${backendUrl}/uploads/products/`, '');
+                    const oldFilePath = path.join(productsUploadDir, oldImagePath);
+
+                    if (fs.existsSync(oldFilePath)) {
+                        fs.unlinkSync(oldFilePath);
+                        console.log('[UploadProductImageService] Old local file deleted');
+                    }
+                }
+
+                imageUrl = `${backendUrl}/uploads/products/${filename}`;
+            }
+
             const updatedProduct = await prismaClient.product.update({
                 where: { id: product_id },
                 data: { image: imageUrl },
             });
-
-            //console.log('[UploadProductImageService] Product updated successfully');
 
             return updatedProduct;
         } catch (error: any) {
             console.error("[UploadProductImageService] Failed:", error);
 
             const filePath = path.join(productsUploadDir, filename);
-            
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath);
             }
