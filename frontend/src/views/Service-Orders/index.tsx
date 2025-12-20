@@ -3,16 +3,18 @@ import moment from "moment";
 import { IOrder } from "../../interfaces/IOrder";
 import { DateRangePicker } from "../../components/DateRangePicker";
 import { ICreateOrderToReceive } from "../../interfaces/IOrderToReceive";
-import { Container, Orders, Header, OrderContainer } from "./style";
+import { Container, Orders, Header, OrderContainer, CardsContainer } from "./style";
 import { updateStatus, updateOrderPaymentStatus } from "../../services/orderService";
 import { checkOrderToReceiveExists } from "../../services/orderToReceiveService";
 import { OrderCard } from "../../components/OrderCard";
+import { OrderFilterCard } from "../../components/OrderFilterCard";
 import { useOrders } from "../../contexts/OrdersContext";
 import { useOrdersToReceive } from "../../contexts/OrdersToReceiveContext";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { Loader } from "../../components/Loader";
 import { EditOrderModal } from "../../components/EditOrderModal";
 import { PaymentStatusModal } from "../../components/PaymentStatusModal";
+import { faStore, faTruck, faClockRotateLeft, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 
 export function ServiceOrdersPage(){
 	const { onGoingOrders, editOrder, loadOnGoingOrders } = useOrders();
@@ -31,6 +33,7 @@ export function ServiceOrdersPage(){
 	const [startDate, setStartDate] = useState<string | null>(null);
 	const [endDate, setEndDate] = useState<string | null>(null);
 	const [dateFilterType, setDateFilterType] = useState<string>("all-dates");
+	const [activeCardFilter, setActiveCardFilter] = useState<string | null>(null);
 
     function handleOpenEditOrderModal(order: IOrder){
         setEditOrderModal(true);
@@ -184,11 +187,113 @@ export function ServiceOrdersPage(){
 		setEndDate(end);
 		setDateFilterType(filterType);
 	};
+
+	// Calculate card counts
+	const pickupOrders = onGoingOrders.filter((order: IOrder) => 
+		!order.is_delivery && order.status !== "DONE"
+	);
+
+	const deliveryOrders = onGoingOrders.filter((order: IOrder) => 
+		order.is_delivery && order.status !== "DONE"
+	);
+
+	const expiredPickupOrders = onGoingOrders.filter((order: IOrder) => 
+		!order.is_delivery && 
+		order.status !== "DONE" && 
+		moment(order.delivery_date).isBefore(moment(), 'day')
+	);
+
+	const expiredDeliveryOrders = onGoingOrders.filter((order: IOrder) => 
+		order.is_delivery && 
+		order.status !== "DONE" && 
+		moment(order.delivery_date).isBefore(moment(), 'day')
+	);
+
+	const handleCardFilterClick = (filterType: string) => {
+		if (activeCardFilter === filterType) {
+			setActiveCardFilter(null);
+			applyDateAndTypeFilters();
+		} else {
+			setActiveCardFilter(filterType);
+			applyCardFilter(filterType);
+		}
+	};
+
+	const applyCardFilter = (filterType: string) => {
+		let filteredOrders: IOrder[] = [];
+
+		switch (filterType) {
+			case 'pickup':
+				filteredOrders = onGoingOrders.filter((order: IOrder) => 
+					!order.is_delivery && order.status !== "DONE"
+				);
+				break;
+			case 'delivery':
+				filteredOrders = onGoingOrders.filter((order: IOrder) => 
+					order.is_delivery && order.status !== "DONE"
+				);
+				break;
+			case 'expired-pickup':
+				filteredOrders = onGoingOrders.filter((order: IOrder) => 
+					!order.is_delivery && 
+					order.status !== "DONE" && 
+					moment(order.delivery_date).isBefore(moment(), 'day')
+				);
+				break;
+			case 'expired-delivery':
+				filteredOrders = onGoingOrders.filter((order: IOrder) => 
+					order.is_delivery && 
+					order.status !== "DONE" && 
+					moment(order.delivery_date).isBefore(moment(), 'day')
+				);
+				break;
+			default:
+				filteredOrders = onGoingOrders;
+		}
+
+		setOpenedOrders(filteredOrders.filter(order => order.status === "OPENED"));
+		setInProgressOrders(filteredOrders.filter(order => order.status === "IN_PROGRESS"));
+		setInDeliveryOrders(filteredOrders.filter(order => order.status === "IN_DELIVERY"));
+	};
 	
 	
     return (
 		<Container>
 			<Loader show={showLoader} />
+			<CardsContainer>
+				<OrderFilterCard
+					title="Pedidos a Retirar"
+					value={pickupOrders.length}
+					icon={faStore}
+					color="#4A90E2"
+					isActive={activeCardFilter === 'pickup'}
+					onClick={() => handleCardFilterClick('pickup')}
+				/>
+				<OrderFilterCard
+					title="Pedidos a Entregar"
+					value={deliveryOrders.length}
+					icon={faTruck}
+					color="#6aa84f"
+					isActive={activeCardFilter === 'delivery'}
+					onClick={() => handleCardFilterClick('delivery')}
+				/>
+				<OrderFilterCard
+					title="Pedidos Retirada Vencidos"
+					value={expiredPickupOrders.length}
+					icon={faClockRotateLeft}
+					color="#f4d47c"
+					isActive={activeCardFilter === 'expired-pickup'}
+					onClick={() => handleCardFilterClick('expired-pickup')}
+				/>
+				<OrderFilterCard
+					title="Pedidos Entrega Vencidos"
+					value={expiredDeliveryOrders.length}
+					icon={faTriangleExclamation}
+					color="#E52E40"
+					isActive={activeCardFilter === 'expired-delivery'}
+					onClick={() => handleCardFilterClick('expired-delivery')}
+				/>
+			</CardsContainer>
 			<Header>
 				<div className="type-filters">
 					<button className={`all-orders ${selectedOrderType === "all-orders" ? "active" : ""}`}
