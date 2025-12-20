@@ -10,15 +10,18 @@ import { OrderCard } from "../../components/OrderCard";
 import { OrderFilterCard } from "../../components/OrderFilterCard";
 import { useOrders } from "../../contexts/OrdersContext";
 import { useOrdersToReceive } from "../../contexts/OrdersToReceiveContext";
+import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { Loader } from "../../components/Loader";
 import { EditOrderModal } from "../../components/EditOrderModal";
 import { PaymentStatusModal } from "../../components/PaymentStatusModal";
+import { SelectDeliveryManModal } from "../../components/SelectDeliveryManModal";
 import { faStore, faTruck, faClockRotateLeft, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 
 export function ServiceOrdersPage(){
 	const { onGoingOrders, editOrder, loadOnGoingOrders } = useOrders();
 	const { createOrderToReceive } = useOrdersToReceive();
+	const { createOrderDelivery } = useOrderDeliveries();
 	const { showSuccess } = useSuccessMessage();
 
 	const [openedOrders, setOpenedOrders] = useState<IOrder[]>([]);
@@ -28,6 +31,7 @@ export function ServiceOrdersPage(){
 	const [requestOrders, setRequestOrders] = useState(false);
     const [editOrderModal, setEditOrderModal] = useState(false);
     const [paymentStatusModal, setPaymentStatusModal] = useState(false);
+	const [selectDeliveryManModal, setSelectDeliveryManModal] = useState(false);
 	const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 	const [selectedOrderType, setSelectedOrderType] = useState("all-orders");
 	const [startDate, setStartDate] = useState<string | null>(null);
@@ -66,29 +70,37 @@ export function ServiceOrdersPage(){
 		setShowLoader(true);
 		const orderToUpdate = onGoingOrders.find(order => order.id === id);
 
-		if (status === 'DONE' && orderToUpdate && !orderToUpdate.payment_received) {
-			try {
-				// Verifica se já existe um registro na tabela orders_to_receive
-				const existsInOrdersToReceive: any = await checkOrderToReceiveExists(id);
-				
-				if (existsInOrdersToReceive.exists) {
-					const response = await updateStatus({ id, status: 'DONE' });
-					const { data: order } = response;
-					editOrder(order);
+		if (status === 'DONE' && orderToUpdate) {
+			if (orderToUpdate.is_delivery) {
+				setCurrentOrder(orderToUpdate);
+				setSelectDeliveryManModal(true);
+				setShowLoader(false);
+				return;
+			}
+
+			if (!orderToUpdate.payment_received) {
+				try {
+					const existsInOrdersToReceive: any = await checkOrderToReceiveExists(id);
+					
+					if (existsInOrdersToReceive.exists) {
+						const response = await updateStatus({ id, status: 'DONE' });
+						const { data: order } = response;
+						editOrder(order);
+						setShowLoader(false);
+						return;
+					}
+					
+					setCurrentOrder(orderToUpdate);
+					setPaymentStatusModal(true);
+					setShowLoader(false);
+					return;
+				} catch (error) {
+					console.error("Error checking order to receive:", error);
+					setCurrentOrder(orderToUpdate);
+					setPaymentStatusModal(true);
 					setShowLoader(false);
 					return;
 				}
-				
-				setCurrentOrder(orderToUpdate);
-				setPaymentStatusModal(true);
-				setShowLoader(false);
-				return;
-			} catch (error) {
-				console.error("Error checking order to receive:", error);
-				setCurrentOrder(orderToUpdate);
-				setPaymentStatusModal(true);
-				setShowLoader(false);
-				return;
 			}
 		}
 
@@ -122,6 +134,31 @@ export function ServiceOrdersPage(){
 		setShowLoader(false);
 		setPaymentStatusModal(false);
 		setCurrentOrder(null);
+	};
+
+	const handleConfirmDeliveryMan = async (deliveryManId: string, deliveryDate: string) => {
+		if (!currentOrder) return;
+		setShowLoader(true);
+		try {
+			await createOrderDelivery({
+				order_id: currentOrder.id!,
+				delivery_man_id: deliveryManId,
+				delivery_date: deliveryDate
+			});
+
+			const response = await updateStatus({ id: currentOrder.id!, status: 'DONE' });
+			const { data: order } = response;
+			editOrder(order);
+			
+			showSuccess("Entrega criada e pedido finalizado com sucesso!");
+			setSelectDeliveryManModal(false);
+			setCurrentOrder(null);
+		} catch (error) {
+			console.error("Error creating delivery:", error);
+			alert("Erro ao criar entrega. Tente novamente.");
+		} finally {
+			setShowLoader(false);
+		}
 	};
 
 	const applyDateAndTypeFilters = () => {
@@ -403,6 +440,17 @@ export function ServiceOrdersPage(){
 					onCreateOrderToReceive={handleCreateOrderToReceive}
 				/>
 			)}
+
+			<SelectDeliveryManModal
+				isOpen={selectDeliveryManModal}
+				onRequestClose={() => {
+					setSelectDeliveryManModal(false);
+					setCurrentOrder(null);
+				}}
+				order={currentOrder}
+				onConfirm={handleConfirmDeliveryMan}
+				isLoading={showLoader}
+			/>
 		</Container>
 	)
 }
