@@ -227,22 +227,22 @@ export function ServiceOrdersPage(){
 
 	// Calculate card counts
 	const pickupOrders = onGoingOrders.filter((order: IOrder) => 
-		!order.is_delivery && order.status !== "DONE"
+		!order.is_delivery && order.status !== "DONE" && order.status !== "WAITING_FOR_CLIENT"
 	);
 
 	const deliveryOrders = onGoingOrders.filter((order: IOrder) => 
-		order.is_delivery && order.status !== "DONE"
+		order.is_delivery && order.status !== "DONE" && order.status !== "WAITING_FOR_CLIENT"
 	);
 
 	const expiredPickupOrders = onGoingOrders.filter((order: IOrder) => 
 		!order.is_delivery && 
-		order.status !== "DONE" && 
+		order.status !== "DONE" && order.status !== "WAITING_FOR_CLIENT" &&
 		moment(order.delivery_date).isBefore(moment(), 'day')
 	);
 
 	const expiredDeliveryOrders = onGoingOrders.filter((order: IOrder) => 
 		order.is_delivery && 
-		order.status !== "DONE" && 
+		order.status !== "DONE" && order.status !== "WAITING_FOR_CLIENT" && 
 		moment(order.delivery_date).isBefore(moment(), 'day')
 	);
 
