@@ -116,7 +116,7 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
 
     return (
         <Container>
-            <table>
+            <table className="responsive-table">
                 <thead>
                     <tr>
                         <th className="smallColumn">
@@ -149,20 +149,37 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
                                 />
                             </td>
                             <td
+                                data-label="Motoboy"
                                 style={{ cursor: 'pointer', color: '#EC4899', fontWeight: '600' }}
                                 onClick={() => navigate(`/backoffice/motoboy/${delivery.deliveryMan?.id}`)}
                             >
                                 {delivery.deliveryMan?.name || 'N/A'}
                             </td>
-                            <td>
+                            <td
+                                data-label="Nº Pedido"
+                            >
                                 <Link to={`/backoffice/pedido/${delivery.order_id}`} className="order-code-link">
                                     #{delivery.order?.code || 'N/A'}
                                 </Link>
                             </td>
-                            <td>{delivery.order?.client ? `${delivery.order.client.first_name} ${delivery.order.client.last_name}` : 'N/A'}</td>
-                            <td>{formatTelephone(delivery.order?.client.phone_number as string) || 'N/A'}</td>
-                            <td>{convertMoney(delivery.order?.delivery_fee || 0)}</td>
-                            <td>{moment(delivery.delivery_date).format('DD/MM/YYYY HH:mm')}</td>
+                            <td
+                                data-label="Cliente"
+                            >{delivery.order?.client ? `${delivery.order.client.first_name} ${delivery.order.client.last_name}` : 'N/A'}</td>
+                            <td
+                                data-label="Telefone"
+                            >
+                                {formatTelephone(delivery.order?.client.phone_number as string) || 'N/A'}
+                            </td>
+                            <td
+                                data-label="Taxa de Entrega"
+                            >
+                                {convertMoney(delivery.order?.delivery_fee || 0)}
+                            </td>
+                            <td
+                                data-label="Data de Entrega"
+                            >
+                                {moment(delivery.delivery_date).format('DD/MM/YYYY HH:mm')}
+                            </td>
                             <td>
                                 <StatusBadge status={delivery.is_paid ? 'Pago' : 'Pendente'}>
                                     {delivery.is_paid ? 'Pago' : 'Pendente'}

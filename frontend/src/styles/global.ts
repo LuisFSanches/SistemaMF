@@ -180,6 +180,62 @@ table{
                 }
             }
         }
+
+        /* Responsividade aprimorada para tabelas em mobile */
+        @media (max-width: 768px) {
+            &.responsive-table {
+                border: none;
+                box-shadow: none;
+
+                thead {
+                    display: none;
+                }
+
+                tbody {
+                    display: block;
+                    max-height: none;
+                    overflow-y: visible;
+                }
+
+                tr {
+                    display: block;
+                    margin-bottom: 1rem;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    background: white;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                }
+
+                td {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 0.75rem 1rem;
+                    border-bottom: 1px solid #f3f4f6;
+                    text-align: right;
+                    width: 100% !important;
+                    word-break: normal;
+
+                    &:last-child {
+                        border-bottom: none;
+                    }
+
+                    &::before {
+                        content: attr(data-label);
+                        font-weight: 600;
+                        color: #6b7280;
+                        text-transform: uppercase;
+                        font-size: 0.75rem;
+                        letter-spacing: 0.5px;
+                        text-align: left;
+                    }
+                }
+
+                tr:nth-child(even) {
+                    background-color: white;
+                }
+            }
+        }
         
     }
 

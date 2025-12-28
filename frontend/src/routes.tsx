@@ -29,6 +29,8 @@ import { ClientDetail } from "./views/ClientDetail";
 import { DeliveryMenPage } from "./views/DeliveryMen";
 import { DeliveryManDetail } from "./views/DeliveryManDetail";
 import { OrderDetail } from "./views/OrderDetail";
+// import { StoreRegistration } from "./views/StoreRegistration";
+import { Reports } from "./views/Reports";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -145,6 +147,11 @@ export default function routes(){
                         <Route path="/backoffice/estatisticas" element={
                             <PrivateRoute>
                                 <Statistics/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/relatorios" element={
+                            <PrivateRoute>
+                                <Reports/>
                             </PrivateRoute>
                         }/>
                         <Route path="/backoffice/administradores" element={

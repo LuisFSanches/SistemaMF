@@ -99,7 +99,7 @@ export function OrdersPage(){
                     onPageChange={setPage}
                 />
             </PageHeader>
-            <table>
+            <table className="responsive-table">
                 <thead className="head">
                     <tr>
                         <th>Pedido</th>
@@ -114,19 +114,19 @@ export function OrdersPage(){
                     {orders?.map(order => (
                         <>
                             <tr key={order.id} className={order.status === 'CANCELED' ? 'canceled-order' : ''}>
-                                <td>
+                                <td data-label="Pedido">
                                     <Link to={`/backoffice/pedido/${order.id}`} className="order-code-link">
                                         #{order.code}
                                     </Link>
                                 </td>
-                                <td className="description">{formatTitleCase(order.description)}</td>
-                                <td>
+                                <td  className="description" data-label="Descrição">{formatTitleCase(order.description)}</td>
+                                <td data-label="Cliente">
                                     {order.status !== "WAITING_FOR_CLIENT"
                                         ? `${formatTitleCase(order.client.first_name)} ${formatTitleCase(order.client.last_name)}`
                                         : "Pendente"}
                                 </td>
-                                <td>{STATUS_LABEL[order.status]}</td>
-                                <td>R$ {order.total}</td>
+                                <td data-label="Status">{STATUS_LABEL[order.status]}</td>
+                                <td data-label="Total">R$ {order.total}</td>
                                 <td className="table-icon">
                                     <button className="edit-button" onClick={() => handleOpenEditOrderModal(order)}>
                                         <FontAwesomeIcon icon={faPen}/>

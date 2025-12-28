@@ -33,6 +33,7 @@ export const Container = styled.div`
     }
 
     @media (max-width:750px) {
+        width: 88%;
         padding: 0.4rem;
     }
 `

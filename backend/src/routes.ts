@@ -75,6 +75,14 @@ import { UpdateOrderToReceiveController } from './controllers/orderToReceive/Upd
 import { DeleteOrderToReceiveController } from './controllers/orderToReceive/DeleteOrderToReceiveController';
 import { CheckOrderToReceiveExistsController } from './controllers/orderToReceive/CheckOrderToReceiveExistsController';
 
+import { GetSalesReportController } from './controllers/reports/GetSalesReportController';
+import { GetTopProductsReportController } from './controllers/reports/GetTopProductsReportController';
+import { GetTopClientsReportController } from './controllers/reports/GetTopClientsReportController';
+import { GetStockReportController } from './controllers/reports/GetStockReportController';
+import { GetFinancialReportController } from './controllers/reports/GetFinancialReportController';
+import { GetDeliveryReportController } from './controllers/reports/GetDeliveryReportController';
+import { GetSupplierReportController } from './controllers/reports/GetSupplierReportController';
+
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 import { upload } from './config/multer';
@@ -173,5 +181,14 @@ router.get('/orderToReceive/check/:orderId', adminAuthMiddleware, new CheckOrder
 router.get('/orderToReceive/:id', adminAuthMiddleware, new GetOrderToReceiveController().handle);
 router.put('/orderToReceive/:id', adminAuthMiddleware, new UpdateOrderToReceiveController().handle);
 router.delete('/orderToReceive/:id', adminAuthMiddleware, new DeleteOrderToReceiveController().handle);
+
+//-- ROTAS REPORTS --
+router.get('/reports/sales', adminAuthMiddleware, new GetSalesReportController().handle);
+router.get('/reports/products/top', adminAuthMiddleware, new GetTopProductsReportController().handle);
+router.get('/reports/clients/top', adminAuthMiddleware, new GetTopClientsReportController().handle);
+router.get('/reports/stock', adminAuthMiddleware, new GetStockReportController().handle);
+router.get('/reports/financial', adminAuthMiddleware, new GetFinancialReportController().handle);
+router.get('/reports/delivery', adminAuthMiddleware, new GetDeliveryReportController().handle);
+router.get('/reports/supplier', adminAuthMiddleware, new GetSupplierReportController().handle);
 
 export { router };
