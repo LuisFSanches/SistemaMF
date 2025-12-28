@@ -246,6 +246,8 @@ export function ServiceOrdersPage(){
 		moment(order.delivery_date).isBefore(moment(), 'day')
 	);
 
+	console.log('Expired Delivery Orders:', expiredDeliveryOrders);
+
 	const handleCardFilterClick = (filterType: string) => {
 		if (activeCardFilter === filterType) {
 			setActiveCardFilter(null);
