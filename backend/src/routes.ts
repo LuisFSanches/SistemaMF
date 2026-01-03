@@ -112,7 +112,7 @@ import { DeleteStoreHolidayController } from './controllers/storeHoliday/DeleteS
 
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
-import { upload } from './config/multer';
+import { upload, uploadStore } from './config/multer';
 import { processImage } from './middlewares/process_image';
 import { handleMulterError } from './middlewares/multer_error';
 
@@ -226,8 +226,8 @@ router.get('/store/:id', superAdminAuthMiddleware, new GetStoreController().hand
 router.put('/store/:id', superAdminAuthMiddleware, new UpdateStoreController().handle);
 router.put('/store/:id/credentials', superAdminAuthMiddleware, new UpdateStoreCredentialsController().handle);
 router.delete('/store/:id', superAdminAuthMiddleware, new DeleteStoreController().handle);
-router.post('/store/:id/logo', superAdminAuthMiddleware, upload.single('logo'), handleMulterError, processImage, new UploadStoreLogoController().handle);
-router.post('/store/:id/banner', superAdminAuthMiddleware, upload.single('banner'), handleMulterError, processImage, new UploadStoreBannerController().handle);
+router.post('/store/:id/logo', superAdminAuthMiddleware, uploadStore.single('logo'), handleMulterError, processImage, new UploadStoreLogoController().handle);
+router.post('/store/:id/banner', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processImage, new UploadStoreBannerController().handle);
 
 //-- ROTAS STORE ADDRESS --
 router.post('/storeAddress', adminAuthMiddleware, new CreateStoreAddressController().handle);

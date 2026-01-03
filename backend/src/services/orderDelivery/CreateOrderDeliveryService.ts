@@ -73,6 +73,7 @@ class CreateOrderDeliveryService {
                         select: {
                             code: true,
                             total: true,
+                            store_id: true,
                             client: {
                                 select: {
                                     first_name: true,

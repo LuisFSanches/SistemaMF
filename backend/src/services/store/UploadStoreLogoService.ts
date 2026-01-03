@@ -3,6 +3,8 @@ import { BadRequestException } from "../../exceptions/bad-request";
 import { ErrorCodes } from "../../exceptions/root";
 import fs from 'fs';
 import path from 'path';
+import { storesUploadDir } from "../../config/paths";
+import { CloudflareR2Service } from "../storage/CloudflareR2Service";
 
 interface IUploadStoreLogo {
     store_id: string;
@@ -11,8 +13,7 @@ interface IUploadStoreLogo {
 
 class UploadStoreLogoService {
     async execute({ store_id, filename }: IUploadStoreLogo) {
-        const backendUrl = process.env.BACKEND_URL || 'http://localhost:3334';
-        const storesUploadDir = path.join(__dirname, '../../../uploads/stores');
+        const useR2 = process.env.USE_R2_STORAGE === 'true';
         
         const store = await prismaClient.store.findFirst({
             where: { id: store_id },
@@ -31,19 +32,37 @@ class UploadStoreLogoService {
             );
         }
 
-        // Remover logo anterior se existir
-        if (store.logo) {
-            const oldLogoPath = store.logo.replace(`${backendUrl}/uploads/stores/`, '');
-            const oldFilePath = path.join(storesUploadDir, oldLogoPath);
-
-            if (fs.existsSync(oldFilePath)) {
-                fs.unlinkSync(oldFilePath);
-            }
-        }
-
-        const logoUrl = `${backendUrl}/uploads/stores/${filename}`;
+        let logoUrl: string;
 
         try {
+            if (useR2) {
+                const r2Service = new CloudflareR2Service();
+                const localFilePath = path.join(storesUploadDir, filename);
+
+                logoUrl = await r2Service.uploadFromPath(localFilePath, 'stores');
+
+                if (store.logo && store.logo.includes(process.env.R2_PUBLIC_URL || '')) {
+                    await r2Service.delete({ fileUrl: store.logo });
+                }
+
+                if (fs.existsSync(localFilePath)) {
+                    fs.unlinkSync(localFilePath);
+                }
+            } else {
+                const backendUrl = process.env.BACKEND_URL || 'http://localhost:3334';
+
+                if (store.logo && !store.logo.includes(process.env.R2_PUBLIC_URL || '')) {
+                    const oldLogoPath = store.logo.replace(`${backendUrl}/uploads/stores/`, '');
+                    const oldFilePath = path.join(storesUploadDir, oldLogoPath);
+
+                    if (fs.existsSync(oldFilePath)) {
+                        fs.unlinkSync(oldFilePath);
+                    }
+                }
+
+                logoUrl = `${backendUrl}/uploads/stores/${filename}`;
+            }
+
             const updatedStore = await prismaClient.store.update({
                 where: { id: store_id },
                 data: { logo: logoUrl },

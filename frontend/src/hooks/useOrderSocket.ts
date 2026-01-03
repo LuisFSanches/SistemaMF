@@ -5,12 +5,13 @@ import { checkPublicRoute } from '../utils';
 
 const baseUrl = process.env.REACT_APP_API_URL || "http://localhost:3334";
 
-// Singleton: mantém uma única instância do socket para toda a aplicação
 let globalSocket: Socket | null = null;
 let isSocketInitialized = false;
+let currentStoreId: string | null = null;
 
 export const useOrderSocket = (
-    onOrderReceived: (data: any, eventType: string) => void
+    onOrderReceived: (data: any, eventType: string) => void,
+    storeId?: string // 👈 Novo parâmetro
 ) => {
     const callbackRef = useRef(onOrderReceived);
 
@@ -26,7 +27,16 @@ export const useOrderSocket = (
             return;
         }
 
+        // Se já existe socket mas mudou de store, sair da room anterior e entrar na nova
         if (isSocketInitialized && globalSocket) {
+            if (currentStoreId && currentStoreId !== storeId) {
+                globalSocket.emit('leaveStore', currentStoreId);
+            }
+            
+            if (storeId && storeId !== currentStoreId) {
+                globalSocket.emit('joinStore', storeId);
+                currentStoreId = storeId;
+            }
             
             globalSocket.off('whatsappOrderReceived');
             globalSocket.off('storeFrontOrderReceived');
@@ -59,6 +69,13 @@ export const useOrderSocket = (
 
         globalSocket.on('connect', () => {
             console.log('WS conectado:', globalSocket?.id);
+            
+            // 👈 Entrar na room da loja ao conectar
+            if (storeId) {
+                globalSocket?.emit('joinStore', storeId);
+                currentStoreId = storeId;
+                console.log(`WS entrou na room: store_${storeId}`);
+            }
         });
 
         globalSocket.on('whatsappOrderReceived', (data) => {
@@ -75,5 +92,5 @@ export const useOrderSocket = (
 
         return () => {
         };
-    }, []);
+    }, [storeId]); // 👈 Adicionar storeId como dependência
 };

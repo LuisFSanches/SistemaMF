@@ -3,6 +3,8 @@ import { BadRequestException } from "../../exceptions/bad-request";
 import { ErrorCodes } from "../../exceptions/root";
 import fs from 'fs';
 import path from 'path';
+import { storesUploadDir } from "../../config/paths";
+import { CloudflareR2Service } from "../storage/CloudflareR2Service";
 
 interface IUploadStoreBanner {
     store_id: string;
@@ -11,8 +13,7 @@ interface IUploadStoreBanner {
 
 class UploadStoreBannerService {
     async execute({ store_id, filename }: IUploadStoreBanner) {
-        const backendUrl = process.env.BACKEND_URL || 'http://localhost:3334';
-        const storesUploadDir = path.join(__dirname, '../../../uploads/stores');
+        const useR2 = process.env.USE_R2_STORAGE === 'true';
         
         const store = await prismaClient.store.findFirst({
             where: { id: store_id },
@@ -31,19 +32,37 @@ class UploadStoreBannerService {
             );
         }
 
-        // Remover banner anterior se existir
-        if (store.banner) {
-            const oldBannerPath = store.banner.replace(`${backendUrl}/uploads/stores/`, '');
-            const oldFilePath = path.join(storesUploadDir, oldBannerPath);
-
-            if (fs.existsSync(oldFilePath)) {
-                fs.unlinkSync(oldFilePath);
-            }
-        }
-
-        const bannerUrl = `${backendUrl}/uploads/stores/${filename}`;
+        let bannerUrl: string;
 
         try {
+            if (useR2) {
+                const r2Service = new CloudflareR2Service();
+                const localFilePath = path.join(storesUploadDir, filename);
+
+                bannerUrl = await r2Service.uploadFromPath(localFilePath, 'stores');
+
+                if (store.banner && store.banner.includes(process.env.R2_PUBLIC_URL || '')) {
+                    await r2Service.delete({ fileUrl: store.banner });
+                }
+
+                if (fs.existsSync(localFilePath)) {
+                    fs.unlinkSync(localFilePath);
+                }
+            } else {
+                const backendUrl = process.env.BACKEND_URL || 'http://localhost:3334';
+
+                if (store.banner && !store.banner.includes(process.env.R2_PUBLIC_URL || '')) {
+                    const oldBannerPath = store.banner.replace(`${backendUrl}/uploads/stores/`, '');
+                    const oldFilePath = path.join(storesUploadDir, oldBannerPath);
+
+                    if (fs.existsSync(oldFilePath)) {
+                        fs.unlinkSync(oldFilePath);
+                    }
+                }
+
+                bannerUrl = `${backendUrl}/uploads/stores/${filename}`;
+            }
+
             const updatedStore = await prismaClient.store.update({
                 where: { id: store_id },
                 data: { banner: bannerUrl },

@@ -4,11 +4,22 @@ import crypto from 'crypto';
 import fs from 'fs';
 import { BadRequestException } from '../exceptions/bad-request';
 import { ErrorCodes } from '../exceptions/root';
-import { productsUploadDir } from './paths';
+import { productsUploadDir, storesUploadDir } from './paths';
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, productsUploadDir);
+    },
+    filename: (req, file, cb) => {
+        const hash = crypto.randomBytes(16).toString('hex');
+        const filename = `${hash}-${Date.now()}${path.extname(file.originalname)}`;
+        cb(null, filename);
+    }
+});
+
+const storeStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, storesUploadDir);
     },
     filename: (req, file, cb) => {
         const hash = crypto.randomBytes(16).toString('hex');
@@ -35,5 +46,13 @@ export const upload = multer({
     fileFilter,
     limits: {
         fileSize: 100 * 1024, // 100KB
+    }
+});
+
+export const uploadStore = multer({
+    storage: storeStorage,
+    fileFilter,
+    limits: {
+        fileSize: 500 * 1024, // 500KB para logo e banner
     }
 });

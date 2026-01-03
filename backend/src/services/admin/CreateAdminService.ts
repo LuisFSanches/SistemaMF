@@ -5,7 +5,7 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class CreateAdminService{
-	async execute({ username, name, password, role }: IAdmin) {
+	async execute({ username, name, password, role, store_id }: IAdmin) {
 		const hashedPassword = await hash(password, 10);
 
 		const admin = await prismaClient.admin.findFirst({
@@ -27,7 +27,8 @@ class CreateAdminService{
 					username,
 					name,
 					password: hashedPassword,
-					role
+					role,
+					store_id
 				}
 			})
 

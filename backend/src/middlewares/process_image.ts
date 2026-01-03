@@ -4,7 +4,6 @@ import fs from 'fs';
 import path from 'path';
 import { BadRequestException } from '../exceptions/bad-request';
 import { ErrorCodes } from '../exceptions/root';
-import { productsUploadDir } from '../config/paths';
 
 export const processImage = async (
     req: Request,
@@ -18,7 +17,10 @@ export const processImage = async (
     const inputPath = req.file.path;
     const date = new Date();
     const outputFilename = `optimized-${date.getTime()}-${req.file.filename}`;
-    const outputPath = path.join(productsUploadDir, outputFilename);
+    
+    // Detectar o diretório de destino automaticamente baseado no path do arquivo original
+    const uploadDir = path.dirname(inputPath);
+    const outputPath = path.join(uploadDir, outputFilename);
 
     try {
         await sharp(inputPath)

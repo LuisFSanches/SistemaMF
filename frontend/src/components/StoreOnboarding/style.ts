@@ -196,6 +196,132 @@ export const OnboardingBody = styled.div`
         margin-bottom: 20px;
     }
 
+    .media-upload-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .media-upload-section {
+        h4 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            svg {
+                color: var(--primary-color);
+            }
+        }
+
+        .media-description {
+            font-size: 13px;
+            color: #6c757d;
+            margin: 0 0 15px 0;
+        }
+    }
+
+    .media-upload-box {
+        border: 2px dashed #ced4da;
+        border-radius: 8px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            border-color: var(--primary-color);
+            background: #fff;
+        }
+
+        svg {
+            font-size: 36px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        span {
+            display: block;
+            color: #6c757d;
+            font-size: 13px;
+
+            &.format-info {
+                font-size: 11px;
+                margin-top: 5px;
+                color: #adb5bd;
+            }
+        }
+
+        &.avatar-upload {
+            height: 180px;
+        }
+
+        &.banner-upload {
+            height: 180px;
+        }
+    }
+
+    .avatar-preview-container {
+        .avatar-preview-box {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 15px;
+            border: 3px solid var(--primary-color);
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+    }
+
+    .media-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+
+            &.btn-change {
+                background: #EC4899;
+                color: white;
+
+                &:hover {
+                    opacity: 0.9;
+                }
+            }
+
+            &.btn-remove {
+                background: #dc3545;
+                color: white;
+
+                &:hover {
+                    opacity: 0.9;
+                }
+            }
+        }
+    }
+
     .banner-upload-box {
         border: 2px dashed #ced4da;
         border-radius: 8px;
@@ -232,7 +358,7 @@ export const OnboardingBody = styled.div`
     .banner-preview-container {
         .banner-preview-box {
             width: 100%;
-            height: 200px;
+            height: 150px;
             border-radius: 8px;
             overflow: hidden;
             margin-bottom: 15px;
@@ -244,35 +370,52 @@ export const OnboardingBody = styled.div`
                 object-fit: cover;
             }
         }
+    }
 
-        .banner-actions {
+    .payment-section {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: #fafafa;
+
+        .payment-header {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
             gap: 10px;
 
-            button {
-                flex: 1;
-                padding: 10px;
-                border: none;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 14px;
-                transition: all 0.2s;
+            h4 {
+                margin: 0;
+                font-size: 18px;
+                color: #333;
+            }
+        }
 
-                &.btn-change {
-                    background: #EC4899;
-                    color: white;
+        .payment-fields {
+            .form-input {
+                margin-bottom: 15px;
 
-                    &:hover {
-                        opacity: 0.9;
+                textarea {
+                    width: 100%;
+                    padding: 12px 15px;
+                    border: 1px solid #ced4da;
+                    border-radius: 6px;
+                    font-size: 13px;
+                    font-family: 'Courier New', monospace;
+                    resize: vertical;
+                    transition: all 0.2s;
+
+                    &:focus {
+                        outline: none;
+                        border-color: var(--primary-color);
+                        box-shadow: 0 0 0 3px rgba(255, 102, 196, 0.1);
                     }
-                }
 
-                &.btn-remove {
-                    background: #dc3545;
-                    color: white;
-
-                    &:hover {
-                        opacity: 0.9;
+                    &::placeholder {
+                        color: #adb5bd;
                     }
                 }
             }

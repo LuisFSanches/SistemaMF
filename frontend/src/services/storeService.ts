@@ -63,7 +63,7 @@ export const updateStoreCredentials = async (id: string, data: IUpdateCredential
 
 export const uploadStoreLogo = async (id: string, file: File) => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('logo', file);
     
     const response = await api.post(`/store/${id}/logo`, formData, {
         headers: {
@@ -75,7 +75,7 @@ export const uploadStoreLogo = async (id: string, file: File) => {
 
 export const uploadStoreBanner = async (id: string, file: File) => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('banner', file);
     
     const response = await api.post(`/store/${id}/banner`, formData, {
         headers: {
