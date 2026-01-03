@@ -5,7 +5,7 @@ import { createOrderDeliverySchema } from "../../schemas/orderDelivery/createOrd
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class CreateOrderDeliveryService {
-    async execute(data: IOrderDelivery) {
+    async execute(data: IOrderDelivery, store_id?: string) {
         // Validação com Zod
         const parsed = createOrderDeliverySchema.safeParse({
             ...data,
@@ -65,7 +65,8 @@ class CreateOrderDeliveryService {
                     delivery_man_id: parsed.data.delivery_man_id,
                     delivery_date: new Date(parsed.data.delivery_date),
                     is_paid: parsed.data.is_paid,
-                    is_archived: parsed.data.is_archived
+                    is_archived: parsed.data.is_archived,
+                    store_id
                 },
                 include: {
                     order: {

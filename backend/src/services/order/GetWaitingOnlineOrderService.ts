@@ -3,12 +3,19 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetWaitingOnlineOrderService{
-    async execute() {
+    async execute(store_id?: string) {
         try {
+            const whereClause: any = {
+                status: 'WAITING_FOR_CLIENT'
+            };
+
+            // Filtro por loja (multi-tenancy)
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
+
             const orders = await prismaClient.order.findMany({
-                where: {
-                    status: 'WAITING_FOR_CLIENT'
-                },
+                where: whereClause,
                 include: {
                     client: true,
                     clientAddress: true,

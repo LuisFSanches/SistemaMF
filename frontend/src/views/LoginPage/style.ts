@@ -105,6 +105,7 @@ export const LoginForm = styled.div`
         
     a{
         color: var(--sideBarBackground);
+        margin: 0.3rem 0;
     }
     .empty{
         margin-bottom:1.2rem;

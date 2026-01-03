@@ -3,9 +3,17 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllSuppliersService {
-    async execute() {
+    async execute(store_id?: string) {
         try {
+            const whereClause: any = {};
+
+            // Filtro por loja (multi-tenancy)
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
+
             const suppliers = await prismaClient.supplier.findMany({
+                where: whereClause,
                 orderBy: {
                     name: 'asc'
                 },

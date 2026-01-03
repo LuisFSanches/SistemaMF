@@ -3,6 +3,7 @@ import { UpdateDeliveryManService } from '../../services/deliveryMan/UpdateDeliv
 
 class UpdateDeliveryManController {
     async handle(req: Request, res: Response, next: NextFunction) {
+        const store_id = req.admin?.store_id || undefined;
         const { id } = req.params;
         const { name, phone_number } = req.body;
 
@@ -12,7 +13,7 @@ class UpdateDeliveryManController {
             id,
             name,
             phone_number
-        });
+        }, store_id);
         
         return res.json(deliveryMan);
     }

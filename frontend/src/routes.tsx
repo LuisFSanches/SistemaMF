@@ -31,6 +31,7 @@ import { DeliveryManDetail } from "./views/DeliveryManDetail";
 import { OrderDetail } from "./views/OrderDetail";
 // import { StoreRegistration } from "./views/StoreRegistration";
 import { Reports } from "./views/Reports";
+import { StoreRegistration } from "./views/StoreRegistration";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -161,6 +162,7 @@ export default function routes(){
                         }/>
                     </Route>
                     <Route path="/" element={<StoreFront />} />
+                    <Route path="/cadastro" element={<StoreRegistration />} />
                     <Route path="/carrinho" element={<Cart />} />
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="completarPedido/:id" element={

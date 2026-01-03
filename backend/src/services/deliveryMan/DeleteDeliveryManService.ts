@@ -4,12 +4,18 @@ import { BadRequestException } from "../../exceptions/bad-request";
 
 interface DeleteDeliveryManRequest {
     id: string
+    store_id?: string
 }
 
 class DeleteDeliveryManService {
-    async execute({ id }: DeleteDeliveryManRequest) {
+    async execute({ id, store_id }: DeleteDeliveryManRequest) {
+        const whereClause: any = { id };
+        if (store_id) {
+            whereClause.store_id = store_id;
+        }
+
         const existingDeliveryMan = await prismaClient.deliveryMan.findFirst({
-            where: { id }
+            where: whereClause
         });
 
         if (!existingDeliveryMan) {

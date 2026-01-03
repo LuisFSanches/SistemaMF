@@ -9,6 +9,7 @@ const adminAuthMiddleware = async (req: Request, res: Response, next: NextFuncti
     const token = req.headers.authorization as string;
     if (!token) {
         next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
+        return;
     }
 
     try {
@@ -16,14 +17,35 @@ const adminAuthMiddleware = async (req: Request, res: Response, next: NextFuncti
         const admin = await prismaClient.admin.findFirst({
             where: {
                 id: payload.id
+            },
+            include: {
+                store: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        is_active: true,
+                    }
+                }
             }
         });
 
         if (!admin) {
             next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
+            return;
         }
 
-        req.admin = admin!;
+        if (!admin.store) {
+            next(new UnauthorizedRequestException('Admin does not belong to any store', ErrorCodes.UNAUTHORIZED))
+        }
+
+        // Verificar se a loja está ativa (se admin pertence a uma loja)
+        if (admin.store && !admin.store.is_active) {
+            next(new UnauthorizedRequestException('Store is inactive', ErrorCodes.UNAUTHORIZED))
+            return;
+        }
+
+        req.admin = admin;
         next();
     }
 

@@ -3,11 +3,12 @@ import { DeleteOrderToReceiveService } from '../../services/orderToReceive/Delet
 
 class DeleteOrderToReceiveController {
     async handle(req: Request, res: Response, next: NextFunction) {
+        const store_id = req.admin?.store_id || undefined;
         const { id } = req.params;
 
         const deleteOrderToReceiveService = new DeleteOrderToReceiveService();
 
-        const result = await deleteOrderToReceiveService.execute({ id });
+        const result = await deleteOrderToReceiveService.execute({ id, store_id });
         
         return res.json(result);
     }

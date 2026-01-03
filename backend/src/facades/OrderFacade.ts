@@ -29,7 +29,7 @@ class OrderFacade {
         this.createOrderService = createOrderService;
     }
 
-    async createOrder(data: any) {
+    async createOrder(data: any, store_id?: string) {
         let client_id = data.clientId;
         let address_id = data.addressId;
 
@@ -114,9 +114,11 @@ class OrderFacade {
                 online_order: data.online_order,
                 store_front_order: data.store_front_order,
                 online_code: data.online_code,
-                is_delivery: data.is_delivery
+                is_delivery: data.is_delivery,
+                store_id
             },
-            data.products
+            data.products,
+            store_id
         );
 
         return order;

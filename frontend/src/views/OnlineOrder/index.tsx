@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import InputMask from "react-input-mask";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { ProductCard} from "../../components/ProductCard";
 import { Pagination } from "../../components/Pagination";
 import { TooltipModal } from "../../components/Tooltip";
@@ -323,6 +323,8 @@ export function OnlineOrder() {
         setShowLoader(true);
         setTimeout(() => {
             loadAvailableProducts(page, pageSize, query).then(() => {
+                setShowLoader(false);
+            }).catch(() => {
                 setShowLoader(false);
             });
         }, 300);

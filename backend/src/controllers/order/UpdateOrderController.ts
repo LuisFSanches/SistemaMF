@@ -47,13 +47,14 @@ class UpdateOrderController{
 		order.client_address_id = client_address_id;
 		order.is_delivery = is_delivery;
 
-		const updateOrderService = new UpdateOrderService();
+	const store_id = req.admin?.store_id || undefined;
+	const updateOrderService = new UpdateOrderService();
 
-		const data = await updateOrderService.execute(order);
+	const data = await updateOrderService.execute(order, store_id);
 
-		orderEmitter.emit("orderUpdated", { data });
+	orderEmitter.emit("orderUpdated", { data });
 
-		return res.json(data)
+	return res.json(data)
 	}
 }
 

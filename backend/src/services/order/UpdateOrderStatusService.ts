@@ -5,11 +5,29 @@ import { BadRequestException } from "../../exceptions/bad-request";
 interface IOrderStatus {
 	id: string;
 	status: string;
+	store_id?: string;
 }
 
 class UpdateOrderStatusService{
-	async execute({ id, status }: IOrderStatus) {
+	async execute({ id, status, store_id }: IOrderStatus) {
 		try {
+			// Verificar se a ordem existe e pertence à loja
+			const whereClause: any = { id };
+			if (store_id) {
+				whereClause.store_id = store_id;
+			}
+
+			const orderExists = await prismaClient.order.findFirst({
+				where: whereClause
+			});
+
+			if (!orderExists) {
+				throw new BadRequestException(
+					"Order not found",
+					ErrorCodes.USER_NOT_FOUND
+				);
+			}
+
 			const updateOrder = await prismaClient.order.update({
 				where: {
 					id: id

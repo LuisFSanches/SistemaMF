@@ -5,7 +5,7 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class UpdateOrderService{
-	async execute(data: IOrder) {
+	async execute(data: IOrder, store_id?: string) {
 		const order = {
 			...data
 		}
@@ -13,6 +13,23 @@ class UpdateOrderService{
 		delete order.products;
 
 		try {
+			// Verificar se a ordem existe e pertence à loja
+			const whereClause: any = { id: data.id };
+			if (store_id) {
+				whereClause.store_id = store_id;
+			}
+
+			const orderExists = await prismaClient.order.findFirst({
+				where: whereClause
+			});
+
+			if (!orderExists) {
+				throw new BadRequestException(
+					"Order not found",
+					ErrorCodes.USER_NOT_FOUND
+				);
+			}
+
 			const formattedDeliveryDate = moment.utc(order.delivery_date)
 				.tz('America/Sao_Paulo', true)
 				.set({ hour: 12, minute: 0, second: 0 })
@@ -43,8 +60,7 @@ class UpdateOrderService{
 						.map((product: any) => ({
 							product_id: product.product_id,
 							quantity: Number(product.quantity),
-							price: Number(product.price),
-						})),
+							price: Number(product.price),						store_id,						})),
 					},
 				},
 				include: {

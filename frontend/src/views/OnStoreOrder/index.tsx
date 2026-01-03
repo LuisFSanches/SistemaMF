@@ -583,12 +583,15 @@ export function OnStoreOrder() {
 
     useEffect(() => {
         // Verifica se já está no step 1 (produtos) antes de carregar
-        if (step === 1) {
+        if (step === 1) { 
             setShowLoader(true);
             setTimeout(() => {
                 loadAvailableProducts(page, pageSize, query).then(() => {
                     setShowLoader(false);
-                });
+                }).catch(() => {
+                    setShowLoader(false);
+                });;
+                setShowLoader(false);
             }, 120);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps

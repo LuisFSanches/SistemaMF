@@ -3,14 +3,21 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetOnGoingOrderService {
-    async execute() {
+    async execute(store_id?: string) {
         try {
+            const whereClause: any = {
+                status: {
+                    notIn: ['FINISHED', 'CANCELED', 'DONE']
+                }
+            };
+
+            // Filtro por loja (multi-tenancy)
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
+
             const orders = await prismaClient.order.findMany({
-                where: {
-                    status: {
-                        notIn: ['FINISHED', 'CANCELED', 'DONE']
-                    }
-                },
+                where: whereClause,
                 orderBy: {
                     code: 'desc'
                 },

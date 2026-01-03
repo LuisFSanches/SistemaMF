@@ -20,11 +20,13 @@ model Admin {
   username   String
   password   String
   role       String
+  store_id   String?
   created_at DateTime? @default(now())
   updated_at DateTime? @default(now())
 
   created_orders Order[] @relation("createdBy")
   updated_orders Order[] @relation("updatedBy")
+  store          Store?  @relation(fields: [store_id], references: [id])
 
   @@map("admins")
 }
@@ -85,12 +87,15 @@ model Product {
 
 model Supplier {
   id          String   @id @default(uuid())
-  name        String   @unique
+  name        String
+  store_id    String?
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
+  store       Store?    @relation(fields: [store_id], references: [id])
   stockTransactions StockTransaction[]
 
+  @@unique([name, store_id])
   @@map("suppliers")
 }
 
@@ -98,11 +103,13 @@ model OrderItem {
   id        String   @id @default(uuid())
   order_id  String
   product_id String
+  store_id  String?
   quantity  Int
   price     Float  // preço unitário no momento do pedido (evita inconsistência se o preço mudar depois)
 
   order     Order   @relation(fields: [order_id], references: [id])
   product   Product @relation(fields: [product_id], references: [id])
+  store     Store?   @relation(fields: [store_id], references: [id])
 
   @@map("order_items")
 }
@@ -111,6 +118,7 @@ model OrderItem {
 model Order {
   id                String        @id @default(uuid())
   code              Int           @default(autoincrement())
+  store_id          String?
   description       String
   additional_information String?
   client_id         String
@@ -135,6 +143,7 @@ model Order {
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 
+  store             Store?         @relation(fields: [store_id], references: [id])
   client            Client        @relation(fields: [client_id], references: [id])
   clientAddress     Address @relation(fields: [client_address_id], references: [id])
 
@@ -156,6 +165,7 @@ model Order {
 model StockTransaction {
   id             String   @id @default(uuid())
   product_id     String
+  store_id       String?
   supplier       String   // Nome do fornecedor (deprecated - usar supplier_id)
   supplier_id    String?
   unity          String   // Unidade (ex.: UN, KG, Caixa)
@@ -167,6 +177,7 @@ model StockTransaction {
   updated_at     DateTime @updatedAt
 
   product        Product  @relation(fields: [product_id], references: [id])
+  store          Store?    @relation(fields: [store_id], references: [id])
   supplierRelation Supplier? @relation(fields: [supplier_id], references: [id])
 
   @@map("stock_transactions")
@@ -175,6 +186,7 @@ model StockTransaction {
 model OrderToReceive {
   id               String   @id @default(uuid())
   order_id         String
+  store_id         String?
   payment_due_date DateTime
   received_date    DateTime?
   type             String
@@ -183,6 +195,7 @@ model OrderToReceive {
   updated_at       DateTime @updatedAt
 
   order            Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  store            Store?    @relation(fields: [store_id], references: [id])
 
   @@map("orders_to_receive")
 }
@@ -191,9 +204,11 @@ model DeliveryMan {
   id           String   @id @default(uuid())
   name         String
   phone_number String
+  store_id     String?
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
+  store        Store?    @relation(fields: [store_id], references: [id])
   orderDeliveries OrderDelivery[]
 
   @@map("delivery_men")
@@ -203,6 +218,7 @@ model OrderDelivery {
   id              String    @id @default(uuid())
   order_id        String
   delivery_man_id String
+  store_id        String?
   delivery_date   DateTime
   is_paid         Boolean   @default(false)
   is_archived     Boolean   @default(false)
@@ -211,6 +227,109 @@ model OrderDelivery {
 
   order           Order     @relation(fields: [order_id], references: [id], onDelete: Cascade)
   deliveryMan     DeliveryMan @relation(fields: [delivery_man_id], references: [id], onDelete: Cascade)
+  store           Store?     @relation(fields: [store_id], references: [id])
 
   @@map("order_deliveries")
+}
+
+model Store {
+  id               String   @id @default(uuid())
+  name             String
+  slug             String   @unique
+  cnpj             String?  @unique
+  phone_number     String
+  email            String   @unique
+  description      String?
+  
+  // Credenciais Mercado Pago
+  mp_access_token  String?
+  mp_public_key    String?
+  mp_seller_id     String?
+  mp_webhook_secret String?
+  
+  // Credenciais Banco Inter
+  inter_client_id     String?
+  inter_client_secret String?
+  inter_api_cert_path String?
+  inter_api_key_path  String?
+  
+  // Configurações
+  payment_enabled  Boolean  @default(false)
+  is_active        Boolean  @default(true)
+  is_first_access  Boolean  @default(true)
+  logo             String?
+  banner           String?
+  
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  
+  // Relacionamentos
+  addresses        StoreAddress[]
+  schedules        StoreSchedule[]
+  holidays         StoreHoliday[]
+  admins           Admin[]
+  orders           Order[]
+  orderItems       OrderItem[]
+  ordersToReceive  OrderToReceive[]
+  orderDeliveries  OrderDelivery[]
+  suppliers        Supplier[]
+  stockTransactions StockTransaction[]
+  deliveryMen      DeliveryMan[]
+
+  @@map("stores")
+}
+
+model StoreAddress {
+  id              String   @id @default(uuid())
+  store_id        String
+  street          String
+  street_number   String
+  complement      String?
+  neighborhood    String
+  reference_point String?
+  city            String
+  state           String
+  postal_code     String?
+  country         String   @default("Brasil")
+  is_main         Boolean  @default(false)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  
+  store           Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  
+  @@map("store_addresses")
+}
+
+model StoreSchedule {
+  id                String   @id @default(uuid())
+  store_id          String
+  day_of_week       String   // "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"
+  is_closed         Boolean  @default(false)
+  opening_time      String?  // Formato: "HH:MM"
+  closing_time      String?  // Formato: "HH:MM"
+  lunch_break_start String?  // Formato: "HH:MM" (opcional)
+  lunch_break_end   String?  // Formato: "HH:MM" (opcional)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  
+  store             Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  
+  @@unique([store_id, day_of_week])
+  @@map("store_schedules")
+}
+
+model StoreHoliday {
+  id          String   @id @default(uuid())
+  store_id    String
+  date        DateTime
+  name        String
+  description String?
+  is_closed   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  
+  store       Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  
+  @@unique([store_id, date])
+  @@map("store_holidays")
 }

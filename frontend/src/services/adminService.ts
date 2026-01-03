@@ -1,12 +1,7 @@
-import { api } from "./api";
-const token = localStorage.getItem("token")?.replace(/"/g, '');
+import { api, getStoreId } from "./api";
 
 export const listAdmins = async () => {
-	const response = await api.get("/admins/all", {
-		headers: {
-			Authorization: `${token}`,
-		}
-	});
+	const response = await api.get("/admins/all");
 
 	return response;
 };
@@ -18,15 +13,14 @@ export const createAdmin = async ({
 	role,
 	super_admin_password
 	}: any) => {
+		const store_id = getStoreId();
 		const response = await api.post("/admin", {
+		store_id,
 		name,
 		username,
 		password,
 		role,
 		super_admin_password,
-		headers: {
-			Authorization: `${token}`,
-		}
 	});
 
 	return response;
@@ -47,9 +41,6 @@ export const updateAdmin = async({
 		password,
 		role,
 		super_admin_password,
-		headers: {
-			Authorization: `${token}`,
-		}
 	});
 
 	return response;

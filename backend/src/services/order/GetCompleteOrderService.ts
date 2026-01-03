@@ -3,12 +3,19 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetCompleteOrderService {
-    async execute(id: any) {
+    async execute(id: any, store_id?: string) {
         try {
+            const whereClause: any = {
+                id: id
+            };
+
+            // Filtro por loja (multi-tenancy)
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
+
             const order = await prismaClient.order.findFirst({
-                where: {
-                    id: id
-                },
+                where: whereClause,
                 include: {
                     client: true,
                 }

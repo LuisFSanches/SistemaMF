@@ -83,6 +83,33 @@ import { GetFinancialReportController } from './controllers/reports/GetFinancial
 import { GetDeliveryReportController } from './controllers/reports/GetDeliveryReportController';
 import { GetSupplierReportController } from './controllers/reports/GetSupplierReportController';
 
+import { CreateStoreController } from './controllers/store/CreateStoreController';
+import { GetAllStoresController } from './controllers/store/GetAllStoresController';
+import { GetStoreController } from './controllers/store/GetStoreController';
+import { UpdateStoreController } from './controllers/store/UpdateStoreController';
+import { UpdateStoreCredentialsController } from './controllers/store/UpdateStoreCredentialsController';
+import { DeleteStoreController } from './controllers/store/DeleteStoreController';
+import { UploadStoreLogoController } from './controllers/store/UploadStoreLogoController';
+import { UploadStoreBannerController } from './controllers/store/UploadStoreBannerController';
+
+import { CreateStoreAddressController } from './controllers/storeAddress/CreateStoreAddressController';
+import { GetAllStoreAddressesController } from './controllers/storeAddress/GetAllStoreAddressesController';
+import { GetStoreAddressController } from './controllers/storeAddress/GetStoreAddressController';
+import { UpdateStoreAddressController } from './controllers/storeAddress/UpdateStoreAddressController';
+import { DeleteStoreAddressController } from './controllers/storeAddress/DeleteStoreAddressController';
+
+import { CreateStoreScheduleController } from './controllers/storeSchedule/CreateStoreScheduleController';
+import { GetAllStoreSchedulesController } from './controllers/storeSchedule/GetAllStoreSchedulesController';
+import { GetStoreScheduleController } from './controllers/storeSchedule/GetStoreScheduleController';
+import { UpdateStoreScheduleController } from './controllers/storeSchedule/UpdateStoreScheduleController';
+import { DeleteStoreScheduleController } from './controllers/storeSchedule/DeleteStoreScheduleController';
+
+import { CreateStoreHolidayController } from './controllers/storeHoliday/CreateStoreHolidayController';
+import { GetAllStoreHolidaysController } from './controllers/storeHoliday/GetAllStoreHolidaysController';
+import { GetStoreHolidayController } from './controllers/storeHoliday/GetStoreHolidayController';
+import { UpdateStoreHolidayController } from './controllers/storeHoliday/UpdateStoreHolidayController';
+import { DeleteStoreHolidayController } from './controllers/storeHoliday/DeleteStoreHolidayController';
+
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 import { upload } from './config/multer';
@@ -190,5 +217,37 @@ router.get('/reports/stock', adminAuthMiddleware, new GetStockReportController()
 router.get('/reports/financial', adminAuthMiddleware, new GetFinancialReportController().handle);
 router.get('/reports/delivery', adminAuthMiddleware, new GetDeliveryReportController().handle);
 router.get('/reports/supplier', adminAuthMiddleware, new GetSupplierReportController().handle);
+
+//-- ROTAS STORE --
+router.post('/store', new CreateStoreController().handle);
+router.get('/store/all', superAdminAuthMiddleware, new GetAllStoresController().handle);
+router.get('/store/slug/:slug', new GetStoreController().handle); // Público para storefront
+router.get('/store/:id', superAdminAuthMiddleware, new GetStoreController().handle);
+router.put('/store/:id', superAdminAuthMiddleware, new UpdateStoreController().handle);
+router.put('/store/:id/credentials', superAdminAuthMiddleware, new UpdateStoreCredentialsController().handle);
+router.delete('/store/:id', superAdminAuthMiddleware, new DeleteStoreController().handle);
+router.post('/store/:id/logo', superAdminAuthMiddleware, upload.single('logo'), handleMulterError, processImage, new UploadStoreLogoController().handle);
+router.post('/store/:id/banner', superAdminAuthMiddleware, upload.single('banner'), handleMulterError, processImage, new UploadStoreBannerController().handle);
+
+//-- ROTAS STORE ADDRESS --
+router.post('/storeAddress', adminAuthMiddleware, new CreateStoreAddressController().handle);
+router.get('/storeAddress/store/:store_id', new GetAllStoreAddressesController().handle); // Público para storefront
+router.get('/storeAddress/:id', adminAuthMiddleware, new GetStoreAddressController().handle);
+router.put('/storeAddress/:id', adminAuthMiddleware, new UpdateStoreAddressController().handle);
+router.delete('/storeAddress/:id', adminAuthMiddleware, new DeleteStoreAddressController().handle);
+
+//-- ROTAS STORE SCHEDULE --
+router.post('/storeSchedule', adminAuthMiddleware, new CreateStoreScheduleController().handle);
+router.get('/storeSchedule/store/:store_id', new GetAllStoreSchedulesController().handle); // Público para storefront
+router.get('/storeSchedule/:id', adminAuthMiddleware, new GetStoreScheduleController().handle);
+router.put('/storeSchedule/:id', adminAuthMiddleware, new UpdateStoreScheduleController().handle);
+router.delete('/storeSchedule/:id', adminAuthMiddleware, new DeleteStoreScheduleController().handle);
+
+//-- ROTAS STORE HOLIDAY --
+router.post('/storeHoliday', adminAuthMiddleware, new CreateStoreHolidayController().handle);
+router.get('/storeHoliday/store/:store_id', new GetAllStoreHolidaysController().handle); // Público para storefront
+router.get('/storeHoliday/:id', adminAuthMiddleware, new GetStoreHolidayController().handle);
+router.put('/storeHoliday/:id', adminAuthMiddleware, new UpdateStoreHolidayController().handle);
+router.delete('/storeHoliday/:id', adminAuthMiddleware, new DeleteStoreHolidayController().handle);
 
 export { router };

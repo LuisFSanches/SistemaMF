@@ -4,12 +4,19 @@ import { BadRequestException } from "../../exceptions/bad-request";
 import { IOrderDetails } from "../../interfaces/IOrderDetails";
 
 class GetOrderDetailsService {
-    async execute(id: string): Promise<IOrderDetails> {
+    async execute(id: string, store_id?: string): Promise<IOrderDetails> {
         try {
+            const whereClause: any = {
+                id: id
+            };
+
+            // Filtro por loja (multi-tenancy)
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
+
             const order = await prismaClient.order.findFirst({
-                where: {
-                    id: id
-                },
+                where: whereClause,
                 include: {
                     client: true,
                     clientAddress: true,

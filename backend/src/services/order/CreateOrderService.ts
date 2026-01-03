@@ -5,7 +5,7 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class CreateOrderService{
-	async execute(data: IOrder, products: any) {
+	async execute(data: IOrder, products: any, store_id?: string) {
 		const { delivery_date } = data;
 				
 		try {
@@ -17,12 +17,14 @@ class CreateOrderService{
 			const order = await prismaClient.order.create({
 				data: {
 					...data,
+					store_id,
 					delivery_date: formattedDeliveryDate,
 					orderItems: {
 						create: products.map((product: any) => ({
 							product_id: product.id,
 							quantity: Number(product.quantity),
 							price: Number(product.price),
+							store_id,
 						})),
 					},
 				},

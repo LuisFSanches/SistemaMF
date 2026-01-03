@@ -3,17 +3,24 @@ import { createContext, ReactNode, useEffect, useState, useContext } from "react
 
 import { api } from "../services/api";
 import { authenticateUser } from "../services/authenticationService";
+import { getStoreById } from "../services/storeService";
+import { IStore } from "../interfaces/IStore";
 
 interface IAuthContextData {
   isAuthenticated: boolean;
   loading: boolean;
   adminData: {
+    id?: string;
     username: string;
     name: string;
     role: string;
+    store_id?: string | null;
   };
+  storeData: IStore | null;
+  needsOnboarding: boolean;
   handleLogin: (username: string, password: string) => Promise<any>;
   handleSignOut: () => void;
+  refreshStoreData: () => Promise<void>;
 }
 
 interface IAuthProviderProps {
@@ -25,28 +32,68 @@ export const AuthContext = createContext({} as IAuthContextData);
 export function AuthProvider({ children }: IAuthProviderProps) {
   const [isAuthenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [storeData, setStoreData] = useState<IStore | null>(null);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [adminData, setAdminData] = useState({
+    id: "",
     username: "",
     role: "",
-    name: ""
+    name: "",
+    store_id: null as string | null
   });
+
+  const fetchStoreData = async (storeId: string) => {
+    try {
+      const store = await getStoreById(storeId);
+      setStoreData(store);
+      setNeedsOnboarding(store.is_first_access);
+      localStorage.setItem("storeData", JSON.stringify(store));
+    } catch (error) {
+      console.error("Error fetching store data:", error);
+    }
+  };
+
+  const refreshStoreData = async () => {
+    if (adminData.store_id) {
+      await fetchStoreData(adminData.store_id);
+    }
+  };
 
   const handleLogin = async (username: string, password: string) => {
     try {
       const response: any = await authenticateUser(username, password);
-      const admin = {
-        username: response.data.admin.username,
-        role: response.data.admin.role,
-        name: response.data.admin.name
-      }
-      setAdminData(admin);
-      localStorage.setItem("adminData", JSON.stringify(admin));
+      
+      // Extrair dados do admin da resposta
+      // Backend retorna: { id, name, username, role, store_id, token }
+      const { admin: adminResponse, token: adminToken } = response.data;
 
-      const token = `${response.data.token}`;
-      localStorage.setItem("token", JSON.stringify(token));      
-      api.defaults.headers.common.authorization = token;
+      const adminData = {
+        id: adminResponse.id,
+        username: adminResponse.username,
+        role: adminResponse.role,
+        name: adminResponse.name,
+        store_id: adminResponse.store_id || null
+      }
+
+      console.log("Logged in admin:", adminData);
+      
+      setAdminData(adminData);
+      localStorage.setItem("adminData", JSON.stringify(adminData));
+
+      // Armazenar token SEM aspas duplas
+      const token = adminToken;
+      localStorage.setItem("token", token);
+      
+      // NÃO é mais necessário setar aqui, o interceptor fará isso
+      // api.defaults.headers.common.authorization = token;
 
       setAuthenticated(true);
+      
+      // Buscar dados da loja se o admin tiver store_id
+      if (adminData.store_id) {
+        await fetchStoreData(adminData.store_id);
+      }
+
       window.location.reload();
 
       return response;
@@ -57,22 +104,50 @@ export function AuthProvider({ children }: IAuthProviderProps) {
 
   const handleSignOut = async () => {
     setAuthenticated(false);
+    setStoreData(null);
+    setNeedsOnboarding(false);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("adminData");
+    localStorage.removeItem("storeData");
     api.defaults.headers.common.authorization = "";
   };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedAdminData = localStorage.getItem("adminData");
+    const storedStoreData = localStorage.getItem("storeData");
 
     if (token) {
-      api.defaults.headers.common.authorization = `${JSON.parse(token)}`;
+      // Não precisa mais setar manualmente, o interceptor fará isso
       setAuthenticated(true);
     }
 
     if (storedAdminData) {
-      setAdminData(JSON.parse(storedAdminData));
+      try {
+        const admin = JSON.parse(storedAdminData);
+        setAdminData(admin);
+        
+        // Buscar dados atualizados da loja se tiver store_id
+        if (admin.store_id && token) {
+          fetchStoreData(admin.store_id);
+        }
+      } catch (error) {
+        console.error("Error parsing adminData:", error);
+        // Limpar dados inválidos
+        localStorage.removeItem("adminData");
+      }
+    }
+
+    if (storedStoreData) {
+      try {
+        const store = JSON.parse(storedStoreData);
+        setStoreData(store);
+        setNeedsOnboarding(store.is_first_access);
+      } catch (error) {
+        console.error("Error parsing storeData:", error);
+        localStorage.removeItem("storeData");
+      }
     }
     
     setLoading(false);
@@ -84,8 +159,11 @@ export function AuthProvider({ children }: IAuthProviderProps) {
         isAuthenticated,
         loading,
         adminData,
+        storeData,
+        needsOnboarding,
         handleLogin,
         handleSignOut,
+        refreshStoreData,
       }}
     >
       {children}

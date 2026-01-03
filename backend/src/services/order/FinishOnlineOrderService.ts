@@ -5,8 +5,28 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class FinishOnlineOrderService{
-	async execute(data: IOnlineOrder) {
+	async execute(data: IOnlineOrder, store_id?: string) {
 		try {
+			// Verificar se a ordem existe e pertence à loja
+			const whereClause: any = {
+				id: data.id,
+				online_code: data.online_code
+			};
+			if (store_id) {
+				whereClause.store_id = store_id;
+			}
+
+			const orderExists = await prismaClient.order.findFirst({
+				where: whereClause
+			});
+
+			if (!orderExists) {
+				throw new BadRequestException(
+					"Order not found",
+					ErrorCodes.USER_NOT_FOUND
+				);
+			}
+
 			const formattedDeliveryDate = moment.utc(data.delivery_date)
 				.tz('America/Sao_Paulo', true)
 				.set({ hour: 12, minute: 0, second: 0 })

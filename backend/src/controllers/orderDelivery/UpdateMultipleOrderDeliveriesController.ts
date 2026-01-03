@@ -3,6 +3,7 @@ import { UpdateMultipleOrderDeliveriesService } from '../../services/orderDelive
 
 class UpdateMultipleOrderDeliveriesController {
     async handle(req: Request, res: Response, next: NextFunction) {
+        const store_id = req.admin?.store_id || undefined;
         const { ids, delivery_man_id, delivery_date, is_paid, is_archived } = req.body;
 
         const updateMultipleOrderDeliveriesService = new UpdateMultipleOrderDeliveriesService();
@@ -13,7 +14,7 @@ class UpdateMultipleOrderDeliveriesController {
             delivery_date: delivery_date ? new Date(delivery_date) : undefined,
             is_paid,
             is_archived
-        });
+        }, store_id);
         
         return res.json(result);
     }

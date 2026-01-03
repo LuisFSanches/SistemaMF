@@ -4,7 +4,7 @@ import { BadRequestException } from "../../exceptions/bad-request";
 import { IProductStockDetails, IStockTransactionDetails, IPriceHistory, IStockMetrics } from "../../interfaces/IProductStockDetails";
 
 class GetProductStockDetailsService {
-    async execute(product_id: string): Promise<IProductStockDetails> {
+    async execute(product_id: string, store_id?: string): Promise<IProductStockDetails> {
         try {
             // 1. Verificar se o produto existe e buscar informações básicas
             const product = await prismaClient.product.findUnique({
@@ -26,8 +26,13 @@ class GetProductStockDetailsService {
             }
 
             // 2. Buscar todas as transações do produto
+            const whereClause: any = { product_id };
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
+
             const transactions = await prismaClient.stockTransaction.findMany({
-                where: { product_id },
+                where: whereClause,
                 include: {
                     supplierRelation: true
                 },
