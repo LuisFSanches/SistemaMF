@@ -12,11 +12,16 @@ interface ICreateStoreData {
 
 interface IUpdateStoreData {
     name?: string;
+    cnpj?: string;
+    slug?: string;
     phone_number?: string;
     email?: string;
     description?: string;
     is_active?: boolean;
     is_first_access?: boolean;
+    facebook?: string;
+    instagram?: string;
+    youtube?: string;
 }
 
 interface IUpdateCredentialsData {
@@ -29,6 +34,19 @@ interface IUpdateCredentialsData {
     inter_api_cert_path?: string;
     inter_api_key_path?: string;
     payment_enabled?: boolean;
+}
+
+interface IScheduleUpdate {
+    day_of_week: string;
+    is_closed: boolean;
+    opening_time?: string;
+    closing_time?: string;
+    lunch_break_start?: string;
+    lunch_break_end?: string;
+}
+
+interface IUpdateStoreSchedulesData {
+    schedules: IScheduleUpdate[];
 }
 
 export const createStore = async (data: ICreateStoreData) => {
@@ -58,6 +76,11 @@ export const updateStore = async (id: string, data: IUpdateStoreData) => {
 
 export const updateStoreCredentials = async (id: string, data: IUpdateCredentialsData) => {
     const response = await api.put(`/store/${id}/credentials`, data);
+    return response.data;
+};
+
+export const updateStoreSchedules = async (id: string, data: IUpdateStoreSchedulesData) => {
+    const response = await api.put(`/store/${id}/schedules`, data);
     return response.data;
 };
 

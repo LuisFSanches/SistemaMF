@@ -446,6 +446,12 @@ export const ModalContainer = styled.div`
                 filter: brightness(1.2);
             }
     }
+
+    .create-button {
+        height: 50px;
+        font-size: 16px;
+        background: #EC4899;
+    }
 `
 
 export const Form = styled.form`
@@ -718,6 +724,11 @@ export const CheckboxContainer =styled.div<{alignLeft?: boolean}>`
     
     label {
         margin: 0px 10px;
+    }
+
+    h4 {
+        margin-bottom: 0px;
+        margin-left: 5px;
     }
 
     @media (max-width: 768px){

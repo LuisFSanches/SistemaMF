@@ -143,7 +143,8 @@ export function ServiceOrdersPage(){
 			await createOrderDelivery({
 				order_id: currentOrder.id!,
 				delivery_man_id: deliveryManId,
-				delivery_date: deliveryDate
+				delivery_date: deliveryDate,
+				store_id: currentOrder.store_id
 			});
 
 			const response = await updateStatus({ id: currentOrder.id!, status: 'DONE' });

@@ -6,7 +6,7 @@ import { IAdmin } from '../../interfaces/IAdmin';
 
 class UpdateAdminController{
 	async handle(req: Request, res: Response, next: NextFunction) {
-		const { id, username, name, password, role, super_admin_password }: IAdmin = req.body;
+		const { id, username, name, password, role, email, super_admin_password }: IAdmin = req.body;
 		const store_id = req.admin?.store_id || undefined;
 
 		const validateSuperAdminService = new ValidateSuperAdminService();
@@ -35,6 +35,7 @@ class UpdateAdminController{
 			name,
 			password,
 			role,
+			email,
 			store_id
 		});
 

@@ -130,7 +130,8 @@ export function CompleteDelivery() {
             await createOrderDelivery({
                 order_id: orderId,
                 delivery_man_id: deliveryMan.id!,
-                delivery_date: moment(data.delivery_date).toISOString()
+                delivery_date: moment(data.delivery_date).toISOString(),
+                store_id: order!.store_id
             });
 
             await updateStatus({

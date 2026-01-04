@@ -20,13 +20,25 @@ class CreateStoreService {
         }
 
         // Verificar se slug já existe
-        const existingStore = await prismaClient.store.findFirst({
+        const existingSlug = await prismaClient.store.findFirst({
             where: { slug: data.slug },
         });
 
-        if (existingStore) {
+        if (existingSlug) {
             throw new BadRequestException(
-                "Store with this slug already exists",
+                "Uma loja com este slug já está cadastrada. Por favor, escolha outro identificador único para sua loja.",
+                ErrorCodes.USER_ALREADY_EXISTS
+            );
+        }
+
+        // Verificar se email já existe
+        const existingEmail = await prismaClient.store.findFirst({
+            where: { email: data.email },
+        });
+
+        if (existingEmail) {
+            throw new BadRequestException(
+                "Uma loja com este email já está cadastrada. Por favor, utilize outro endereço de email.",
                 ErrorCodes.USER_ALREADY_EXISTS
             );
         }
@@ -39,7 +51,7 @@ class CreateStoreService {
 
             if (existingCNPJ) {
                 throw new BadRequestException(
-                    "Store with this CNPJ already exists",
+                    "Uma loja com este CNPJ já está cadastrada. Por favor, verifique se o CNPJ está correto ou utilize outro.",
                     ErrorCodes.USER_ALREADY_EXISTS
                 );
             }

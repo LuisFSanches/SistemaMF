@@ -14,9 +14,18 @@ class CreateOrderService{
 				.set({ hour: 12, minute: 0, second: 0 })
 				.toDate();
 
+			const lastOrder = await prismaClient.order.findFirst({
+				where: { store_id },
+				orderBy: { code: 'desc' },
+				select: { code: true }
+			});
+
+			const nextCode = lastOrder ? lastOrder.code + 1 : 1;
+
 			const order = await prismaClient.order.create({
 				data: {
 					...data,
+					code: nextCode,
 					store_id,
 					delivery_date: formattedDeliveryDate,
 					orderItems: {

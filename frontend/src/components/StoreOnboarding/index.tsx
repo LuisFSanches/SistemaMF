@@ -39,6 +39,12 @@ interface IPaymentCredentials {
     inter_api_key_path: string;
 }
 
+interface ISocialMedia {
+    facebook?: string;
+    instagram?: string;
+    youtube?: string;
+}
+
 const DAYS_OF_WEEK: { value: DayOfWeek; label: string }[] = [
     { value: 'MONDAY', label: 'Segunda-feira' },
     { value: 'TUESDAY', label: 'Terça-feira' },
@@ -72,6 +78,13 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
         inter_client_secret: '',
         inter_api_cert_path: '',
         inter_api_key_path: ''
+    });
+
+    // Estados para redes sociais
+    const [socialMedia, setSocialMedia] = useState<ISocialMedia>({
+        facebook: '',
+        instagram: '',
+        youtube: ''
     });
 
     // Formulário de endereço
@@ -158,6 +171,13 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
 
     const handlePaymentCredentialChange = (field: keyof IPaymentCredentials, value: string) => {
         setPaymentCredentials(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleSocialMediaChange = (field: keyof ISocialMedia, value: string) => {
+        setSocialMedia(prev => ({
             ...prev,
             [field]: value
         }));
@@ -258,10 +278,7 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
                 await updateStoreCredentials(storeId, credentialsData);
             }
 
-            // Atualizar is_first_access para false
-            await updateStore(storeId, { is_first_access: false });
-
-            setIsCompleted(true);
+            setCurrentStep(5);
         } catch (error: any) {
             alert("Erro ao salvar configurações de pagamento. Tente novamente.");
             console.error(error);
@@ -270,7 +287,37 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
         }
     };
 
-    const handleSkipPayment = async () => {
+    const handleSkipPayment = () => {
+        setCurrentStep(5);
+    };
+
+    const handleSocialSubmit = async () => {
+        setShowLoader(true);
+        try {
+            // Preparar dados de redes sociais
+            const socialData: any = {};
+            if (socialMedia.facebook) socialData.facebook = socialMedia.facebook;
+            if (socialMedia.instagram) socialData.instagram = socialMedia.instagram;
+            if (socialMedia.youtube) socialData.youtube = socialMedia.youtube;
+
+            // Salvar redes sociais se houver alguma
+            if (Object.keys(socialData).length > 0) {
+                await updateStore(storeId, socialData);
+            }
+
+            // Atualizar is_first_access para false
+            await updateStore(storeId, { is_first_access: false });
+
+            setIsCompleted(true);
+        } catch (error: any) {
+            alert("Erro ao salvar redes sociais. Tente novamente.");
+            console.error(error);
+        } finally {
+            setShowLoader(false);
+        }
+    };
+
+    const handleSkipSocial = async () => {
         setShowLoader(true);
         try {
             // Apenas atualizar is_first_access para false
@@ -313,7 +360,7 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
             <OnboardingContainer>
                 <OnboardingHeader>
                     <h2>Bem-vindo, {storeName}!</h2>
-                    <p>Vamos configurar sua loja em apenas 3 passos simples</p>
+                    <p>Vamos configurar sua loja em apenas alguns passos simples</p>
                 </OnboardingHeader>
 
                 <OnboardingProgress>
@@ -332,6 +379,10 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
                     <ProgressStep active={currentStep === 4} completed={currentStep > 4}>
                         <div className="step-number">4</div>
                         <span className="step-label">Pagamento</span>
+                    </ProgressStep>
+                    <ProgressStep active={currentStep === 5} completed={currentStep > 5}>
+                        <div className="step-number">5</div>
+                        <span className="step-label">Redes Sociais</span>
                     </ProgressStep>
                 </OnboardingProgress>
 
@@ -780,6 +831,75 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
                                 type="button" 
                                 className="btn-next" 
                                 onClick={handlePaymentSubmit}
+                            >
+                                Próximo
+                            </button>
+                        </OnboardingFooter>
+                    </>
+                )}
+
+                {/* STEP 5: Redes Sociais */}
+                {currentStep === 5 && (
+                    <>
+                        <OnboardingBody>
+                            <h3>Redes Sociais (Opcional)</h3>
+                            <div className="info-box">
+                                <p>Conecte suas redes sociais para que seus clientes possam encontrar e seguir sua loja. Este passo é opcional e pode ser configurado depois.</p>
+                            </div>
+
+                            <div className="form-input">
+                                <label>
+                                    <FontAwesomeIcon icon={faUser} /> Facebook
+                                </label>
+                                <input
+                                    type="url"
+                                    placeholder="https://facebook.com/sua-pagina"
+                                    value={socialMedia.facebook}
+                                    onChange={(e) => handleSocialMediaChange('facebook', e.target.value)}
+                                />
+                                <small>Cole o link completo do seu perfil ou página no Facebook</small>
+                            </div>
+
+                            <div className="form-input">
+                                <label>
+                                    <FontAwesomeIcon icon={faUser} /> Instagram
+                                </label>
+                                <input
+                                    type="url"
+                                    placeholder="https://instagram.com/seu-perfil"
+                                    value={socialMedia.instagram}
+                                    onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}
+                                />
+                                <small>Cole o link completo do seu perfil no Instagram</small>
+                            </div>
+
+                            <div className="form-input">
+                                <label>
+                                    <FontAwesomeIcon icon={faUser} /> YouTube
+                                </label>
+                                <input
+                                    type="url"
+                                    placeholder="https://youtube.com/@seu-canal"
+                                    value={socialMedia.youtube}
+                                    onChange={(e) => handleSocialMediaChange('youtube', e.target.value)}
+                                />
+                                <small>Cole o link completo do seu canal no YouTube</small>
+                            </div>
+                        </OnboardingBody>
+
+                        <OnboardingFooter>
+                            <div>
+                                <button type="button" className="btn-back" onClick={() => setCurrentStep(4)}>
+                                    Voltar
+                                </button>
+                                <button type="button" className="btn-skip" onClick={handleSkipSocial}>
+                                    Pular por enquanto
+                                </button>
+                            </div>
+                            <button 
+                                type="button" 
+                                className="btn-next" 
+                                onClick={handleSocialSubmit}
                             >
                                 Finalizar
                             </button>

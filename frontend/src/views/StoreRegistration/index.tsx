@@ -96,33 +96,33 @@ export function StoreRegistration() {
                 const { status, data } = error.response;
                 
                 if (status === 400) {
-                    if (data.message.includes("slug")) {
+                    const errorMessage = data.message?.toLowerCase() || "";
+                    
+                    if (errorMessage.includes("slug")) {
                         setError("slug", {
                             type: "custom",
-                            message: "Este identificador já está em uso",
+                            message: "Uma loja com este identificador já está cadastrada. Por favor, escolha outro identificador único.",
                         });
-                    } else if (data.message.includes("CNPJ")) {
-                        setError("cnpj", {
-                            type: "custom",
-                            message: "Este CNPJ já está cadastrado",
-                        });
-                    } else {
+                    } else if (errorMessage.includes("email")) {
                         setError("email", {
                             type: "custom",
-                            message: "Verifique os dados informados",
+                            message: "Uma loja com este email já está cadastrada. Por favor, utilize outro endereço de email.",
                         });
+                    } else if (errorMessage.includes("cnpj")) {
+                        setError("cnpj", {
+                            type: "custom",
+                            message: "Uma loja com este CNPJ já está cadastrada. Por favor, verifique se o CNPJ está correto ou utilize outro.",
+                        });
+                    } else {
+                        alert("Erro ao cadastrar: " + (data.message || "Verifique os dados informados"));
                     }
                 } else if (status === 500) {
-                    setError("email", {
-                        type: "custom",
-                        message: "Erro no servidor. Tente novamente mais tarde",
-                    });
+                    alert("Erro no servidor. Tente novamente mais tarde.");
+                } else {
+                    alert("Erro ao cadastrar loja: " + (data.message || "Tente novamente"));
                 }
             } else {
-                setError("email", {
-                    type: "custom",
-                    message: "Erro ao cadastrar loja. Tente novamente",
-                });
+                alert("Erro ao cadastrar loja. Verifique sua conexão e tente novamente.");
             }
         }
         

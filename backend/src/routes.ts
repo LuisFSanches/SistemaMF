@@ -41,6 +41,11 @@ import { GetAdminController } from './controllers/admin/GetAdminController'
 import { GetAllAdminController } from './controllers/admin/GetAllAdminController'
 import { DeleteAdminController } from './controllers/admin/DeleteAdminController'
 import { UpdateAdminController } from './controllers/admin/UpdateAdminController';
+import { UpdateAdminPasswordController } from './controllers/admin/UpdateAdminPasswordController';
+import { UpdateAdminEmailController } from './controllers/admin/UpdateAdminEmailController';
+import { RequestPasswordResetController } from './controllers/admin/RequestPasswordResetController';
+import { ResetPasswordController } from './controllers/admin/ResetPasswordController';
+import { ResetPasswordByEmailController } from './controllers/admin/ResetPasswordByEmailController';
 
 import { GetPixController } from './controllers/inter/GetPixController';
 // import { RegisterWebhookController } from './controllers/inter/RegisterWebhookController';
@@ -88,6 +93,7 @@ import { GetAllStoresController } from './controllers/store/GetAllStoresControll
 import { GetStoreController } from './controllers/store/GetStoreController';
 import { UpdateStoreController } from './controllers/store/UpdateStoreController';
 import { UpdateStoreCredentialsController } from './controllers/store/UpdateStoreCredentialsController';
+import { UpdateStoreSchedulesController } from './controllers/store/UpdateStoreSchedulesController';
 import { DeleteStoreController } from './controllers/store/DeleteStoreController';
 import { UploadStoreLogoController } from './controllers/store/UploadStoreLogoController';
 import { UploadStoreBannerController } from './controllers/store/UploadStoreBannerController';
@@ -151,10 +157,10 @@ router.delete('/order/:id', adminAuthMiddleware, new DeleteOrderController().han
 
 //-- ROTAS PRODUCT --
 router.post('/product', adminAuthMiddleware, new CreateProductController().handle)
-router.get('/product/all', superAdminAuthMiddleware, new GetAllProductController().handle)
-router.get('/product/search', superAdminAuthMiddleware, new SearchProductsController().handle)
+router.get('/product/all', adminAuthMiddleware, new GetAllProductController().handle)
+router.get('/product/search', adminAuthMiddleware, new SearchProductsController().handle)
 router.get('/product/:id', adminAuthMiddleware, new GetProductByIdController().handle)
-router.put('/product/:id', superAdminAuthMiddleware, new UpdateProductController().handle)
+router.put('/product/:id', adminAuthMiddleware, new UpdateProductController().handle)
 router.post('/product/:id/image', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadProductImageController().handle)
 router.delete('/product/:id/image', adminAuthMiddleware, new DeleteProductImageController().handle)
 router.post('/product/:id/qrcode', adminAuthMiddleware, new GenerateProductQRCodeController().handle)
@@ -169,9 +175,18 @@ router.get('/admins/admin', adminAuthMiddleware, new GetAdminController().handle
 router.get('/admins/all', superAdminAuthMiddleware, new GetAllAdminController().handle)
 router.delete('/admins/delete/:id', superAdminAuthMiddleware, new DeleteAdminController().handle)
 router.put('/admin/:id', superAdminAuthMiddleware, new UpdateAdminController().handle)
+router.put('/admin/password/update', superAdminAuthMiddleware, new UpdateAdminPasswordController().handle)
+router.put('/admin/email/update', adminAuthMiddleware, new UpdateAdminEmailController().handle)
+
+//-- ROTAS DE RESET DE SENHA (PÚBLICAS) --
+router.post('/admin/password/request-reset', new RequestPasswordResetController().handle)
+router.post('/admin/password/reset', new ResetPasswordController().handle)
+
+//-- ROTAS DE RESET DE SENHA (SUPER_ADMIN) --
+router.put('/admin/password/reset-by-email', superAdminAuthMiddleware, new ResetPasswordByEmailController().handle)
 
 //-- ROTAS PIX --
-router.get('/pix', superAdminAuthMiddleware, new GetPixController().handle)
+router.get('/pix', adminAuthMiddleware, new GetPixController().handle)
 router.post('/webhook/pix', superAdminAuthMiddleware,  new WebhookPixController().handle)
 // router.put('/create/webhook', new RegisterWebhookController().handle)
 
@@ -225,6 +240,7 @@ router.get('/store/slug/:slug', new GetStoreController().handle); // Público pa
 router.get('/store/:id', superAdminAuthMiddleware, new GetStoreController().handle);
 router.put('/store/:id', superAdminAuthMiddleware, new UpdateStoreController().handle);
 router.put('/store/:id/credentials', superAdminAuthMiddleware, new UpdateStoreCredentialsController().handle);
+router.put('/store/:id/schedules', adminAuthMiddleware, new UpdateStoreSchedulesController().handle);
 router.delete('/store/:id', superAdminAuthMiddleware, new DeleteStoreController().handle);
 router.post('/store/:id/logo', superAdminAuthMiddleware, uploadStore.single('logo'), handleMulterError, processImage, new UploadStoreLogoController().handle);
 router.post('/store/:id/banner', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processImage, new UploadStoreBannerController().handle);

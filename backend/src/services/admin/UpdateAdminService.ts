@@ -5,7 +5,7 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class UpdateAdminService{
-	async execute({ id, username, name, password, role, store_id }: IAdmin) {		
+	async execute({ id, username, name, password, role, email, store_id }: IAdmin) {		
 		try {
 			// Verificar se o admin existe e pertence à loja
 			const whereClause: any = { id };
@@ -27,7 +27,8 @@ class UpdateAdminService{
 			let data = {
 				username,
 				name,
-				role
+				role,
+				email
 			} as any;
 	
 			if (password) {

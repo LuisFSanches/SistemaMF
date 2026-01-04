@@ -15,14 +15,17 @@ datasource db {
 
 //yarn prisma migrate dev
 model Admin {
-  id         String   @id @default(uuid())
-  name       String
-  username   String
-  password   String
-  role       String
-  store_id   String?
-  created_at DateTime? @default(now())
-  updated_at DateTime? @default(now())
+  id                      String    @id @default(uuid())
+  name                    String
+  username                String
+  password                String
+  role                    String
+  email                   String?
+  reset_password_token    String?
+  reset_password_expires  DateTime?
+  store_id                String?
+  created_at              DateTime? @default(now())
+  updated_at              DateTime? @default(now())
 
   created_orders Order[] @relation("createdBy")
   updated_orders Order[] @relation("updatedBy")
@@ -240,6 +243,11 @@ model Store {
   phone_number     String
   email            String   @unique
   description      String?
+  
+  // Redes sociais
+  facebook         String?
+  instagram        String?
+  youtube          String?
   
   // Credenciais Mercado Pago
   mp_access_token  String?

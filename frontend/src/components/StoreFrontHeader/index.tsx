@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
 import logoFull from "../../assets/images/original_logo.png";
 import {
     Header,
@@ -29,6 +31,10 @@ export function StoreFrontHeader({
 }: StoreFrontHeaderProps) {
     const navigate = useNavigate();
     const { cartCount } = useCart();
+    const { storeData } = useContext(AuthContext);
+
+    // Usar logo da loja se disponível, caso contrário usar logo mocada
+    const logoSrc = storeData?.logo || logoFull;
 
     const handleLogoClick = () => {
         if (onLogoClick) {
@@ -48,7 +54,7 @@ export function StoreFrontHeader({
 
     return (
         <Header>
-            <Logo src={logoFull} alt="Mirai Flores" onClick={handleLogoClick} />
+            <Logo src={logoSrc} alt="Mirai Flores" onClick={handleLogoClick} />
             <HeaderActions>
                 {showBackButton && (
                     <BackButton onClick={handleBackClick}>

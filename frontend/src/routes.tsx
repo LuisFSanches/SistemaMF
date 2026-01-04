@@ -32,6 +32,9 @@ import { OrderDetail } from "./views/OrderDetail";
 // import { StoreRegistration } from "./views/StoreRegistration";
 import { Reports } from "./views/Reports";
 import { StoreRegistration } from "./views/StoreRegistration";
+import StoreSettings from "./views/StoreSettings";
+import { ForgotPasswordPage } from "./views/ForgotPasswordPage";
+import { ResetPasswordPage } from "./views/ResetPasswordPage";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -160,9 +163,16 @@ export default function routes(){
                                 <AdminsPage/>
                             </PrivateRoute>
                         }/>
+                        <Route path="/backoffice/configuracoes" element={
+                            <PrivateRoute>
+                                <StoreSettings/>
+                            </PrivateRoute>
+                        }/>
                     </Route>
                     <Route path="/" element={<StoreFront />} />
                     <Route path="/cadastro" element={<StoreRegistration />} />
+                    <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/carrinho" element={<Cart />} />
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="completarPedido/:id" element={

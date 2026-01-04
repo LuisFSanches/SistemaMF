@@ -50,6 +50,7 @@ const adminAuthMiddleware = async (req: Request, res: Response, next: NextFuncti
     }
 
     catch(error) {
+        console.log(error);
         next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
     }
 }
