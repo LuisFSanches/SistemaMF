@@ -138,7 +138,7 @@ export function OrdersPage(){
                                         order={order}
                                         orderCode={order.code}
                                         clientName={getName(order.client.first_name, order.client.last_name)}
-                                        clientTelephone={order.client.phone_number !== '22997517940' ? order.client.phone_number : ''}
+                                        clientTelephone={order.client.phone_number !== '33333333333' ? order.client.phone_number : ''}
                                         admins={admins}
                                         buttonLabel="" />
                                 </td>

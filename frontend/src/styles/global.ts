@@ -908,6 +908,12 @@ export const PageHeader = styled.div`
         }
     }
 `
+
+export const PageTitle = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
 export const ErrorMessage = styled.span`
     color: red;
     margin-bottom: 5px;

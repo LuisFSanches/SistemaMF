@@ -108,6 +108,30 @@ export const uploadStoreBanner = async (id: string, file: File) => {
     return response.data;
 };
 
+export const uploadStoreBanner2 = async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('banner', file);
+    
+    const response = await api.post(`/store/${id}/banner-2`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    return response.data;
+};
+
+export const uploadStoreBanner3 = async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('banner', file);
+    
+    const response = await api.post(`/store/${id}/banner-3`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    return response.data;
+};
+
 export const deleteStore = async (id: string) => {
     const response = await api.delete(`/store/${id}`);
     return response.data;

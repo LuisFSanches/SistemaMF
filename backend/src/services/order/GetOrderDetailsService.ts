@@ -21,6 +21,20 @@ class GetOrderDetailsService {
                     client: true,
                     clientAddress: true,
                     createdBy: true,
+                    orderItems: {
+                        include: {
+                            storeProduct: {
+                                include: {
+                                    product: {
+                                        select: {
+                                            name: true,
+                                            image: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
                     orderDeliveries: {
                         include: {
                             deliveryMan: true

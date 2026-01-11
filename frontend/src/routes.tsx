@@ -19,6 +19,7 @@ import { WaitingClientOrders } from "./views/WaitingClientOrders";
 import { ProductsPage } from "./views/Products";
 import { StockPage } from "./views/Stock";
 import { ProductStockDetail } from "./views/ProductStockDetail";
+import { CatalogoGeral } from "./views/CatalogoGeral";
 import { OrdersToReceivePage } from "./views/OrdersToReceive";
 import { OrderDeliveriesPage } from "./views/OrderDeliveries";
 import { CompleteDelivery } from "./views/CompleteDelivery";
@@ -91,6 +92,16 @@ export default function routes(){
                         <Route path="/backoffice/produtos" element={
                             <PrivateRoute>
                                 <ProductsPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/meus-produtos" element={
+                            <PrivateRoute>
+                                <ProductsPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/catalogo-geral" element={
+                            <PrivateRoute>
+                                <CatalogoGeral/>
                             </PrivateRoute>
                         }/>
                         <Route path="/backoffice/estoque" element={
@@ -169,12 +180,12 @@ export default function routes(){
                             </PrivateRoute>
                         }/>
                     </Route>
-                    <Route path="/" element={<StoreFront />} />
+                    <Route path="/:slug" element={<StoreFront />} />
+                    <Route path="/:slug/carrinho" element={<Cart />} />
+                    <Route path="/:slug/checkout" element={<Checkout />} />
                     <Route path="/cadastro" element={<StoreRegistration />} />
                     <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
-                    <Route path="/carrinho" element={<Cart />} />
-                    <Route path="/checkout" element={<Checkout />} />
                     <Route path="completarPedido/:id" element={
                         <CompleteOrder/>
                     }/>

@@ -20,7 +20,7 @@ import { ICreateStoreAddress } from "../../interfaces/IStoreAddress";
 import { ICreateStoreSchedule, DayOfWeek } from "../../interfaces/IStoreSchedule";
 import { createStoreAddress } from "../../services/storeAddressService";
 import { createStoreSchedule } from "../../services/storeScheduleService";
-import { uploadStoreBanner, uploadStoreLogo, updateStore, updateStoreCredentials } from "../../services/storeService";
+import { uploadStoreBanner, uploadStoreBanner2, uploadStoreBanner3, uploadStoreLogo, updateStore, updateStoreCredentials } from "../../services/storeService";
 
 interface IStoreOnboardingProps {
     storeId: string;
@@ -61,9 +61,15 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
     const [isCompleted, setIsCompleted] = useState(false);
     const [bannerFile, setBannerFile] = useState<File | null>(null);
     const [bannerPreview, setBannerPreview] = useState<string>("");
+    const [banner2File, setBanner2File] = useState<File | null>(null);
+    const [banner2Preview, setBanner2Preview] = useState<string>("");
+    const [banner3File, setBanner3File] = useState<File | null>(null);
+    const [banner3Preview, setBanner3Preview] = useState<string>("");
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string>("");
     const bannerInputRef = useRef<HTMLInputElement>(null);
+    const banner2InputRef = useRef<HTMLInputElement>(null);
+    const banner3InputRef = useRef<HTMLInputElement>(null);
     const avatarInputRef = useRef<HTMLInputElement>(null);
 
     // Estados para meios de pagamento
@@ -153,11 +159,75 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
         }
     };
 
+    const handleBanner2Change = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert("O banner deve ter no máximo 5MB. Escolha outra imagem por favor.");
+                return;
+            }
+
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                alert("Formato inválido. Use JPEG, JPG, PNG ou WEBP.");
+                return;
+            }
+
+            setBanner2File(file);
+            
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setBanner2Preview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleBanner3Change = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert("O banner deve ter no máximo 5MB. Escolha outra imagem por favor.");
+                return;
+            }
+
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                alert("Formato inválido. Use JPEG, JPG, PNG ou WEBP.");
+                return;
+            }
+
+            setBanner3File(file);
+            
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setBanner3Preview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleRemoveBanner = () => {
         setBannerPreview("");
         setBannerFile(null);
         if (bannerInputRef.current) {
             bannerInputRef.current.value = "";
+        }
+    };
+
+    const handleRemoveBanner2 = () => {
+        setBanner2Preview("");
+        setBanner2File(null);
+        if (banner2InputRef.current) {
+            banner2InputRef.current.value = "";
+        }
+    };
+
+    const handleRemoveBanner3 = () => {
+        setBanner3Preview("");
+        setBanner3File(null);
+        if (banner3InputRef.current) {
+            banner3InputRef.current.value = "";
         }
     };
 
@@ -235,9 +305,15 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
                 await uploadStoreLogo(storeId, avatarFile);
             }
 
-            // Upload do banner (opcional)
+            // Upload dos banners (opcionais)
             if (bannerFile) {
                 await uploadStoreBanner(storeId, bannerFile);
+            }
+            if (banner2File) {
+                await uploadStoreBanner2(storeId, banner2File);
+            }
+            if (banner3File) {
+                await uploadStoreBanner3(storeId, banner3File);
             }
 
             setCurrentStep(4);
@@ -569,7 +645,7 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
                         <OnboardingBody>
                             <h3>Mídia da Loja (Opcional)</h3>
                             <div className="info-box">
-                                <p>Adicione um avatar e um banner atraentes para personalizar sua loja. Este passo é opcional e pode ser feito depois.</p>
+                                <p>Adicione um avatar e até 3 banners para criar um carousel atraente na sua loja. Este passo é opcional e pode ser feito depois.</p>
                             </div>
 
                             <div className="media-upload-grid">
@@ -620,10 +696,10 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
                                     )}
                                 </div>
 
-                                {/* Banner Upload */}
+                                {/* Banner 1 Upload */}
                                 <div className="media-upload-section">
-                                    <h4><FontAwesomeIcon icon={faImage} /> Banner</h4>
-                                    <p className="media-description">Imagem horizontal para o topo da loja</p>
+                                    <h4><FontAwesomeIcon icon={faImage} /> Banner 1</h4>
+                                    <p className="media-description">Primeira imagem do carousel</p>
                                     
                                     <input
                                         ref={bannerInputRef}
@@ -636,7 +712,7 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
                                     {bannerPreview ? (
                                         <div className="banner-preview-container">
                                             <div className="banner-preview-box">
-                                                <img src={bannerPreview} alt="Preview do Banner" />
+                                                <img src={bannerPreview} alt="Preview do Banner 1" />
                                             </div>
                                             <div className="media-actions">
                                                 <button
@@ -666,6 +742,100 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Banner 2 Upload */}
+                                <div className="media-upload-section">
+                                    <h4><FontAwesomeIcon icon={faImage} /> Banner 2</h4>
+                                    <p className="media-description">Segunda imagem do carousel (opcional)</p>
+                                    
+                                    <input
+                                        ref={banner2InputRef}
+                                        type="file"
+                                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                                        onChange={handleBanner2Change}
+                                        style={{ display: "none" }}
+                                    />
+
+                                    {banner2Preview ? (
+                                        <div className="banner-preview-container">
+                                            <div className="banner-preview-box">
+                                                <img src={banner2Preview} alt="Preview do Banner 2" />
+                                            </div>
+                                            <div className="media-actions">
+                                                <button
+                                                    type="button"
+                                                    className="btn-change"
+                                                    onClick={() => banner2InputRef.current?.click()}
+                                                >
+                                                    Trocar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="btn-remove"
+                                                    onClick={handleRemoveBanner2}
+                                                >
+                                                    Remover
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div 
+                                            className="media-upload-box banner-upload"
+                                            onClick={() => banner2InputRef.current?.click()}
+                                        >
+                                            <FontAwesomeIcon icon={faCloudArrowUp} />
+                                            <span>Clique para selecionar</span>
+                                            <span className="format-info">JPEG, PNG, WEBP (máx. 5MB)</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Banner 3 Upload */}
+                                <div className="media-upload-section">
+                                    <h4><FontAwesomeIcon icon={faImage} /> Banner 3</h4>
+                                    <p className="media-description">Terceira imagem do carousel (opcional)</p>
+                                    
+                                    <input
+                                        ref={banner3InputRef}
+                                        type="file"
+                                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                                        onChange={handleBanner3Change}
+                                        style={{ display: "none" }}
+                                    />
+
+                                    {banner3Preview ? (
+                                        <div className="banner-preview-container">
+                                            <div className="banner-preview-box">
+                                                <img src={banner3Preview} alt="Preview do Banner 3" />
+                                            </div>
+                                            <div className="media-actions">
+                                                <button
+                                                    type="button"
+                                                    className="btn-change"
+                                                    onClick={() => banner3InputRef.current?.click()}
+                                                >
+                                                    Trocar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="btn-remove"
+                                                    onClick={handleRemoveBanner3}
+                                                >
+                                                    Remover
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div 
+                                            className="media-upload-box banner-upload"
+                                            onClick={() => banner3InputRef.current?.click()}
+                                        >
+                                            <FontAwesomeIcon icon={faCloudArrowUp} />
+                                            <span>Clique para selecionar</span>
+                                            <span className="format-info">JPEG, PNG, WEBP (máx. 5MB)</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </OnboardingBody>
 
@@ -682,7 +852,7 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
                                 type="button" 
                                 className="btn-next" 
                                 onClick={handleMediaSubmit}
-                                disabled={!bannerFile && !avatarFile}
+                                disabled={!bannerFile && !banner2File && !banner3File && !avatarFile}
                             >
                                 Próximo
                             </button>

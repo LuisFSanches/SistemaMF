@@ -17,7 +17,28 @@ class GetCompleteOrderService {
             const order = await prismaClient.order.findFirst({
                 where: whereClause,
                 include: {
-                    client: true,
+                    store: {
+                        select: {
+                            name: true,
+                            logo: true,
+                            cnpj: true,
+                            phone_number: true,
+                        }
+                    },
+                    orderItems: {
+                        include: {
+                            storeProduct: {
+                                include: {
+                                    product: {
+                                        select: {
+                                            name: true,
+                                            image: true
+                                        }
+                                    }
+                                }
+                            },
+                        }
+                    }
                 }
             });
 

@@ -32,15 +32,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark, faCloudArrowUp, faQrcode, faPrint, faDownload } from "@fortawesome/free-solid-svg-icons";
 import { IProduct } from "../../interfaces/IProduct";
 import { createProduct, updateProduct, uploadProductImage, deleteProductImage } from "../../services/productService";
+import { createStoreProduct } from "../../services/storeProductService";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { useProducts } from "../../contexts/ProductsContext";
+import { useAdminData } from "../../contexts/AuthContext";
 import { UNITIES } from "../../constants";
 import { Loader } from "../Loader";
 
 interface ProductModalProps{
     isOpen: boolean;
     onRequestClose: ()=> void;
-    loadData: () => void;
+    loadData: (storeId: string) => Promise<void>;
     action: string;
     currentProduct: IProduct;
 }
@@ -54,6 +56,7 @@ export function ProductModal({
 }:ProductModalProps){
     const { addProduct, editProduct, loadAvailableProducts } = useProducts();
     const { showSuccess } = useSuccessMessage();
+    const { adminData } = useAdminData();
 
     const {
         register,
@@ -98,7 +101,9 @@ export function ProductModal({
                 setImagePreview("");
                 setImageFile(null);
                 setValue("image", "");
-                loadAvailableProducts(1, 30, "");
+                if (adminData.store_id) {
+                    loadAvailableProducts(adminData.store_id, 1, 30, "");
+                }
                 setShowLoader(false);
             } catch (error) {
                 setShowLoader(false);
@@ -187,9 +192,26 @@ export function ProductModal({
                     await uploadProductImage(productData.id, imageFile);
                 }
 
+                // Se for criação e tiver store_id, criar automaticamente o store_product
+                if (adminData.store_id && productData.id) {
+                    await createStoreProduct({
+                        product_id: productData.id,
+                        store_id: adminData.store_id,
+                        price: parseFloat(formData.price as any) || 0,
+                        stock: parseFloat(formData.stock as any) || 0,
+                        enabled: formData.enabled,
+                        visible_for_online_store: formData.visible_in_store || false,
+                    });
+                    showSuccess("Produto criado e adicionado à loja com sucesso!");
+                } else {
+                    showSuccess("Produto criado com sucesso!");
+                }
+
                 addProduct(productData);
-                showSuccess("Produto criado com sucesso!");
-                await loadData();
+                
+                if (adminData.store_id) {
+                    await loadData(adminData.store_id);
+                }
                 onRequestClose();
             }
 
@@ -210,7 +232,9 @@ export function ProductModal({
 
                 editProduct(productData);
                 showSuccess("Produto atualizado com sucesso!");
-                await loadData();
+                if (adminData.store_id) {
+                    await loadData(adminData.store_id);
+                }
                 onRequestClose();
             }
 

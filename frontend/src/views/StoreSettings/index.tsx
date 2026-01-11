@@ -28,7 +28,7 @@ import {
     CancelButton,
     LoadingContainer
 } from './style';
-import { getStoreById, updateStore, uploadStoreLogo, uploadStoreBanner, updateStoreSchedules } from '../../services/storeService';
+import { getStoreById, updateStore, uploadStoreLogo, uploadStoreBanner, uploadStoreBanner2, uploadStoreBanner3, updateStoreSchedules } from '../../services/storeService';
 import { getStoreAddresses, updateStoreAddress, createStoreAddress } from '../../services/storeAddressService';
 import { getStoreSchedules } from '../../services/storeScheduleService';
 import { resetPasswordByEmail } from '../../services/adminService';
@@ -104,8 +104,12 @@ export default function StoreSettings() {
     const [localSchedules, setLocalSchedules] = useState<IStoreSchedule[]>([]);
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+    const [banner2Preview, setBanner2Preview] = useState<string | null>(null);
+    const [banner3Preview, setBanner3Preview] = useState<string | null>(null);
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [bannerFile, setBannerFile] = useState<File | null>(null);
+    const [banner2File, setBanner2File] = useState<File | null>(null);
+    const [banner3File, setBanner3File] = useState<File | null>(null);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [showEmailModal, setShowEmailModal] = useState(false);
@@ -159,6 +163,12 @@ export default function StoreSettings() {
             }
             if (storeData.banner) {
                 setBannerPreview(storeData.banner);
+            }
+            if (storeData.banner_2) {
+                setBanner2Preview(storeData.banner_2);
+            }
+            if (storeData.banner_3) {
+                setBanner3Preview(storeData.banner_3);
             }
 
             const addresses = await getStoreAddresses(storeId);
@@ -234,6 +244,30 @@ export default function StoreSettings() {
         }
     };
 
+    const handleBanner2Change = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setBanner2File(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setBanner2Preview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleBanner3Change = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setBanner3File(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setBanner3Preview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleGeneralSubmit = async (data: GeneralFormData) => {
         if (!store) return;
 
@@ -261,6 +295,12 @@ export default function StoreSettings() {
             }
             if (bannerFile) {
                 await uploadStoreBanner(store.id, bannerFile);
+            }
+            if (banner2File) {
+                await uploadStoreBanner2(store.id, banner2File);
+            }
+            if (banner3File) {
+                await uploadStoreBanner3(store.id, banner3File);
             }
             alert('Imagens atualizadas com sucesso!');
             loadStoreData();
@@ -498,12 +538,12 @@ export default function StoreSettings() {
 
             <ImageUploadArea>
                 <h3>
-                    <FontAwesomeIcon icon={faImage} /> Banner da Loja
+                    <FontAwesomeIcon icon={faImage} /> Banner 1 (Carousel)
                 </h3>
                 <ImagePreview>
                     <BannerPreview>
                         {bannerPreview ? (
-                            <img src={bannerPreview} alt="Banner da loja" />
+                            <img src={bannerPreview} alt="Banner 1 da loja" />
                         ) : (
                             <FontAwesomeIcon icon={faImage} />
                         )}
@@ -511,6 +551,44 @@ export default function StoreSettings() {
                     <FileInputLabel>
                         Escolher Imagem
                         <input type="file" accept="image/*" onChange={handleBannerChange} />
+                    </FileInputLabel>
+                </ImagePreview>
+            </ImageUploadArea>
+
+            <ImageUploadArea>
+                <h3>
+                    <FontAwesomeIcon icon={faImage} /> Banner 2 (Carousel)
+                </h3>
+                <ImagePreview>
+                    <BannerPreview>
+                        {banner2Preview ? (
+                            <img src={banner2Preview} alt="Banner 2 da loja" />
+                        ) : (
+                            <FontAwesomeIcon icon={faImage} />
+                        )}
+                    </BannerPreview>
+                    <FileInputLabel>
+                        Escolher Imagem
+                        <input type="file" accept="image/*" onChange={handleBanner2Change} />
+                    </FileInputLabel>
+                </ImagePreview>
+            </ImageUploadArea>
+
+            <ImageUploadArea>
+                <h3>
+                    <FontAwesomeIcon icon={faImage} /> Banner 3 (Carousel)
+                </h3>
+                <ImagePreview>
+                    <BannerPreview>
+                        {banner3Preview ? (
+                            <img src={banner3Preview} alt="Banner 3 da loja" />
+                        ) : (
+                            <FontAwesomeIcon icon={faImage} />
+                        )}
+                    </BannerPreview>
+                    <FileInputLabel>
+                        Escolher Imagem
+                        <input type="file" accept="image/*" onChange={handleBanner3Change} />
                     </FileInputLabel>
                 </ImagePreview>
             </ImageUploadArea>

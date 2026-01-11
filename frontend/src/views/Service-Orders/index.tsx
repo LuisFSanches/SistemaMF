@@ -40,6 +40,7 @@ export function ServiceOrdersPage(){
 	const [activeCardFilter, setActiveCardFilter] = useState<string | null>(null);
 
     function handleOpenEditOrderModal(order: IOrder){
+		console.log('edit order', order);
         setEditOrderModal(true);
         setCurrentOrder(order);
     }

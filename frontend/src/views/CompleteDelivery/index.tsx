@@ -5,7 +5,6 @@ import Modal from "react-modal";
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import transparentLogo from '../../assets/images/transparent_logo.png'
 import { getDeliveryManByPhoneCode } from "../../services/deliveryManService";
 import { getCompletedOrder, updateStatus } from "../../services/orderService";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
@@ -34,6 +33,10 @@ interface IDeliveryForm {
 }
 
 export function CompleteDelivery() {
+    const [storeLogo, setStoreLogo] = useState("");
+    const [storeName, setStoreName] = useState("");
+    const [storeCNPJ, setStoreCNPJ] = useState("");
+    const [storePhone, setStorePhone] = useState("");
     const { id: orderId } = useParams<{ id: string }>();
     const { createOrderDelivery } = useOrderDeliveries();
     const [showLoader, setShowLoader] = useState(true);
@@ -67,6 +70,10 @@ export function CompleteDelivery() {
             try {
                 const { data: orderData } = await getCompletedOrder(orderId);
                 setOrder(orderData);
+                setStoreLogo(orderData.store.logo || "");
+                setStoreName(orderData.store.name || "");
+                setStoreCNPJ(orderData.store.cnpj || "");
+                setStorePhone(orderData.store.phone_number || "");
             } catch (error) {
                 console.error("Error fetching order:", error);
                 setErrorMessage("Erro ao carregar pedido");
@@ -182,17 +189,17 @@ export function CompleteDelivery() {
 
             {(isCompleted || order?.status === 'DONE') ? (
                 <CompletedDelivery>
-                    <img src={transparentLogo} alt="" />
+                    <img src={storeLogo} alt="" />
                     <h1>Entrega confirmada com sucesso!</h1>
                     <p>🚚📦✅</p>
                 </CompletedDelivery>
             ) : (
                 <Form onSubmit={handleSubmit(onSubmit)}>
                     <FormHeader>
-                        <img src={transparentLogo} alt="" />
-                        <p>Mirai Flores</p>
-                        <span>CNPJ: 33.861.078/0001-50</span>
-                        <span>Tel: (22) 99751-7940</span>
+                        <img src={storeLogo} alt="" />
+                        <p>{storeName}</p>
+                        <span>CNPJ: {storeCNPJ}</span>
+                        <span>Tel: {storePhone}</span>
                     </FormHeader>
 
                     <div className="spacer"></div>

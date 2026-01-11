@@ -12,7 +12,8 @@
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "build": "rm -rf dist && tsup src",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "update-sales-count": "ts-node scripts/update-sales-count.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
@@ -23,12 +24,15 @@
     "vitest-mock-extended": "^3.1.0"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.948.0",
+    "@aws-sdk/lib-storage": "^3.948.0",
     "@prisma/client": "^5.14.0",
     "@types/axios": "^0.14.4",
     "@types/bcrypt": "^5.0.2",
     "@types/dotenv": "^8.2.3",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/multer": "^2.0.0",
+    "@types/nodemailer": "^7.0.4",
     "@types/qrcode": "^1.5.6",
     "@vitest/coverage-v8": "^3.2.4",
     "axios": "^1.7.9",
@@ -42,6 +46,7 @@
     "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.5.48",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.11",
     "openai": "^5.15.0",
     "prisma": "^5.14.0",
     "qrcode": "^1.5.4",
@@ -49,6 +54,7 @@
     "socket.io": "^4.8.1",
     "tsup": "^8.3.5",
     "vite": "^7.1.2",
+    "xlsx": "^0.18.5",
     "zod": "^3.23.8"
   }
 }

@@ -7,7 +7,7 @@ import { BadRequestException } from "../../exceptions/bad-request";
 class CreateOrderService{
 	async execute(data: IOrder, products: any, store_id?: string) {
 		const { delivery_date } = data;
-				
+
 		try {
 			const formattedDeliveryDate = moment.utc(delivery_date)
 				.tz('America/Sao_Paulo', true)
@@ -30,7 +30,7 @@ class CreateOrderService{
 					delivery_date: formattedDeliveryDate,
 					orderItems: {
 						create: products.map((product: any) => ({
-							product_id: product.id,
+							store_product_id: product.id,
 							quantity: Number(product.quantity),
 							price: Number(product.price),
 							store_id,

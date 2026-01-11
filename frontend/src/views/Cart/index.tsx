@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faTrash, faPlus, faMinus, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
@@ -31,6 +31,7 @@ import {
 
 export function Cart() {
     const navigate = useNavigate();
+    const { slug } = useParams<{ slug: string }>();
     const {
         cartItems,
         cartTotal,
@@ -46,7 +47,7 @@ export function Cart() {
 
     const handleGoToCheckout = () => {
         if (cartItems.length === 0) return;
-        navigate("/checkout");
+        navigate(`/${slug}/checkout`);
     };
 
     return (
@@ -54,7 +55,8 @@ export function Cart() {
             <StoreFrontHeader 
                 showBackButton 
                 backButtonText="Voltar às Compras"
-                backButtonPath="/"
+                backButtonPath={`/${slug}`}
+                slug={slug}
             />
 
             <Content>
@@ -69,7 +71,7 @@ export function Cart() {
                             <FontAwesomeIcon icon={faShoppingCart as any} />
                             <h3>Seu carrinho está vazio</h3>
                             <p>Adicione produtos para continuar</p>
-                            <PrimaryButton onClick={() => navigate("/")}>
+                            <PrimaryButton onClick={() => navigate(`/${slug}`)}>
                                 Ir às Compras
                             </PrimaryButton>
                         </EmptyCart>

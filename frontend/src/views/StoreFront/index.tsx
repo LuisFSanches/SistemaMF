@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
@@ -18,20 +19,55 @@ import {
     EmptyState,
 } from "./style";
 
+interface Store {
+    id: string;
+    name: string;
+    slug: string;
+    logo: string | null;
+    banner: string | null;
+    banner_2?: string | null;
+    banner_3?: string | null;
+}
+
 export function StoreFront() {
+    const { slug } = useParams<{ slug: string }>();
     const { addToCart } = useCart();
     const [products, setProducts] = useState<any[]>([]);
     const [totalProducts, setTotalProducts] = useState(0);
+    const [store, setStore] = useState<Store | null>(null);
     const [showLoader, setShowLoader] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [query, setQuery] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
 
-    const loadAvailableProducts = async (page: number, pageSize: number, query: string) => {
-        const { data: { products, total } } = await listStoreFrontProducts(page, pageSize, query);
-        setProducts(products);
-        setTotalProducts(total);
+    const loadAvailableProducts = async (slug: string, page: number, pageSize: number, query: string) => {
+        try {
+            setError(null);
+            const { data: { products, total, store } } = await listStoreFrontProducts(slug, page, pageSize, query);
+
+            // Salvar store_id no localStorage para uso no checkout
+            if (store?.id) {
+                localStorage.setItem('storefront_store_id', store.id);
+            }
+            
+            setProducts(products);
+            setTotalProducts(total);
+            setStore(store);
+        } catch (err: any) {
+            console.error('Erro ao carregar produtos:', err);
+            if (err.response?.status === 404) {
+                setError('store_not_found');
+            } else if (err.response?.data?.message === 'Store is not active') {
+                setError('store_inactive');
+            } else {
+                setError('unknown_error');
+            }
+            setProducts([]);
+            setTotalProducts(0);
+            setStore(null);
+        }
     }
 
     useEffect(() => {
@@ -44,14 +80,16 @@ export function StoreFront() {
     }, [searchTerm]);
 
     useEffect(() => {
+        if (!slug) return;
+        
         setShowLoader(true);
-        loadAvailableProducts(page, pageSize, query).then(() => {
+        loadAvailableProducts(slug, page, pageSize, query).then(() => {
             setTimeout(() => {
                 setShowLoader(false);
             }, 350);
         });
 
-    }, [page, pageSize, query]);
+    }, [slug, page, pageSize, query]);
 
     useEffect(() => {
         function handleResize() {
@@ -71,15 +109,65 @@ export function StoreFront() {
     }, []);
 
     const handleAddProduct = (product: any, quantity: number, price: number) => {
+        console.log('[StoreFront] Adicionando ao carrinho:', { id: product.id, name: product.name, price });
         addToCart({ ...product, price }, quantity);
     };
 
+    if (error === 'store_not_found') {
+        return (
+            <Container>
+                <StoreFrontHeader showCartButton />
+                <Content>
+                    <EmptyState>
+                        <FontAwesomeIcon icon={faSearch as any} />
+                        <h3>Loja não encontrada</h3>
+                        <p>O slug "{slug}" não corresponde a nenhuma loja ativa.</p>
+                    </EmptyState>
+                </Content>
+            </Container>
+        );
+    }
+
+    if (error === 'store_inactive') {
+        return (
+            <Container>
+                <StoreFrontHeader showCartButton />
+                <Content>
+                    <EmptyState>
+                        <FontAwesomeIcon icon={faSearch as any} />
+                        <h3>Loja Temporariamente Indisponível</h3>
+                        <p>Esta loja está desativada no momento. Tente novamente mais tarde.</p>
+                    </EmptyState>
+                </Content>
+            </Container>
+        );
+    }
+
+    if (error === 'unknown_error') {
+        return (
+            <Container>
+                <StoreFrontHeader showCartButton />
+                <Content>
+                    <EmptyState>
+                        <FontAwesomeIcon icon={faSearch as any} />
+                        <h3>Erro ao carregar produtos</h3>
+                        <p>Ocorreu um erro ao carregar os produtos. Tente novamente mais tarde.</p>
+                    </EmptyState>
+                </Content>
+            </Container>
+        );
+    }
+
     return (
         <Container>
-            <StoreFrontHeader showCartButton />
+            <StoreFrontHeader 
+                showCartButton 
+                store={store}
+                slug={slug}
+            />
 
             <Content>
-                <PageTitle>Nossos Produtos</PageTitle>
+                <PageTitle>{store?.name || 'Nossos Produtos'}</PageTitle>
 
                 <SearchContainer>
                     <SearchInput

@@ -24,7 +24,7 @@ import { useOrders } from "../../contexts/OrdersContext";
 import { PAYMENT_METHODS, STATUS_LABEL } from "../../constants";
 import { updateOrder, updateStatus } from "../../services/orderService";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
-import { searchProducts } from "../../services/productService";
+import { searchStoreProducts } from "../../services/storeProductService";
 import { getPickupAddress } from "../../services/addressService";
 import { Loader } from "../Loader";
 import { ConfirmPopUp } from "../ConfirmPopUp";
@@ -167,6 +167,7 @@ export function EditOrderModal({
 		setValue("clientAddress.country", order.clientAddress.country);
 		setValue("pickup_on_store", order.pickup_on_store);
 		setPickupAddress(order.pickup_on_store);
+		console.log('order items', order.orderItems);
 		setProducts(order.orderItems);
     }, [order, setValue]);
 
@@ -224,7 +225,7 @@ export function EditOrderModal({
 	
 		debounceTimeout.current = setTimeout(async () => {
 			if (text.length >= 2) {
-				const response = await searchProducts(text);
+				const response = await searchStoreProducts(text);
 	
 				setProductSuggestions(prev => ({
 					...prev,
@@ -241,9 +242,28 @@ export function EditOrderModal({
 	
 
 	const handleSelectProduct = (index: number, product: any) => {
-		updateProducts(index, "product", product);
+		// Constrói a estrutura storeProduct correta
+		const storeProductStructure = {
+			id: product.id,
+			price: product.price,
+			stock: product.stock,
+			enabled: product.enabled,
+			visible_for_online_store: product.visible_for_online_store,
+			store_id: product.store_id,
+			product_id: product.product_id,
+			created_at: product.created_at,
+			updated_at: product.updated_at,
+			product: {
+				name: product.name,
+				image: product.image
+			}
+		};
+
+		updateProducts(index, "storeProduct", storeProductStructure);
 		updateProducts(index, "price", product.price);
-		updateProducts(index, "product_id", product.id);
+		updateProducts(index, "store_product_id", product.id);
+		updateProducts(index, "product_id", null);
+		updateProducts(index, "store_id", product.store_id);
 		setShowSuggestions({});
 
 		// Atualiza o texto do input também
@@ -256,18 +276,26 @@ export function EditOrderModal({
 			{
 				id: null,
 				order_id: order.id,
-				product_id: "",
+				product_id: null,
+				store_product_id: "",
+				store_id: "",
 				quantity: 1,
 				price: 0,
-				product: {
-					name: '',
+				storeProduct: {
+					id: "",
+					product_id: "",
+					store_id: "",
 					price: 0,
-					unity: 'UN',
 					stock: 0,
 					enabled: true,
+					visible_for_online_store: false,
 					created_at: new Date().toISOString(),
 					updated_at: new Date().toISOString(),
-				},
+					product: {
+						name: '',
+						image: null
+					}
+				}
 			}
 		]);
 		
@@ -287,9 +315,13 @@ export function EditOrderModal({
 		});
 	};
 
+	console.log('products on edit', products);
+
 	const description = products
-			?.map((p) => `${p.quantity}x ${p.product.name} - R$ ${p.price}`)
+			?.map((p) => `${p.quantity}x ${p?.storeProduct?.product?.name} - R$ ${p.price}`)
 			.join('\n');
+
+	console.log('description', description);
 	
 	useEffect(() => {
 		if (order?.orderItems?.length > 0) {
@@ -375,9 +407,9 @@ export function EditOrderModal({
 												<Label>Produto</Label>
 												<Input
 													placeholder="Produto"
-													value={queries[index] ?? p.product.name}
+													value={queries[index] ?? p?.storeProduct?.product?.name}
 													onChange={(e) => handleSearchProducts(index, e.target.value)}
-													onFocus={() => (queries[index] || p.product.name) &&
+													onFocus={() => (queries[index] || p?.storeProduct?.product?.name) &&
 														setShowSuggestions(prev => ({ ...prev, [index]: true }))}
 												/>
 
@@ -428,7 +460,7 @@ export function EditOrderModal({
 							<DescriptionArea>
 								{products?.map((p, index) => (
 									<p key={index}>
-										{p.quantity}x - {p.product.name} - R$ {p.price}
+										{p.quantity}x - {p?.storeProduct?.product?.name} - R$ {p.price}
 									</p>
 								))}
 							</DescriptionArea>

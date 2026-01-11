@@ -81,11 +81,39 @@ model Product {
   sales_count        Int      @default(0)
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
+  categories         ProductCategory[]
 
   orderItems OrderItem[]
   stockTransactions StockTransaction[]
+  storeProducts    StoreProduct[]
 
   @@map("products")
+}
+
+model Category {
+  id        String @id @default(uuid())
+  name      String
+  slug      String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  products  ProductCategory[]
+
+  @@map("categories")
+}
+
+model ProductCategory {
+  product_id  String
+  category_id String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  product  Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+
+  @@id([product_id, category_id])
+  @@map("product_categories")
 }
 
 model Supplier {
@@ -102,16 +130,40 @@ model Supplier {
   @@map("suppliers")
 }
 
+model StoreProduct {
+  id         String  @id @default(uuid())
+  store_id   String
+  product_id String
+
+  price      Float
+  stock      Float
+  enabled    Boolean @default(true)
+  visible_for_online_store    Boolean @default(false)
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt @default(now())
+
+  store      Store   @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  product    Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  orderItems OrderItem[]
+
+  @@unique([store_id, product_id])
+  @@map("store_products")
+}
+
 model OrderItem {
   id        String   @id @default(uuid())
   order_id  String
-  product_id String
+  product_id String?
+  store_product_id String?
   store_id  String?
   quantity  Int
-  price     Float  // preço unitário no momento do pedido (evita inconsistência se o preço mudar depois)
+  price     Float
 
+  storeProduct StoreProduct? @relation(fields: [store_product_id], references: [id])
   order     Order   @relation(fields: [order_id], references: [id])
-  product   Product @relation(fields: [product_id], references: [id])
+  product   Product? @relation(fields: [product_id], references: [id])
   store     Store?   @relation(fields: [store_id], references: [id])
 
   @@map("order_items")
@@ -267,6 +319,8 @@ model Store {
   is_first_access  Boolean  @default(true)
   logo             String?
   banner           String?
+  banner_2         String?
+  banner_3         String?
   
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
@@ -283,6 +337,7 @@ model Store {
   suppliers        Supplier[]
   stockTransactions StockTransaction[]
   deliveryMen      DeliveryMan[]
+  storeProducts    StoreProduct[]
 
   @@map("stores")
 }

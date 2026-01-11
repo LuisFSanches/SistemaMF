@@ -37,9 +37,12 @@ export const createOrder = async ({
 	is_delivery,
 	card_from,
 	card_to,
-	card_message
+	card_message,
+	store_id: receivedStoreId
 }: any) => {
-	const store_id = getStoreId();
+	// Usar store_id recebido (do storefront) ou obter do admin logado
+	const store_id = receivedStoreId || getStoreId();
+	console.log('[orderService] Store ID usado:', store_id, '(recebido:', receivedStoreId, ', admin:', getStoreId(), ')');
 	
 	const response = await api.post("/order", {
 		store_id,  // Adicionar store_id automaticamente

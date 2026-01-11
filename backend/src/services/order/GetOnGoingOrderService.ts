@@ -27,7 +27,16 @@ class GetOnGoingOrderService {
                     createdBy: true,
                     orderItems: {
                         include: {
-                            product: true
+                            storeProduct: {
+                                include: {
+                                    product: {
+                                        select: {
+                                            name: true,
+                                            image: true
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

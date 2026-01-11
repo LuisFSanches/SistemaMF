@@ -32,6 +32,8 @@ class GetStoreService {
                     payment_enabled: true,
                     logo: true,
                     banner: true,
+                    banner_2: true,
+                    banner_3: true,
                     created_at: true,
                     updated_at: true,
                     addresses: {

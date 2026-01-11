@@ -17,6 +17,10 @@ import { UploadProductImageController } from './controllers/product/UploadProduc
 import { DeleteProductImageController } from './controllers/product/DeleteProductImageController';
 import { GenerateProductQRCodeController } from './controllers/product/GenerateProductQRCodeController';
 import { GetStoreFrontProductsController } from './controllers/product/GetStoreFrontProductsController';
+import { ExportProductsToExcelController } from './controllers/product/ExportProductsToExcelController';
+import { ImportProductsFromExcelController } from './controllers/product/ImportProductsFromExcelController';
+import { ExportStoreProductsToExcelController } from './controllers/product/ExportStoreProductsToExcelController';
+import { UpdateStoreProductsFromExcelController } from './controllers/product/UpdateStoreProductsFromExcelController';
 
 import { CreateAddressController } from './controllers/address/CreateAddressController';
 import { GetAllClientAddressController } from './controllers/address/GetAllClientAddressController';
@@ -97,6 +101,15 @@ import { UpdateStoreSchedulesController } from './controllers/store/UpdateStoreS
 import { DeleteStoreController } from './controllers/store/DeleteStoreController';
 import { UploadStoreLogoController } from './controllers/store/UploadStoreLogoController';
 import { UploadStoreBannerController } from './controllers/store/UploadStoreBannerController';
+import { UploadStoreBanner2Controller } from './controllers/store/UploadStoreBanner2Controller';
+import { UploadStoreBanner3Controller } from './controllers/store/UploadStoreBanner3Controller';
+
+import { CreateStoreProductController } from './controllers/storeProduct/CreateStoreProductController';
+import { GetAllStoreProductsController } from './controllers/storeProduct/GetAllStoreProductsController';
+import { GetStoreProductController } from './controllers/storeProduct/GetStoreProductController';
+import { UpdateStoreProductController } from './controllers/storeProduct/UpdateStoreProductController';
+import { DeleteStoreProductController } from './controllers/storeProduct/DeleteStoreProductController';
+import { SearchStoreProductsController } from './controllers/storeProduct/SearchStoreProductsController';
 
 import { CreateStoreAddressController } from './controllers/storeAddress/CreateStoreAddressController';
 import { GetAllStoreAddressesController } from './controllers/storeAddress/GetAllStoreAddressesController';
@@ -118,7 +131,7 @@ import { DeleteStoreHolidayController } from './controllers/storeHoliday/DeleteS
 
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
-import { upload, uploadStore } from './config/multer';
+import { upload, uploadStore, uploadExcel } from './config/multer';
 import { processImage } from './middlewares/process_image';
 import { handleMulterError } from './middlewares/multer_error';
 
@@ -147,7 +160,7 @@ router.get('/order/completedOrder/:id', new GetCompleteOrderController().handle)
 router.get('/order/ongoing', adminAuthMiddleware, new GetOnGoingOrderController().handle);
 router.get('/order/all', adminAuthMiddleware, new GetAllOrderController().handle);
 router.get('/order/waitingForClient', adminAuthMiddleware, new GetWaitingOnlineOrderController().handle);
-router.post('/order', adminAuthMiddleware, new CreateOrderController().handle);
+router.post('/order', new CreateOrderController().handle);
 router.post('/order/ai', adminAuthMiddleware, new CreateOrderByAIController().handle);
 router.put('/order/:id', adminAuthMiddleware, new UpdateOrderController().handle);
 router.put('/order/finish/:id', new FinishOnlineOrderController().handle);
@@ -164,9 +177,23 @@ router.put('/product/:id', adminAuthMiddleware, new UpdateProductController().ha
 router.post('/product/:id/image', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadProductImageController().handle)
 router.delete('/product/:id/image', adminAuthMiddleware, new DeleteProductImageController().handle)
 router.post('/product/:id/qrcode', adminAuthMiddleware, new GenerateProductQRCodeController().handle)
+router.get('/product/export/excel', adminAuthMiddleware, new ExportProductsToExcelController().handle)
+router.post('/product/import/excel', adminAuthMiddleware, uploadExcel.single('file'), handleMulterError, new ImportProductsFromExcelController().handle)
+
+//-- ROTAS STORE PRODUCTS EXCEL --
+router.get('/store-product/export/excel', adminAuthMiddleware, new ExportStoreProductsToExcelController().handle)
+router.put('/store-product/update/excel', adminAuthMiddleware, uploadExcel.single('file'), handleMulterError, new UpdateStoreProductsFromExcelController().handle)
+
+//-- ROTAS STORE PRODUCTS --
+router.post('/store-product', adminAuthMiddleware, new CreateStoreProductController().handle)
+router.get('/store-product/all', adminAuthMiddleware, new GetAllStoreProductsController().handle)
+router.get('/store-product/search', adminAuthMiddleware, new SearchStoreProductsController().handle)
+router.get('/store-product/:id', adminAuthMiddleware, new GetStoreProductController().handle)
+router.put('/store-product/:id', adminAuthMiddleware, new UpdateStoreProductController().handle)
+router.delete('/store-product/:id', adminAuthMiddleware, new DeleteStoreProductController().handle)
 
 //-- ROTAS STOREFRONT (PÚBLICAS) --
-router.get('/storefront/products', new GetStoreFrontProductsController().handle)
+router.get('/storefront/:slug/products', new GetStoreFrontProductsController().handle)
 
 //-- ROTAS ADMIN --
 router.post('/admin', superAdminAuthMiddleware, new CreateAdminController().handle)
@@ -244,6 +271,8 @@ router.put('/store/:id/schedules', adminAuthMiddleware, new UpdateStoreSchedules
 router.delete('/store/:id', superAdminAuthMiddleware, new DeleteStoreController().handle);
 router.post('/store/:id/logo', superAdminAuthMiddleware, uploadStore.single('logo'), handleMulterError, processImage, new UploadStoreLogoController().handle);
 router.post('/store/:id/banner', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processImage, new UploadStoreBannerController().handle);
+router.post('/store/:id/banner-2', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processImage, new UploadStoreBanner2Controller().handle);
+router.post('/store/:id/banner-3', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processImage, new UploadStoreBanner3Controller().handle);
 
 //-- ROTAS STORE ADDRESS --
 router.post('/storeAddress', adminAuthMiddleware, new CreateStoreAddressController().handle);

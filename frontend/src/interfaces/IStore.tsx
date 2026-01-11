@@ -19,6 +19,8 @@ export interface IStore {
     is_first_access: boolean;
     logo?: string;
     banner?: string;
+    banner_2?: string;
+    banner_3?: string;
     facebook?: string;
     instagram?: string;
     youtube?: string;

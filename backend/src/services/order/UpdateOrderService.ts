@@ -35,45 +35,70 @@ class UpdateOrderService{
 				.set({ hour: 12, minute: 0, second: 0 })
 				.toDate();
 
-			const updatedOrder = await prismaClient.order.update({
-				where: {
-					id: data.id
-				},
-				data: {
-					...order,
-					delivery_date: formattedDeliveryDate,
-					orderItems: {
-						update: data.products
+		// IDs dos produtos que foram enviados no payload
+		const sentProductIds = data.products
+			.filter((product: any) => product.id)
+			.map((product: any) => product.id);
+
+		const updatedOrder = await prismaClient.order.update({
+			where: {
+				id: data.id
+			},
+			data: {
+				...order,
+				delivery_date: formattedDeliveryDate,
+				orderItems: {
+					// Deletar itens que não estão mais no payload
+					deleteMany: sentProductIds.length > 0 ? {
+						order_id: data.id,
+						id: {
+							notIn: sentProductIds
+						}
+					} : {
+						order_id: data.id
+					},
+					update: data.products
 						.filter((product: any) => product.id)
 						.map((product: any) => ({
 							where: {
 								id: product.id,
 							},
 							data: {
-								product_id: product.product_id,
+								store_product_id: product.store_product_id,
 								quantity: Number(product.quantity),
 								price: Number(product.price),
 							},
 						})),
-						create: data.products
+					create: data.products
 						.filter((product: any) => !product.id)
 						.map((product: any) => ({
-							product_id: product.product_id,
+							store_product_id: product.store_product_id,
 							quantity: Number(product.quantity),
-							price: Number(product.price),						store_id,						})),
-					},
+							price: Number(product.price),
+							store_id,
+						})),
 				},
-				include: {
-					client: true,
-					clientAddress: true,
-					createdBy: true,
-					orderItems: {
-						include: {
-							product: true
+			},
+			include: {
+				client: true,
+				clientAddress: true,
+				createdBy: true,
+				orderItems: {
+					include: {
+						storeProduct: {
+							include: {
+								product: {
+									select: {
+										name: true,
+										image: true
+									}
+								}
+							}
 						}
 					}
 				}
-			})
+			}
+		})
 
 			return updatedOrder;
 

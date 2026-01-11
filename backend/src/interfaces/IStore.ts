@@ -25,6 +25,8 @@ export interface IStore {
     is_first_access?: boolean;
     logo?: string;
     banner?: string;
+    banner_2?: string;
+    banner_3?: string;
     
     created_at?: Date;
     updated_at?: Date;

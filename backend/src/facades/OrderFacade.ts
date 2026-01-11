@@ -79,7 +79,7 @@ class OrderFacade {
         }
 
         if (!data.is_delivery) {
-            const defaultUser = await this.getClientByPhoneService.execute("22997517940") as any;
+            const defaultUser = await this.getClientByPhoneService.execute("33333333333") as any;
             if (!client_id) {
                 client_id = defaultUser.id
             }
