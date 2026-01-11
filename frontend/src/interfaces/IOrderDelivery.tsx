@@ -18,6 +18,7 @@ export interface ICreateOrderDelivery {
     order_id: string;
     delivery_man_id: string;
     delivery_date: string;
+    store_id?: string;
     is_paid?: boolean;
     is_archived?: boolean;
 }

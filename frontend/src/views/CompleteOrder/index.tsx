@@ -14,7 +14,6 @@ import { TooltipModal } from "../../components/Tooltip";
 import { RememberCardModal } from "../../components/RememberCardModal";
 import { formatDescription } from "../../utils";
 import { ErrorAlert } from "../../components/ErrorAlert";
-import transparentLogo from '../../assets/images/transparent_logo.png'
 import { convertMoney } from "../../utils";
 import {
     FormField,
@@ -64,6 +63,10 @@ interface INewOrder {
 
 export function CompleteOrder() {
     const { addOrder } = useOrders();
+    const [storeLogo, setStoreLogo] = useState("");
+    const [storeName, setStoreName] = useState("");
+    const [storeCNPJ, setStoreCNPJ] = useState("");
+    const [storePhone, setStorePhone] = useState("");
     const [showLoader, setShowLoader] = useState(true);
     const [mask, setMask] = useState("(99) 99999-9999");
     const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
@@ -182,6 +185,10 @@ export function CompleteOrder() {
             if (order.status === "WAITING_FOR_CLIENT") {
                 setIsWaitingForClienteOrder(true);
                 setCurrentOrder(order);
+                setStoreLogo(order.store.logo || "");
+                setStoreName(order.store.name || "");
+                setStoreCNPJ(order.store.cnpj || "");
+                setStorePhone(order.store.phone_number || "");
             }
             setShowLoader(false);
         }
@@ -392,7 +399,7 @@ export function CompleteOrder() {
             {errorMessage && <ErrorAlert message={errorMessage} />}
             {(!isWaitingForClienteOrder && !showLoader ) &&
                 <CompletedOrder>
-                    <img src={transparentLogo} alt="" />
+                    <img src={storeLogo} alt="" />
                     <h1>Seu pedido foi enviado para a loja!</h1>
                     {!currentOrder?.payment_received &&
                         <>
@@ -410,10 +417,10 @@ export function CompleteOrder() {
             {isWaitingForClienteOrder &&
                 <Form onSubmit={handleSubmit(submitOrder)}>
                     <FormHeader>
-                        <img src={transparentLogo} alt="" />
-                        <p>Mirai Flores</p>
-                        <span>CNPJ: 33.861.078/0001-50</span>
-                        <span>Tel: (22) 99751-7940</span>
+                        <img src={storeLogo} alt="" />
+                        <p>{storeName}</p>
+                        <span>CNPJ: {storeCNPJ}</span>
+                        <span>Tel: {storePhone}</span>
                     </FormHeader>
                     <OrderReview>
                         <h1>Resumo do pedido</h1>

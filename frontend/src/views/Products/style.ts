@@ -23,7 +23,188 @@ export const Container = styled.div`
             height: 11rem;
         }
     }
-    
+`
+
+export const SearchContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+
+    .search-box {
+        flex: 1;
+        min-width: 300px;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        background: var(--white-background);
+        padding: 3px 10px;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+
+        svg {
+            color: var(--text-body);
+            font-size: 1rem;
+        }
+
+        input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            padding: 0.5rem 0;
+            
+            &:focus {
+                outline: none;
+            }
+        }
+
+        .search-btn {
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.4rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.3s;
+
+            &:hover {
+                opacity: 0.9;
+            }
+        }
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+        
+        button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+
+            svg {
+                font-size: 1rem;
+            }
+
+            p {
+                margin: 0;
+            }
+
+            &.qr-button {
+                background: #10b981;
+                color: white;
+
+                &:hover {
+                    opacity: 0.9;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                }
+            }
+
+            &.add-button {
+                background: var(--primary-color);
+                color: white;
+
+                &:hover {
+                    opacity: 0.9;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+                }
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+
+        .search-box {
+            min-width: 100%;
+        }
+
+        .action-buttons {
+            width: 100%;
+            justify-content: flex-end;
+
+            button {
+                flex: 1;
+            }
+        }
+    }
+`
+
+export const ActionButtons = styled.div`
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+
+    @media (max-width: 768px) {
+        width: 100%;
+        justify-content: flex-end;
+    }
+`
+
+export const ExcelButton = styled.button`
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.2rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+
+    &.download {
+        background: var(--primary-color);
+        color: white;
+
+        &:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+    }
+
+    &.upload {
+        background: #10b981;
+        color: white;
+
+        &:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    svg {
+        font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
 `
 export const ContainerTitle = styled.div`
     display: flex;

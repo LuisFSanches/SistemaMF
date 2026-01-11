@@ -3,6 +3,7 @@ import { GetAllOrderToReceiveService } from '../../services/orderToReceive/GetAl
 
 class GetAllOrderToReceiveController {
     async handle(req: Request, res: Response, next: NextFunction) {
+        const store_id = req.admin?.store_id || undefined;
         const page = parseInt(req.query.page as string) || 1;
         const pageSize = parseInt(req.query.pageSize as string) || 10;
         const query = req.query.query as string;
@@ -10,7 +11,7 @@ class GetAllOrderToReceiveController {
 
         const getAllOrderToReceiveService = new GetAllOrderToReceiveService();
 
-        const result = await getAllOrderToReceiveService.execute(page, pageSize, query, filter);
+        const result = await getAllOrderToReceiveService.execute(page, pageSize, query, filter, store_id);
         
         return res.json(result);
     }

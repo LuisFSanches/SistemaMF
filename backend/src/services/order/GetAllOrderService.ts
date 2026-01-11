@@ -3,11 +3,17 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllOrderService {
-    async execute(page: number = 1, pageSize: number = 10, query?: string, startDate?: string, endDate?: string) {
+    async execute(page: number = 1, pageSize: number = 10, query?: string, startDate?: string, endDate?: string, store_id?: string) {
         try {
+            
             const skip = (page - 1) * pageSize;
 
             let filters: any = {};
+
+            // Filtro por loja (multi-tenancy)
+            if (store_id) {
+                filters.store_id = store_id;
+            }
 
             // Filtro por data
             if (startDate && endDate) {
@@ -61,7 +67,16 @@ class GetAllOrderService {
                         createdBy: true,
                         orderItems: {
                             include: {
-                                product: true
+                                storeProduct: {
+                                    include: {
+                                        product: {
+                                            select: {
+                                                name: true,
+                                                image: true
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     },

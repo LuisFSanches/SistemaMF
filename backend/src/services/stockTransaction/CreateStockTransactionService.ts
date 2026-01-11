@@ -11,10 +11,11 @@ interface IStockTransaction {
     unity_price: number;
     purchased_date: Date;
     total_price: number;
+    store_id?: string;
 }
 
 class CreateStockTransactionService {
-    async execute({ product_id, supplier, unity, quantity, unity_price, purchased_date, total_price }: IStockTransaction) {
+    async execute({ product_id, supplier, unity, quantity, unity_price, purchased_date, total_price, store_id }: IStockTransaction) {
         try {
             const formattedPurchasedDate = moment.utc(purchased_date)
                 .tz('America/Sao_Paulo', true)
@@ -22,13 +23,21 @@ class CreateStockTransactionService {
                 .toDate();
 
             // Buscar ou criar fornecedor
+            const whereClause: any = { name: supplier.trim() };
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
+
             let supplierRecord = await prismaClient.supplier.findFirst({
-                where: { name: supplier.trim() }
+                where: whereClause
             });
 
             if (!supplierRecord) {
                 supplierRecord = await prismaClient.supplier.create({
-                    data: { name: supplier.trim() }
+                    data: { 
+                        name: supplier.trim(),
+                        store_id
+                    }
                 });
             }
 
@@ -42,6 +51,7 @@ class CreateStockTransactionService {
                     unity_price,
                     total_price,
                     purchased_date: formattedPurchasedDate,
+                    store_id,
                 },
                 include: {
                     product: true,

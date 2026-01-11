@@ -26,4 +26,12 @@ export const MenuButton = styled.button`
         font-size: 16px;
         font-weight: bold;
     }
+
+    &.config-button {
+        margin-left: 15px;
+
+        svg {
+            font-size: 20px;
+        }
+    }
 `;

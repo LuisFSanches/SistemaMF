@@ -35,7 +35,9 @@ export function SideBar(){
         aguardandoCliente: false,
         estoque: false,
         valoresAReceber: false,
-        entregas: false
+        entregas: false,
+        meusProdutos: false,
+        catalogoGeral: false
     })
     
     const handleActiveMenuButton = useCallback((name:string) => {
@@ -229,6 +231,8 @@ export function SideBar(){
             break;
 
             case 'produtos':
+            case 'meus-produtos':
+            case 'catalogo-geral':
                 setActive({...isActive, 
                     'dashboard':false,
                     'pedidoBalcao':false,
@@ -244,7 +248,9 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "meusProdutos": false,
+                    "catalogoGeral": false
                 })
             break;
 
@@ -398,18 +404,28 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
 
-                <NavLink to="/backoffice/produtos">
-                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('produtos')}>
-                        <SideBarButton
-                            isActive={isActive['produtos']}
-                            isMinimizedActive
-                            title="Produtos"
-                        >
-                            <i className="material-icons">local_florist</i>
-                            <span>Produtos</span>
-                        </SideBarButton>
-                    </SideBarItemContainer>
-                </NavLink>
+                <SideBarItemContainer className="produtos-menu-container">
+                    <SideBarButton
+                        isActive={isActive['produtos']}
+                        isMinimizedActive
+                        title="Produtos"
+                    >
+                        <i className="material-icons">local_florist</i>
+                        <span>Produtos</span>
+                    </SideBarButton>
+                    <div className="submenu">
+                        <NavLink to="/backoffice/meus-produtos">
+                            <button className="submenu-item" onClick={()=>handleActiveMenuButton('meus-produtos')}>
+                                Meus Produtos
+                            </button>
+                        </NavLink>
+                        <NavLink to="/backoffice/catalogo-geral">
+                            <button className="submenu-item" onClick={()=>handleActiveMenuButton('catalogo-geral')}>
+                                Catálogo Geral
+                            </button>
+                        </NavLink>
+                    </div>
+                </SideBarItemContainer>
                 
                 <NavLink to="/backoffice/estoque" style={{ display: 'none'}}>
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('estoque')}>

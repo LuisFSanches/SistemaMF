@@ -17,11 +17,25 @@ const superAdminAuthMiddleware = async (req: Request, res: Response, next: NextF
         const admin = await prismaClient.admin.findFirst({
             where: {
                 id: payload.id
+            },
+            include: {
+                store: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        is_active: true,
+                    }
+                }
             }
         });
 
         if (!admin) {
             next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
+        }
+
+        if (admin && !admin.store) {
+            next(new UnauthorizedRequestException('Admin does not belong to any store', ErrorCodes.UNAUTHORIZED))
         }
 
         if (admin?.role !== 'SUPER_ADMIN') {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Container } from "./style";
+import { Container, RoleBadge } from "./style";
 import { AddButton, PageHeader } from "../../styles/global";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
@@ -32,7 +32,7 @@ export function AdminsPage(){
     return(
         <Container>
             <PageHeader>
-                <h1>Administradores</h1>
+                <h1>Administradores/Vendedores</h1>
 
                 <AddButton onClick={() =>handleOpenAdminModal("create", {
                     id: "",
@@ -41,7 +41,7 @@ export function AdminsPage(){
                     role: ""
                 })}>
                     <FontAwesomeIcon icon={faPlus}/>
-                    <p>Novo Admin</p>
+                    <p>Novo Vendedor/Admin</p>
                 </AddButton>
             </PageHeader>
             
@@ -50,6 +50,7 @@ export function AdminsPage(){
                     <tr>
                         <th>Nome</th>
                         <th>Usuário</th>
+                        <th>Tipo</th>
                         <th>Editar</th>
                         <th>Deletar</th>
                     </tr>
@@ -59,6 +60,11 @@ export function AdminsPage(){
                         <tr key={admin.id}>
                             <td>{admin.name}</td>
                             <td>{admin.username}</td>
+                            <td>
+                                <RoleBadge role={admin.role}>
+                                    {admin.role === "SUPER_ADMIN" ? "Administrador" : "Vendedor"}
+                                </RoleBadge>
+                            </td>
                             <td className="table-icon">
                                 <button className="edit-button" onClick={() => handleOpenAdminModal("edit", admin)}>
                                     <span>Editar</span> <FontAwesomeIcon icon={faPen}/>

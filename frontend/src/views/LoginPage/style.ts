@@ -15,7 +15,7 @@ export const LoginForm = styled.div`
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    border: 2px solid var(--sideBarBackground);
+    border: 2px solid var(--primary-color);
     padding: 0;
  
     background: #fff;
@@ -47,7 +47,7 @@ export const LoginForm = styled.div`
             justify-content: center;
             margin-bottom: 1rem;
             font-size: 1.8rem;
-            color: var(--sideBarBackground);
+            color: var(--primary-color);
         
         }
         
@@ -105,6 +105,7 @@ export const LoginForm = styled.div`
         
     a{
         color: var(--sideBarBackground);
+        margin: 0.3rem 0;
     }
     .empty{
         margin-bottom:1.2rem;

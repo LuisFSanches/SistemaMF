@@ -3,9 +3,10 @@ import { GetAllSuppliersService } from '../../services/supplier/GetAllSuppliersS
 
 class GetAllSuppliersController {
     async handle(req: Request, res: Response, next: NextFunction) {
+        const store_id = req.admin?.store_id || undefined;
         const getAllSuppliersService = new GetAllSuppliersService();
 
-        const suppliers = await getAllSuppliersService.execute();
+        const suppliers = await getAllSuppliersService.execute(store_id);
 
         return res.json(suppliers);
     }

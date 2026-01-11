@@ -68,6 +68,54 @@ export const InternalContainer = styled.div<SidebarProps>`
 export const SideBarItemContainer = styled.div`
   width: 100%;
   padding: 7px 1rem;
+  position: relative;
+
+  &.produtos-menu-container {
+    .submenu {
+      position: absolute;
+      left: 100%;
+      top: 0;
+      background: white;
+      border-radius: 0.4rem;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+      padding: 0.5rem 0;
+      min-width: 180px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-10px);
+      transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+      z-index: 1000;
+
+      a {
+        text-decoration: none;
+      }
+
+      .submenu-item {
+        width: 100%;
+        padding: 0.8rem 1.2rem;
+        background: transparent;
+        border: none;
+        color: var(--text-body);
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: left;
+        transition: background-color 0.2s, color 0.2s;
+        display: block;
+
+        &:hover {
+          background-color: rgba(236, 72, 153, 0.1);
+          color: #EC4899;
+        }
+      }
+    }
+
+    &:hover .submenu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+  }
 `;
 
 export const LogoContainer = styled.div<SidebarProps>`

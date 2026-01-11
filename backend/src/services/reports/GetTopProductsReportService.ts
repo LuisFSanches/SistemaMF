@@ -29,7 +29,12 @@ class GetTopProductsReportService {
                 include: {
                     orderItems: {
                         include: {
-                            product: true
+                            product: true,
+                            storeProduct: {
+                                include: {
+                                    product: true
+                                }
+                            }
                         }
                     }
                 }
@@ -47,9 +52,20 @@ class GetTopProductsReportService {
 
             orders.forEach(order => {
                 order.orderItems.forEach(item => {
-                    const existing = productMap.get(item.product_id) || {
-                        id: item.product_id,
-                        name: item.product.name,
+                    // Determinar qual produto usar (storeProduct tem prioridade sobre product direto)
+                    const productData = item.storeProduct?.product || item.product;
+                    
+                    // Pular item se não houver produto associado
+                    if (!productData) {
+                        return;
+                    }
+
+                    const productId = productData.id;
+                    const productName = productData.name;
+
+                    const existing = productMap.get(productId) || {
+                        id: productId,
+                        name: productName,
                         total_quantity: 0,
                         total_revenue: 0,
                         order_count: 0,
@@ -61,7 +77,7 @@ class GetTopProductsReportService {
                     existing.order_count += 1;
                     existing.prices.push(item.price);
 
-                    productMap.set(item.product_id, existing);
+                    productMap.set(productId, existing);
                 });
             });
 

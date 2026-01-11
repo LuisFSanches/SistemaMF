@@ -1,5 +1,4 @@
 import { api } from "./api";
-const token = localStorage.getItem("token")?.replace(/"/g, '');
 
 export const getClientAddresses = async (params = "") => {
 
@@ -9,11 +8,7 @@ export const getClientAddresses = async (params = "") => {
 };
 
 export const getPickupAddress = async () => {
-  const response = await api.get(`/address/pickup`, {
-    headers: {
-      Authorization: `${token}`,
-    }
-  });
+  const response = await api.get(`/address/pickup`);
   
   return response;
 };

@@ -1,18 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPen, faPlus, faQrcode } from "@fortawesome/free-solid-svg-icons";
+import { faPen, faPlus, faQrcode, faDownload, faUpload, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { PDFDocument, rgb } from 'pdf-lib';
-import { ProductModal } from "../../components/ProductModal";
+import { StoreProductModal } from "../../components/StoreProductModal";
 import { useProducts } from "../../contexts/ProductsContext";
 import { Pagination } from "../../components/Pagination";
+import { useAdminData } from "../../contexts/AuthContext";
+import { SuccessMessage } from "../../components/SuccessMessage";
+import { api } from "../../services/api";
 
-import { Container, ProductItem, ProductsContainer, ProductImage } from "./style";
-import { PageHeader, AddButton, Input } from "../../styles/global";
+import { Container, ProductItem, ProductsContainer, ProductImage, SearchContainer, ActionButtons, ExcelButton } from "./style";
+import { PageHeader, PageTitle } from "../../styles/global";
 import placeholder_products from '../../assets/images/placeholder_products.png';
 
 
 export function ProductsPage(){
     const { products, loadAvailableProducts, totalProducts, refreshProducts } = useProducts();
+    const { adminData } = useAdminData();
+
+    console.log("ProductsPage adminData:", products);
     
     const [productModal, setProductModal] = useState(false);
     const [action, setAction] = useState("");
@@ -28,6 +34,11 @@ export function ProductsPage(){
     const [page, setPage] = useState(1);
     const pageSize= 15;
     const [query, setQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [downloading, setDownloading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     function handleOpenProductModal(action:string, product: any){
         setProductModal(true)
@@ -41,6 +52,117 @@ export function ProductsPage(){
     const handleSearchProducts = (text: string) => {
         setQuery(text);
         setPage(1);
+    };
+
+    const handleDownloadExcel = async () => {
+        if (!adminData.store_id) {
+            alert("Erro: Loja não identificada.");
+            return;
+        }
+
+        try {
+            setDownloading(true);
+            const token = localStorage.getItem('token')?.replace(/"/g, '');
+            
+            const response = await fetch(`${api.defaults.baseURL}/store-product/export/excel?storeId=${adminData.store_id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token || '',
+                    'x-custom-secret': 'only-mirai-users'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erro ao baixar planilha');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `meus-produtos-${new Date().toISOString().split('T')[0]}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
+        } catch (error: any) {
+            console.error('Erro ao baixar planilha:', error);
+            alert(error.message || 'Erro ao baixar planilha. Tente novamente.');
+        } finally {
+            setDownloading(false);
+        }
+    };
+
+    const handleFileSelect = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        if (!adminData.store_id) {
+            alert("Erro: Loja não identificada.");
+            return;
+        }
+
+        // Validar tipo de arquivo
+        const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+        if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+            alert('Por favor, selecione um arquivo Excel válido (.xlsx ou .xls)');
+            event.target.value = '';
+            return;
+        }
+
+        // Validar tamanho (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('O arquivo deve ter no máximo 5MB');
+            event.target.value = '';
+            return;
+        }
+
+        try {
+            setUploading(true);
+            const formData = new FormData();
+            formData.append('storeId', adminData.store_id);
+            formData.append('file', file);
+
+            const token = localStorage.getItem('token')?.replace(/"/g, '');
+            
+            const response = await fetch(`${api.defaults.baseURL}/store-product/update/excel`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': token || '',
+                    'x-custom-secret': 'only-mirai-users'
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Erro ao atualizar produtos');
+            }
+
+            alert(`Sucesso! ${data.totalUpdated} produtos atualizados.`);
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
+            
+            // Atualiza produtos do contexto
+            if (adminData.store_id) {
+                await refreshProducts(adminData.store_id);
+            }
+        } catch (error: any) {
+            console.error('Erro ao atualizar produtos:', error);
+            alert(error.message || 'Erro ao atualizar produtos. Tente novamente.');
+        } finally {
+            setUploading(false);
+            event.target.value = ''; // Limpa input
+        }
     };
 
     const handleGenerateQRCodesPDF = async () => {
@@ -149,45 +271,98 @@ export function ProductsPage(){
     };
 
     useEffect(() => {
-        loadAvailableProducts(page, pageSize, query);
+        if (!adminData.store_id) return;
+        loadAvailableProducts(adminData.store_id, page, pageSize, query);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, pageSize, query]);
+    }, [page, pageSize, query, adminData.store_id]);
 
     return(
         <Container>
+            {showSuccess && (
+                <SuccessMessage 
+                    message="Operação realizada com sucesso!" 
+                    onClose={() => setShowSuccess(false)}
+                />
+            )}
+            
             <PageHeader>
-                <h1>Produtos</h1>
-                <div className="product-data">
-                    <div style={{ position: 'relative', width: '300px', 'marginBottom': '10px' }}>
-                        <Input
-                            placeholder="Buscar Produtos"
-                            onKeyDown={(e: any) => {
-                                if (e.key === 'Enter') {
-                                    handleSearchProducts(e.target.value);
-                                }
-                            }}
-                        />
-                    </div>
-                </div>
-                <AddButton 
-                    onClick={handleGenerateQRCodesPDF}
-                    style={{ marginBottom: 0, marginRight: '10px', backgroundColor: '#10b981' }}
-                >
-                    <FontAwesomeIcon icon={faQrcode}/>
-                    <p>Imprimir QRCodes</p>
-                </AddButton>
-                <AddButton onClick={() =>handleOpenProductModal("create", 
-                    {id: "", name: "", price: null, unity: "", stock: null, enabled: true})}
-                    style={{ marginBottom: 0 }}
-                >
-                    <FontAwesomeIcon icon={faPlus}/>
-                    <p>Adicionar produto</p>
-                </AddButton>
-                
+                <PageTitle>
+                    <h1>Produtos</h1>
+                    <p>Gerencie os produtos da sua loja</p>
+                </PageTitle>
+                <ActionButtons>
+                    <ExcelButton
+                        type="button"
+                        onClick={handleDownloadExcel}
+                        disabled={downloading}
+                        className="download"
+                    >
+                        <FontAwesomeIcon icon={faDownload} />
+                        {downloading ? 'Baixando...' : 'Baixar Planilha'}
+                    </ExcelButton>
+                    <ExcelButton
+                        type="button"
+                        onClick={handleFileSelect}
+                        disabled={uploading}
+                        className="upload"
+                    >
+                        <FontAwesomeIcon icon={faUpload} />
+                        {uploading ? 'Atualizando...' : 'Atualizar via Planilha'}
+                    </ExcelButton>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".xlsx,.xls"
+                        onChange={handleFileUpload}
+                        style={{ display: 'none' }}
+                    />
+                </ActionButtons>
             </PageHeader>
+
+            <SearchContainer>
+                <div className="search-box">
+                    <FontAwesomeIcon icon={faSearch} />
+                    <input
+                        type="text"
+                        placeholder="Buscar produtos..."
+                        value={searchQuery}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e: any) => {
+                            if (e.key === 'Enter') {
+                                handleSearchProducts(searchQuery);
+                            }
+                        }}
+                    />
+                    <button 
+                        type="button" 
+                        onClick={() => handleSearchProducts(searchQuery)}
+                        className="search-btn"
+                    >
+                        Buscar
+                    </button>
+                </div>
+
+                <div className="action-buttons">
+                    <button
+                        onClick={handleGenerateQRCodesPDF}
+                        className="qr-button"
+                    >
+                        <FontAwesomeIcon icon={faQrcode}/>
+                        <p>Imprimir QRCodes</p>
+                    </button>
+                    <button
+                        onClick={() =>handleOpenProductModal("create", 
+                            {id: "", name: "", price: null, unity: "", stock: null, enabled: true})}
+                        className="add-button"
+                    >
+                        <FontAwesomeIcon icon={faPlus}/>
+                        <p>Adicionar produto</p>
+                    </button>
+                </div>
+            </SearchContainer>
             
             <ProductsContainer>
-                {products.map((product: any) => (
+                {products?.map((product: any) => (
                     <ProductItem key={product.id} className={product.enabled ? "enabled" : "disabled"}>
                         <ProductImage
                             src={product.image ? product.image : placeholder_products}
@@ -225,10 +400,10 @@ export function ProductsPage(){
                 pageSize={pageSize as number}
                 onPageChange={setPage}
             />
-            <ProductModal 
+            <StoreProductModal 
                 isOpen={productModal}
                 onRequestClose={handleCloseProductModal}
-                loadData={refreshProducts}
+                loadData={(storeId) => refreshProducts(storeId)}
                 action={action}
                 currentProduct={currentProduct}
             />

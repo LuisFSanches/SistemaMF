@@ -3,10 +3,15 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class DeleteStockTransactionService {
-    async execute(id: string) {
+    async execute(id: string, store_id?: string) {
         try {
-            const existing = await prismaClient.stockTransaction.findUnique({
-                where: { id }
+            const whereClause: any = { id };
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
+
+            const existing = await prismaClient.stockTransaction.findFirst({
+                where: whereClause
             });
 
             if (!existing) {

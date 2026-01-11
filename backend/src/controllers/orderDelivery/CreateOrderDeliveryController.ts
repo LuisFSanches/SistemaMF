@@ -4,8 +4,7 @@ import { orderEmitter, OrderEvents } from '../../events/orderEvents';
 
 class CreateOrderDeliveryController {
     async handle(req: Request, res: Response, next: NextFunction) {
-        const { order_id, delivery_man_id, delivery_date, is_paid, is_archived } = req.body;
-
+        const { order_id, delivery_man_id, delivery_date, is_paid, is_archived, store_id } = req.body;
         const createOrderDeliveryService = new CreateOrderDeliveryService();
 
         const orderDelivery = await createOrderDeliveryService.execute({
@@ -14,7 +13,7 @@ class CreateOrderDeliveryController {
             delivery_date: new Date(delivery_date),
             is_paid,
             is_archived
-        });
+        }, store_id);
 
         orderEmitter.emit(OrderEvents.orderDelivered, orderDelivery);
         

@@ -1,14 +1,8 @@
 import { api } from "./api";
 import { ICreateOrderDelivery, IUpdateOrderDelivery } from "../interfaces/IOrderDelivery";
 
-const token = localStorage.getItem("token")?.replace(/"/g, '');
-
 export const createOrderDelivery = async (data: ICreateOrderDelivery) => {
-    const response = await api.post("/orderDelivery", data, {
-        headers: {
-            authorization: token,
-        },
-    });
+    const response = await api.post("/orderDelivery", data);
     return response.data;
 };
 
@@ -27,38 +21,22 @@ export const getAllOrderDeliveries = async (page: number, pageSize: number, quer
         url += `&endDate=${endDate}`;
     }
     
-    const response = await api.get(url, {
-        headers: {
-            authorization: token,
-        },
-    });
+    const response = await api.get(url);
     return response.data;
 };
 
 export const getOrderDeliveryById = async (id: string) => {
-    const response = await api.get(`/orderDelivery/${id}`, {
-        headers: {
-            authorization: token,
-        },
-    });
+    const response = await api.get(`/orderDelivery/${id}`);
     return response.data;
 };
 
 export const updateOrderDelivery = async (id: string, data: IUpdateOrderDelivery) => {
-    const response = await api.put(`/orderDelivery/${id}`, data, {
-        headers: {
-            authorization: token,
-        },
-    });
+    const response = await api.put(`/orderDelivery/${id}`, data);
     return response.data;
 };
 
 export const deleteOrderDelivery = async (id: string) => {
-    const response = await api.delete(`/orderDelivery/${id}`, {
-        headers: {
-            authorization: token,
-        },
-    });
+    const response = await api.delete(`/orderDelivery/${id}`);
     return response.data;
 };
 
@@ -66,10 +44,6 @@ export const bulkUpdateOrderDeliveries = async (ids: string[], data: IUpdateOrde
     const response = await api.patch("/orderDelivery/bulk-update", {
         ids,
         ...data
-    }, {
-        headers: {
-            authorization: token,
-        },
     });
     return response.data;
 };

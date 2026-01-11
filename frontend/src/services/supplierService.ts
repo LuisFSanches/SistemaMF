@@ -1,16 +1,12 @@
-import { api } from "./api";
-const token = localStorage.getItem("token")?.replace(/"/g, '');
+import { api, getStoreId } from "./api";
 
 export const createSupplier = async (data: any) => {
-    const response = await api.post("/supplier", data, {
-        headers: { authorization: `${token}` }
-    });
+    const store_id = getStoreId();
+    const response = await api.post("/supplier", { ...data, store_id });
     return response;
 };
 
 export const getAllSuppliers = async () => {
-    const response = await api.get("/supplier/all", {
-        headers: { authorization: `${token}` }
-    });
+    const response = await api.get("/supplier/all");
     return response;
 };

@@ -3,15 +3,18 @@ import { GetStoreFrontProductsService } from '../../services/product/GetStoreFro
 
 class GetStoreFrontProductsController{
 	async handle(req: Request, res: Response, next: NextFunction) {
+		const { slug } = req.params;
 		const { page = '1', pageSize = '10', query = '' } = req.query;
+		
 		const getStoreFrontProductsService = new GetStoreFrontProductsService();
-		const products = await getStoreFrontProductsService.execute(
+		const result = await getStoreFrontProductsService.execute(
+			slug,
 			Number(page),
             Number(pageSize),
             String(query)
 		);
 
-		return res.json(products);
+		return res.json(result);
 	}
 }
 

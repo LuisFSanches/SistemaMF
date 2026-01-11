@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -77,6 +77,7 @@ interface INewOrder {
 
 export function Checkout() {
     const navigate = useNavigate();
+    const { slug } = useParams<{ slug: string }>();
     const { cartItems, cartTotal, clearCart } = useCart();
     const [showLoader, setShowLoader] = useState(false);
     const [mask, setMask] = useState("(99) 99999-9999");
@@ -103,7 +104,6 @@ export function Checkout() {
     const DEFAULT_DELIVERY_FEE = 8.0;
     const deliveryFee = pickupOnStore ? 0 : DEFAULT_DELIVERY_FEE;
     const totalWithDelivery = cartTotal + deliveryFee;
-
     const {
         register,
         handleSubmit,
@@ -146,7 +146,11 @@ export function Checkout() {
             quantity: item.quantity
         }));
 
+        // Obter store_id do localStorage (salvo no StoreFront)
+        const storefrontStoreId = localStorage.getItem('storefront_store_id');
+
         const orderData = {
+            store_id: storefrontStoreId,
             client_id: client_id,
             phone_number: rawTelephone(data.phone_number),
             first_name: data.first_name,
@@ -288,9 +292,9 @@ export function Checkout() {
 
     useEffect(() => {
         if (cartItems.length === 0 && !currentOrder) {
-            navigate("/");
+            navigate(`/${slug}`);
         }
-    }, [cartItems, currentOrder, navigate]);
+    }, [cartItems, currentOrder, navigate, slug]);
 
     useEffect(() => {
         if (currentOrder?.id) {
@@ -298,7 +302,7 @@ export function Checkout() {
                 setCountdown((prev) => {
                     if (prev <= 1) {
                         clearInterval(timer);
-                        navigate("/");
+                        navigate(`/${slug}`);
                         return 0;
                     }
                     return prev - 1;
@@ -307,7 +311,7 @@ export function Checkout() {
 
             return () => clearInterval(timer);
         }
-    }, [currentOrder, navigate]);
+    }, [currentOrder, navigate, slug]);
 
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
@@ -419,7 +423,8 @@ export function Checkout() {
             <StoreFrontHeader 
                 showBackButton 
                 backButtonText="Voltar ao Carrinho"
-                backButtonPath="/carrinho"
+                backButtonPath={`/${slug}/carrinho`}
+                slug={slug}
             />
 
             <Content>

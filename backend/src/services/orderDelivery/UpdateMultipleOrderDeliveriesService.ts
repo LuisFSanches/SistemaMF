@@ -5,7 +5,7 @@ import { updateMultipleOrderDeliveriesSchema } from "../../schemas/orderDelivery
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class UpdateMultipleOrderDeliveriesService {
-    async execute(data: IUpdateMultipleOrderDeliveries) {
+    async execute(data: IUpdateMultipleOrderDeliveries, store_id?: string) {
         // Validação com Zod
         const parsed = updateMultipleOrderDeliveriesSchema.safeParse({
             ...data,
@@ -24,8 +24,13 @@ class UpdateMultipleOrderDeliveriesService {
         }
 
         // Verificar se todos os IDs existem
+        const whereClause: any = { id: { in: parsed.data.ids } };
+        if (store_id) {
+            whereClause.store_id = store_id;
+        }
+
         const existingOrderDeliveries = await prismaClient.orderDelivery.findMany({
-            where: { id: { in: parsed.data.ids } }
+            where: whereClause
         });
 
         if (existingOrderDeliveries.length !== parsed.data.ids.length) {
@@ -71,13 +76,13 @@ class UpdateMultipleOrderDeliveriesService {
         // Atualizar múltiplas entregas
         try {
             const result = await prismaClient.orderDelivery.updateMany({
-                where: { id: { in: parsed.data.ids } },
+                where: whereClause,
                 data: updateData
             });
 
             // Buscar entregas atualizadas para retornar com detalhes
             const updatedOrderDeliveries = await prismaClient.orderDelivery.findMany({
-                where: { id: { in: parsed.data.ids } },
+                where: whereClause,
                 include: {
                     order: {
                         select: {

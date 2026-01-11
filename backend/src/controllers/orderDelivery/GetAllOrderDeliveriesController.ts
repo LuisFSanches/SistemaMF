@@ -3,6 +3,7 @@ import { GetAllOrderDeliveriesService } from '../../services/orderDelivery/GetAl
 
 class GetAllOrderDeliveriesController {
     async handle(req: Request, res: Response, next: NextFunction) {
+        const store_id = req.admin?.store_id || undefined;
         const { page = '1', pageSize = '10', query = '', filter, startDate, endDate } = req.query;
         const getAllOrderDeliveriesService = new GetAllOrderDeliveriesService();
 
@@ -12,7 +13,8 @@ class GetAllOrderDeliveriesController {
             String(query),
             filter as string,
             startDate as string,
-            endDate as string
+            endDate as string,
+            store_id
         );
         
         return res.json(orderDeliveries);
