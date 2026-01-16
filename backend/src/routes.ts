@@ -46,6 +46,12 @@ import { GetPixController } from './controllers/inter/GetPixController';
 // import { RegisterWebhookController } from './controllers/inter/RegisterWebhookController';
 import { WebhookPixController } from './controllers/inter/WebhookPixController';
 
+import { CreateSicrediCobrancaController } from './controllers/sicredi/CreateSicrediCobrancaController';
+import { GetSicrediCobrancaController } from './controllers/sicredi/GetSicrediCobrancaController';
+import { UpdateSicrediWebhookController } from './controllers/sicredi/UpdateSicrediWebhookController';
+import { GetSicrediWebhookController } from './controllers/sicredi/GetSicrediWebhookController';
+import { DeleteSicrediWebhookController } from './controllers/sicredi/DeleteSicrediWebhookController';
+
 import { CreateStockTransactionController } from './controllers/stockTransaction/CreateStockTransactionController';
 import { GetAllStockTransactionsController } from './controllers/stockTransaction/GetAllStockTransactionsController';
 import { GetProductStockDetailsController } from './controllers/stockTransaction/GetProductStockDetailsController';
@@ -143,10 +149,17 @@ router.get('/admins/all', superAdminAuthMiddleware, new GetAllAdminController().
 router.delete('/admins/delete/:id', superAdminAuthMiddleware, new DeleteAdminController().handle)
 router.put('/admin/:id', superAdminAuthMiddleware, new UpdateAdminController().handle)
 
-//-- ROTAS PIX --
+//-- ROTAS PIX INTER --
 router.get('/pix', superAdminAuthMiddleware, new GetPixController().handle)
 router.post('/webhook/pix', superAdminAuthMiddleware,  new WebhookPixController().handle)
 // router.put('/create/webhook', new RegisterWebhookController().handle)
+
+//-- ROTAS PIX SICREDI --
+router.post('/sicredi/cobranca', new CreateSicrediCobrancaController().handle)
+router.get('/sicredi/cobranca/:txid', new GetSicrediCobrancaController().handle)
+router.put('/sicredi/webhook/:chave', new UpdateSicrediWebhookController().handle)
+router.get('/sicredi/webhook/:chave', new GetSicrediWebhookController().handle)
+router.delete('/sicredi/webhook/:chave', new DeleteSicrediWebhookController().handle)
 
 //-- ROTAS STOCK TRANSACTION --
 router.get('/stockTransaction/all', adminAuthMiddleware, new GetAllStockTransactionsController().handle);
