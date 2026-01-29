@@ -262,7 +262,7 @@ export const CardTitle = styled.h3`
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-align: center;
-    background: #6EA47B;
+    background: #EC4899;
     padding: 5px;
     border-radius: 5px;
     color: white;

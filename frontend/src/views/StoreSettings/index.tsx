@@ -28,7 +28,7 @@ import {
     CancelButton,
     LoadingContainer
 } from './style';
-import { getStoreById, updateStore, uploadStoreLogo, uploadStoreBanner, uploadStoreBanner2, uploadStoreBanner3, updateStoreSchedules } from '../../services/storeService';
+import { getStoreById, updateStore, uploadStoreLogo, uploadStoreBanner, uploadStoreBanner2, uploadStoreBanner3, updateStoreSchedules, updateStoreCredentials } from '../../services/storeService';
 import { getStoreAddresses, updateStoreAddress, createStoreAddress } from '../../services/storeAddressService';
 import { getStoreSchedules } from '../../services/storeScheduleService';
 import { resetPasswordByEmail } from '../../services/adminService';
@@ -395,10 +395,17 @@ export default function StoreSettings() {
         if (!store) return;
 
         try {
-            await updateStore(store.id, {
-                is_first_access: store.is_first_access
+            await updateStoreCredentials(store.id, {
+                mp_access_token: data.mp_access_token,
+                mp_public_key: data.mp_public_key,
+                mp_seller_id: data.mp_seller_id,
+                mp_webhook_secret: data.mp_webhook_secret,
+                inter_client_id: data.inter_client_id,
+                inter_client_secret: data.inter_client_secret,
+                inter_api_cert_path: data.inter_api_cert_path,
+                inter_api_key_path: data.inter_api_key_path,
+                payment_enabled: data.payment_enabled
             });
-            // TODO: Implementar updateStoreCredentials
             alert('Configurações de pagamento atualizadas com sucesso!');
             loadStoreData();
         } catch (error) {

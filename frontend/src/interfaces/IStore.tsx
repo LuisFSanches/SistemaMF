@@ -1,3 +1,15 @@
+export interface ISchedule {
+    id: string;
+    day_of_week: string;
+    is_closed: boolean;
+    opening_time: string | null;
+    closing_time: string | null;
+    lunch_break_start: string | null;
+    lunch_break_end: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface IStore {
     id: string;
     name: string;
@@ -24,6 +36,7 @@ export interface IStore {
     facebook?: string;
     instagram?: string;
     youtube?: string;
+    schedules?: ISchedule[];
     created_at: string;
     updated_at: string;
 }

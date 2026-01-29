@@ -1,36 +1,31 @@
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart, faArrowLeft, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { faShoppingCart, faArrowLeft, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
+import { listStoreFrontProducts } from "../../services/productService";
 import logoFull from "../../assets/images/original_logo.png";
 import {
     Header,
-    BannerCarouselContainer,
-    BannerSlide,
-    Banner,
-    CarouselButton,
-    CarouselDots,
-    CarouselDot,
     LogoContainer,
     Logo,
     StoreName,
     HeaderActions,
     BackButton,
     CartButton,
-    CartBadge
+    CartBadge,
+    SearchContainer,
+    SearchInput,
+    SearchDropdown,
+    SearchResultItem,
+    SearchResultImage,
+    SearchResultInfo,
+    SearchResultName,
+    SearchResultPrice,
+    EmptySearchResults,
+    SearchLoader
 } from "./style";
-
-interface Store {
-    id: string;
-    name: string;
-    slug: string;
-    logo: string | null;
-    banner: string | null;
-    banner_2?: string | null;
-    banner_3?: string | null;
-}
 
 interface StoreFrontHeaderProps {
     showBackButton?: boolean;
@@ -38,8 +33,12 @@ interface StoreFrontHeaderProps {
     backButtonPath?: string;
     showCartButton?: boolean;
     onLogoClick?: () => void;
-    store?: Store | null;
+    logoSrc?: string;
+    storeName?: string;
     slug?: string;
+    searchTerm?: string;
+    onSearchChange?: (value: string) => void;
+    showSearch?: boolean;
 }
 
 export function StoreFrontHeader({
@@ -48,34 +47,61 @@ export function StoreFrontHeader({
     backButtonPath = "/",
     showCartButton = false,
     onLogoClick,
-    store,
-    slug
+    logoSrc: customLogoSrc,
+    storeName: customStoreName,
+    slug,
+    searchTerm = "",
+    onSearchChange,
+    showSearch = false
 }: StoreFrontHeaderProps) {
     const navigate = useNavigate();
     const { cartCount } = useCart();
     const { storeData } = useContext(AuthContext);
-    const [currentSlide, setCurrentSlide] = useState(0);
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+    const [internalSearchTerm, setInternalSearchTerm] = useState(searchTerm);
 
-    // Usar logo da loja se disponível, caso contrário usar logo mocada
-    const logoSrc = store?.logo || storeData?.logo || logoFull;
-    const storeName = store?.name || storeData?.name || "Loja";
-    
-    // Filtrar banners não-nulos
-    const banners = [
-        store?.banner,
-        store?.banner_2,
-        store?.banner_3
-    ].filter(Boolean) as string[];
+    // Usar logo customizado ou da loja se disponível, caso contrário usar logo mocada
+    const logoSrc = customLogoSrc || storeData?.logo || logoFull;
+    const storeName = customStoreName || storeData?.name || "Loja";
 
-    // Auto-play do carousel
+    // Realizar busca quando o usuário digita
     useEffect(() => {
-        if (banners.length > 1) {
-            const interval = setInterval(() => {
-                setCurrentSlide((prev) => (prev + 1) % banners.length);
-            }, 5000);
-            return () => clearInterval(interval);
+        const timeoutId = setTimeout(async () => {
+            if (internalSearchTerm.trim() && slug) {
+                setIsSearching(true);
+                try {
+                    const { data } = await listStoreFrontProducts(slug, 1, 10, internalSearchTerm);
+                    setSearchResults(data.products.filter((p: any) => p.enabled && p.stock > 0));
+                    setShowDropdown(true);
+                } catch (error) {
+                    console.error('Erro ao buscar produtos:', error);
+                    setSearchResults([]);
+                } finally {
+                    setIsSearching(false);
+                }
+            } else {
+                setSearchResults([]);
+                setShowDropdown(false);
+            }
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [internalSearchTerm, slug]);
+
+    // Fechar dropdown ao clicar fora
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setShowDropdown(false);
+            }
         }
-    }, [banners.length]);
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleLogoClick = () => {
         if (onLogoClick) {
@@ -99,71 +125,92 @@ export function StoreFrontHeader({
         }
     };
 
-    const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % banners.length);
+    const handleProductClick = (productId: string) => {
+        setShowDropdown(false);
+        setInternalSearchTerm("");
+        if (onSearchChange) {
+            onSearchChange("");
+        }
+        if (slug) {
+            navigate(`/${slug}/produto/${productId}`);
+        }
     };
 
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
+    const handleSearchInputChange = (value: string) => {
+        setInternalSearchTerm(value);
+        if (onSearchChange) {
+            onSearchChange(value);
+        }
     };
 
-    const goToSlide = (index: number) => {
-        setCurrentSlide(index);
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(price);
     };
 
     return (
-        <>
-            <Header>
-                <LogoContainer onClick={handleLogoClick}>
-                    <Logo src={logoSrc} alt={storeName} />
-                    <StoreName>{storeName}</StoreName>
-                </LogoContainer>
-                <HeaderActions>
-                {showBackButton && (
-                    <BackButton onClick={handleBackClick}>
-                        <FontAwesomeIcon icon={faArrowLeft as any} />
-                        {backButtonText}
-                    </BackButton>
-                )}
-                {showCartButton && (
-                    <CartButton onClick={handleCartClick}>
-                        <FontAwesomeIcon icon={faShoppingCart as any} />
-                        {cartCount > 0 && <CartBadge>{cartCount}</CartBadge>}
-                    </CartButton>
-                )}
-                </HeaderActions>
-            </Header>
-            {banners.length > 0 && (
-                <BannerCarouselContainer>
-                    {banners.map((banner, index) => (
-                        <BannerSlide key={index} isActive={currentSlide === index}>
-                            <Banner src={banner} alt={`${storeName} Banner ${index + 1}`} />
-                        </BannerSlide>
-                    ))}
-                    
-                    {banners.length > 1 && (
-                        <>
-                            <CarouselButton direction="left" onClick={prevSlide}>
-                                <FontAwesomeIcon icon={faChevronLeft as any} />
-                            </CarouselButton>
-                            <CarouselButton direction="right" onClick={nextSlide}>
-                                <FontAwesomeIcon icon={faChevronRight as any} />
-                            </CarouselButton>
-                            
-                            <CarouselDots>
-                                {banners.map((_, index) => (
-                                    <CarouselDot
-                                        key={index}
-                                        isActive={currentSlide === index}
-                                        onClick={() => goToSlide(index)}
-                                    />
-                                ))}
-                            </CarouselDots>
-                        </>
+        <Header>
+            <LogoContainer onClick={handleLogoClick}>
+                <Logo src={logoSrc} alt={storeName} />
+                <StoreName>{storeName}</StoreName>
+            </LogoContainer>
+            {showSearch && (
+                <SearchContainer ref={searchRef}>
+                    <SearchInput
+                        placeholder="Buscar produtos..."
+                        value={internalSearchTerm}
+                        onChange={(e) => handleSearchInputChange(e.target.value)}
+                        onFocus={() => internalSearchTerm.trim() && setShowDropdown(true)}
+                    />
+                    {showDropdown && (
+                        <SearchDropdown>
+                            {isSearching ? (
+                                <SearchLoader>
+                                    <FontAwesomeIcon icon={faSearch as any} spin />
+                                    <span>Buscando produtos...</span>
+                                </SearchLoader>
+                            ) : searchResults.length > 0 ? (
+                                searchResults.map((product) => (
+                                    <SearchResultItem
+                                        key={product.id}
+                                        onClick={() => handleProductClick(product.id)}
+                                    >
+                                        <SearchResultImage
+                                            src={product.image || '/placeholder_products.png'}
+                                            alt={product.name}
+                                        />
+                                        <SearchResultInfo>
+                                            <SearchResultName>{product.name}</SearchResultName>
+                                            <SearchResultPrice>{formatPrice(product.price)}</SearchResultPrice>
+                                        </SearchResultInfo>
+                                    </SearchResultItem>
+                                ))
+                            ) : (
+                                <EmptySearchResults>
+                                    <FontAwesomeIcon icon={faSearch as any} />
+                                    <span>Nenhum produto encontrado</span>
+                                </EmptySearchResults>
+                            )}
+                        </SearchDropdown>
                     )}
-                </BannerCarouselContainer>
+                </SearchContainer>
             )}
-            
-        </>
+            <HeaderActions>
+            {showBackButton && (
+                <BackButton onClick={handleBackClick}>
+                    <FontAwesomeIcon icon={faArrowLeft as any} />
+                    {backButtonText}
+                </BackButton>
+            )}
+            {showCartButton && (
+                <CartButton onClick={handleCartClick}>
+                    <FontAwesomeIcon icon={faShoppingCart as any} />
+                    {cartCount > 0 && <CartBadge>{cartCount}</CartBadge>}
+                </CartButton>
+            )}
+            </HeaderActions>
+        </Header>
     );
 }

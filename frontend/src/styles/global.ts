@@ -5,7 +5,7 @@ export const GlobalStyle = createGlobalStyle`
 
 :root{
     --background: #f7f2f2;
-    --primary-color: #e4bfc7;
+    --primary-color: #e95578;
     --sideBarBackground: #e7b7c2;
     --light-background: #E9CBD2;
     --tbody-background: #F4E5E8;

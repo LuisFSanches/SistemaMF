@@ -279,7 +279,7 @@ export const ProductItem = styled.div`
         align-items: center;
         padding: 0.2rem 0;
         text-align: center;
-        background: var(--sideBarBackground);
+        background: #EC4899;
         color: white;
     }
 

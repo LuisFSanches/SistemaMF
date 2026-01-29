@@ -1,7 +1,16 @@
 import { api } from "./api";
 
-export const listStoreFrontProducts = async (slug: string, page: number, pageSize: number, query: string) => {
-    const response = await api.get(`/storefront/${slug}/products?page=${page}&pageSize=${pageSize}&query=${query}`);
+export const listStoreFrontProducts = async (slug: string, page: number, pageSize: number, query: string, categorySlug?: string) => {
+    let url = `/storefront/${slug}/products?page=${page}&pageSize=${pageSize}&query=${query}`;
+    if (categorySlug) {
+        url += `&categorySlug=${categorySlug}`;
+    }
+    const response = await api.get(url);
+    return response;
+}
+
+export const getStoreFrontProductDetail = async (storeProductId: string) => {
+    const response = await api.get(`/storefront/product/${storeProductId}`);
     return response;
 }
 
@@ -75,8 +84,35 @@ export const uploadProductImage = async(productId: string, imageFile: File) => {
     return response;
 };
 
-export const deleteProductImage = async(productId: string) => {
-    const response = await api.delete(`/product/${productId}/image`);
+export const uploadProductImage2 = async(productId: string, imageFile: File) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    
+    const response = await api.post(`/product/${productId}/image-2`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        }
+    });
+    
+    return response;
+};
+
+export const uploadProductImage3 = async(productId: string, imageFile: File) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    
+    const response = await api.post(`/product/${productId}/image-3`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        }
+    });
+    
+    return response;
+};
+
+export const deleteProductImage = async(productId: string, imageField?: 'image' | 'image_2' | 'image_3') => {
+    const queryParam = imageField ? `?image_field=${imageField}` : '';
+    const response = await api.delete(`/product/${productId}/image${queryParam}`);
     
     return response;
 };

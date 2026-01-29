@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma";
 import { BadRequestException } from "../../exceptions/bad-request";
 import { ErrorCodes } from "../../exceptions/root";
+import { maskPaymentCredentials } from "../../utils/maskSensitiveData";
 
 interface IGetStore {
     id?: string;
@@ -34,8 +35,20 @@ class GetStoreService {
                     banner: true,
                     banner_2: true,
                     banner_3: true,
+                    // Credenciais de pagamento (serão mascaradas)
+                    mp_access_token: true,
+                    mp_public_key: true,
+                    mp_seller_id: true,
+                    mp_webhook_secret: true,
+                    inter_client_id: true,
+                    inter_client_secret: true,
+                    inter_api_cert_path: true,
+                    inter_api_key_path: true,
                     created_at: true,
                     updated_at: true,
+                    facebook: true,
+                    instagram: true,
+                    youtube: true,
                     addresses: {
                         select: {
                             id: true,
@@ -94,7 +107,22 @@ class GetStoreService {
                 );
             }
 
-            return store;
+            // Mascara os dados sensíveis antes de retornar
+            const maskedCredentials = maskPaymentCredentials({
+                mp_access_token: store.mp_access_token,
+                mp_public_key: store.mp_public_key,
+                mp_seller_id: store.mp_seller_id,
+                mp_webhook_secret: store.mp_webhook_secret,
+                inter_client_id: store.inter_client_id,
+                inter_client_secret: store.inter_client_secret,
+                inter_api_cert_path: store.inter_api_cert_path,
+                inter_api_key_path: store.inter_api_key_path,
+            });
+
+            return {
+                ...store,
+                ...maskedCredentials,
+            };
         } catch (error: any) {
             console.error("[GetStoreService] Failed:", error);
 

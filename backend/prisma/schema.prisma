@@ -76,7 +76,10 @@ model Product {
   stock              Float
   enabled            Boolean
   visible_in_store   Boolean  @default(false)
+  description        String?
   image              String?
+  image_2            String?
+  image_3            String?
   qr_code            String?
   sales_count        Int      @default(0)
   created_at         DateTime @default(now())
@@ -94,6 +97,7 @@ model Category {
   id        String @id @default(uuid())
   name      String
   slug      String @unique
+  image     String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -104,6 +108,7 @@ model Category {
 }
 
 model ProductCategory {
+  id          String   @id @default(uuid())
   product_id  String
   category_id String
   created_at DateTime @default(now())
@@ -112,7 +117,7 @@ model ProductCategory {
   product  Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
   category Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
 
-  @@id([product_id, category_id])
+  @@unique([product_id, category_id])
   @@map("product_categories")
 }
 
@@ -312,6 +317,11 @@ model Store {
   inter_client_secret String?
   inter_api_cert_path String?
   inter_api_key_path  String?
+
+  // Score google
+  google_rating_value Float?
+  google_rating_count Int?
+  google_rating_url   String?
   
   // Configurações
   payment_enabled  Boolean  @default(false)

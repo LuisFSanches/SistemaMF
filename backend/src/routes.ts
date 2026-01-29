@@ -8,12 +8,29 @@ import { GetClientByPhoneNumbeController } from './controllers/client/GetClientB
 import { CreateClientController } from './controllers/client/CreateClientController'
 import { UpdateClientController } from './controllers/client/UpdateClientController';
 
+import { CreateCategoryController } from './controllers/category/CreateCategoryController';
+import { GetAllCategoriesController } from './controllers/category/GetAllCategoriesController';
+import { GetCategoryController } from './controllers/category/GetCategoryController';
+import { GetCategoryBySlugController } from './controllers/category/GetCategoryBySlugController';
+import { UpdateCategoryController } from './controllers/category/UpdateCategoryController';
+import { DeleteCategoryController } from './controllers/category/DeleteCategoryController';
+import { UploadCategoryImageController } from './controllers/category/UploadCategoryImageController';
+import { DeleteCategoryImageController } from './controllers/category/DeleteCategoryImageController';
+
+import { AddProductCategoryController } from './controllers/productCategory/AddProductCategoryController';
+import { GetProductCategoriesController } from './controllers/productCategory/GetProductCategoriesController';
+import { RemoveProductCategoryController } from './controllers/productCategory/RemoveProductCategoryController';
+import { UpdateProductCategoriesController } from './controllers/productCategory/UpdateProductCategoriesController';
+import { RemoveAllProductCategoriesController } from './controllers/productCategory/RemoveAllProductCategoriesController';
+
 import { CreateProductController } from './controllers/product/CreateProductController';
 import { GetAllProductController } from './controllers/product/GetAllProductController';
 import { GetProductByIdController } from './controllers/product/GetProductByIdController';
 import { UpdateProductController } from './controllers/product/UpdateProductController';
 import { SearchProductsController } from './controllers/product/SearchProductsController';
 import { UploadProductImageController } from './controllers/product/UploadProductImageController';
+import { UploadProductImage2Controller } from './controllers/product/UploadProductImage2Controller';
+import { UploadProductImage3Controller } from './controllers/product/UploadProductImage3Controller';
 import { DeleteProductImageController } from './controllers/product/DeleteProductImageController';
 import { GenerateProductQRCodeController } from './controllers/product/GenerateProductQRCodeController';
 import { GetStoreFrontProductsController } from './controllers/product/GetStoreFrontProductsController';
@@ -107,6 +124,7 @@ import { UploadStoreBanner3Controller } from './controllers/store/UploadStoreBan
 import { CreateStoreProductController } from './controllers/storeProduct/CreateStoreProductController';
 import { GetAllStoreProductsController } from './controllers/storeProduct/GetAllStoreProductsController';
 import { GetStoreProductController } from './controllers/storeProduct/GetStoreProductController';
+import { GetStoreProductByIdController } from './controllers/storeProduct/GetStoreProductByIdController';
 import { UpdateStoreProductController } from './controllers/storeProduct/UpdateStoreProductController';
 import { DeleteStoreProductController } from './controllers/storeProduct/DeleteStoreProductController';
 import { SearchStoreProductsController } from './controllers/storeProduct/SearchStoreProductsController';
@@ -129,9 +147,13 @@ import { GetStoreHolidayController } from './controllers/storeHoliday/GetStoreHo
 import { UpdateStoreHolidayController } from './controllers/storeHoliday/UpdateStoreHolidayController';
 import { DeleteStoreHolidayController } from './controllers/storeHoliday/DeleteStoreHolidayController';
 
+import { CreateMercadoPagoPreferenceController } from './controllers/mercadoPago/CreateMercadoPagoPreferenceController';
+import { MercadoPagoWebhookController } from './controllers/mercadoPago/MercadoPagoWebhookController';
+import { GetMercadoPagoPaymentStatusController } from './controllers/mercadoPago/GetMercadoPagoPaymentStatusController';
+
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
-import { upload, uploadStore, uploadExcel } from './config/multer';
+import { upload, uploadStore, uploadCategory, uploadExcel } from './config/multer';
 import { processImage } from './middlewares/process_image';
 import { handleMulterError } from './middlewares/multer_error';
 
@@ -148,6 +170,23 @@ router.get('/clients/all', adminAuthMiddleware, new GetAllClientController().han
 router.get('/client/phone_number', new GetClientByPhoneNumbeController().handle)
 router.get('/client/:id', superAdminAuthMiddleware, new GetClientController().handle)
 router.put('/client/:id', adminAuthMiddleware, new UpdateClientController().handle)
+
+//-- ROTAS CATEGORY --
+router.post('/category', adminAuthMiddleware, new CreateCategoryController().handle);
+router.get('/category/all', new GetAllCategoriesController().handle);
+router.get('/category/slug/:slug', new GetCategoryBySlugController().handle);
+router.get('/category/:id', adminAuthMiddleware, new GetCategoryController().handle);
+router.put('/category/:id', adminAuthMiddleware, new UpdateCategoryController().handle);
+router.delete('/category/:id', adminAuthMiddleware, new DeleteCategoryController().handle);
+router.post('/category/:id/upload', adminAuthMiddleware, uploadCategory.single('file'), handleMulterError, new UploadCategoryImageController().handle);
+router.delete('/category/:id/image', adminAuthMiddleware, new DeleteCategoryImageController().handle);
+
+//-- ROTAS PRODUCT CATEGORY --
+router.post('/product-category', adminAuthMiddleware, new AddProductCategoryController().handle);
+router.get('/product-category/product/:product_id', new GetProductCategoriesController().handle);
+router.put('/product-category/product/:product_id', adminAuthMiddleware, new UpdateProductCategoriesController().handle);
+router.delete('/product-category/:id', adminAuthMiddleware, new RemoveProductCategoryController().handle);
+router.delete('/product-category/product/:product_id/all', adminAuthMiddleware, new RemoveAllProductCategoriesController().handle);
 
 //-- ROTAS ADDRESS --
 router.post('/address', adminAuthMiddleware, new CreateAddressController().handle)
@@ -175,6 +214,8 @@ router.get('/product/search', adminAuthMiddleware, new SearchProductsController(
 router.get('/product/:id', adminAuthMiddleware, new GetProductByIdController().handle)
 router.put('/product/:id', adminAuthMiddleware, new UpdateProductController().handle)
 router.post('/product/:id/image', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadProductImageController().handle)
+router.post('/product/:id/image-2', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadProductImage2Controller().handle)
+router.post('/product/:id/image-3', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadProductImage3Controller().handle)
 router.delete('/product/:id/image', adminAuthMiddleware, new DeleteProductImageController().handle)
 router.post('/product/:id/qrcode', adminAuthMiddleware, new GenerateProductQRCodeController().handle)
 router.get('/product/export/excel', adminAuthMiddleware, new ExportProductsToExcelController().handle)
@@ -194,6 +235,7 @@ router.delete('/store-product/:id', adminAuthMiddleware, new DeleteStoreProductC
 
 //-- ROTAS STOREFRONT (PÚBLICAS) --
 router.get('/storefront/:slug/products', new GetStoreFrontProductsController().handle)
+router.get('/storefront/product/:id', new GetStoreProductByIdController().handle)
 
 //-- ROTAS ADMIN --
 router.post('/admin', superAdminAuthMiddleware, new CreateAdminController().handle)
@@ -294,5 +336,10 @@ router.get('/storeHoliday/store/:store_id', new GetAllStoreHolidaysController().
 router.get('/storeHoliday/:id', adminAuthMiddleware, new GetStoreHolidayController().handle);
 router.put('/storeHoliday/:id', adminAuthMiddleware, new UpdateStoreHolidayController().handle);
 router.delete('/storeHoliday/:id', adminAuthMiddleware, new DeleteStoreHolidayController().handle);
+
+//-- ROTAS MERCADO PAGO (STOREFRONT) --
+router.post('/mercadopago/preference', new CreateMercadoPagoPreferenceController().handle);
+router.post('/webhook/mercadopago', new MercadoPagoWebhookController().handle);
+router.get('/mercadopago/payment/:payment_id', new GetMercadoPagoPaymentStatusController().handle);
 
 export { router };

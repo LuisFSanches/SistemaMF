@@ -27,6 +27,12 @@ import {
     CheckoutButton,
     ObservationsField,
     Textarea,
+    StepperContainer,
+    StepperWrapper,
+    Step,
+    StepCircle,
+    StepLabel,
+    StepSubLabel,
 } from "./style";
 
 export function Cart() {
@@ -50,6 +56,9 @@ export function Cart() {
         navigate(`/${slug}/checkout`);
     };
 
+    const steps = ["Carrinho", "Informações do Pedido", "Pagamento"];
+    const currentStep = 1;
+
     return (
         <Container>
             <StoreFrontHeader 
@@ -58,6 +67,35 @@ export function Cart() {
                 backButtonPath={`/${slug}`}
                 slug={slug}
             />
+
+            <StepperContainer>
+                <StepperWrapper>
+                    {steps.map((stepName, index) => {
+                        const stepNumber = index + 1;
+                        const isActive = currentStep === stepNumber;
+                        const isCompleted = currentStep > stepNumber;
+                        
+                        return (
+                            <Step 
+                                key={stepNumber} 
+                                active={isActive} 
+                                completed={isCompleted}
+                                clickable={false}
+                            >
+                                <StepCircle active={isActive} completed={isCompleted}>
+                                    {isCompleted ? '✓' : stepNumber}
+                                </StepCircle>
+                                <StepLabel active={isActive}>{stepName}</StepLabel>
+                                <StepSubLabel>
+                                    {stepNumber === 1 && 'Revise seus itens'}
+                                    {stepNumber === 2 && 'Dados de entrega'}
+                                    {stepNumber === 3 && 'Finalize o pedido'}
+                                </StepSubLabel>
+                            </Step>
+                        );
+                    })}
+                </StepperWrapper>
+            </StepperContainer>
 
             <Content>
                 <CartSection>

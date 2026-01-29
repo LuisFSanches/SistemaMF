@@ -8,16 +8,34 @@ import { ProductCard } from "../../components/ProductCard";
 import { Pagination } from "../../components/Pagination";
 import { Loader } from "../../components/Loader";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
+import { CategoryMenu } from "../../components/CategoryMenu";
+import { BannerCarousel } from "../../components/BannerCarousel";
+import { DeliveryAvailability } from "../../components/DeliveryAvailability";
+import { GoogleRating } from "../../components/GoogleRating";
+import { StoreFrontFooter } from "../../components/StoreFrontFooter";
 import placeholder_products from "../../assets/images/placeholder_products.png";
 import {
     Container,
     Content,
-    PageTitle,
-    SearchContainer,
-    SearchInput,
     ProductGrid,
     EmptyState,
+    DeliverySession,
+    SessionTitle,
+    SessionContent,
+    ReviewSession
 } from "./style";
+
+interface Schedule {
+    id: string;
+    day_of_week: string;
+    is_closed: boolean;
+    opening_time: string | null;
+    closing_time: string | null;
+    lunch_break_start: string | null;
+    lunch_break_end: string | null;
+    created_at: string;
+    updated_at: string;
+}
 
 interface Store {
     id: string;
@@ -27,29 +45,40 @@ interface Store {
     banner: string | null;
     banner_2?: string | null;
     banner_3?: string | null;
+    schedules?: Schedule[];
+    google_rating_value: number | null;
+    google_rating_count: number | null;
+    google_rating_url: string | null;
 }
 
 export function StoreFront() {
-    const { slug } = useParams<{ slug: string }>();
+    const { slug, categorySlug } = useParams<{ slug: string; categorySlug?: string }>();
     const { addToCart } = useCart();
     const [products, setProducts] = useState<any[]>([]);
     const [totalProducts, setTotalProducts] = useState(0);
     const [store, setStore] = useState<Store | null>(null);
     const [showLoader, setShowLoader] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [query, setQuery] = useState("");
-    const [searchTerm, setSearchTerm] = useState("");
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
 
-    const loadAvailableProducts = async (slug: string, page: number, pageSize: number, query: string) => {
+    const loadAvailableProducts = async (slug: string, page: number, pageSize: number, categorySlug?: string) => {
         try {
             setError(null);
-            const { data: { products, total, store } } = await listStoreFrontProducts(slug, page, pageSize, query);
+            const { data: { products, total, store } } = await listStoreFrontProducts(slug, page, pageSize, "", categorySlug);
 
-            // Salvar store_id no localStorage para uso no checkout
+            // Salvar store_id, store_name, phone_number e schedules no localStorage para uso no checkout e PDP
             if (store?.id) {
                 localStorage.setItem('storefront_store_id', store.id);
+            }
+            if (store?.name) {
+                localStorage.setItem('storefront_store_name', store.name);
+            }
+            if (store?.phone_number) {
+                localStorage.setItem('storefront_store_phone', store.phone_number);
+            }
+            if (store?.schedules) {
+                localStorage.setItem('storefront_store_schedules', JSON.stringify(store.schedules));
             }
             
             setProducts(products);
@@ -71,25 +100,16 @@ export function StoreFront() {
     }
 
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            setQuery(searchTerm);
-            setPage(1);
-        }, 1000);
-
-        return () => clearTimeout(timeoutId);
-    }, [searchTerm]);
-
-    useEffect(() => {
         if (!slug) return;
         
         setShowLoader(true);
-        loadAvailableProducts(slug, page, pageSize, query).then(() => {
+        loadAvailableProducts(slug, page, pageSize, categorySlug).then(() => {
             setTimeout(() => {
                 setShowLoader(false);
             }, 350);
         });
 
-    }, [slug, page, pageSize, query]);
+    }, [slug, page, pageSize, categorySlug]);
 
     useEffect(() => {
         function handleResize() {
@@ -113,6 +133,8 @@ export function StoreFront() {
         addToCart({ ...product, price }, quantity);
     };
 
+    console.log(store)
+
     if (error === 'store_not_found') {
         return (
             <Container>
@@ -124,6 +146,7 @@ export function StoreFront() {
                         <p>O slug "{slug}" não corresponde a nenhuma loja ativa.</p>
                     </EmptyState>
                 </Content>
+                <StoreFrontFooter />
             </Container>
         );
     }
@@ -139,6 +162,7 @@ export function StoreFront() {
                         <p>Esta loja está desativada no momento. Tente novamente mais tarde.</p>
                     </EmptyState>
                 </Content>
+                <StoreFrontFooter />
             </Container>
         );
     }
@@ -154,6 +178,7 @@ export function StoreFront() {
                         <p>Ocorreu um erro ao carregar os produtos. Tente novamente mais tarde.</p>
                     </EmptyState>
                 </Content>
+                <StoreFrontFooter />
             </Container>
         );
     }
@@ -162,21 +187,28 @@ export function StoreFront() {
         <Container>
             <StoreFrontHeader 
                 showCartButton 
-                store={store}
+                logoSrc={store?.logo || undefined}
+                storeName={store?.name}
                 slug={slug}
+                showSearch={true}
             />
 
+            <CategoryMenu 
+                storeSlug={slug || ''} 
+                selectedCategorySlug={categorySlug}
+            />
+            {!categorySlug && store && (
+                <BannerCarousel 
+                    banners={[
+                        store.banner,
+                        store.banner_2,
+                        store.banner_3
+                    ].filter(Boolean) as string[]}
+                    storeName={store.name}
+                />
+            )}
+
             <Content>
-                <PageTitle>{store?.name || 'Nossos Produtos'}</PageTitle>
-
-                <SearchContainer>
-                    <SearchInput
-                        placeholder="Buscar produtos..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </SearchContainer>
-
                 <Loader show={showLoader} />
 
                 {!showLoader && products.length === 0 && (
@@ -199,6 +231,7 @@ export function StoreFront() {
                                         image={product.image || placeholder_products}
                                         onAdd={handleAddProduct}
                                         editablePrice={false}
+                                        enableDetailView={true}
                                     />
                                 ))}
                         </ProductGrid>
@@ -211,7 +244,31 @@ export function StoreFront() {
                         />
                     </>
                 )}
+
+                {!categorySlug && store?.schedules && store.schedules.length > 0 && (
+                    <DeliverySession>
+                        <SessionTitle>Disponibilidade de <strong>Entrega</strong></SessionTitle>
+                        <SessionContent>
+                            <p>Confira abaixo os dias de funcionamento da nossa loja. Fique atento para possíveis alterações nos horários de entrega.</p>
+                            <DeliveryAvailability schedules={store.schedules} />
+                        </SessionContent>
+                    </DeliverySession>
+                )}
+
+                {!categorySlug && store?.google_rating_value && store?.google_rating_count && store?.google_rating_url && (
+                    <ReviewSession>
+                        <SessionTitle>Avaliações no <strong>Google</strong></SessionTitle>
+                        <SessionContent>
+                            <GoogleRating
+                                ratingValue={store.google_rating_value}
+                                ratingCount={store.google_rating_count}
+                                ratingUrl={store.google_rating_url}
+                            />
+                        </SessionContent>
+                    </ReviewSession>
+                )}
             </Content>
+            <StoreFrontFooter />
         </Container>
     );
 }

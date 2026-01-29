@@ -4,11 +4,19 @@ import { BadRequestException } from "../../exceptions/bad-request";
 import { NotFoundException } from "../../exceptions/not-found";
 
 class GetStoreFrontProductsService{
-	async execute(storeSlug: string, page: number = 1, pageSize: number = 8, query?: string) {
+	async execute(storeSlug: string, page: number = 1, pageSize: number = 8, query?: string, categorySlug?: string) {
 		try {
 			// Buscar a loja pelo slug
 			const store = await prismaClient.store.findUnique({
-				where: { slug: storeSlug }
+				where: { slug: storeSlug },
+				include: {
+					schedules: {
+						orderBy: {
+							day_of_week: 'asc'
+						}
+					},
+					addresses: true
+				}
 			});
 
 			if (!store) {
@@ -25,6 +33,18 @@ class GetStoreFrontProductsService{
 				);
 			}
 
+			// Buscar categoria se categorySlug foi fornecido
+			let categoryId: string | undefined;
+			if (categorySlug && categorySlug.trim()) {
+				const category = await prismaClient.category.findUnique({
+					where: { slug: categorySlug.trim() }
+				});
+				
+				if (category) {
+					categoryId = category.id;
+				}
+			}
+
 			const skip = (page - 1) * pageSize;
 
 			if (query && query.trim()) {
@@ -34,9 +54,23 @@ class GetStoreFrontProductsService{
 					`replace(unaccent(lower(p.name)), ' ', '') LIKE '%' || replace(unaccent(lower($${index + 2})), ' ', '') || '%'`
 				).join(' AND ');
 
+				// Adicionar filtro de categoria se fornecido
+				const categoryJoin = categoryId ? 
+					'INNER JOIN "product_categories" pc ON pc.product_id = p.id' : '';
+				const categoryCondition = categoryId ? 
+					`AND pc.category_id = $${searchTerms.length + 2}` : '';
+
+				const queryParams = categoryId ? 
+					[store.id, ...searchTerms, categoryId, pageSize, skip] :
+					[store.id, ...searchTerms, pageSize, skip];
+
+				const limitOffset = categoryId ?
+					`LIMIT $${searchTerms.length + 3} OFFSET $${searchTerms.length + 4}` :
+					`LIMIT $${searchTerms.length + 2} OFFSET $${searchTerms.length + 3}`;
+
 				const products = await prismaClient.$queryRawUnsafe<any[]>(
 					`
-						SELECT 
+						SELECT DISTINCT
 							sp.id, 
 							p.name, 
 							p.image, 
@@ -44,34 +78,39 @@ class GetStoreFrontProductsService{
 							p.unity, 
 							sp.stock, 
 							sp.enabled, 
-							p.qr_code
+							p.qr_code,
+							p.created_at
 						FROM "store_products" sp
 						INNER JOIN "products" p ON p.id = sp.product_id
+						${categoryJoin}
 						WHERE sp.store_id = $1
 						AND sp.enabled = true
 						AND sp.visible_for_online_store = true
 						AND ${conditions}
+						${categoryCondition}
 						ORDER BY p.created_at DESC
-						LIMIT $${searchTerms.length + 2} OFFSET $${searchTerms.length + 3}
+						${limitOffset}
 					`,
-					store.id,
-					...searchTerms,
-					pageSize,
-					skip
+					...queryParams
 				);
+
+				const totalQueryParams = categoryId ? 
+					[store.id, ...searchTerms, categoryId] :
+					[store.id, ...searchTerms];
 
 				const totalResult = await prismaClient.$queryRawUnsafe<{ count: bigint }[]>(
 					`
-						SELECT COUNT(*) as count
+						SELECT COUNT(DISTINCT sp.id) as count
 						FROM "store_products" sp
 						INNER JOIN "products" p ON p.id = sp.product_id
+						${categoryJoin}
 						WHERE sp.store_id = $1
 						AND sp.enabled = true
 						AND sp.visible_for_online_store = true
 						AND ${conditions}
+						${categoryCondition}
 					`,
-					store.id,
-					...searchTerms
+					...totalQueryParams
 				);
 
 				const total = Number(totalResult[0].count);
@@ -88,19 +127,37 @@ class GetStoreFrontProductsService{
 						logo: store.logo,
 						banner: store.banner,
 						banner_2: store.banner_2,
-						banner_3: store.banner_3
+						banner_3: store.banner_3,
+						schedules: store.schedules,
+						addresses: store.addresses,
+						google_rating_value: store.google_rating_value,
+						google_rating_count: store.google_rating_count,
+						google_rating_url: store.google_rating_url,
 					}
 				};
 			}
 
 			// Buscar produtos da loja através da tabela store_products
+			const whereCondition: any = { 
+				store_id: store.id,
+				enabled: true,
+				visible_for_online_store: true
+			};
+
+			// Adicionar filtro de categoria se fornecido
+			if (categoryId) {
+				whereCondition.product = {
+					categories: {
+						some: {
+							category_id: categoryId
+						}
+					}
+				};
+			}
+
 			const [storeProducts, total] = await Promise.all([
 				prismaClient.storeProduct.findMany({
-					where: { 
-						store_id: store.id,
-						enabled: true,
-						visible_for_online_store: true
-					},
+					where: whereCondition,
 					skip,
 					take: pageSize,
 					select: {
@@ -125,11 +182,7 @@ class GetStoreFrontProductsService{
 					}
 				}),
 				prismaClient.storeProduct.count({
-					where: { 
-						store_id: store.id,
-						enabled: true,
-						visible_for_online_store: true
-					},
+					where: whereCondition,
 				}),
 			]);
 
@@ -157,7 +210,12 @@ class GetStoreFrontProductsService{
 					logo: store.logo,
 					banner: store.banner,
 					banner_2: store.banner_2,
-					banner_3: store.banner_3
+					banner_3: store.banner_3,
+					schedules: store.schedules,
+					addresses: store.addresses,
+					google_rating_value: store.google_rating_value,
+					google_rating_count: store.google_rating_count,
+					google_rating_url: store.google_rating_url,
 				}
 			};
 

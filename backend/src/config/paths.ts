@@ -28,6 +28,7 @@ export const rootDir = findProjectRoot(__dirname);
 export const uploadsDir = path.join(rootDir, 'uploads');
 export const productsUploadDir = path.join(uploadsDir, 'products');
 export const storesUploadDir = path.join(uploadsDir, 'stores');
+export const categoriesUploadDir = path.join(uploadsDir, 'categories');
 
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
@@ -42,6 +43,11 @@ if (!fs.existsSync(productsUploadDir)) {
 if (!fs.existsSync(storesUploadDir)) {
     fs.mkdirSync(storesUploadDir, { recursive: true });
     console.log('[Paths] Created stores upload directory:', storesUploadDir);
+}
+
+if (!fs.existsSync(categoriesUploadDir)) {
+    fs.mkdirSync(categoriesUploadDir, { recursive: true });
+    console.log('[Paths] Created categories upload directory:', categoriesUploadDir);
 }
 
 // console.log('[Paths] Root directory:', rootDir);

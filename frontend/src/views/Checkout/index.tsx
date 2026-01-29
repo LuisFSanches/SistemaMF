@@ -8,6 +8,7 @@ import { useCart } from "../../contexts/CartContext";
 import { getClientByPhone, createClientOnline } from "../../services/clientService";
 import { getClientAddresses, getPickupAddress } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
+import { createMercadoPagoPreference } from "../../services/mercadoPagoService";
 import { Loader } from "../../components/Loader";
 import { ErrorAlert } from "../../components/ErrorAlert";
 import { WelcomeBackModal } from "../../components/WelcomeBackModal";
@@ -15,7 +16,7 @@ import { RememberCardModal } from "../../components/RememberCardModal";
 import { TooltipModal } from "../../components/Tooltip";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
 import { convertMoney, rawTelephone } from "../../utils";
-import { TYPES_OF_DELIVERY, STATES, PAYMENT_METHODS } from "../../constants";
+import { TYPES_OF_DELIVERY, STATES } from "../../constants";
 
 import {
     FormField,
@@ -46,7 +47,13 @@ import {
     ProductPrice,
     Divider,
     CartItemImage,
-    CompletedOrder
+    CompletedOrder,
+    StepperContainer,
+    StepperWrapper,
+    Step,
+    StepCircle,
+    StepLabel,
+    StepSubLabel,
 } from "./style";
 
 interface INewOrder {
@@ -94,7 +101,7 @@ export function Checkout() {
     const [cardModalShowed, setCardModalShowed] = useState(false);
     const [showToolTipModal, setShowToolTipModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const [currentOrder, setCurrentOrder] = useState<any>(null);
+    const [currentOrder] = useState<any>(null);
     const cardSectionRef = useRef<HTMLDivElement>(null);
     const hasShownWelcomeModal = useRef(false);
     const [identifiedUser, setIdentifiedUser] = useState("");
@@ -117,6 +124,7 @@ export function Checkout() {
             state: "RJ",
             city: "Itaperuna",
             postal_code: "28300-000",
+            payment_method: "MERCADO_PAGO",
         }
     });
 
@@ -176,13 +184,13 @@ export function Checkout() {
             card_to: data.card_to,
             description: description,
             additional_information: "",
-            payment_method: data.payment_method,
+            payment_method: "MERCADO_PAGO",
             payment_received: false,
             products_value: cartTotal,
             discount: 0,
             delivery_fee: deliveryFee,
             total: totalWithDelivery,
-            status: 'OPENED',
+            status: 'PENDING_PAYMENT',
             products: products,
             is_delivery: !pickupOnStore,
             online_order: false,
@@ -195,10 +203,59 @@ export function Checkout() {
                 ...orderData,
             });
 
-            setCurrentOrder(response);
+            // Criar preferência de pagamento e redirecionar para o Mercado Pago
+            if (slug) {
+                try {
+                    const baseUrl = window.location.origin;
+                    
+                    const preferenceData = {
+                        order_id: response.id,
+                        store_slug: slug,
+                        items: cartItems.map(item => ({
+                            id: item.id || '',
+                            title: item.name,
+                            description: item.name,
+                            picture_url: item.image,
+                            quantity: item.quantity,
+                            unit_price: item.price || 0
+                        })),
+                        payer: {
+                            name: data.first_name,
+                            surname: data.last_name,
+                            phone: {
+                                area_code: rawTelephone(data.phone_number).substring(0, 2),
+                                number: rawTelephone(data.phone_number).substring(2)
+                            }
+                        },
+                        back_urls: {
+                            success: `${baseUrl}/${slug}/checkout/success`,
+                            failure: `${baseUrl}/${slug}/checkout/failure`,
+                            pending: `${baseUrl}/${slug}/checkout/pending`
+                        },
+                        auto_return: 'approved' as const
+                    };
 
-            clearCart();
-            setShowLoader(false);
+                    const preference = await createMercadoPagoPreference(preferenceData);
+                    
+                    // Limpar carrinho antes de redirecionar
+                    clearCart();
+                    
+                    // Redirecionar para o checkout do Mercado Pago
+                    // Em produção usar init_point, em desenvolvimento usar sandbox_init_point
+                    const checkoutUrl = process.env.NODE_ENV === 'production' 
+                        ? preference.init_point 
+                        : preference.sandbox_init_point;
+                    
+                    window.location.href = checkoutUrl;
+                    return;
+                } catch (mpError: any) {
+                    console.error("Erro ao criar preferência de pagamento:", mpError);
+                    setErrorMessage("Erro ao processar pagamento. Tente novamente.");
+                    setTimeout(() => setErrorMessage(""), 3000);
+                    setShowLoader(false);
+                    return;
+                }
+            }
         } catch (error: any) {
             setErrorMessage("Erro ao criar pedido. Tente novamente.");
             setTimeout(() => setErrorMessage(""), 3000);
@@ -426,6 +483,38 @@ export function Checkout() {
                 backButtonPath={`/${slug}/carrinho`}
                 slug={slug}
             />
+
+            <StepperContainer>
+                <StepperWrapper>
+                    {["Carrinho", "Informações do Pedido", "Pagamento"].map((stepName, index) => {
+                        const stepNumber = index + 1;
+                        const currentStep = 2;
+                        const isActive = currentStep === stepNumber;
+                        const isCompleted = currentStep > stepNumber;
+                        const isClickable = currentStep > stepNumber;
+                        
+                        return (
+                            <Step 
+                                key={stepNumber} 
+                                active={isActive} 
+                                completed={isCompleted}
+                                clickable={isClickable}
+                                onClick={() => isClickable && navigate(`/${slug}/carrinho`)}
+                            >
+                                <StepCircle active={isActive} completed={isCompleted}>
+                                    {isCompleted ? '✓' : stepNumber}
+                                </StepCircle>
+                                <StepLabel active={isActive}>{stepName}</StepLabel>
+                                <StepSubLabel>
+                                    {stepNumber === 1 && 'Revise seus itens'}
+                                    {stepNumber === 2 && 'Dados de entrega'}
+                                    {stepNumber === 3 && 'Finalize o pedido'}
+                                </StepSubLabel>
+                            </Step>
+                        );
+                    })}
+                </StepperWrapper>
+            </StepperContainer>
 
             <Content>
                 {!currentOrder?.id &&
@@ -726,20 +815,6 @@ export function Checkout() {
                                                 </InlineFormField>
                                             </>
                                         }
-
-                                        <FormField>
-                                            <Label>
-                                                Método de pagamento
-                                                <span>*</span>
-                                            </Label>
-                                            <Select {...register("payment_method", { required: "Método de pagamento inválido" })}>
-                                                <option value="">Selecione um método</option>
-                                                {Object.entries(PAYMENT_METHODS).map(([key, value]) => (
-                                                    <option key={key} value={key}>{value}</option>
-                                                ))}
-                                            </Select>
-                                            {errors.payment_method && <ErrorMessage>{errors.payment_method.message}</ErrorMessage>}
-                                        </FormField>
 
                                         <FormField>
                                             <Label>
