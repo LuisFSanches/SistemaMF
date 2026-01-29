@@ -4,14 +4,17 @@ import { ErrorCodes } from "../../exceptions/root";
 import fs from 'fs';
 import path from 'path';
 import { productsUploadDir } from "../../config/paths";
+import { CloudflareR2Service } from "../storage/CloudflareR2Service";
 
 interface IDeleteProductImage {
     product_id: string;
+    image_field?: 'image' | 'image_2' | 'image_3';
 }
 
 class DeleteProductImageService {
-    async execute({ product_id }: IDeleteProductImage) {
+    async execute({ product_id, image_field = 'image' }: IDeleteProductImage) {
         const backendUrl = process.env.BACKEND_URL || 'http://localhost:3334';
+        const useR2 = process.env.USE_R2_STORAGE === 'true';
         
         const product = await prismaClient.product.findFirst({
             where: { id: product_id },
@@ -24,27 +27,31 @@ class DeleteProductImageService {
             );
         }
 
-        if (!product.image) {
+        const imageUrl = product[image_field];
+
+        if (!imageUrl) {
             throw new BadRequestException(
-                "Product has no image to delete",
+                `Product has no ${image_field} to delete`,
                 ErrorCodes.BAD_REQUEST
             );
         }
 
-        const imagePath = product.image.replace(`${backendUrl}/uploads/products/`, '');
-        const filePath = path.join(productsUploadDir, imagePath);
-
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-            // console.log('[DeleteProductImageService] Image deleted successfully');
-        } else {
-            // console.log('[DeleteProductImageService] Image file not found');
-        }
-
         try {
+            if (useR2 && imageUrl.includes(process.env.R2_PUBLIC_URL || '')) {
+                const r2Service = new CloudflareR2Service();
+                await r2Service.delete({ fileUrl: imageUrl });
+            } else {
+                const imagePath = imageUrl.replace(`${backendUrl}/uploads/products/`, '');
+                const filePath = path.join(productsUploadDir, imagePath);
+
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
+            }
+
             const updatedProduct = await prismaClient.product.update({
                 where: { id: product_id },
-                data: { image: null },
+                data: { [image_field]: null },
             });
 
             return updatedProduct;

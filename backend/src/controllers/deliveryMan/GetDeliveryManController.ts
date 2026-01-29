@@ -3,6 +3,7 @@ import { GetDeliveryManService } from '../../services/deliveryMan/GetDeliveryMan
 
 class GetDeliveryManController {
     async handle(req: Request, res: Response, next: NextFunction) {
+        const store_id = req.admin?.store_id || undefined;
         const { id } = req.params;
         const { page = '1', pageSize = '10', startDate, endDate } = req.query;
 
@@ -13,7 +14,8 @@ class GetDeliveryManController {
             page: Number(page),
             pageSize: Number(pageSize),
             startDate: startDate as string,
-            endDate: endDate as string
+            endDate: endDate as string,
+            store_id
         });
         
         return res.json(deliveryMan);

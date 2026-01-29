@@ -3,11 +3,16 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllOrderToReceiveService {
-    async execute(page: number = 1, pageSize: number = 10, query?: string, filter?: string) {
+    async execute(page: number = 1, pageSize: number = 10, query?: string, filter?: string, store_id?: string) {
         try {
             const skip = (page - 1) * pageSize;
 
             let whereClause: any = {};
+
+            // Filtro por loja (multi-tenancy)
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
             
             if (filter === 'active') {
                 whereClause.is_archived = false;
@@ -75,6 +80,7 @@ class GetAllOrderToReceiveService {
                 prismaClient.orderToReceive.findMany({
                     where: {
                         is_archived: false,
+                        ...(store_id ? { store_id } : {}),
                         order: {
                             payment_received: false
                         }

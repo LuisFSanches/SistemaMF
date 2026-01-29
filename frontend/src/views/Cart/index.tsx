@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faTrash, faPlus, faMinus, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
@@ -27,10 +27,17 @@ import {
     CheckoutButton,
     ObservationsField,
     Textarea,
+    StepperContainer,
+    StepperWrapper,
+    Step,
+    StepCircle,
+    StepLabel,
+    StepSubLabel,
 } from "./style";
 
 export function Cart() {
     const navigate = useNavigate();
+    const { slug } = useParams<{ slug: string }>();
     const {
         cartItems,
         cartTotal,
@@ -46,16 +53,49 @@ export function Cart() {
 
     const handleGoToCheckout = () => {
         if (cartItems.length === 0) return;
-        navigate("/checkout");
+        navigate(`/${slug}/checkout`);
     };
+
+    const steps = ["Carrinho", "Informações do Pedido", "Pagamento"];
+    const currentStep = 1;
 
     return (
         <Container>
             <StoreFrontHeader 
                 showBackButton 
                 backButtonText="Voltar às Compras"
-                backButtonPath="/"
+                backButtonPath={`/${slug}`}
+                slug={slug}
             />
+
+            <StepperContainer>
+                <StepperWrapper>
+                    {steps.map((stepName, index) => {
+                        const stepNumber = index + 1;
+                        const isActive = currentStep === stepNumber;
+                        const isCompleted = currentStep > stepNumber;
+                        
+                        return (
+                            <Step 
+                                key={stepNumber} 
+                                active={isActive} 
+                                completed={isCompleted}
+                                clickable={false}
+                            >
+                                <StepCircle active={isActive} completed={isCompleted}>
+                                    {isCompleted ? '✓' : stepNumber}
+                                </StepCircle>
+                                <StepLabel active={isActive}>{stepName}</StepLabel>
+                                <StepSubLabel>
+                                    {stepNumber === 1 && 'Revise seus itens'}
+                                    {stepNumber === 2 && 'Dados de entrega'}
+                                    {stepNumber === 3 && 'Finalize o pedido'}
+                                </StepSubLabel>
+                            </Step>
+                        );
+                    })}
+                </StepperWrapper>
+            </StepperContainer>
 
             <Content>
                 <CartSection>
@@ -69,7 +109,7 @@ export function Cart() {
                             <FontAwesomeIcon icon={faShoppingCart as any} />
                             <h3>Seu carrinho está vazio</h3>
                             <p>Adicione produtos para continuar</p>
-                            <PrimaryButton onClick={() => navigate("/")}>
+                            <PrimaryButton onClick={() => navigate(`/${slug}`)}>
                                 Ir às Compras
                             </PrimaryButton>
                         </EmptyCart>

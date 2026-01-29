@@ -4,10 +4,11 @@ import { BadRequestException } from "../../exceptions/bad-request";
 
 interface IDeleteOrderToReceive {
     id: string;
+    store_id?: string;
 }
 
 class DeleteOrderToReceiveService {
-    async execute({ id }: IDeleteOrderToReceive) {
+    async execute({ id, store_id }: IDeleteOrderToReceive) {
         if (!id) {
             throw new BadRequestException(
                 "id is required",
@@ -16,8 +17,13 @@ class DeleteOrderToReceiveService {
         }
 
         // Verificar se existe
-        const orderToReceiveExists = await prismaClient.orderToReceive.findUnique({
-            where: { id },
+        const whereClause: any = { id };
+        if (store_id) {
+            whereClause.store_id = store_id;
+        }
+
+        const orderToReceiveExists = await prismaClient.orderToReceive.findFirst({
+            where: whereClause,
         });
 
         if (!orderToReceiveExists) {

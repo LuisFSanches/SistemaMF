@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import {
     Card,
@@ -12,6 +13,7 @@ import {
     PriceInputWrapper,
     MoneySign,
     PriceDisplay,
+    ClickableArea,
 } from './style';
 
 interface IProduct {
@@ -26,28 +28,38 @@ type ProductCardProps = {
     image: string;
     onAdd: (product: IProduct, quantity: number, price: number) => void;
     editablePrice?: boolean;
+    enableDetailView?: boolean;
 };
 
-export function ProductCard({ product, image, onAdd, editablePrice = true }: ProductCardProps){
+export function ProductCard({ product, image, onAdd, editablePrice = true, enableDetailView = false }: ProductCardProps){
     const { showSuccess } = useSuccessMessage();
+    const navigate = useNavigate();
+    const { slug } = useParams<{ slug: string }>();
 
     const [quantity, setQuantity] = useState<number>(1);
     const [initialPrice, setInitialPrice] = useState<any>(product.price);
 
-    const handleAddClick = () => {
+    const handleAddClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
         if (quantity > 0) {
             onAdd(product, quantity, initialPrice);
             showSuccess(`x${quantity} ${product.name} adicionado ao pedido!`, 1800);
         }
     };
 
+    const handleCardClick = () => {
+        if (enableDetailView && slug) {
+            navigate(`/${slug}/produto/${product.id}`);
+        }
+    };
+
     return (
-        <Card>
-            <ProductImage src={image} alt={product.name} />
-            <Info>
+        <Card onClick={handleCardClick} clickable={enableDetailView}>
+            <ClickableArea>
+                <ProductImage src={image} alt={product.name} />
                 <ProductName>{product.name}</ProductName>
                 {editablePrice ? (
-                    <PriceInputWrapper>
+                    <PriceInputWrapper onClick={(e) => e.stopPropagation()}>
                         <MoneySign>R$</MoneySign>
                         <PriceInput
                             type="number"
@@ -64,7 +76,9 @@ export function ProductCard({ product, image, onAdd, editablePrice = true }: Pro
                         R$ {Number(initialPrice).toFixed(2).replace('.', ',')}
                     </PriceDisplay>
                 )}
-                <BottomActions>
+            </ClickableArea>
+            <Info>
+                <BottomActions onClick={(e) => e.stopPropagation()}>
                     <QuantityInput
                         type="number"
                         min={1}

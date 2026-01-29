@@ -5,14 +5,20 @@ import { BadRequestException } from "../../exceptions/bad-request";
 interface IOrderPayment {
 	id: string;
 	payment_received: boolean;
+	store_id?: string;
 }
 
 class UpdateOrderPaymentService {
-	async execute({ id, payment_received }: IOrderPayment) {
+	async execute({ id, payment_received, store_id }: IOrderPayment) {
 		try {
-			// Verificar se a ordem existe
-			const orderExists = await prismaClient.order.findUnique({
-				where: { id }
+			// Verificar se a ordem existe e pertence à loja
+			const whereClause: any = { id };
+			if (store_id) {
+				whereClause.store_id = store_id;
+			}
+
+			const orderExists = await prismaClient.order.findFirst({
+				where: whereClause
 			});
 
 			if (!orderExists) {

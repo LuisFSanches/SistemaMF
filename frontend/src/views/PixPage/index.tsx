@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import moment from "moment";
-import { Container, DateContainer } from "./style";
+import { Container, DateContainer, ConfigErrorContainer } from "./style";
 import { PageHeader } from "../../styles/global";
 import { getPix } from"../../services/pixService";
 import { IPix } from "../../interfaces/IPix";
@@ -12,6 +12,7 @@ export function PixPage(){
     const [initialDate, setInitialDate] = useState("");
     const [finalDate, setFinalDate] = useState("");
     const [showLoader, setShowLoader] = useState(false);
+    const [configError, setConfigError] = useState(false);
     const limits = [20, 40, 60];
     const [selectedLimit, setSelectedLimit] = useState(20);
     useEffect(() => {
@@ -21,14 +22,20 @@ export function PixPage(){
         async function loadPix(){
             if (!initialDate || !finalDate) return;
             setShowLoader(true);
+            setConfigError(false);
             const params = `?initial_date=${initialDate}&final_date=${finalDate}&limit=${selectedLimit}`
 
             try {
                 const { data } = await getPix(params);
                 setPixList(data);
                 setShowLoader(false);
-            } catch(error) {
+            } catch(error: any) {
                 setShowLoader(false);
+                if (error?.response?.data?.errorCode === 404 || 
+                    (error?.response?.status === 404 && error?.response?.data?.message?.includes("payment credentials"))) {
+                    setConfigError(true);
+                    setPixList([]);
+                }
             }
 
         }
@@ -60,7 +67,16 @@ export function PixPage(){
                     </div>
                 </DateContainer>
             </PageHeader>
-            {pixList &&
+            {configError && (
+                <ConfigErrorContainer>
+                    <h3>Configurações de Pix não encontradas</h3>
+                    <p>Para visualizar os registros de Pix, é necessário configurar suas credenciais de pagamento.</p>
+                    <a href="/backoffice/configuracoes?tab=payment">
+                        Ir para Configurações de Pagamento
+                    </a>
+                </ConfigErrorContainer>
+            )}
+            {pixList && pixList.length > 0 && (
                 <table>
                     <thead className="head">
                         <tr>
@@ -83,7 +99,7 @@ export function PixPage(){
                         ))}
                     </tbody>
                 </table>
-            }
+            )}
         </Container>
     )
 }

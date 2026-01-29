@@ -1,6 +1,7 @@
 import { Status } from "../interfaces/IStatus";
 
 export const STATUS_LABEL: Record<Status, string>= {
+  "PENDING_PAYMENT": "Aguardando Pagamento",
   "OPENED": "Aberto",
   "WAITING_FOR_CLIENT": "Aguardando Cliente",
   "IN_PROGRESS": "Em andamento",
@@ -12,7 +13,8 @@ export const STATUS_LABEL: Record<Status, string>= {
 export const PAYMENT_METHODS = {
   "CASH": "Dinheiro",
   "PIX": "Pix",
-  "CARD": "Cartão"
+  "CARD": "Cartão",
+  "MERCADO_PAGO": "Mercado Pago"
 }
 
 export const PAYMENT_RECEIVED = {
@@ -85,5 +87,8 @@ export const PUBLIC_ROUTES = [
   'concluirEntrega',
   '/carrinho',
   '/checkout',
+  '/checkout/success',
+  '/checkout/failure',
+  '/checkout/pending',
   '/login',
 ]

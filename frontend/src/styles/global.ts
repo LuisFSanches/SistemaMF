@@ -5,7 +5,7 @@ export const GlobalStyle = createGlobalStyle`
 
 :root{
     --background: #f7f2f2;
-    --primary-color: #e4bfc7;
+    --primary-color: #e95578;
     --sideBarBackground: #e7b7c2;
     --light-background: #E9CBD2;
     --tbody-background: #F4E5E8;
@@ -446,6 +446,12 @@ export const ModalContainer = styled.div`
                 filter: brightness(1.2);
             }
     }
+
+    .create-button {
+        height: 50px;
+        font-size: 16px;
+        background: #EC4899;
+    }
 `
 
 export const Form = styled.form`
@@ -720,6 +726,11 @@ export const CheckboxContainer =styled.div<{alignLeft?: boolean}>`
         margin: 0px 10px;
     }
 
+    h4 {
+        margin-bottom: 0px;
+        margin-left: 5px;
+    }
+
     @media (max-width: 768px){
         width: 100%;
         justify-content: start;
@@ -897,6 +908,12 @@ export const PageHeader = styled.div`
         }
     }
 `
+
+export const PageTitle = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
 export const ErrorMessage = styled.span`
     color: red;
     margin-bottom: 5px;

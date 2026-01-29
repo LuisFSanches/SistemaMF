@@ -4,13 +4,19 @@ import { BadRequestException } from "../../exceptions/bad-request";
 
 interface GetOrderDeliveryRequest {
     id: string
+    store_id?: string
 }
 
 class GetOrderDeliveryService {
-    async execute({ id }: GetOrderDeliveryRequest) {
+    async execute({ id, store_id }: GetOrderDeliveryRequest) {
         try {
+            const whereClause: any = { id };
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
+
             const orderDelivery = await prismaClient.orderDelivery.findFirst({
-                where: { id },
+                where: whereClause,
                 include: {
                     order: {
                         select: {

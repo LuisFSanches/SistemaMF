@@ -26,6 +26,7 @@ class UpdateProductService{
 			return updatedProduct;
 
 		} catch(error: any) {
+			console.error("[UpdateProductService] Failed:", error);
 			throw new BadRequestException(
 				error.message,
 				ErrorCodes.SYSTEM_ERROR

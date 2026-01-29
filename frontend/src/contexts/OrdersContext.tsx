@@ -4,6 +4,7 @@ import { useOrderSocket } from '../hooks/useOrderSocket';
 import { IOrder } from "../interfaces/IOrder";
 import { PUBLIC_ROUTES } from "../constants";
 import { checkPublicRoute } from "../utils";
+import { AuthContext } from "./AuthContext";
 
 interface OrdersContextType {
   orders: IOrder[];
@@ -25,6 +26,7 @@ export const OrdersProvider: React.FC = ({ children }) => {
   const [onGoingOrders, setOnGoingOrders] = useState<IOrder[]>([]);
   const [waitingOrders, setWaitingOrders] = useState<IOrder[]>([]);
   const token = localStorage.getItem("token");
+  const { adminData } = useContext(AuthContext);
 
   const loadAvailableOrders = async (page: number, pageSize: number, query: string, startDate?: string | null, endDate?: string | null) => {
     const { data: { orders, total } } = await getAllOrders(page, pageSize, query, startDate, endDate);
@@ -109,7 +111,7 @@ export const OrdersProvider: React.FC = ({ children }) => {
     }
 
     loadOnGoingOrders(true);
-  });
+  }, adminData.store_id || undefined);
 
   useEffect(() => {
     const currentPath = window.location.pathname;

@@ -331,7 +331,7 @@ export function DeliveryManDetail() {
 
                 <TableContent>
                     {deliveries.length > 0 ? (
-                        <table>
+                        <table className="responsive-table">
                         <thead>
                             <tr>
                                 <th>Pedido</th>

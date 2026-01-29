@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export const Card = styled.div`
+export const Card = styled.div<{ clickable?: boolean }>`
     width: 220px;
     border: 1px solid #ddd;
     border-radius: 12px;
@@ -9,6 +9,8 @@ export const Card = styled.div`
     display: flex;
     flex-direction: column;
     background: #fff;
+    cursor: ${props => props.clickable ? 'pointer' : 'default'};
+    transition: all 0.3s ease;
 
     &:hover {
         border-color: #EC4899;
@@ -21,6 +23,11 @@ export const Card = styled.div`
         
 `;
 
+export const ClickableArea = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
 export const ProductImage = styled.img`
     width: 100%;
     height: 100px;
@@ -29,11 +36,10 @@ export const ProductImage = styled.img`
 `;
 
 export const Info = styled.div`
-    padding: 16px;
-    flex-grow: 1;
+    padding: 0 16px 16px;
 
     @media (max-width: 768px) {
-        padding: 12px;
+        padding: 0 12px 12px;
     }
 `;
 
@@ -41,6 +47,8 @@ export const ProductName = styled.h3`
     min-height: 42px;
     font-size: 16px;
     margin: 0 0 8px;
+    padding: 0 16px;
+    margin-top: 8px;
 
     @media (max-width: 768px) {
         font-size: 14px;
@@ -52,6 +60,7 @@ export const PriceInputWrapper = styled.div`
     position: relative;
     display: inline-block;
     width: 100%;
+    padding: 0 16px;
 `;
 
 export const PriceInput = styled.input`
@@ -68,12 +77,13 @@ export const PriceDisplay = styled.div`
     font-weight: bold;
     color: #EC4899;
     margin-bottom: 12px;
+    padding: 0 16px;
 `;
 
 export const MoneySign = styled.span`
     position: absolute;
     top: 22px;
-    left: 6px;
+    left: 22px;
     transform: translateY(-50%);
     color: #EC4899;
     font-size: 1rem;

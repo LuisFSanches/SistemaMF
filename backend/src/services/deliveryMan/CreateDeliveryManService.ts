@@ -5,7 +5,7 @@ import { createDeliveryManSchema } from "../../schemas/deliveryMan/createDeliver
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class CreateDeliveryManService {
-    async execute(data: IDeliveryMan) {
+    async execute(data: IDeliveryMan, store_id?: string) {
         const parsed = createDeliveryManSchema.safeParse(data);
 
         if (!parsed.success) {
@@ -15,8 +15,13 @@ class CreateDeliveryManService {
             );
         }
 
+        const whereClause: any = { phone_number: parsed.data.phone_number };
+        if (store_id) {
+            whereClause.store_id = store_id;
+        }
+
         const existingDeliveryMan = await prismaClient.deliveryMan.findFirst({
-            where: { phone_number: parsed.data.phone_number },
+            where: whereClause,
         });
 
         if (existingDeliveryMan) {
@@ -30,7 +35,8 @@ class CreateDeliveryManService {
             const deliveryMan = await prismaClient.deliveryMan.create({ 
                 data: {
                     name: parsed.data.name,
-                    phone_number: parsed.data.phone_number
+                    phone_number: parsed.data.phone_number,
+                    store_id
                 }
             });
             

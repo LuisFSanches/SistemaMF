@@ -4,9 +4,10 @@ import { GetOrderDetailsService } from '../../services/order/GetOrderDetailsServ
 class GetOrderDetailsController {
     async handle(req: Request, res: Response, next: NextFunction) {
         const { id } = req.params;
+        const store_id = req.admin?.store_id || undefined;
 
         const getOrderDetailsService = new GetOrderDetailsService();
-        const orderDetails = await getOrderDetailsService.execute(id);
+        const orderDetails = await getOrderDetailsService.execute(id, store_id);
 
         return res.json(orderDetails);
     }

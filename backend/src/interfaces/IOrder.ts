@@ -25,5 +25,6 @@ export interface IOrder {
     store_front_order: boolean;
     online_code?: string;
     products?: any,
-    is_delivery?: boolean
+    is_delivery?: boolean,
+    store_id?: string,
 }

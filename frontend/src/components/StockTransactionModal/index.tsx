@@ -4,12 +4,12 @@ import { useForm } from "react-hook-form";
 import { ModalContainer, Form, Input, InlineFormField, Label, EditFormField, ErrorMessage } from '../../styles/global';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { searchProducts } from "../../services/productService";
+import { searchStoreProducts } from "../../services/storeProductService";
 import { createStockTransaction } from "../../services/stockTransactionService";
 import { getAllSuppliers } from "../../services/supplierService";
 import { Loader } from "../../components/Loader";
 import { UNITIES } from "../../constants";
-import { ProductModal } from "../../components/ProductModal";
+import { StoreProductModal } from "../../components/StoreProductModal";
 import { SupplierModal } from "../../components/SupplierModal";
 import { ISupplier } from "../../interfaces/ISupplier";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
@@ -74,7 +74,7 @@ export function StockTransactionModal({
         
         debounceTimeout.current = setTimeout(async () => {
             if (text.length >= 2) {
-                const response = await searchProducts(text);
+                const response = await searchStoreProducts(text);
                 setProductSuggestions(response.data as any);
                 setShowSuggestions(true);
             }
@@ -378,10 +378,13 @@ export function StockTransactionModal({
                     </button>
                 </Form>
             </ModalContainer>
-            <ProductModal 
+            <StoreProductModal 
                 isOpen={productModal}
                 onRequestClose={() => setProductModal(false)}
-                loadData={() => {}}
+                loadData={async (storeId: string) => {
+                    // Não precisa fazer nada aqui pois produtos serão recarregados automaticamente
+                    // quando necessário nas páginas que listam produtos
+                }}
                 action={"create"}
                 currentProduct={{
                     id: "",

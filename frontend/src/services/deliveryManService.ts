@@ -1,12 +1,7 @@
-import { api } from "./api";
-const token = localStorage.getItem("token")?.replace(/"/g, '');
+import { api, getStoreId } from "./api";
 
 export const listDeliveryMen = async (page: number, pageSize: number, query: string) => {
-    const response = await api.get(`/deliveryMan/all?page=${page}&pageSize=${pageSize}&query=${query}`, {
-        headers: {
-            Authorization: `${token}`,
-        }
-    });
+    const response = await api.get(`/deliveryMan/all?page=${page}&pageSize=${pageSize}&query=${query}`);
     
     return response;
 };
@@ -24,11 +19,7 @@ export const getDeliveryManDetails = async (id: string, page?: number, pageSize?
         url += `?${params.toString()}`;
     }
     
-    const response = await api.get(url, {
-        headers: {
-            Authorization: `${token}`,
-        }
-    });
+    const response = await api.get(url);
     
     return response;
 };
@@ -44,13 +35,11 @@ export const createDeliveryMan = async ({
     name,
     phone_number,
 }: any) => {
+    const store_id = getStoreId();
     const response = await api.post("/deliveryMan", {
+        store_id,
         name,
         phone_number,
-    }, {
-        headers: {
-            Authorization: `${token}`,
-        }
     });
     
     return response;
@@ -64,21 +53,13 @@ export const updateDeliveryMan = async ({
     const response = await api.put(`/deliveryMan/${id}`, {
         name,
         phone_number,
-    }, {
-        headers: {
-            Authorization: `${token}`,
-        }
     });
     
     return response;
 };
 
 export const deleteDeliveryMan = async (id: string) => {
-    const response = await api.delete(`/deliveryMan/${id}`, {
-        headers: {
-            Authorization: `${token}`,
-        }
-    });
+    const response = await api.delete(`/deliveryMan/${id}`);
     
     return response;
 };
