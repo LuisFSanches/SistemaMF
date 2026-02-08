@@ -229,6 +229,7 @@ export const PreviewContent = styled.div<{ fontSize: number }>`
         white-space: pre-wrap;
         font-size: ${props => props.fontSize * 0.85}px;
         text-align: left;
+        line-height: 18px;
     }
 
     .card-from {
@@ -411,7 +412,7 @@ export const CardTo = styled.div<{ fontSize: number }>`
 
 export const CardMessage = styled.div<{ fontSize: number }>`
     font-size: ${props => props.fontSize}px;
-    line-height: 1.6;
+    line-height: 18px;
     white-space: pre-wrap;
     word-wrap: break-word;
     color: #000;
