@@ -10,7 +10,8 @@ import {
     InlineFormField,
     FormField,
     Switch,
-    StyledSwitch
+    StyledSwitch,
+    Textarea
 } from '../../styles/global';
 import { 
     ImagePreviewBox,
@@ -96,7 +97,7 @@ export function ProductModal({
     const fileInputRef3 = useRef<HTMLInputElement>(null);
     
     // Tabs state
-    const [activeTab, setActiveTab] = useState<'basic' | 'image' | 'categories'>('basic');
+    const [activeTab, setActiveTab] = useState<'basic' | 'image' | 'categories' | 'qrcode'>('basic');
     
     // Categories state
     const [allCategories, setAllCategories] = useState<ICategory[]>([]);
@@ -345,6 +346,7 @@ export function ProductModal({
                     stock: formData.stock,
                     enabled: formData.enabled,
                     visible_in_store: formData.visible_in_store,
+                    description: formData.description,
                 });
 
                 // Upload sequencial das imagens
@@ -397,6 +399,7 @@ export function ProductModal({
                     stock: formData.stock,
                     enabled: formData.enabled,
                     visible_in_store: formData.visible_in_store,
+                    description: formData.description,
                 });
 
                 // Upload sequencial das imagens
@@ -439,6 +442,7 @@ export function ProductModal({
         setValue("stock", currentProduct.stock);
         setValue("enabled", Boolean(currentProduct.enabled));
         setValue("visible_in_store", Boolean(currentProduct.visible_in_store));
+        setValue("description", currentProduct.description || "");
         
         // Carregar preview das 3 imagens
         if (currentProduct.image) {
@@ -553,6 +557,13 @@ export function ProductModal({
                             >
                                 Categorias
                             </TabButton>
+                            <TabButton 
+                                type="button"
+                                $active={activeTab === 'qrcode'} 
+                                onClick={() => setActiveTab('qrcode')}
+                            >
+                                QR Code
+                            </TabButton>
                         </TabsList>
 
                         {activeTab === 'basic' && (
@@ -580,6 +591,12 @@ export function ProductModal({
                                         {errors.stock && <ErrorMessage>{errors.stock.message}</ErrorMessage>}
                                     </FormField>
                                 </InlineFormField>
+                                <Textarea 
+                                    placeholder='Descrição do produto' 
+                                    rows={5}
+                                    {...register("description")}
+                                />
+                                {errors.description && <ErrorMessage>{errors.description.message}</ErrorMessage>}
                             </TabContent>
                         )}
 
@@ -733,39 +750,6 @@ export function ProductModal({
                                         )}
                                     </ImageSlot>
                                 </MultiImageGrid>
-
-                                {action === "edit" && currentProduct.qr_code && (
-                                    <QRCodeContainer>
-                                        <QRCodeTitle>
-                                            <FontAwesomeIcon icon={faQrcode as any} />
-                                            QR Code do Produto
-                                        </QRCodeTitle>
-                                        <QRCodeImageBox>
-                                            <img src={currentProduct.qr_code} alt={`QR Code - ${currentProduct.name}`} />
-                                        </QRCodeImageBox>
-                                        <QRCodeInfo>
-                                            Use este QR Code para adicionar o produto rapidamente ao pedido
-                                        </QRCodeInfo>
-                                        <QRCodeActions>
-                                            <QRCodeButton
-                                                type="button"
-                                                className="print"
-                                                onClick={handlePrintQRCode}
-                                            >
-                                                <FontAwesomeIcon icon={faPrint as any} />
-                                                Imprimir QR Code
-                                            </QRCodeButton>
-                                            <QRCodeButton
-                                                type="button"
-                                                className="download"
-                                                onClick={handleDownloadQRCode}
-                                            >
-                                                <FontAwesomeIcon icon={faDownload as any} />
-                                                Baixar QR Code
-                                            </QRCodeButton>
-                                        </QRCodeActions>
-                                    </QRCodeContainer>
-                                )}
                             </TabContent>
                         )}
 
@@ -819,6 +803,49 @@ export function ProductModal({
                                         </>
                                     )}
                                 </CategoriesContainer>
+                            </TabContent>
+                        )}
+
+                        {activeTab === 'qrcode' && (
+                            <TabContent>
+                                {action === "edit" && currentProduct.qr_code ? (
+                                    <QRCodeContainer>
+                                        <QRCodeTitle>
+                                            <FontAwesomeIcon icon={faQrcode as any} />
+                                            QR Code do Produto
+                                        </QRCodeTitle>
+                                        <QRCodeImageBox>
+                                            <img src={currentProduct.qr_code} alt={`QR Code - ${currentProduct.name}`} />
+                                        </QRCodeImageBox>
+                                        <QRCodeInfo>
+                                            Use este QR Code para adicionar o produto rapidamente ao pedido
+                                        </QRCodeInfo>
+                                        <QRCodeActions>
+                                            <QRCodeButton
+                                                type="button"
+                                                className="print"
+                                                onClick={handlePrintQRCode}
+                                            >
+                                                <FontAwesomeIcon icon={faPrint as any} />
+                                                Imprimir QR Code
+                                            </QRCodeButton>
+                                            <QRCodeButton
+                                                type="button"
+                                                className="download"
+                                                onClick={handleDownloadQRCode}
+                                            >
+                                                <FontAwesomeIcon icon={faDownload as any} />
+                                                Baixar QR Code
+                                            </QRCodeButton>
+                                        </QRCodeActions>
+                                    </QRCodeContainer>
+                                ) : (
+                                    <CategoriesLoadingMessage>
+                                        {action === "create" 
+                                            ? "O QR Code será gerado automaticamente após criar o produto" 
+                                            : "QR Code não disponível para este produto"}
+                                    </CategoriesLoadingMessage>
+                                )}
                             </TabContent>
                         )}
                     </TabsContainer>

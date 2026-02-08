@@ -1,24 +1,22 @@
 import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPen, faPlus, faQrcode, faDownload, faUpload, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faQrcode, faDownload, faUpload, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { PDFDocument, rgb } from 'pdf-lib';
 import { StoreProductModal } from "../../components/StoreProductModal";
+import { ProductItem } from "../../components/ProductItem";
 import { useProducts } from "../../contexts/ProductsContext";
 import { Pagination } from "../../components/Pagination";
 import { useAdminData } from "../../contexts/AuthContext";
 import { SuccessMessage } from "../../components/SuccessMessage";
 import { api } from "../../services/api";
 
-import { Container, ProductItem, ProductsContainer, ProductImage, SearchContainer, ActionButtons, ExcelButton } from "./style";
+import { Container, ProductsContainer, SearchContainer, ActionButtons, ExcelButton } from "./style";
 import { PageHeader, PageTitle } from "../../styles/global";
-import placeholder_products from '../../assets/images/placeholder_products.png';
 
 
 export function ProductsPage(){
     const { products, loadAvailableProducts, totalProducts, refreshProducts } = useProducts();
     const { adminData } = useAdminData();
-
-    console.log("ProductsPage adminData:", products);
     
     const [productModal, setProductModal] = useState(false);
     const [action, setAction] = useState("");
@@ -298,7 +296,7 @@ export function ProductsPage(){
                         className="download"
                     >
                         <FontAwesomeIcon icon={faDownload} />
-                        {downloading ? 'Baixando...' : 'Baixar Planilha'}
+                        {downloading ? 'Baixando...' : 'Baixar Planilha de Atualização'}
                     </ExcelButton>
                     <ExcelButton
                         type="button"
@@ -363,35 +361,11 @@ export function ProductsPage(){
             
             <ProductsContainer>
                 {products?.map((product: any) => (
-                    <ProductItem key={product.id} className={product.enabled ? "enabled" : "disabled"}>
-                        <ProductImage
-                            src={product.image ? product.image : placeholder_products}
-                            alt={product.name}
-                        />
-                        <div className="product-title">
-                            <h3>{product.name}</h3>
-                        </div>
-                        <div className="product-actions">
-                            <div className="product-info">
-                                <div className="product-status">
-                                    <span>
-                                        Preço: R$ {product.price}
-                                    </span>
-                                    <span>
-                                        Estoque: {product.stock} {product.unity}
-                                    </span>
-                                </div>
-                                <span> Status:
-                                    <strong className={product.enabled ? "enabled" : "disabled"}>
-                                        {product.enabled ? "Ativado" : "Desativado"}
-                                    </strong>
-                                </span>
-                            </div>
-                        <button onClick={() => handleOpenProductModal("edit", product)}>
-                            <FontAwesomeIcon icon={faPen}  className="product-action-icon edit" />
-                        </button>
-                    </div>
-                    </ProductItem>
+                    <ProductItem 
+                        key={product.id}
+                        product={product}
+                        onEdit={(product) => handleOpenProductModal("edit", product)}
+                    />
                 ))}
             </ProductsContainer>
             <Pagination

@@ -10,6 +10,41 @@ export interface ISchedule {
     updated_at: string;
 }
 
+export interface IStoreListItem {
+    id: string;
+    name: string;
+    slug: string;
+    is_active: boolean;
+    address?: string;
+    phone?: string;
+    email: string;
+    logo?: string;
+    whatsapp?: string;
+    created_at: string;
+    updated_at: string;
+    _count?: {
+        admins: number;
+        store_products: number;
+    };
+}
+
+export interface IStoreAddress {
+    id: string;
+    store_id: string;
+    street: string;
+    street_number: string;
+    complement?: string;
+    neighborhood: string;
+    reference_point?: string;
+    city: string;
+    state: string;
+    postal_code?: string;
+    country: string;
+    is_main: boolean;
+    created_at: Date;
+    updated_at: Date;
+}
+
 export interface IStore {
     id: string;
     name: string;
@@ -30,6 +65,7 @@ export interface IStore {
     is_active: boolean;
     is_first_access: boolean;
     logo?: string;
+    logo_base64?: string;
     banner?: string;
     banner_2?: string;
     banner_3?: string;
@@ -37,6 +73,7 @@ export interface IStore {
     instagram?: string;
     youtube?: string;
     schedules?: ISchedule[];
+    addresses?: IStoreAddress[];
     created_at: string;
     updated_at: string;
 }

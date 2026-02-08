@@ -4,7 +4,8 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 interface IStockTransaction {
-    product_id: string;
+    product_id?: string;
+    store_product_id?: string;
     supplier: string;
     unity: string;
     quantity: number;
@@ -15,7 +16,7 @@ interface IStockTransaction {
 }
 
 class CreateStockTransactionService {
-    async execute({ product_id, supplier, unity, quantity, unity_price, purchased_date, total_price, store_id }: IStockTransaction) {
+    async execute({ store_product_id, supplier, unity, quantity, unity_price, purchased_date, total_price, store_id }: IStockTransaction) {
         try {
             const formattedPurchasedDate = moment.utc(purchased_date)
                 .tz('America/Sao_Paulo', true)
@@ -43,7 +44,7 @@ class CreateStockTransactionService {
 
             const transaction = await prismaClient.stockTransaction.create({
                 data: {
-                    product_id,
+                    store_product_id,
                     supplier, // Manter para compatibilidade (deprecated)
                     supplier_id: supplierRecord.id, // Nova referência
                     unity,

@@ -1,22 +1,22 @@
 import { useContext, useEffect, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { AuthContext } from "../../contexts/AuthContext";
+import { AuthContext, useAdminData } from "../../contexts/AuthContext";
 import { Container,SideBarItemContainer, SideBarButton, CompanyInfoContainer, InternalContainer } from "./style";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faComputer,
     faRightFromBracket,
-    faGlobe,
-    faBagShopping,
     faReceipt,
     faHome,
     faWarehouse
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { NavLink} from 'react-router-dom'
+import helmet from '../../assets/icons/helmet.svg';
 
 export function SideBar(){
     const { handleSignOut } = useContext(AuthContext);
+    const { adminData } = useAdminData();
     const location = useLocation();
 
     const [isActive, setActive] = useState({
@@ -38,7 +38,9 @@ export function SideBar(){
         valoresAReceber: false,
         entregas: false,
         meusProdutos: false,
-        catalogoGeral: false
+        generalCatalog: false,
+        produtosPais: false,
+        motoboys: false
     })
     
     const handleActiveMenuButton = useCallback((name:string) => {
@@ -59,7 +61,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
             case 'pedidoBalcao':
@@ -78,7 +81,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
             case 'ordensDeServico':
@@ -99,7 +103,8 @@ export function SideBar(){
                     "aguardandoCliente": name === 'aguardandoCliente',
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
             case 'statistics':
@@ -118,7 +123,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -138,7 +144,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -158,7 +165,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -179,7 +187,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -200,13 +209,15 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
             case 'produtos':
             case 'meus-produtos':
             case 'catalogo-geral':
+            case 'produtos-pais':
                 setActive({...isActive, 
                     'dashboard':false,
                     'pedidoBalcao':false,
@@ -225,7 +236,9 @@ export function SideBar(){
                     "valoresAReceber": false,
                     "entregas": false,
                     "meusProdutos": false,
-                    "catalogoGeral": false
+                    "generalCatalog": false,
+                    "produtosPais": false,
+                    "motoboys": false
                 })
             break;
 
@@ -246,7 +259,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -267,7 +281,8 @@ export function SideBar(){
                     'pix': false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -288,7 +303,30 @@ export function SideBar(){
                     'pix': false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "entregas": true
+                    "entregas": true,
+                    "motoboys": false
+                })
+            break;
+
+            case 'motoboys':
+                setActive({...isActive,
+                    'valoresAReceber':false,
+                    'estoque':false,
+                    'dashboard':false,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'pedidosMenu': false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false,
+                    "entregas": false,
+                    "motoboys": true
                 })
             break;
         }
@@ -390,6 +428,13 @@ export function SideBar(){
                                 Catálogo Geral
                             </button>
                         </NavLink>
+                        {adminData.role === 'SYS_ADMIN' && (
+                            <NavLink to="/backoffice/produtos-pais">
+                                <button className="submenu-item" onClick={()=>handleActiveMenuButton('produtos-pais')}>
+                                    Produtos Pais (SYS_ADMIN)
+                                </button>
+                            </NavLink>
+                        )}
                     </div>
                 </SideBarItemContainer>
                 
@@ -430,6 +475,20 @@ export function SideBar(){
                         >
                             <i className="material-icons">account_balance_wallet</i>
                             <span>Ordens para receber</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
+                <NavLink to="/backoffice/motoboys">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('motoboys')}>
+                        <SideBarButton
+                            isActive={isActive['motoboys']}
+                            isMinimizedActive
+                            title="Motoboys"
+                        >
+                            <i>
+                                <img src={helmet} alt="Motoboys" style={{width: '20px', height: '20px'}}/>
+                            </i>
+                            <span>Motoboys</span>
                         </SideBarButton>
                     </SideBarItemContainer>
                 </NavLink>

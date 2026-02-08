@@ -54,6 +54,7 @@ class CreateOrderByAIController {
     handle = async (req: Request, res: Response, next: NextFunction) => {
         const data = req.body;
         const status = "OPENED";
+        const store_id = data.store_id ?? req.admin?.store_id;
 
         try {
             const aiIntegration = new AIIntegrationService();
@@ -97,10 +98,10 @@ class CreateOrderByAIController {
                 created_by: data.created_by,
                 online_order: true,
                 store_front_order: false,
-                products: data.products
+                products: data.products,
             }
 
-            const order = await this.orderFacade.createOrder(orderData);
+            const order = await this.orderFacade.createOrder(orderData, store_id as string);
             return res.json(order);
         } catch (error: any) {
             throw new BadRequestException(

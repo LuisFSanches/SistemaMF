@@ -30,6 +30,11 @@ export const FooterColumn = styled.div`
     display: flex;
     flex-direction: column;
     gap: 16px;
+
+    img {
+        max-width: 100px;
+        align-self: anchor-center;
+    }
 `;
 
 export const FooterTitle = styled.h3`

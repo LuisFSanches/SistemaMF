@@ -150,6 +150,7 @@ model StoreProduct {
 
   store      Store   @relation(fields: [store_id], references: [id], onDelete: Cascade)
   product    Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  stockTransactions StockTransaction[]
 
   orderItems OrderItem[]
 
@@ -224,7 +225,8 @@ model Order {
 
 model StockTransaction {
   id             String   @id @default(uuid())
-  product_id     String
+  product_id     String?
+  store_product_id String?
   store_id       String?
   supplier       String   // Nome do fornecedor (deprecated - usar supplier_id)
   supplier_id    String?
@@ -236,7 +238,8 @@ model StockTransaction {
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
 
-  product        Product  @relation(fields: [product_id], references: [id])
+  product        Product?  @relation(fields: [product_id], references: [id])
+  storeProduct  StoreProduct? @relation(fields: [store_product_id], references: [id])
   store          Store?    @relation(fields: [store_id], references: [id])
   supplierRelation Supplier? @relation(fields: [supplier_id], references: [id])
 

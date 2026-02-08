@@ -255,7 +255,12 @@ export function OrderCard({
 				</p>
 			</div>
 			<div className="order-card-container order-admin">
-				<p><strong>Status Pagamento: </strong>{order.payment_received ? "Pago" : "Pendente"}</p>
+				<p>
+					<strong>Status Pagamento: </strong>
+					<span className={`payment-status ${order.payment_received ? 'paid' : 'pending'}`}>
+						{order.payment_received ? "✓ Pago" : "⏳ Pendente"}
+					</span>
+				</p>
 				<p><strong>Responsável pelo Pedido: </strong>{order.createdBy?.name || "Próprio Cliente"}</p>
 			</div>
 			<div className="move-order">

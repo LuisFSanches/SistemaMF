@@ -3,14 +3,13 @@ import { GetAllProductService } from '../../services/product/GetAllProductServic
 
 class GetAllProductController{
 	async handle(req: Request, res: Response, next: NextFunction) {
+		console.log("Entrou no GetAllProductController");
 		const { page = '1', pageSize = '10', query = '' } = req.query;
-		const store_id = req.admin?.store_id || undefined;
 		const getAllProductService = new GetAllProductService();
 		const products = await getAllProductService.execute(
 			Number(page),
             Number(pageSize),
-            String(query),
-            store_id
+            String(query)
 		);
 
 		return res.json(products);

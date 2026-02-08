@@ -9,9 +9,11 @@ export const Container = styled.div`
     align-items: center;
     padding: 0 20px;
     box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.1);
+`;
 
+export const LogoContainer = styled.div`
     img {
-        width: 100px;
+        width: 80px;
         height: 50px;
     }
 `;

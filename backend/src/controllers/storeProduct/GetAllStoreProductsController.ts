@@ -19,7 +19,7 @@ class GetAllStoreProductsController {
             store_id,
             page: pageNumber,
             pageSize: pageSizeNumber,
-            query: searchQuery
+            query: searchQuery  
         });
 
         return res.json(result);

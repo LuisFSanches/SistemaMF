@@ -84,3 +84,17 @@ export const resetPasswordByEmail = async (email: string, new_password: string) 
 
 	return response;
 };
+
+// SYS_ADMIN: Listar todas as lojas
+export const listAllStores = async () => {
+	const response = await api.get("/admin/stores/all");
+	return response;
+};
+
+// SYS_ADMIN: Alternar para uma loja específica
+export const switchStore = async (store_id: string) => {
+	const response = await api.post("/admin/switch-store", {
+		store_id,
+	});
+	return response;
+};

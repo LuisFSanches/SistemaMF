@@ -145,7 +145,7 @@ export function StockTransactionModal({
             setShowLoader(true);
             const selectedSupplier = suppliers.find(s => s.id === formData.supplier_id);
             const data = {
-                product_id: selectedProduct.id,
+                store_product_id: selectedProduct.id,
                 supplier_id: formData.supplier_id,
                 supplier: selectedSupplier?.name || "",
                 unity: formData.unity,

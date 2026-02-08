@@ -37,7 +37,22 @@ class UpdateOrderStatusService{
 				},
 				include: {
 					client: true,
-          			clientAddress: true
+          			clientAddress: true,
+					createdBy: true,
+					orderItems: {
+						include: {
+							storeProduct: {
+								include: {
+									product: {
+										select: {
+											name: true,
+											image: true
+										}
+									}
+								}
+							}
+						}
+					}
 				}
 			})
 

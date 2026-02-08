@@ -35,8 +35,9 @@ const adminAuthMiddleware = async (req: Request, res: Response, next: NextFuncti
             return;
         }
 
-        if (!admin.store) {
+        if (!admin.store && admin.role !== 'SYS_ADMIN') {
             next(new UnauthorizedRequestException('Admin does not belong to any store', ErrorCodes.UNAUTHORIZED))
+            return;
         }
 
         // Verificar se a loja está ativa (se admin pertence a uma loja)
@@ -45,7 +46,21 @@ const adminAuthMiddleware = async (req: Request, res: Response, next: NextFuncti
             return;
         }
 
-        req.admin = admin;
+        if (admin?.role !== 'ADMIN' && admin?.role !== 'SYS_ADMIN' && admin?.role !== 'SUPER_ADMIN') {
+            next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
+            return;
+        }
+
+        // Se for SYS_ADMIN e o token tiver store_id, usar o store_id do token (após switch)
+        if (admin.role === 'SYS_ADMIN' && payload.store_id) {
+            req.admin = {
+                ...admin,
+                store_id: payload.store_id
+            };
+        } else {
+            req.admin = admin;
+        }
+        
         next();
     }
 

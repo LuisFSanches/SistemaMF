@@ -857,8 +857,8 @@ export default function StoreSettings() {
             <FormField>
                 <Label>Instagram</Label>
                 <Input 
-                    type="url" 
-                    placeholder="https://instagram.com/seu-perfil"
+                    type="text" 
+                    placeholder="seu-perfil"
                     {...registerSocial('instagram')}
                 />
                 <p style={{ color: 'var(--text-light)', fontSize: '0.85rem', marginTop: '0.25rem' }}>

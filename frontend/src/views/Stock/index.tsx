@@ -123,17 +123,17 @@ export function StockPage(){
                         <tr key={transaction.id}>
                             <td>
                                 <span 
-                                    onClick={() => navigate(`/backoffice/estoque/produto/${transaction.product?.id}`)}
+                                    onClick={() => navigate(`/backoffice/estoque/produto/${transaction.storeProduct?.id}`)}
                                     style={{ color: 'rgb(236, 72, 153)', fontWeight: 'bold', cursor: 'pointer' }}
                                 >
-                                    {transaction.product?.name}
+                                    {transaction.storeProduct?.product?.name}
                                 </span>
                             </td>
                             <td className="smallColumn">{transaction.quantity}</td>
                             <td className="smallColumn">{transaction.unity}</td>
                             <td>{convertMoney(transaction.unity_price)}</td>
                             <td>{convertMoney(transaction.total_price)}</td>
-                            <td>{convertMoney(transaction.product?.price as number)}</td>
+                            <td>{convertMoney(transaction.storeProduct?.price as number)}</td>
                             <td>{transaction.supplier}</td>
                             <td>{moment(transaction.purchased_date).format("DD/MM/YYYY")}</td>
                             <td className="delete-icon">

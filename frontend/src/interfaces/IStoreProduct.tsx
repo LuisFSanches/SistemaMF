@@ -1,3 +1,5 @@
+import { IProduct } from "./IProduct";
+
 export interface IStoreProduct {
     id?: string;
     name: string;
@@ -6,4 +8,5 @@ export interface IStoreProduct {
     stock: number;
     enabled: boolean;
     visible_for_online_store?: boolean;
+    product?: IProduct
 }

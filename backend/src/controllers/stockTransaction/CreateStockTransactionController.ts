@@ -4,12 +4,12 @@ import { CreateStockTransactionService } from "../../services/stockTransaction/C
 class CreateStockTransactionController {
     async handle(req: Request, res: Response, next: NextFunction) {
         const store_id = req.admin?.store_id || undefined;
-        const { product_id, supplier, unity, quantity, unity_price, purchased_date, total_price } = req.body;
+        const { store_product_id, supplier, unity, quantity, unity_price, purchased_date, total_price } = req.body;
 
         const createStockTransactionService = new CreateStockTransactionService();
 
         const transaction = await createStockTransactionService.execute({
-            product_id,
+            store_product_id,
             supplier,
             unity,
             quantity,

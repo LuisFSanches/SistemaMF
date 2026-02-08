@@ -48,4 +48,5 @@ export interface IOrderDetails {
         name: string
         username: string
     } | null
+    orderItems: any[]
 }

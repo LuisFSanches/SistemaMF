@@ -20,6 +20,12 @@ export const listProducts = async (page: number, pageSize: number, query: string
     return response;
 };
 
+export const getAvailableProductsForStore = async (page: number, pageSize: number, query: string) => {
+    const response = await api.get(`/product/available-for-store?page=${page}&pageSize=${pageSize}&query=${query}`);
+    
+    return response;
+};
+
 export const listStoreProducts = async (storeId: string, page: number, pageSize: number, query: string) => {
     const response = await api.get(`/store-product/all?store_id=${storeId}&page=${page}&pageSize=${pageSize}&query=${query}`);
     

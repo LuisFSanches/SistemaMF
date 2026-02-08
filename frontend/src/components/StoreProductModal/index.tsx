@@ -46,7 +46,6 @@ import { useProducts } from "../../contexts/ProductsContext";
 import { useAdminData } from "../../contexts/AuthContext";
 import { UNITIES } from "../../constants";
 import { Loader } from "../Loader";
-import { IStoreProduct } from "../../interfaces/IStoreProduct";
 import { ProductModal } from "../ProductModal";
 import placeholder_products from "../../assets/images/placeholder_products.png";
 
@@ -198,7 +197,7 @@ export function StoreProductModal({
         setIsProductModalOpen(false);
     };
 
-    const handleProduct = async (formData: IStoreProduct) => {
+    const handleProduct = async (formData: IProduct) => {
         setShowLoader(true);
         console.log('formData', formData); 
         try {
@@ -215,7 +214,7 @@ export function StoreProductModal({
                     price: parseFloat(formData.price as any) as number,
                     stock: parseFloat(formData.stock as any) as number,
                     enabled: formData.enabled,
-                    visible_for_online_store: formData.visible_for_online_store || false,
+                    visible_for_online_store: formData.visible_in_store ?? false,
                 });
 
                 addProduct(productData);
@@ -232,7 +231,7 @@ export function StoreProductModal({
                     price: parseFloat(formData.price as any) as number,
                     stock: formData.stock as number,
                     enabled: formData.enabled,
-                    visible_for_online_store: formData.visible_for_online_store || false,
+                    visible_for_online_store: formData.visible_in_store ?? false,
                 });
 
                 editProduct(productData);
@@ -461,7 +460,7 @@ export function StoreProductModal({
                                     placeholder='Unidade' 
                                     {...register("unity", { required: "Unidade invária" })} 
                                     style={{ height: "4rem" }}
-                                    disabled={action === "create"}
+                                    disabled={true}
                                 >
                                     <option value="">Selecione a unidade</option>
                                     {Object.entries(UNITIES).map(([key, value]) => (

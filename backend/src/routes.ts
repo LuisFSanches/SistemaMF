@@ -25,6 +25,7 @@ import { RemoveAllProductCategoriesController } from './controllers/productCateg
 
 import { CreateProductController } from './controllers/product/CreateProductController';
 import { GetAllProductController } from './controllers/product/GetAllProductController';
+import { GetAvailableProductsForStoreController } from './controllers/product/GetAvailableProductsForStoreController';
 import { GetProductByIdController } from './controllers/product/GetProductByIdController';
 import { UpdateProductController } from './controllers/product/UpdateProductController';
 import { SearchProductsController } from './controllers/product/SearchProductsController';
@@ -67,6 +68,8 @@ import { UpdateAdminEmailController } from './controllers/admin/UpdateAdminEmail
 import { RequestPasswordResetController } from './controllers/admin/RequestPasswordResetController';
 import { ResetPasswordController } from './controllers/admin/ResetPasswordController';
 import { ResetPasswordByEmailController } from './controllers/admin/ResetPasswordByEmailController';
+import { SwitchStoreController } from './controllers/admin/SwitchStoreController';
+import { GetAllStoresForSysAdminController } from './controllers/admin/GetAllStoresForSysAdminController';
 
 import { GetPixController } from './controllers/inter/GetPixController';
 // import { RegisterWebhookController } from './controllers/inter/RegisterWebhookController';
@@ -153,6 +156,7 @@ import { GetMercadoPagoPaymentStatusController } from './controllers/mercadoPago
 
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
+import sysAdminAuthMiddleware from './middlewares/sys_admin_auth';
 import { upload, uploadStore, uploadCategory, uploadExcel } from './config/multer';
 import { processImage } from './middlewares/process_image';
 import { handleMulterError } from './middlewares/multer_error';
@@ -210,6 +214,7 @@ router.delete('/order/:id', adminAuthMiddleware, new DeleteOrderController().han
 //-- ROTAS PRODUCT --
 router.post('/product', adminAuthMiddleware, new CreateProductController().handle)
 router.get('/product/all', adminAuthMiddleware, new GetAllProductController().handle)
+router.get('/product/available-for-store', adminAuthMiddleware, new GetAvailableProductsForStoreController().handle)
 router.get('/product/search', adminAuthMiddleware, new SearchProductsController().handle)
 router.get('/product/:id', adminAuthMiddleware, new GetProductByIdController().handle)
 router.put('/product/:id', adminAuthMiddleware, new UpdateProductController().handle)
@@ -253,6 +258,10 @@ router.post('/admin/password/reset', new ResetPasswordController().handle)
 
 //-- ROTAS DE RESET DE SENHA (SUPER_ADMIN) --
 router.put('/admin/password/reset-by-email', superAdminAuthMiddleware, new ResetPasswordByEmailController().handle)
+
+//-- ROTAS SYS_ADMIN (Sistema Multi-loja) --
+router.post('/admin/switch-store', sysAdminAuthMiddleware, new SwitchStoreController().handle)
+router.get('/admin/stores/all', sysAdminAuthMiddleware, new GetAllStoresForSysAdminController().handle)
 
 //-- ROTAS PIX --
 router.get('/pix', adminAuthMiddleware, new GetPixController().handle)

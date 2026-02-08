@@ -4,29 +4,33 @@ import { BadRequestException } from "../../exceptions/bad-request";
 import { IProductStockDetails, IStockTransactionDetails, IPriceHistory, IStockMetrics } from "../../interfaces/IProductStockDetails";
 
 class GetProductStockDetailsService {
-    async execute(product_id: string, store_id?: string): Promise<IProductStockDetails> {
+    async execute(store_product_id: string, store_id?: string): Promise<IProductStockDetails> {
         try {
-            // 1. Verificar se o produto existe e buscar informações básicas
-            const product = await prismaClient.product.findUnique({
-                where: { id: product_id },
+            // 1. Verificar se o store_product existe e buscar informações básicas
+            const storeProduct = await prismaClient.storeProduct.findUnique({
+                where: { id: store_product_id },
                 select: {
                     id: true,
-                    name: true,
-                    image: true,
                     stock: true,
-                    price: true
+                    price: true,
+                    product: {
+                        select: {
+                            name: true,
+                            image: true
+                        }
+                    }
                 }
             });
 
-            if (!product) {
+            if (!storeProduct) {
                 throw new BadRequestException(
-                    "Product not found",
+                    "Store product not found",
                     ErrorCodes.USER_NOT_FOUND
                 );
             }
 
-            // 2. Buscar todas as transações do produto
-            const whereClause: any = { product_id };
+            // 2. Buscar todas as transações do store_product
+            const whereClause: any = { store_product_id };
             if (store_id) {
                 whereClause.store_id = store_id;
             }
@@ -76,7 +80,7 @@ class GetProductStockDetailsService {
 
             const metrics: IStockMetrics = {
                 total_quantity_purchased: totalQuantityPurchased,
-                current_stock: product.stock,
+                current_stock: storeProduct.stock,
                 average_price: averagePrice,
                 last_purchase_date: lastPurchaseDate
             };
@@ -84,10 +88,10 @@ class GetProductStockDetailsService {
             // 6. Montar o objeto de retorno
             return {
                 product_info: {
-                    id: product.id,
-                    name: product.name,
-                    image: product.image,
-                    price: product.price
+                    id: storeProduct.id,
+                    name: storeProduct.product.name,
+                    image: storeProduct.product.image,
+                    price: storeProduct.price
                 },
                 transactions: formattedTransactions,
                 price_history: priceHistory,

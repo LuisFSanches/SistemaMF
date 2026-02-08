@@ -1035,7 +1035,7 @@ export function StoreOnboarding({ storeId, storeName, onComplete }: IStoreOnboar
                                     <FontAwesomeIcon icon={faUser} /> Instagram
                                 </label>
                                 <input
-                                    type="url"
+                                    type="text"
                                     placeholder="https://instagram.com/seu-perfil"
                                     value={socialMedia.instagram}
                                     onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}

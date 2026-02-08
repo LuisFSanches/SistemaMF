@@ -98,6 +98,7 @@ export const Orders = styled.div`
     grid-template-columns: 1fr 1fr 1fr;
     padding: 0.5rem 1rem;
     grid-gap: 2.1rem;
+    margin-bottom: 0.7rem;
 `
 export const Header = styled.div`
     display: flex;

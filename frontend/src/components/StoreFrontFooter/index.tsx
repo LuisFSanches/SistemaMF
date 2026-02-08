@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faPhone } from "@fortawesome/free-solid-svg-icons";
+import logo from "../../assets/images/logo.png";
 import {
     FooterContainer,
     FooterContent,
@@ -19,10 +20,10 @@ export function StoreFrontFooter() {
         <FooterContainer>
             <FooterContent>
                 <FooterColumn>
-                    <FooterTitle>Minhas Flores</FooterTitle>
+                    <img src={logo} alt="Minhas Flores Logo" />
                     <FooterDescription>
-                        Sistema completo de gestão para floriculturas e
-                        lojas de presentes. Desenvolvido por especialistas
+                        Sistema completo de gestão para floriculturas.
+                        Desenvolvido por especialistas
                         para o seu negócio.
                     </FooterDescription>
                 </FooterColumn>

@@ -36,7 +36,22 @@ class GetAllStockTransactionsService {
                 prismaClient.stockTransaction.findMany({
                     where: filters as any,
                     include: {
-                        product: true,
+                        product: {
+                            select: {
+                                name: true,
+                                image: true
+                            }
+                        },
+                        storeProduct: {
+                            include: {
+                                product: {
+                                    select: {
+                                        name: true,
+                                        image: true
+                                    }
+                                }
+                            }
+                        },
                         supplierRelation: true,
                     },
                     orderBy: {

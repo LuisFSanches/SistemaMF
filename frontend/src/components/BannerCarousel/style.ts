@@ -2,7 +2,9 @@ import styled from 'styled-components';
 
 export const BannerCarouselContainer = styled.div`
     width: 100%;
+    max-width: 1440px;
     height: 285px;
+    margin: 0 auto;
     position: relative;
     overflow: hidden;
 

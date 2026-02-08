@@ -5,10 +5,11 @@ import { SideBar } from "../../components/SideBar";
 import { Header } from "../../components/Header";
 import { OrderNotification } from '../../components/OrderNotification';
 import { StoreOnboarding } from '../../components/StoreOnboarding';
+import { StoreFrontFooter } from '../../components/StoreFrontFooter';
 import { AuthContext } from "../../contexts/AuthContext";
 
 export function SideBarLayout (){
-    const { needsOnboarding, storeData, adminData, refreshStoreData } = useContext(AuthContext);
+    const { needsOnboarding, storeData, refreshStoreData } = useContext(AuthContext);
 
     const handleOnboardingComplete = async () => {
         await refreshStoreData();
@@ -30,7 +31,7 @@ export function SideBarLayout (){
                 <Outlet/>
                 <OrderNotification/>
             </BodyContainer>
-            
+            <StoreFrontFooter/>
         </PageContainer>
     )
 }

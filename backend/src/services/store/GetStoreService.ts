@@ -2,6 +2,9 @@ import prismaClient from "../../prisma";
 import { BadRequestException } from "../../exceptions/bad-request";
 import { ErrorCodes } from "../../exceptions/root";
 import { maskPaymentCredentials } from "../../utils/maskSensitiveData";
+import fs from "fs";
+import path from "path";
+import { storesUploadDir } from "../../config/paths";
 
 interface IGetStore {
     id?: string;
@@ -9,6 +12,55 @@ interface IGetStore {
 }
 
 class GetStoreService {
+    private async convertLogoToBase64(logoUrl: string): Promise<string | null> {
+        try {
+            let logoBuffer: Buffer;
+            let logoExtension: string;
+
+            // Verificar se é uma URL (Cloudflare R2) ou caminho local
+            if (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) {
+                // Download da imagem do Cloudflare R2
+                const response = await fetch(logoUrl);
+                if (response.ok) {
+                    const arrayBuffer = await response.arrayBuffer();
+                    logoBuffer = Buffer.from(arrayBuffer);
+                    
+                    // Extrair extensão da URL
+                    const urlPath = new URL(logoUrl).pathname;
+                    logoExtension = path.extname(urlPath).toLowerCase();
+                } else {
+                    throw new Error(`Failed to fetch logo from URL: ${response.status}`);
+                }
+            } else {
+                // Caminho local
+                const logoPath = path.join(storesUploadDir, logoUrl);
+                if (fs.existsSync(logoPath)) {
+                    logoBuffer = fs.readFileSync(logoPath);
+                    logoExtension = path.extname(logoUrl).toLowerCase();
+                } else {
+                    throw new Error('Logo file not found locally');
+                }
+            }
+
+            // Determinar o tipo MIME
+            let mimeType = 'image/jpeg';
+            if (logoExtension === '.png') {
+                mimeType = 'image/png';
+            } else if (logoExtension === '.jpg' || logoExtension === '.jpeg') {
+                mimeType = 'image/jpeg';
+            } else if (logoExtension === '.webp') {
+                mimeType = 'image/webp';
+            } else if (logoExtension === '.gif') {
+                mimeType = 'image/gif';
+            }
+            
+            return `data:${mimeType};base64,${logoBuffer!.toString('base64')}`;
+        } catch (error) {
+            console.error("[GetStoreService] Failed to convert logo to base64:", error);
+            return null;
+        }
+    }
+
     async execute({ id, slug }: IGetStore) {
         if (!id && !slug) {
             throw new BadRequestException(
@@ -119,9 +171,13 @@ class GetStoreService {
                 inter_api_key_path: store.inter_api_key_path,
             });
 
+            // Converter logo para base64 se existir
+            const logoBase64 = store.logo ? await this.convertLogoToBase64(store.logo) : null;
+
             return {
                 ...store,
                 ...maskedCredentials,
+                logo_base64: logoBase64,
             };
         } catch (error: any) {
             console.error("[GetStoreService] Failed:", error);

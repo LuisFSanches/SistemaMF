@@ -19,7 +19,8 @@ import { WaitingClientOrders } from "./views/WaitingClientOrders";
 import { ProductsPage } from "./views/Products";
 import { StockPage } from "./views/Stock";
 import { ProductStockDetail } from "./views/ProductStockDetail";
-import { CatalogoGeral } from "./views/CatalogoGeral";
+import { GeneralCatalog } from "./views/GeneralCatalog";
+import { ParentProducts } from "./views/ParentProducts";
 import { OrdersToReceivePage } from "./views/OrdersToReceive";
 import { OrderDeliveriesPage } from "./views/OrderDeliveries";
 import { CompleteDelivery } from "./views/CompleteDelivery";
@@ -104,7 +105,12 @@ export default function routes(){
                         }/>
                         <Route path="/backoffice/catalogo-geral" element={
                             <PrivateRoute>
-                                <CatalogoGeral/>
+                                <GeneralCatalog/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/produtos-pais" element={
+                            <PrivateRoute>
+                                <ParentProducts/>
                             </PrivateRoute>
                         }/>
                         <Route path="/backoffice/estoque" element={

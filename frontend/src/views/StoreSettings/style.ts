@@ -70,7 +70,7 @@ export const Tab = styled.button<{ $active: boolean }>`
 export const TabContent = styled.div`
     background: var(--white-background);
     border-radius: 8px;
-    padding: 2rem;
+    padding: 1rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
     @media (max-width: 768px) {

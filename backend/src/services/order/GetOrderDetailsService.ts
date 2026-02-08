@@ -100,7 +100,8 @@ class GetOrderDetailsService {
                     id: order.createdBy.id,
                     name: order.createdBy.name,
                     username: order.createdBy.username
-                } : null
+                } : null,
+                orderItems: order.orderItems
             };
 
             return orderDetails;

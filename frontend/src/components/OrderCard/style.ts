@@ -197,6 +197,33 @@ export const OrderCardContainer= styled.div`
             padding: 8px;
             border-radius: 8px;
         }
+
+        &.order-admin {
+            display: block;
+            gap: 15px;
+
+            .payment-status {
+                display: inline-flex;
+                align-items: center;
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-weight: 700;
+                font-size: 14px;
+                margin-left: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                transition: all 0.3s ease;
+
+                &.paid {
+                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                    color: white;
+                }
+
+                &.pending {
+                    background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+                    color: white;
+                }
+            }
+        }
     }
 
     .value-container {

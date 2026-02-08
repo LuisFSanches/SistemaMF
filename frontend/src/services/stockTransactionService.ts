@@ -2,7 +2,7 @@ import { api, getStoreId } from "./api";
 import { IStockTransaction } from "../interfaces/IStockTransaction";
 
 export const createStockTransaction = async ({
-    product_id,
+    store_product_id,
     supplier,
     unity,
     quantity,
@@ -13,7 +13,7 @@ export const createStockTransaction = async ({
     const store_id = getStoreId();
     const response = await api.post("/stockTransaction", {
         store_id,
-        product_id,
+        store_product_id,
         supplier,
         unity,
         quantity: Number(quantity),

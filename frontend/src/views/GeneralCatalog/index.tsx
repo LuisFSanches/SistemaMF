@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faSearch, faDownload, faUpload } from "@fortawesome/free-solid-svg-icons";
-import { listProducts } from "../../services/productService";
+import { getAvailableProductsForStore } from "../../services/productService";
 import { createStoreProduct } from "../../services/storeProductService";
 import { Pagination } from "../../components/Pagination";
 import { useAdminData } from "../../contexts/AuthContext";
@@ -40,7 +40,7 @@ interface IProductSelection {
     selected: boolean;
 }
 
-export function CatalogoGeral() {
+export function GeneralCatalog() {
     const { adminData } = useAdminData();
     const { refreshProducts } = useProducts();
     const [products, setProducts] = useState<IProductSelection[]>([]);
@@ -64,7 +64,7 @@ export function CatalogoGeral() {
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const response = await listProducts(page, pageSize, query);
+            const response = await getAvailableProductsForStore(page, pageSize, query);
             
             const productsWithSelection = response.data.products.map((product: any) => ({
                 id: product.id,
@@ -79,7 +79,7 @@ export function CatalogoGeral() {
             setTotalProducts(response.data.total);
         } catch (error) {
             console.error("Erro ao buscar produtos:", error);
-            alert("Erro ao carregar produtos do catálogo.");
+            alert("Erro ao carregar produtos disponíveis para adicionar à loja.");
         } finally {
             setLoading(false);
         }
@@ -306,7 +306,7 @@ export function CatalogoGeral() {
             <PageHeader>
                 <PageTitle>
                     <h1>Catálogo Geral de Produtos</h1>
-                    <p>Selecione produtos do catálogo para adicionar à sua loja</p>
+                    <p>Selecione produtos disponíveis para adicionar à sua loja</p>
                 </PageTitle>
                 <HeaderActions>
                     <ExcelButton
@@ -316,7 +316,7 @@ export function CatalogoGeral() {
                         className="download"
                     >
                         <FontAwesomeIcon icon={faDownload} />
-                        {downloading ? 'Baixando...' : 'Baixar Planilha'}
+                        {downloading ? 'Baixando...' : 'Baixar Planilha de importação'}
                     </ExcelButton>
                     <ExcelButton
                         type="button"
@@ -386,7 +386,7 @@ export function CatalogoGeral() {
 
                     {products.length === 0 ? (
                         <EmptyState>
-                            Nenhum produto encontrado no catálogo
+                            Nenhum produto disponível para adicionar à sua loja
                         </EmptyState>
                     ) : (
                         <ProductsGrid>

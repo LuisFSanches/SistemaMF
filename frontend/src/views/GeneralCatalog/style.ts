@@ -30,26 +30,26 @@ export const ExcelButton = styled.button`
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
+    color: #323332;
+    border: 1px solid #B5B5B5;
 
     &.download {
-        background: var(--primary-color);
-        color: white;
-
         &:hover:not(:disabled) {
             opacity: 0.9;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+            background: var(--primary-color);
+            color: white;
         }
     }
 
     &.upload {
-        background: #10b981;
-        color: white;
-
         &:hover:not(:disabled) {
             opacity: 0.9;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            background: #10b981;
+            color: white;
         }
     }
 

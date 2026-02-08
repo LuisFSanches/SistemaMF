@@ -4,7 +4,8 @@ import { createContext, ReactNode, useEffect, useState, useContext } from "react
 import { api } from "../services/api";
 import { authenticateUser } from "../services/authenticationService";
 import { getStoreById } from "../services/storeService";
-import { IStore } from "../interfaces/IStore";
+import { listAllStores, switchStore as switchStoreService } from "../services/adminService";
+import { IStore, IStoreListItem } from "../interfaces/IStore";
 
 interface IAuthContextData {
   isAuthenticated: boolean;
@@ -18,9 +19,13 @@ interface IAuthContextData {
   };
   storeData: IStore | null;
   needsOnboarding: boolean;
+  availableStores: IStoreListItem[];
+  loadingStores: boolean;
   handleLogin: (username: string, password: string) => Promise<any>;
   handleSignOut: () => void;
   refreshStoreData: () => Promise<void>;
+  loadAvailableStores: () => Promise<void>;
+  handleSwitchStore: (storeId: string) => Promise<void>;
 }
 
 interface IAuthProviderProps {
@@ -34,6 +39,8 @@ export function AuthProvider({ children }: IAuthProviderProps) {
   const [loading, setLoading] = useState(true);
   const [storeData, setStoreData] = useState<IStore | null>(null);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  const [availableStores, setAvailableStores] = useState<IStoreListItem[]>([]);
+  const [loadingStores, setLoadingStores] = useState(false);
   const [adminData, setAdminData] = useState({
     id: "",
     username: "",
@@ -56,6 +63,53 @@ export function AuthProvider({ children }: IAuthProviderProps) {
   const refreshStoreData = async () => {
     if (adminData.store_id) {
       await fetchStoreData(adminData.store_id);
+    }
+  };
+
+  const loadAvailableStores = async () => {
+    setLoadingStores(true);
+    try {
+      const response = await listAllStores();
+      setAvailableStores(response.data);
+    } catch (error) {
+      console.error("Error loading stores:", error);
+    } finally {
+      setLoadingStores(false);
+    }
+  };
+
+  const handleSwitchStore = async (storeId: string) => {
+    setLoadingStores(true);
+    try {
+      const response = await switchStoreService(storeId);
+      const { admin: adminResponse, token: newToken } = response.data;
+
+      const newAdminData = {
+        id: adminResponse.id,
+        username: adminResponse.username,
+        role: adminResponse.role,
+        name: adminResponse.name,
+        store_id: adminResponse.store_id || null
+      };
+
+      setAdminData(newAdminData);
+      localStorage.setItem("adminData", JSON.stringify(newAdminData));
+      localStorage.setItem("token", newToken);
+
+      // Atualizar dados da loja
+      if (adminResponse.store) {
+        setStoreData(adminResponse.store);
+        setNeedsOnboarding(adminResponse.store.is_first_access);
+        localStorage.setItem("storeData", JSON.stringify(adminResponse.store));
+      }
+
+      // Recarregar a página para aplicar as mudanças
+      window.location.reload();
+    } catch (error) {
+      console.error("Error switching store:", error);
+      throw error;
+    } finally {
+      setLoadingStores(false);
     }
   };
 
@@ -94,6 +148,11 @@ export function AuthProvider({ children }: IAuthProviderProps) {
         await fetchStoreData(adminData.store_id);
       }
 
+      // Se for SYS_ADMIN, carregar lista de lojas
+      if (adminData.role === 'SYS_ADMIN') {
+        await loadAvailableStores();
+      }
+
       window.location.reload();
 
       return response;
@@ -106,6 +165,7 @@ export function AuthProvider({ children }: IAuthProviderProps) {
     setAuthenticated(false);
     setStoreData(null);
     setNeedsOnboarding(false);
+    setAvailableStores([]);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("adminData");
@@ -132,6 +192,11 @@ export function AuthProvider({ children }: IAuthProviderProps) {
         if (admin.store_id && token) {
           fetchStoreData(admin.store_id);
         }
+
+        // Se for SYS_ADMIN, carregar lista de lojas
+        if (admin.role === 'SYS_ADMIN') {
+          loadAvailableStores();
+        }
       } catch (error) {
         console.error("Error parsing adminData:", error);
         // Limpar dados inválidos
@@ -142,6 +207,7 @@ export function AuthProvider({ children }: IAuthProviderProps) {
     if (storedStoreData) {
       try {
         const store = JSON.parse(storedStoreData);
+        console.log("Loaded store from localStorage:", store);
         setStoreData(store);
         setNeedsOnboarding(store.is_first_access);
       } catch (error) {
@@ -161,9 +227,13 @@ export function AuthProvider({ children }: IAuthProviderProps) {
         adminData,
         storeData,
         needsOnboarding,
+        availableStores,
+        loadingStores,
         handleLogin,
         handleSignOut,
         refreshStoreData,
+        loadAvailableStores,
+        handleSwitchStore,
       }}
     >
       {children}
