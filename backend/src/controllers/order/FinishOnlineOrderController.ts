@@ -15,7 +15,7 @@ class FinishOnlineOrderController{
 
         const getOrder = new GetCompleteOrderService();
 
-        const orderFound = await getOrder.execute(order.id);
+        const orderFound = await getOrder.execute(order.id, order.store_id);
 
         if ('error' in orderFound) {
             return res.status(400).json(orderFound);
@@ -59,7 +59,7 @@ class FinishOnlineOrderController{
             online_code: order.online_code
         }
 
-        const data = await finishOrderService.execute(orderData);
+        const data = await finishOrderService.execute(orderData, order.store_id);
 
         const updateClientService = new UpdateClientService();
         await updateClientService.execute({

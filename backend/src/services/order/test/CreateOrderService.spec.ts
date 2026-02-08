@@ -28,6 +28,7 @@ describe('CreateOrderService', () => {
     });
 
     it('should create an order successfully', async () => {
+        const store_id = 'store-123';
         const mockOrderData = {
             description: "Order description",
             additional_information: "Additional information",
@@ -68,6 +69,7 @@ describe('CreateOrderService', () => {
         const mockCreatedOrder = {
             id: "abc123",
             code: 1001,
+            store_id,
             ...mockOrderData,
             delivery_date: new Date('2023-08-01T15:00:00.000Z'),
             created_at: new Date('2023-08-01T10:00:00.000Z'),
@@ -101,25 +103,41 @@ describe('CreateOrderService', () => {
             }
         };
 
+        // Mock da busca pelo último código
+        (prismaClient as DeepMockProxy<PrismaClient>).order.findFirst.mockResolvedValue({
+            code: 1000
+        } as any);
+
         (prismaClient as DeepMockProxy<PrismaClient>).order.create.mockResolvedValue(mockCreatedOrder);
 
-        const result = await createOrderService.execute(mockOrderData, mockProducts);
+        const result = await createOrderService.execute(mockOrderData, mockProducts, store_id);
+
+        // Verifica se buscou o último código para o store correto
+        expect(prismaClient.order.findFirst).toHaveBeenCalledWith({
+            where: { store_id },
+            orderBy: { code: 'desc' },
+            select: { code: true }
+        });
 
         expect(prismaClient.order.create).toHaveBeenCalledWith({
             data: {
                 ...mockOrderData,
+                code: 1001,
+                store_id,
                 delivery_date: new Date('2023-08-01T15:00:00.000Z'),
                 orderItems: {
                     create: [
                         {
                             product_id: '456',
                             quantity: 2,
-                            price: 10.99
+                            price: 10.99,
+                            store_id
                         },
                         {
                             product_id: '789',
                             quantity: 1,
-                            price: 25.50
+                            price: 25.50,
+                            store_id
                         }
                     ]
                 }
@@ -130,5 +148,56 @@ describe('CreateOrderService', () => {
             }
         });
         expect(result).toEqual(mockCreatedOrder);
+    });
+
+    it('should start code at 1 for a new store with no previous orders', async () => {
+        const store_id = 'new-store-123';
+        const mockOrderData = {
+            description: "First order",
+            client_id: '123',
+            client_address_id: '456',
+            products_value: 50.00,
+            delivery_fee: 10.00,
+            discount: 0,
+            total: 60.00,
+            delivery_date: "2023-08-01T12:00:00.000Z",
+        };
+
+        const mockProducts = [
+            {
+                id: '456',
+                quantity: 1,
+                price: 50.00
+            }
+        ];
+
+        const mockCreatedOrder = {
+            id: "new-order-123",
+            code: 1,
+            store_id,
+            ...mockOrderData,
+            delivery_date: new Date('2023-08-01T15:00:00.000Z'),
+            created_at: new Date('2023-08-01T10:00:00.000Z'),
+            updated_at: new Date('2023-08-01T10:00:00.000Z'),
+            client: {} as any,
+            clientAddress: {} as any
+        };
+
+        // Mock retornando null (nenhum pedido anterior)
+        (prismaClient as DeepMockProxy<PrismaClient>).order.findFirst.mockResolvedValue(null);
+        (prismaClient as DeepMockProxy<PrismaClient>).order.create.mockResolvedValue(mockCreatedOrder);
+
+        const result = await createOrderService.execute(mockOrderData, mockProducts, store_id);
+
+        // Verifica se o código foi definido como 1
+        expect(prismaClient.order.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    code: 1,
+                    store_id
+                })
+            })
+        );
+        expect(result.code).toBe(1);
     });
 });

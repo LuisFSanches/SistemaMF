@@ -4,6 +4,7 @@ import moment from 'moment-timezone';
 
 class CreateOrderToReceiveController {
     async handle(req: Request, res: Response, next: NextFunction) {
+        const store_id = req.admin?.store_id || undefined;
         const { order_id, payment_due_date, received_date, type, is_archived } = req.body;
 
         const createOrderToReceiveService = new CreateOrderToReceiveService();
@@ -26,7 +27,7 @@ class CreateOrderToReceiveController {
             received_date: formattedReceivedDate,
             type,
             is_archived
-        });
+        }, store_id);
         
         return res.json(orderToReceive);
     }

@@ -84,7 +84,7 @@ import {
     PrimaryButton
 } from "../../styles/global";
 
-import { ProductModal } from "../../components/ProductModal";
+import { StoreProductModal } from "../../components/StoreProductModal";
 import { CompletedOrderModal } from "../../components/CompletedOrderModal";
 import { Loader } from '../../components/Loader';
 import { getClientByPhone } from "../../services/clientService";
@@ -96,6 +96,7 @@ import { PAYMENT_METHODS, STATES } from "../../constants";
 import { useOrders } from "../../contexts/OrdersContext";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { useProducts } from "../../contexts/ProductsContext";
+import { useAdminData } from "../../contexts/AuthContext";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import placeholder_products from '../../assets/images/placeholder_products.png';
 
@@ -142,6 +143,7 @@ export function OnStoreOrder() {
     const { admins } = useAdmins();
     const { products: availableProducts, loadAvailableProducts, totalProducts, refreshProducts } = useProducts();
     const { showSuccess } = useSuccessMessage();
+    const { adminData } = useAdminData();
 
     const [step, setStep] = useState(1);
     const [client_id, setClientId] = useState("");
@@ -583,16 +585,19 @@ export function OnStoreOrder() {
 
     useEffect(() => {
         // Verifica se já está no step 1 (produtos) antes de carregar
-        if (step === 1) {
+        if (step === 1 && adminData.store_id) { 
             setShowLoader(true);
             setTimeout(() => {
-                loadAvailableProducts(page, pageSize, query).then(() => {
+                loadAvailableProducts(adminData.store_id!, page, pageSize, query).then(() => {
                     setShowLoader(false);
-                });
+                }).catch(() => {
+                    setShowLoader(false);
+                });;
+                setShowLoader(false);
             }, 120);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, pageSize, query, step]);
+    }, [page, pageSize, query, step, adminData.store_id]);
 
     useEffect(() => {
         if (is_delivery) {
@@ -618,10 +623,10 @@ export function OnStoreOrder() {
     return(
         <Container>
             {/* Modals */}
-            <ProductModal 
+            <StoreProductModal 
                 isOpen={productModal}
                 onRequestClose={handleCloseProductModal}
-                loadData={refreshProducts}
+                loadData={(storeId) => refreshProducts(storeId)}
                 action={"create"}
                 currentProduct={{
                     id: "",
@@ -732,7 +737,7 @@ export function OnStoreOrder() {
                             </SearchButton>
                         </SearchContainer>
                         <ProductList>
-                            {availableProducts.map((product: any) => (
+                            {availableProducts?.map((product: any) => (
                                 <ProductCard
                                     key={product.id}
                                     product={product}

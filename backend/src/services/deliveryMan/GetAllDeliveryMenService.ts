@@ -3,17 +3,22 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllDeliveryMenService {
-    async execute(page: number = 1, pageSize: number = 10, query?: string) {
+    async execute(page: number = 1, pageSize: number = 10, query?: string, store_id?: string) {
         try {
             const skip = (page - 1) * pageSize;
-            const filters = query
-                ? {
-                    OR: [
-                        { name: { contains: query, mode: 'insensitive' } },
-                        { phone_number: { contains: query, mode: 'insensitive' } }
-                    ]
-                }
-                : {};
+            let filters: any = {};
+
+            // Filtro por loja (multi-tenancy)
+            if (store_id) {
+                filters.store_id = store_id;
+            }
+
+            if (query) {
+                filters.OR = [
+                    { name: { contains: query, mode: 'insensitive' } },
+                    { phone_number: { contains: query, mode: 'insensitive' } }
+                ];
+            }
 
             const [deliveryMen, total] = await Promise.all([
                 prismaClient.deliveryMan.findMany({

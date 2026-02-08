@@ -13,17 +13,33 @@ dotenv.config();
 import { router } from './routes';
 import { errorMiddleware } from './middlewares/errors';
 
+// Eventos agora emitem para rooms específicas por store_id
 orderEmitter.on(OrderEvents.WhatsappOrderReceived, (data) => {
-  io.emit(OrderEvents.WhatsappOrderReceived, data);
-
+  const storeId = data?.store_id;
+  if (storeId) {
+    io.to(`store_${storeId}`).emit(OrderEvents.WhatsappOrderReceived, data);
+  } else {
+    // Fallback: broadcast global se não houver store_id
+    io.emit(OrderEvents.WhatsappOrderReceived, data);
+  }
 });
 
 orderEmitter.on(OrderEvents.StoreFrontOderReceived, (data) => {
-  io.emit(OrderEvents.StoreFrontOderReceived, data);
+  const storeId = data?.store_id;
+  if (storeId) {
+    io.to(`store_${storeId}`).emit(OrderEvents.StoreFrontOderReceived, data);
+  } else {
+    io.emit(OrderEvents.StoreFrontOderReceived, data);
+  }
 });
 
 orderEmitter.on(OrderEvents.orderDelivered, (data) => {
-  io.emit(OrderEvents.orderDelivered, data);
+  const storeId = data?.order?.store_id;
+  if (storeId) {
+    io.to(`store_${storeId}`).emit(OrderEvents.orderDelivered, data);
+  } else {
+    io.emit(OrderEvents.orderDelivered, data);
+  }
 });
 
 const app = express();
@@ -69,9 +85,27 @@ export const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-  console.log('Novo cliente conectado:', socket.id);
+  console.log(`[Socket] Cliente conectado: ${socket.id}`);
+
+  // Cliente deve enviar o store_id para entrar na room correta
+  socket.on('joinStore', (storeId: string) => {
+    if (storeId) {
+      const roomName = `store_${storeId}`;
+      socket.join(roomName);
+      console.log(`[Socket] Cliente ${socket.id} entrou na room: ${roomName}`);
+    }
+  });
+
+  // Permite sair de uma room específica
+  socket.on('leaveStore', (storeId: string) => {
+    if (storeId) {
+      const roomName = `store_${storeId}`;
+      socket.leave(roomName);
+      console.log(`[Socket] Cliente ${socket.id} saiu da room: ${roomName}`);
+    }
+  });
 
   socket.on('disconnect', () => {
-    console.log('WS desconectado:', socket.id);
+    console.log(`[Socket] Cliente desconectado: ${socket.id}`);
   });
 });

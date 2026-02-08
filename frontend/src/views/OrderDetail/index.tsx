@@ -17,12 +17,14 @@ import {
     faCreditCard,
     faEnvelope,
     faShoppingBag,
-    faGifts
+    faGifts,
+    faPen
 } from "@fortawesome/free-solid-svg-icons";
 import { getOrderById } from "../../services/orderService";
 import { convertMoney, formatTitleCase, formatTelephone, formatDescriptionWithPrice } from "../../utils";
 import { Loader } from "../../components/Loader";
 import { PrintCardMessage } from "../../components/PrintCardMessage";
+import { EditOrderModal } from "../../components/EditOrderModal";
 import { STATUS_LABEL, PAYMENT_METHODS } from "../../constants";
 import {
     Container,
@@ -32,7 +34,8 @@ import {
     InfoSection,
     StatusBadge,
     EmptyState,
-    InfoSectionDetail
+    InfoSectionDetail,
+    PrintCardButton
 } from "./style";
 
 moment.locale('pt-br');
@@ -94,6 +97,9 @@ export function OrderDetail() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [orderData, setOrderData] = useState<IOrderDetail | null>(null);
+    const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [orderForEdit, setOrderForEdit] = useState<any>(null);
 
     useEffect(() => {
         const fetchOrderData = async () => {
@@ -101,6 +107,44 @@ export function OrderDetail() {
                 setLoading(true);
                 const response = await getOrderById(id as string);
                 setOrderData(response.data);
+                
+                // Estrutura o objeto de pedido completo para o modal de edição
+                const fullOrder = {
+                    id: id,
+                    code: response.data.orderInfo.code,
+                    description: response.data.orderInfo.description,
+                    additional_information: response.data.orderInfo.additional_information,
+                    delivery_date: response.data.orderInfo.delivery_date,
+                    is_delivery: response.data.orderInfo.is_delivery,
+                    online_order: response.data.orderInfo.online_order,
+                    store_front_order: response.data.orderInfo.store_front_order,
+                    status: response.data.orderInfo.status,
+                    client_id: response.data.clientInfo.id,
+                    client: {
+                        id: response.data.clientInfo.id,
+                        first_name: response.data.clientInfo.first_name,
+                        last_name: response.data.clientInfo.last_name,
+                        phone_number: response.data.clientInfo.phone_number,
+                    },
+                    clientAddress: response.data.clientInfo.address || {},
+                    client_address_id: response.data.clientInfo.address?.id,
+                    receiver_name: response.data.orderInfo.receiver_name,
+                    receiver_phone: response.data.orderInfo.receiver_phone,
+                    products_value: response.data.orderValues.products_value,
+                    discount: response.data.orderValues.discount,
+                    delivery_fee: response.data.orderValues.delivery_fee,
+                    total: response.data.orderValues.total,
+                    payment_method: response.data.orderValues.payment_method,
+                    payment_received: response.data.orderValues.payment_received,
+                    has_card: response.data.cardDetails ? true : false,
+                    card_message: response.data.cardDetails?.card_message,
+                    card_from: response.data.cardDetails?.card_from,
+                    card_to: response.data.cardDetails?.card_to,
+                    pickup_on_store: !response.data.orderInfo.is_delivery,
+                    orderItems: response.data.orderItems || []
+                };
+                
+                setOrderForEdit(fullOrder);
             } catch (error) {
                 console.error("Error fetching order data:", error);
             } finally {
@@ -174,6 +218,13 @@ export function OrderDetail() {
                             </p>
                         </div>
                     </div>
+                    <button 
+                        className="edit-button"
+                        onClick={() => setIsEditModalOpen(true)}
+                    >
+                        <FontAwesomeIcon icon={faPen} />
+                        Editar
+                    </button>
                 </div>
             </Header>
 
@@ -354,12 +405,6 @@ export function OrderDetail() {
                         <FontAwesomeIcon icon={faEnvelope} />
                         Mensagem do Cartão
                     </h2>
-                    <PrintCardMessage
-                        card_message={cardDetails.card_message}
-                        card_from={cardDetails.card_from}
-                        card_to={cardDetails.card_to}
-                        order_code={orderInfo.code}
-                    />
                     <div className="card-message-block">
                         <div className="card-header">Mensagem:</div>
                         <div className="card-message">"{cardDetails.card_message}"</div>
@@ -368,7 +413,79 @@ export function OrderDetail() {
                             <div>Para: <span>{cardDetails.card_to}</span></div>
                         </div>
                     </div>
+                    <PrintCardButton onClick={() => setIsCardModalOpen(true)}>
+                        <FontAwesomeIcon icon={faEnvelope} />
+                        Imprimir Cartão
+                    </PrintCardButton>
+
+                    <PrintCardMessage
+                        card_message={cardDetails.card_message}
+                        card_from={cardDetails.card_from}
+                        card_to={cardDetails.card_to}
+                        order_code={orderInfo.code.toString()}
+                        isOpen={isCardModalOpen}
+                        onRequestClose={() => setIsCardModalOpen(false)}
+                    />
                 </InfoSection>
+            )}
+
+            {orderForEdit && (
+                <EditOrderModal
+                    isOpen={isEditModalOpen}
+                    onRequestClose={() => {
+                        setIsEditModalOpen(false);
+                        if (id) {
+                            const fetchOrderData = async () => {
+                                try {
+                                    const response = await getOrderById(id as string);
+                                    setOrderData(response.data);
+                                    
+                                    // Reconstrói o objeto fullOrder
+                                    const fullOrder = {
+                                        id: id,
+                                        code: response.data.orderInfo.code,
+                                        description: response.data.orderInfo.description,
+                                        additional_information: response.data.orderInfo.additional_information,
+                                        delivery_date: response.data.orderInfo.delivery_date,
+                                        is_delivery: response.data.orderInfo.is_delivery,
+                                        online_order: response.data.orderInfo.online_order,
+                                        store_front_order: response.data.orderInfo.store_front_order,
+                                        status: response.data.orderInfo.status,
+                                        client_id: response.data.clientInfo.id,
+                                        client: {
+                                            id: response.data.clientInfo.id,
+                                            first_name: response.data.clientInfo.first_name,
+                                            last_name: response.data.clientInfo.last_name,
+                                            phone_number: response.data.clientInfo.phone_number,
+                                        },
+                                        clientAddress: response.data.clientInfo.address || {},
+                                        client_address_id: response.data.clientInfo.address?.id,
+                                        receiver_name: response.data.orderInfo.receiver_name,
+                                        receiver_phone: response.data.orderInfo.receiver_phone,
+                                        products_value: response.data.orderValues.products_value,
+                                        discount: response.data.orderValues.discount,
+                                        delivery_fee: response.data.orderValues.delivery_fee,
+                                        total: response.data.orderValues.total,
+                                        payment_method: response.data.orderValues.payment_method,
+                                        payment_received: response.data.orderValues.payment_received,
+                                        has_card: response.data.cardDetails ? true : false,
+                                        card_message: response.data.cardDetails?.card_message,
+                                        card_from: response.data.cardDetails?.card_from,
+                                        card_to: response.data.cardDetails?.card_to,
+                                        pickup_on_store: !response.data.orderInfo.is_delivery,
+                                        orderItems: response.data.orderItems || []
+                                    };
+                                    
+                                    setOrderForEdit(fullOrder);
+                                } catch (error) {
+                                    console.error("Error fetching order data:", error);
+                                }
+                            };
+                            fetchOrderData();
+                        }
+                    }}
+                    order={orderForEdit}
+                />
             )}
         </Container>
     );

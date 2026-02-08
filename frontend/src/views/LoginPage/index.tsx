@@ -97,8 +97,11 @@ export function LoginPage(){
 
                     <button onClick={() => { }}>Entrar</button>
                 </form>
-                <Link to="">
+                <Link to="/esqueci-senha">
                     Esqueceu sua senha?
+                </Link>
+                <Link to="/cadastro">
+                    Não tem uma loja? Cadastre-se
                 </Link>
                 <div className="empty">
                     <h1>vazia</h1>

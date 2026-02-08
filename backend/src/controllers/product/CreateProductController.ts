@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { CreateProductService } from '../../services/product/CreateProductService';
-import { BadRequestException } from '../../exceptions/bad-request';
 
 export class CreateProductController {
     async handle(req: Request, res: Response, next: NextFunction) {

@@ -141,6 +141,7 @@ export function NewOrderDeliveryModal({ isOpen, onRequestClose, action, currentO
             if (action === "create") {
                 await createOrderDelivery({
                     order_id: selectedOrder!.id!,
+                    store_id: selectedOrder!.store_id,
                     ...data
                 });
 

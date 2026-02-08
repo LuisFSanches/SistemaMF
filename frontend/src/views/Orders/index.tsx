@@ -28,10 +28,6 @@ export function OrdersPage(){
     const [endDate, setEndDate] = useState<string | null>(null);
     const pageSize = 15;
 
-    function handleOpenOrderDetailModal(order: IOrder){
-        setOrderDetailModal(true);
-        setCurrentOrder(order);
-    }
     function handleCloseOrderDetailModal(){
         setOrderDetailModal(false);
     }
@@ -131,14 +127,14 @@ export function OrdersPage(){
                                     <button className="edit-button" onClick={() => handleOpenEditOrderModal(order)}>
                                         <FontAwesomeIcon icon={faPen}/>
                                     </button>
-                                    <button className="view-button" onClick={() => handleOpenOrderDetailModal(order)}>
+                                    <Link to={`/backoffice/pedido/${order.id}`} className="view-order">
                                         <FontAwesomeIcon icon={faEye}/>
-                                    </button>
+                                    </Link>
                                     <PrintOrder
                                         order={order}
                                         orderCode={order.code}
                                         clientName={getName(order.client.first_name, order.client.last_name)}
-                                        clientTelephone={order.client.phone_number !== '22997517940' ? order.client.phone_number : ''}
+                                        clientTelephone={order.client.phone_number !== '33333333333' ? order.client.phone_number : ''}
                                         admins={admins}
                                         buttonLabel="" />
                                 </td>

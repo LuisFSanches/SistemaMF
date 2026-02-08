@@ -9,16 +9,22 @@ interface GetDeliveryManRequest {
     pageSize?: number
     startDate?: string
     endDate?: string
+    store_id?: string
 }
 
 class GetDeliveryManService {
-    async execute({ id, page = 1, pageSize = 10, startDate, endDate }: GetDeliveryManRequest): Promise<IDeliveryManDetails> {
+    async execute({ id, page = 1, pageSize = 10, startDate, endDate, store_id }: GetDeliveryManRequest): Promise<IDeliveryManDetails> {
         try {
             const skip = (page - 1) * pageSize;
 
             // 1. Buscar informações do motoboy
+            const whereClauseDeliveryMan: any = { id };
+            if (store_id) {
+                whereClauseDeliveryMan.store_id = store_id;
+            }
+
             const deliveryMan = await prismaClient.deliveryMan.findFirst({
-                where: { id }
+                where: whereClauseDeliveryMan
             });
 
             if (!deliveryMan) {

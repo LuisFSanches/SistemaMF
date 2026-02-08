@@ -8,7 +8,7 @@ export const Container = styled.div`
 export const ModalContainer = styled.div`
     display: flex;
     gap: 20px;
-    height: 80vh;
+    height: 82vh;
     max-width: 1200px;
     width: 100%;
 
@@ -137,12 +137,12 @@ export const FontSizeControl = styled.div`
     }
 `;
 
-export const PreviewCard = styled.div`
-    width: 100%;
+export const PreviewCard = styled.div<{ $backgroundImage: string }>`
+    width: 92%;
     max-width: 500px;
     aspect-ratio: 1 / 3;
     background: white;
-    background-image: url('/card_background.png');
+    background-image: url('/${props => props.$backgroundImage}');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -158,7 +158,7 @@ export const PreviewContent = styled.div<{ fontSize: number }>`
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    margin-top: 70px;
+    margin-top: 80px;
     margin-left: 85px;
     align-items: flex-start;
     font-size: ${props => props.fontSize}px;
@@ -167,6 +167,55 @@ export const PreviewContent = styled.div<{ fontSize: number }>`
     line-height: 1.6;
     word-wrap: break-word;
     overflow-y: auto;
+
+    .logo-top {
+        position: absolute;
+        top: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 105px;
+        max-height: 80px;
+        object-fit: contain;
+    }
+
+    .bottom-section {
+        position: absolute;
+        bottom: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .logo-bottom {
+        max-width: 105px;
+        max-height: 70px;
+        object-fit: contain;
+        flex-shrink: 0;
+        border-right: 1px solid #000000;
+        padding-right: 0px;
+    }
+
+    .store-info {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 9px;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .store-info-item {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        
+        svg {
+            width: 11px;
+            height: 11px;
+            color: #333;
+        }
+    }
 
     .card-to {
         font-style: italic;
@@ -226,4 +275,154 @@ export const PrintButton = styled(Button)`
     &:hover {
         background: #EF6CAD;
     }
+`;
+
+export const TemplateSelector = styled.div`
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+`;
+
+export const TemplateOption = styled.div<{ $isSelected: boolean }>`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border: 2px solid ${props => props.$isSelected ? '#66c1df' : '#e7b7c2'};
+    border-radius: 8px;
+    cursor: pointer;
+    background: ${props => props.$isSelected ? '#f0f9ff' : 'white'};
+    transition: all 0.2s;
+
+    &:hover {
+        border-color: #66c1df;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    img {
+        width: 100%;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+
+    span {
+        font-size: 12px;
+        font-weight: ${props => props.$isSelected ? '600' : '400'};
+        color: ${props => props.$isSelected ? '#66c1df' : '#666'};
+    }
+`;
+export const CardWrapper = styled.div<{ $backgroundImage: string }>`
+    width: 595px;
+    height: 830px;
+    background: white;
+    background-image: url('/${props => props.$backgroundImage}');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 120px 110px;
+    font-family: 'Times New Roman', serif;
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+`;
+
+export const LogoTop = styled.img`
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 115px;
+    max-height: 90px;
+    object-fit: contain;
+`;
+
+export const StoreInfoContainer = styled.div`
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: #333;
+
+    img {
+        max-width: 80px;
+        max-height: 80px;
+        object-fit: contain;
+        border-right: 1px solid #000000;
+        padding-right: 5px;
+    }
+
+    .store-info {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        span, svg {
+            font-size: 9px;
+        }
+    }
+`;
+
+export const StoreInfoItem = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    
+    svg {
+        width: 12px;
+        height: 12px;
+        color: #333;
+    }
+    
+    span {
+        font-family: 'Arial', sans-serif;
+        font-size: 11px;
+    }
+`;
+
+export const ContentWrapper = styled.div`
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+`;
+
+export const CardFrom = styled.div<{ fontSize: number }>`
+    font-size: ${props => props.fontSize}px;
+    margin-bottom: 10px;
+    color: #000;
+    line-height: 1.3;
+    font-style: italic;
+`;
+
+export const CardTo = styled.div<{ fontSize: number }>`
+    font-size: ${props => props.fontSize}px;
+    margin-bottom: 25px;
+    color: #000;
+    line-height: 1.3;
+    font-style: italic;
+`;
+
+export const CardMessage = styled.div<{ fontSize: number }>`
+    font-size: ${props => props.fontSize}px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #000;
+    max-width: 100%;
+`;
+
+export const OrderCode = styled.div`
+    position: absolute;
+    bottom: 10px;
+    left: 240px;
+    font-size: 13px;
+    color: #000;
+    font-style: italic;
 `;

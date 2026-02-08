@@ -1,5 +1,4 @@
-import { api } from "./api";
-const token = localStorage.getItem("token")?.replace(/"/g, '');
+import { api, getStoreId } from "./api";
 
 export const createOrder = async ({
 	clientId,
@@ -38,9 +37,15 @@ export const createOrder = async ({
 	is_delivery,
 	card_from,
 	card_to,
-	card_message
+	card_message,
+	store_id: receivedStoreId
 }: any) => {
+	// Usar store_id recebido (do storefront) ou obter do admin logado
+	const store_id = receivedStoreId || getStoreId();
+	console.log('[orderService] Store ID usado:', store_id, '(recebido:', receivedStoreId, ', admin:', getStoreId(), ')');
+	
 	const response = await api.post("/order", {
+		store_id,  // Adicionar store_id automaticamente
 		clientId,
 		first_name,
 		last_name,
@@ -78,17 +83,14 @@ export const createOrder = async ({
 		card_from,
 		card_to,
 		card_message
-	}, {
-		headers: {
-			Authorization: `${token}`,
-		}
 	});
 
 	return response;
 };
 
 export const createOrderByAi = async (data: any) => {
-	const response = await api.post("/order/ai", data);
+	const store_id = getStoreId();
+	const response = await api.post("/order/ai", { ...data, store_id });
 
 	return response;
 }
@@ -101,21 +103,13 @@ export const getCompletedOrder = async (id: string) => {
 
 
 export const getOrderById = async(id: string) => {
-	const response = await api.get(`/order/detail/${id}`, {
-		headers: {
-			Authorization: `${token}`,
-		}
-	});
+	const response = await api.get(`/order/detail/${id}`);
 
 	return response;
 };
 
 export const getOnGoingOrders = async () => {
-	const response = await api.get("/order/ongoing", {
-		headers: {
-			Authorization: `${token}`,
-		}
-	});
+	const response = await api.get("/order/ongoing");
 
 	return response;
 };
@@ -131,21 +125,13 @@ export const getAllOrders = async (page: number, pageSize: number, query: string
 		url += `&endDate=${endDate}`;
 	}
 	
-	const response = await api.get(url, {
-		headers: {
-			Authorization: `${token}`,
-		}
-	});
+	const response = await api.get(url);
 
 	return response;
 }
 
 export const getWaitingOrders = async () => {
-	const response = await api.get("/order/waitingForClient", {
-		headers: {
-			Authorization: `${token}`,
-		}
-	});
+	const response = await api.get("/order/waitingForClient");
 
 	return response;
 }
@@ -155,11 +141,8 @@ export const updateStatus = async({
 	status
 }: any) => {
 	const response = await api.patch(`/order/${id}`, {
-	id,
-	status,
-	headers: {
-		Authorization: `${token}`,
-	}
+		id,
+		status
 	});
 
 	return response;
@@ -167,10 +150,7 @@ export const updateStatus = async({
 
 export const updateOrder = async(order: any) => {
 	const response = await api.put(`/order/${order.id}`, {
-		order,
-		headers: {
-			Authorization: `${token}`,
-		}
+		order
 	});
 
 	return response;
@@ -179,10 +159,6 @@ export const updateOrder = async(order: any) => {
 export const updateOrderPaymentStatus = async(id: string, payment_received: boolean) => {
 	const response = await api.patch(`/order/${id}/payment`, {
 		payment_received
-	}, {
-		headers: {
-			Authorization: `${token}`,
-		}
 	});
 
 	return response.data;
@@ -197,11 +173,7 @@ export const finishOnlineOrder = async(order: any) => {
 };
 
 export const deleteOrder = async(id: string) => {
-	const response = await api.delete(`/order/${id}`, {
-		headers: {
-			Authorization: `${token}`,
-		}
-	});
+	const response = await api.delete(`/order/${id}`);
 
 	return response;
 };

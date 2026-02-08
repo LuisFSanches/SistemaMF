@@ -9,7 +9,7 @@ interface UpdateOrderDeliveryRequest extends Partial<IOrderDelivery> {
 }
 
 class UpdateOrderDeliveryService {
-    async execute({ id, ...data }: UpdateOrderDeliveryRequest) {
+    async execute({ id, ...data }: UpdateOrderDeliveryRequest, store_id?: string) {
         // Validação com Zod
         const parsed = updateOrderDeliverySchema.safeParse({
             ...data,
@@ -28,8 +28,13 @@ class UpdateOrderDeliveryService {
         }
 
         // Verificar se a entrega existe
+        const whereClause: any = { id };
+        if (store_id) {
+            whereClause.store_id = store_id;
+        }
+
         const existingOrderDelivery = await prismaClient.orderDelivery.findFirst({
-            where: { id }
+            where: whereClause
         });
 
         if (!existingOrderDelivery) {

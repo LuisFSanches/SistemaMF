@@ -14,10 +14,11 @@ import { faXmark, faCircleQuestion } from "@fortawesome/free-solid-svg-icons";
 import { createOrder, createOrderByAi } from "../../services/orderService";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { useOrders } from "../../contexts/OrdersContext";
-import { ProductModal } from "../../components/ProductModal";
+import { StoreProductModal } from "../../components/StoreProductModal";
 import { rawTelephone } from "../../utils";
 import { useProducts } from "../../contexts/ProductsContext";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
+import { useAdminData } from "../../contexts/AuthContext";
 import {
     FormField,
     Label,
@@ -79,6 +80,7 @@ interface IProduct {
 export function OnlineOrder() {
     const { products: availableProducts, loadAvailableProducts, totalProducts, refreshProducts } = useProducts();
     const { showSuccess } = useSuccessMessage();
+    const { adminData } = useAdminData();
 
     const navigate = useNavigate();
     const { admins } = useAdmins();
@@ -320,14 +322,17 @@ export function OnlineOrder() {
     }, [description]);
 
     useEffect(() => {
+        if (!adminData.store_id) return;
         setShowLoader(true);
         setTimeout(() => {
-            loadAvailableProducts(page, pageSize, query).then(() => {
+            loadAvailableProducts(adminData.store_id!, page, pageSize, query).then(() => {
+                setShowLoader(false);
+            }).catch(() => {
                 setShowLoader(false);
             });
         }, 300);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, pageSize, query]);
+    }, [page, pageSize, query, adminData.store_id]);
 
     useEffect(() => {
         function handleResize() {
@@ -360,10 +365,10 @@ export function OnlineOrder() {
                 showWhatsapp={false}
                 showCopyButton={true}
             />
-            <ProductModal 
+            <StoreProductModal 
                 isOpen={productModal}
                 onRequestClose={handleCloseProductModal}
-                loadData={refreshProducts}
+                loadData={(storeId) => refreshProducts(storeId)}
                 action={"create"}
                 currentProduct={{
                     id: "",
@@ -453,7 +458,7 @@ export function OnlineOrder() {
                             </div>
                         </div>
                         <ProductList>
-                            {availableProducts.map((product: any) => (
+                            {availableProducts?.map((product: any) => (
                                 <ProductCard
                                     key={product.id}
                                     product={product}

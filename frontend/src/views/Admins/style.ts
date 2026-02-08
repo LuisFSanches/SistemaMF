@@ -14,3 +14,16 @@ export const Container = styled.div`
         padding: 0.4rem;
     }
 `
+
+export const RoleBadge = styled.span<{ role: string }>`
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    
+    background-color: ${props => props.role === "SUPER_ADMIN" ? "var(--primary-color)" : "var(--secondary-color)"};
+    color: white;
+    display: inline-block;
+`

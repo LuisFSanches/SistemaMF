@@ -118,7 +118,6 @@ export interface ISupplierReport {
 }
 
 export async function getSalesReport(filters?: IReportFilters) {
-    const token = localStorage.getItem("token")?.replace(/"/g, '');
     const params = new URLSearchParams();
     
     if (filters?.start_date) params.append('start_date', filters.start_date);
@@ -130,91 +129,56 @@ export async function getSalesReport(filters?: IReportFilters) {
     if (filters?.store_front_order !== undefined) params.append('store_front_order', String(filters.store_front_order));
     if (filters?.payment_received !== undefined) params.append('payment_received', String(filters.payment_received));
 
-    return api.get<ISalesReport>(`/reports/sales?${params.toString()}`, {
-        headers: {
-            authorization: token
-        }
-    });
+    return api.get<ISalesReport>(`/reports/sales?${params.toString()}`);
 }
 
 export async function getTopProducts(filters?: IReportFilters) {
-    const token = localStorage.getItem("token")?.replace(/"/g, '');
     const params = new URLSearchParams();
     
     if (filters?.start_date) params.append('start_date', filters.start_date);
     if (filters?.end_date) params.append('end_date', filters.end_date);
 
-    return api.get<ITopProduct[]>(`/reports/products/top?${params.toString()}`, {
-        headers: {
-            authorization: token
-        }
-    });
+    return api.get<ITopProduct[]>(`/reports/products/top?${params.toString()}`);
 }
 
 export async function getTopClients(filters?: IReportFilters) {
-    const token = localStorage.getItem("token")?.replace(/"/g, '');
     const params = new URLSearchParams();
     
     if (filters?.start_date) params.append('start_date', filters.start_date);
     if (filters?.end_date) params.append('end_date', filters.end_date);
 
-    return api.get<ITopClient[]>(`/reports/clients/top?${params.toString()}`, {
-        headers: {
-            authorization: token
-        }
-    });
+    return api.get<ITopClient[]>(`/reports/clients/top?${params.toString()}`);
 }
 
 export async function getStockReport() {
-    const token = localStorage.getItem("token")?.replace(/"/g, '');
-
-    return api.get<IStockReport[]>(`/reports/stock`, {
-        headers: {
-            authorization: token
-        }
-    });
+    return api.get<IStockReport[]>(`/reports/stock`);
 }
 
 export async function getFinancialReport(filters?: IReportFilters) {
-    const token = localStorage.getItem("token")?.replace(/"/g, '');
     const params = new URLSearchParams();
     
     if (filters?.start_date) params.append('start_date', filters.start_date);
     if (filters?.end_date) params.append('end_date', filters.end_date);
 
-    return api.get<IFinancialReport>(`/reports/financial?${params.toString()}`, {
-        headers: {
-            authorization: token
-        }
-    });
+    return api.get<IFinancialReport>(`/reports/financial?${params.toString()}`);
 }
 
 export async function getDeliveryReport(filters?: IReportFilters) {
-    const token = localStorage.getItem("token")?.replace(/"/g, '');
     const params = new URLSearchParams();
     
     if (filters?.start_date) params.append('start_date', filters.start_date);
     if (filters?.end_date) params.append('end_date', filters.end_date);
     if (filters?.delivery_man_id) params.append('delivery_man_id', filters.delivery_man_id);
 
-    return api.get<IDeliveryReport>(`/reports/delivery?${params.toString()}`, {
-        headers: {
-            authorization: token
-        }
-    });
+    return api.get<IDeliveryReport>(`/reports/delivery?${params.toString()}`);
 }
 
 export async function getSupplierReport(filters?: IReportFilters) {
-    const token = localStorage.getItem("token")?.replace(/"/g, '');
     const params = new URLSearchParams();
     
     if (filters?.start_date) params.append('start_date', filters.start_date);
     if (filters?.end_date) params.append('end_date', filters.end_date);
     if (filters?.supplier_id) params.append('supplier_id', filters.supplier_id);
 
-    return api.get<ISupplierReport[]>(`/reports/supplier?${params.toString()}`, {
-        headers: {
-            authorization: token
-        }
-    });
+    return api.get<ISupplierReport[]>(`/reports/supplier?${params.toString()}`);
 }

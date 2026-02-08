@@ -5,7 +5,7 @@ import { createOrderToReceiveSchema } from "../../schemas/orderToReceive/createO
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class CreateOrderToReceiveService {
-    async execute(data: IOrderToReceive) {
+    async execute(data: IOrderToReceive, store_id?: string) {
         const parsed = createOrderToReceiveSchema.safeParse({
             ...data,
             payment_due_date: data.payment_due_date instanceof Date 
@@ -56,7 +56,8 @@ class CreateOrderToReceiveService {
                     payment_due_date: data.payment_due_date,
                     received_date: data.received_date,
                     type: data.type,
-                    is_archived: data.is_archived || false
+                    is_archived: data.is_archived || false,
+                    store_id
                 },
                 include: {
                     order: {

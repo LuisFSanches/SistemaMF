@@ -49,6 +49,7 @@ export const Header = styled.div`
         padding: 2rem;
         border-radius: 12px;
         background: white;
+        position: relative;
 
         h1 {
             font-size: 1.75rem;
@@ -132,6 +133,29 @@ export const Header = styled.div`
 
             .created-by {
                 color: #6b7280;
+            }
+        }
+
+        .edit-button {
+            position: absolute;
+            top: 50%;
+            right: 2rem;
+            transform: translateY(-50%);
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+
+            &:hover {
+                transform: translateY(-52%);
             }
         }
     }
@@ -398,6 +422,26 @@ export const StatusBadge = styled.span`
     &.pending {
         background: #fed7aa;
         color: #92400e;
+    }
+`;
+
+export const PrintCardButton = styled.button`
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
     }
 `;
 

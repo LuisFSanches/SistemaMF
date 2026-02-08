@@ -14,18 +14,18 @@ class GetAllProductService{
 					`replace(unaccent(lower(p.name)), ' ', '') LIKE '%' || replace(unaccent(lower($${index + 1})), ' ', '') || '%'`
 				).join(' AND ');
 
+				const queryParams = [...searchTerms, pageSize, skip];
+
 				const productsRaw = await prismaClient.$queryRawUnsafe<any[]>(
 					`
-						SELECT p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store, p.sales_count
+						SELECT p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store, p.sales_count, p.description
 						FROM "products" p
 						WHERE p.enabled = true
 						AND ${conditions}
 						ORDER BY p.sales_count DESC, p.created_at DESC
 						LIMIT $${searchTerms.length + 1} OFFSET $${searchTerms.length + 2}
 					`,
-					...searchTerms,
-					pageSize,
-					skip
+					...queryParams
 				);
 
 				const products = productsRaw.map(product => ({
@@ -55,7 +55,7 @@ class GetAllProductService{
 
 			const [productsRaw, total] = await Promise.all([
 				prismaClient.$queryRaw<any[]>`
-					SELECT p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store, p.sales_count
+					SELECT p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store, p.sales_count, p.description
 					FROM "products" p
 					WHERE p.enabled = true
 					ORDER BY p.sales_count DESC, p.created_at DESC
@@ -78,13 +78,13 @@ class GetAllProductService{
 				totalPages: Math.ceil(total / pageSize)
 			};
 
-			} catch(error: any) {
-				throw new BadRequestException(
-					error.message,
-					ErrorCodes.SYSTEM_ERROR
-				);
-			}
+		} catch(error: any) {
+			throw new BadRequestException(
+				error.message,
+				ErrorCodes.SYSTEM_ERROR
+			);
 		}
 	}
+}
 
 export { GetAllProductService }

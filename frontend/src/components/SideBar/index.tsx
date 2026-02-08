@@ -1,22 +1,22 @@
 import { useContext, useEffect, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { AuthContext } from "../../contexts/AuthContext";
+import { AuthContext, useAdminData } from "../../contexts/AuthContext";
 import { Container,SideBarItemContainer, SideBarButton, CompanyInfoContainer, InternalContainer } from "./style";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faComputer,
     faRightFromBracket,
-    faGlobe,
-    faBagShopping,
     faReceipt,
     faHome,
     faWarehouse
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { NavLink} from 'react-router-dom'
+import helmet from '../../assets/icons/helmet.svg';
 
 export function SideBar(){
     const { handleSignOut } = useContext(AuthContext);
+    const { adminData } = useAdminData();
     const location = useLocation();
 
     const [isActive, setActive] = useState({
@@ -26,6 +26,7 @@ export function SideBar(){
         produtos:false,
         categorias:false,
         pedidos:false,
+        pedidosMenu: false,
         clientes:false,
         statistics:false,
         pix: false,
@@ -35,7 +36,11 @@ export function SideBar(){
         aguardandoCliente: false,
         estoque: false,
         valoresAReceber: false,
-        entregas: false
+        entregas: false,
+        meusProdutos: false,
+        generalCatalog: false,
+        produtosPais: false,
+        motoboys: false
     })
     
     const handleActiveMenuButton = useCallback((name:string) => {
@@ -48,6 +53,7 @@ export function SideBar(){
                     'produtos':false,
                     'categorias':false,
                     'pedidos':false,
+                    'pedidosMenu': false,
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
@@ -55,7 +61,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
             case 'pedidoBalcao':
@@ -66,6 +73,7 @@ export function SideBar(){
                     'produtos':false,
                     'categorias':false,
                     'pedidos':false,
+                    'pedidosMenu': false,
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
@@ -73,25 +81,30 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
             case 'ordensDeServico':
+            case 'aguardandoCliente':
+            case 'pedidos':
                 setActive({...isActive,
                     'dashboard':false,
                     'pedidoBalcao':false,
-                    'ordensDeServico':true,
+                    'ordensDeServico': name === 'ordensDeServico',
                     'produtos':false,
                     'categorias':false,
-                    'pedidos':false,
+                    'pedidos': name === 'pedidos',
+                    'pedidosMenu': true,
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
                     "pedidoOnline": false,
-                    "aguardandoCliente": false,
+                    "aguardandoCliente": name === 'aguardandoCliente',
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
             case 'statistics':
@@ -102,6 +115,7 @@ export function SideBar(){
                     'produtos':false,
                     'categorias':false,
                     'pedidos':false,
+                    'pedidosMenu': false,
                     'clientes':false,
                     'statistics':true,
                     "administradores": false,
@@ -109,25 +123,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
-                })
-            break;
-            case 'pedidos':
-                setActive({...isActive,
-                    'dashboard':false,
-                    'pedidoBalcao':false,
-                    'ordensDeServico':false,
-                    'produtos':false,
-                    'categorias':false,
-                    'pedidos':true,
-                    'clientes':false,
-                    'statistics':false,
-                    "administradores": false,
-                    "pedidoOnline": false,
-                    "aguardandoCliente": false,
-                    "estoque": false,
-                    "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -139,6 +136,7 @@ export function SideBar(){
                     'produtos':false,
                     'categorias':false,
                     'pedidos':false,
+                    'pedidosMenu': false,
                     'clientes':true,
                     'statistics':false,
                     "administradores": false,
@@ -146,7 +144,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -158,6 +157,7 @@ export function SideBar(){
                     'produtos':false,
                     'categorias':false,
                     'pedidos':false,
+                    'pedidosMenu': false,
                     'clientes':false,
                     'statistics':false,
                     "administradores": true,
@@ -165,7 +165,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -177,6 +178,7 @@ export function SideBar(){
                     'produtos':false,
                     'categorias':false,
                     'pedidos':false,
+                    'pedidosMenu': false,
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
@@ -185,7 +187,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -197,6 +200,7 @@ export function SideBar(){
                     'produtos':false,
                     'categorias':false,
                     'pedidos':false,
+                    'pedidosMenu': false,
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
@@ -205,30 +209,15 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
-                })
-            break;
-            case 'aguardandoCliente':
-                setActive({...isActive, 
-                    'dashboard':false,
-                    'pedidoBalcao':false,
-                    'ordensDeServico':false,
-                    'produtos':false,
-                    'categorias':false,
-                    'pedidos':false,
-                    'clientes':false,
-                    'statistics':false,
-                    "administradores": false,
-                    'pix': false,
-                    "pedidoOnline": false,
-                    "aguardandoCliente": true,
-                    "estoque": false,
-                    "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
             case 'produtos':
+            case 'meus-produtos':
+            case 'catalogo-geral':
+            case 'produtos-pais':
                 setActive({...isActive, 
                     'dashboard':false,
                     'pedidoBalcao':false,
@@ -236,6 +225,7 @@ export function SideBar(){
                     'produtos':true,
                     'categorias':false,
                     'pedidos':false,
+                    'pedidosMenu': false,
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
@@ -244,7 +234,11 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "estoque": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "meusProdutos": false,
+                    "generalCatalog": false,
+                    "produtosPais": false,
+                    "motoboys": false
                 })
             break;
 
@@ -257,6 +251,7 @@ export function SideBar(){
                     'produtos':false,
                     'categorias':false,
                     'pedidos':false,
+                    'pedidosMenu': false,
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
@@ -264,7 +259,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "valoresAReceber": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -278,13 +274,15 @@ export function SideBar(){
                     'produtos':false,
                     'categorias':false,
                     'pedidos':false,
+                    'pedidosMenu': false,
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
                     'pix': false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "entregas": false
+                    "entregas": false,
+                    "motoboys": false
                 })
             break;
 
@@ -298,13 +296,37 @@ export function SideBar(){
                     'produtos':false,
                     'categorias':false,
                     'pedidos':false,
+                    'pedidosMenu': false,
                     'clientes':false,
                     'statistics':false,
                     "administradores": false,
                     'pix': false,
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
-                    "entregas": true
+                    "entregas": true,
+                    "motoboys": false
+                })
+            break;
+
+            case 'motoboys':
+                setActive({...isActive,
+                    'valoresAReceber':false,
+                    'estoque':false,
+                    'dashboard':false,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'pedidosMenu': false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false,
+                    "entregas": false,
+                    "motoboys": true
                 })
             break;
         }
@@ -358,58 +380,63 @@ export function SideBar(){
                     </SideBarItemContainer>
                 </NavLink>
 
-                <NavLink to="/backoffice/ordensDeServico" >
-                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('ordensDeServico')}>
-                        <SideBarButton
-                            isActive={isActive['ordensDeServico']}
-                            isMinimizedActive
-                            title="Pedidos em Aberto"
-                        >
-                            <FontAwesomeIcon icon={faReceipt} className="Side-Bar-Icon"/>
-                            <span>Pedidos atuais</span>
-                        </SideBarButton>
-                        
-                    </SideBarItemContainer>
-                </NavLink>
+                <SideBarItemContainer className="produtos-menu-container">
+                    <SideBarButton
+                        isActive={isActive['pedidosMenu']}
+                        isMinimizedActive
+                        title="Pedidos"
+                    >
+                        <FontAwesomeIcon icon={faReceipt} className="Side-Bar-Icon"/>
+                        <span>Pedidos</span>
+                    </SideBarButton>
+                    <div className="submenu">
+                        <NavLink to="/backoffice/ordensDeServico">
+                            <button className="submenu-item" onClick={()=>handleActiveMenuButton('ordensDeServico')}>
+                                Pedidos Atuais
+                            </button>
+                        </NavLink>
+                        <NavLink to="/backoffice/aguardandoCliente">
+                            <button className="submenu-item" onClick={()=>handleActiveMenuButton('aguardandoCliente')}>
+                                Aguardando Cliente
+                            </button>
+                        </NavLink>
+                        <NavLink to="/backoffice/pedidos">
+                            <button className="submenu-item" onClick={()=>handleActiveMenuButton('pedidos')}>
+                                Pedidos Finalizados
+                            </button>
+                        </NavLink>
+                    </div>
+                </SideBarItemContainer>
 
-                <NavLink to="/backoffice/aguardandoCliente">
-                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('aguardandoCliente')}>
-                        <SideBarButton
-                            isActive={isActive['aguardandoCliente']}
-                            isMinimizedActive
-                            title="Aguardando Cliente"
-                        >
-                            <FontAwesomeIcon icon={faGlobe} className="Side-Bar-Icon"/>
-                            <span>Aguardando Cliente</span>
-                        </SideBarButton>
-                    </SideBarItemContainer>
-                </NavLink>
-
-                <NavLink to="/backoffice/pedidos">
-                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('pedidos')}>
-                        <SideBarButton
-                            isActive={isActive['pedidos']}
-                            isMinimizedActive
-                            title="Pedidos"
-                        >
-                            <FontAwesomeIcon icon={faBagShopping} className="Side-Bar-Icon"/>
-                            <span>Pedidos finalizados</span>
-                        </SideBarButton>
-                    </SideBarItemContainer>
-                </NavLink>
-
-                <NavLink to="/backoffice/produtos">
-                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('produtos')}>
-                        <SideBarButton
-                            isActive={isActive['produtos']}
-                            isMinimizedActive
-                            title="Produtos"
-                        >
-                            <i className="material-icons">local_florist</i>
-                            <span>Produtos</span>
-                        </SideBarButton>
-                    </SideBarItemContainer>
-                </NavLink>
+                <SideBarItemContainer className="produtos-menu-container">
+                    <SideBarButton
+                        isActive={isActive['produtos']}
+                        isMinimizedActive
+                        title="Produtos"
+                    >
+                        <i className="material-icons">local_florist</i>
+                        <span>Produtos</span>
+                    </SideBarButton>
+                    <div className="submenu">
+                        <NavLink to="/backoffice/meus-produtos">
+                            <button className="submenu-item" onClick={()=>handleActiveMenuButton('meus-produtos')}>
+                                Meus Produtos
+                            </button>
+                        </NavLink>
+                        <NavLink to="/backoffice/catalogo-geral">
+                            <button className="submenu-item" onClick={()=>handleActiveMenuButton('catalogo-geral')}>
+                                Catálogo Geral
+                            </button>
+                        </NavLink>
+                        {adminData.role === 'SYS_ADMIN' && (
+                            <NavLink to="/backoffice/produtos-pais">
+                                <button className="submenu-item" onClick={()=>handleActiveMenuButton('produtos-pais')}>
+                                    Produtos Pais (SYS_ADMIN)
+                                </button>
+                            </NavLink>
+                        )}
+                    </div>
+                </SideBarItemContainer>
                 
                 <NavLink to="/backoffice/estoque" style={{ display: 'none'}}>
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('estoque')}>
@@ -448,6 +475,20 @@ export function SideBar(){
                         >
                             <i className="material-icons">account_balance_wallet</i>
                             <span>Ordens para receber</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
+                <NavLink to="/backoffice/motoboys">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('motoboys')}>
+                        <SideBarButton
+                            isActive={isActive['motoboys']}
+                            isMinimizedActive
+                            title="Motoboys"
+                        >
+                            <i>
+                                <img src={helmet} alt="Motoboys" style={{width: '20px', height: '20px'}}/>
+                            </i>
+                            <span>Motoboys</span>
                         </SideBarButton>
                     </SideBarItemContainer>
                 </NavLink>

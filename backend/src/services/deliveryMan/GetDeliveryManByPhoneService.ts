@@ -4,10 +4,11 @@ import { BadRequestException } from "../../exceptions/bad-request";
 
 interface GetDeliveryManByPhoneRequest {
     phone_code: string
+    store_id?: string
 }
 
 class GetDeliveryManByPhoneService {
-    async execute({ phone_code }: GetDeliveryManByPhoneRequest) {
+    async execute({ phone_code, store_id }: GetDeliveryManByPhoneRequest) {
         if (!phone_code) {
             throw new BadRequestException(
                 "phone_code is required",
@@ -24,12 +25,17 @@ class GetDeliveryManByPhoneService {
 
         try {
             // Buscar entregador cujo telefone termine com os 4 dígitos informados
-            const deliveryMan = await prismaClient.deliveryMan.findFirst({
-                where: { 
-                    phone_number: {
-                        endsWith: phone_code
-                    }
+            const whereClause: any = {
+                phone_number: {
+                    endsWith: phone_code
                 }
+            };
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
+
+            const deliveryMan = await prismaClient.deliveryMan.findFirst({
+                where: whereClause
             });
 
             if (!deliveryMan) {

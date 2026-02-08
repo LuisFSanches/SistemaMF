@@ -17,6 +17,16 @@ const superAdminAuthMiddleware = async (req: Request, res: Response, next: NextF
         const admin = await prismaClient.admin.findFirst({
             where: {
                 id: payload.id
+            },
+            include: {
+                store: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        is_active: true,
+                    }
+                }
             }
         });
 
@@ -24,7 +34,11 @@ const superAdminAuthMiddleware = async (req: Request, res: Response, next: NextF
             next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
         }
 
-        if (admin?.role !== 'SUPER_ADMIN') {
+        if (admin && !admin.store && admin.role !== 'SYS_ADMIN') {
+            next(new UnauthorizedRequestException('Admin does not belong to any store', ErrorCodes.UNAUTHORIZED))
+        }
+
+        if (admin?.role !== 'SUPER_ADMIN' && admin?.role !== 'SYS_ADMIN') {
             next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
         }
 

@@ -1,5 +1,4 @@
 import { api } from "./api";
-const token = localStorage.getItem("token")?.replace(/"/g, '');
 
 export const getClientByPhone = async (params = "") => {
   const response = await api.get(`/client/phone_number?phone_number=${params}`);
@@ -8,22 +7,14 @@ export const getClientByPhone = async (params = "") => {
 };
 
 export const getClientDetails = async (id: string) => {
-  const response = await api.get(`/client/${id}`, {
-    headers: {
-      Authorization: `${token}`,
-    }
-  });
+  const response = await api.get(`/client/${id}`);
   
   return response;
 }
 
 
 export const listClients = async (page: number, pageSize: number, query: string) => {
-  const response = await api.get(`/clients/all?page=${page}&pageSize=${pageSize}&query=${query}`, {
-    headers: {
-      Authorization: `${token}`,
-    }
-  });
+  const response = await api.get(`/clients/all?page=${page}&pageSize=${pageSize}&query=${query}`);
   
   return response;
 };
@@ -37,9 +28,6 @@ export const createClient = async ({
     first_name,
     last_name,
     phone_number,
-    headers: {
-      Authorization: `${token}`,
-    }
   });
   
   return response;
@@ -70,9 +58,6 @@ export const updateClient = async({
     first_name,
     last_name,
     phone_number,
-    headers: {
-      Authorization: `${token}`,
-    }
   });
   
   return response;

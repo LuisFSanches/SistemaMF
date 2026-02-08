@@ -7,6 +7,116 @@ export const Container = styled.div`
     padding-bottom: 40px;
 `;
 
+// Stepper
+export const StepperContainer = styled.div`
+    width: 100%;
+    background: white;
+    padding-bottom: 24px;
+    padding-top: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    @media (max-width: 768px) {
+        padding: 16px;
+    }
+`;
+
+export const StepperWrapper = styled.div`
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 60px;
+        right: 60px;
+        height: 2px;
+        background: #E5E7EB;
+        z-index: 0;
+    }
+
+    @media (max-width: 768px) {
+        &::before {
+            left: 40px;
+            right: 40px;
+        }
+    }
+`;
+
+export const Step = styled.div<{ active: boolean; completed: boolean; clickable?: boolean }>`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+    cursor: ${({ clickable }) => (clickable ? 'pointer' : 'default')};
+    transition: all 0.3s ease;
+
+    &:hover {
+        ${({ clickable }) => clickable && `
+            transform: translateY(-2px);
+        `}
+    }
+
+    @media (max-width: 768px) {
+        gap: 4px;
+    }
+`;
+
+export const StepCircle = styled.div<{ active: boolean; completed: boolean }>`
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+    background: ${({ active, completed }) =>
+        completed ? '#EC4899' : active ? '#EC4899' : 'white'};
+    color: ${({ active, completed }) =>
+        completed || active ? 'white' : '#9CA3AF'};
+    border: 2px solid ${({ active, completed }) =>
+        completed ? '#EC4899' : active ? '#EC4899' : '#E5E7EB'};
+    transition: all 0.3s ease;
+
+    @media (max-width: 768px) {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+`;
+
+export const StepLabel = styled.div<{ active: boolean }>`
+    font-size: 0.875rem;
+    font-weight: ${({ active }) => (active ? '600' : '500')};
+    color: ${({ active }) => (active ? '#333' : '#6B7280')};
+    text-align: center;
+    white-space: nowrap;
+
+    @media (max-width: 768px) {
+        font-size: 0.75rem;
+    }
+`;
+
+export const StepSubLabel = styled.div`
+    font-size: 0.75rem;
+    color: #9CA3AF;
+    text-align: center;
+
+    @media (max-width: 768px) {
+        font-size: 0.65rem;
+    }
+`;
+
 export const Content = styled.main`
     max-width: 1440px;
     margin: 0 auto;

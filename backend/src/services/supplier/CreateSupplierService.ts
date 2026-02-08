@@ -5,7 +5,7 @@ import { createSupplierSchema } from "../../schemas/supplier/createSupplier";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class CreateSupplierService {
-    async execute(data: ISupplier) {
+    async execute(data: ISupplier, store_id?: string) {
         // Validação com Zod
         const parsed = createSupplierSchema.safeParse(data);
 
@@ -16,9 +16,14 @@ class CreateSupplierService {
             );
         }
 
-        // Verificar se fornecedor já existe
+        // Verificar se fornecedor já existe na mesma loja
+        const whereClause: any = { name: parsed.data.name };
+        if (store_id) {
+            whereClause.store_id = store_id;
+        }
+
         const existingSupplier = await prismaClient.supplier.findFirst({
-            where: { name: parsed.data.name },
+            where: whereClause,
         });
 
         if (existingSupplier) {
@@ -32,7 +37,8 @@ class CreateSupplierService {
         try {
             const supplier = await prismaClient.supplier.create({ 
                 data: {
-                    name: parsed.data.name
+                    name: parsed.data.name,
+                    store_id
                 }
             });
             

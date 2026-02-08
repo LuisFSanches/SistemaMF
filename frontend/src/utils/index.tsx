@@ -18,6 +18,7 @@ export const formatTelephone = (phoneNumber: string,) => {
 }
 
 export const convertMoney = (value: number) => {
+    if (value === null || value === undefined) return "";
     const numericValue = typeof value === "string" ? parseFloat(value) : value
     const formatedValue = numericValue.toLocaleString("pt-BR", {
         style: "currency",

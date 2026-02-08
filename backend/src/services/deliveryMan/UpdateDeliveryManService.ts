@@ -9,7 +9,7 @@ interface UpdateDeliveryManRequest extends Partial<IDeliveryMan> {
 }
 
 class UpdateDeliveryManService {
-    async execute({ id, ...data }: UpdateDeliveryManRequest) {
+    async execute({ id, ...data }: UpdateDeliveryManRequest, store_id?: string) {
         const parsed = updateDeliveryManSchema.safeParse(data);
 
         if (!parsed.success) {
@@ -19,8 +19,13 @@ class UpdateDeliveryManService {
             );
         }
 
+        const whereClause: any = { id };
+        if (store_id) {
+            whereClause.store_id = store_id;
+        }
+
         const existingDeliveryMan = await prismaClient.deliveryMan.findFirst({
-            where: { id }
+            where: whereClause
         });
 
         if (!existingDeliveryMan) {
@@ -31,11 +36,16 @@ class UpdateDeliveryManService {
         }
 
         if (parsed.data.phone_number && parsed.data.phone_number !== existingDeliveryMan.phone_number) {
+            const phoneWhereClause: any = { 
+                phone_number: parsed.data.phone_number,
+                id: { not: id }
+            };
+            if (store_id) {
+                phoneWhereClause.store_id = store_id;
+            }
+
             const phoneInUse = await prismaClient.deliveryMan.findFirst({
-                where: { 
-                    phone_number: parsed.data.phone_number,
-                    id: { not: id }
-                }
+                where: phoneWhereClause
             });
 
             if (phoneInUse) {

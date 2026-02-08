@@ -9,6 +9,7 @@ const adminAuthMiddleware = async (req: Request, res: Response, next: NextFuncti
     const token = req.headers.authorization as string;
     if (!token) {
         next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
+        return;
     }
 
     try {
@@ -16,18 +17,55 @@ const adminAuthMiddleware = async (req: Request, res: Response, next: NextFuncti
         const admin = await prismaClient.admin.findFirst({
             where: {
                 id: payload.id
+            },
+            include: {
+                store: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        is_active: true,
+                    }
+                }
             }
         });
 
         if (!admin) {
             next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
+            return;
         }
 
-        req.admin = admin!;
+        if (!admin.store && admin.role !== 'SYS_ADMIN') {
+            next(new UnauthorizedRequestException('Admin does not belong to any store', ErrorCodes.UNAUTHORIZED))
+            return;
+        }
+
+        // Verificar se a loja está ativa (se admin pertence a uma loja)
+        if (admin.store && !admin.store.is_active) {
+            next(new UnauthorizedRequestException('Store is inactive', ErrorCodes.UNAUTHORIZED))
+            return;
+        }
+
+        if (admin?.role !== 'ADMIN' && admin?.role !== 'SYS_ADMIN' && admin?.role !== 'SUPER_ADMIN') {
+            next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
+            return;
+        }
+
+        // Se for SYS_ADMIN e o token tiver store_id, usar o store_id do token (após switch)
+        if (admin.role === 'SYS_ADMIN' && payload.store_id) {
+            req.admin = {
+                ...admin,
+                store_id: payload.store_id
+            };
+        } else {
+            req.admin = admin;
+        }
+        
         next();
     }
 
     catch(error) {
+        console.log(error);
         next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
     }
 }

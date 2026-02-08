@@ -5,7 +5,7 @@ export const GlobalStyle = createGlobalStyle`
 
 :root{
     --background: #f7f2f2;
-    --primary-color: #e4bfc7;
+    --primary-color: #e95578;
     --sideBarBackground: #e7b7c2;
     --light-background: #E9CBD2;
     --tbody-background: #F4E5E8;
@@ -326,7 +326,7 @@ button{
     max-width: 1200px;
     max-height: 95vh;
     background: var(--background);
-    padding: 2rem;
+    padding: 1rem;
     position: relative;
     border-radius: 0.25rem;
     outline: none;
@@ -345,32 +345,42 @@ button{
 
 .react-modal-content-edit-order {
     width: 100%;
-    max-height: 835px;
-    max-width: 800px;
+    max-height: 90vh;
+    max-width: 1200px;
     background: var(--background);
-    padding: 3rem;
+    padding: 2rem;
     position: relative;
-    border-radius: 0.25rem;
+    border-radius: 1.5rem;
 
     overflow-y: scroll;
     overflow-x: hidden;
 
     ::-webkit-scrollbar {
-        width: 8px;
+        width: 10px;
     }
 
     ::-webkit-scrollbar-track {
-        background: #f1f1f1;
+        background: #f5f5f5;
         border-radius: 10px;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: #fcc5d0;
+        background: linear-gradient(135deg, var(--primary-color), #ec4899);
         border-radius: 10px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background: #a1a1a1;
+        background: linear-gradient(135deg, #d14766, #d43d88);
+    }
+
+    @media (max-width: 1280px){
+        max-width: 95%;
+    }
+
+    @media (max-width: 768px){
+        padding: 1rem;
+        max-width: 100%;
+        border-radius: 1rem;
     }
 }
 .modal-close{
@@ -381,6 +391,7 @@ button{
         background:transparent;
         color:var(--text-title);
         transition:filter 0.2s;
+        z-index: 500;
 
         &:hover{
             filter: brightness(0.7);
@@ -445,6 +456,12 @@ export const ModalContainer = styled.div`
             &:hover{
                 filter: brightness(1.2);
             }
+    }
+
+    .create-button {
+        height: 50px;
+        font-size: 16px;
+        background: #EC4899;
     }
 `
 
@@ -720,6 +737,11 @@ export const CheckboxContainer =styled.div<{alignLeft?: boolean}>`
         margin: 0px 10px;
     }
 
+    h4 {
+        margin-bottom: 0px;
+        margin-left: 5px;
+    }
+
     @media (max-width: 768px){
         width: 100%;
         justify-content: start;
@@ -897,6 +919,12 @@ export const PageHeader = styled.div`
         }
     }
 `
+
+export const PageTitle = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
 export const ErrorMessage = styled.span`
     color: red;
     margin-bottom: 5px;

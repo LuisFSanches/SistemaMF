@@ -4,17 +4,19 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 interface IStockTransaction {
-    product_id: string;
+    product_id?: string;
+    store_product_id?: string;
     supplier: string;
     unity: string;
     quantity: number;
     unity_price: number;
     purchased_date: Date;
     total_price: number;
+    store_id?: string;
 }
 
 class CreateStockTransactionService {
-    async execute({ product_id, supplier, unity, quantity, unity_price, purchased_date, total_price }: IStockTransaction) {
+    async execute({ store_product_id, supplier, unity, quantity, unity_price, purchased_date, total_price, store_id }: IStockTransaction) {
         try {
             const formattedPurchasedDate = moment.utc(purchased_date)
                 .tz('America/Sao_Paulo', true)
@@ -22,19 +24,27 @@ class CreateStockTransactionService {
                 .toDate();
 
             // Buscar ou criar fornecedor
+            const whereClause: any = { name: supplier.trim() };
+            if (store_id) {
+                whereClause.store_id = store_id;
+            }
+
             let supplierRecord = await prismaClient.supplier.findFirst({
-                where: { name: supplier.trim() }
+                where: whereClause
             });
 
             if (!supplierRecord) {
                 supplierRecord = await prismaClient.supplier.create({
-                    data: { name: supplier.trim() }
+                    data: { 
+                        name: supplier.trim(),
+                        store_id
+                    }
                 });
             }
 
             const transaction = await prismaClient.stockTransaction.create({
                 data: {
-                    product_id,
+                    store_product_id,
                     supplier, // Manter para compatibilidade (deprecated)
                     supplier_id: supplierRecord.id, // Nova referência
                     unity,
@@ -42,6 +52,7 @@ class CreateStockTransactionService {
                     unity_price,
                     total_price,
                     purchased_date: formattedPurchasedDate,
+                    store_id,
                 },
                 include: {
                     product: true,

@@ -4,7 +4,7 @@ import { startOfDay, startOfWeek, startOfMonth, startOfYear, subHours } from 'da
 type Period = 'day' | 'week' | 'month' | 'year'
 
 export class DashboardService {
-    static async getDashboardData(period: Period) {
+    static async getDashboardData(period: Period, store_id?: string) {
         const now = new Date()
         let startDate: Date
 
@@ -27,9 +27,10 @@ export class DashboardService {
         const orders = await prismaClient.order.findMany({
             where: {
                 created_at: {
-                gte: startDate,
-                lte: now,
+                    gte: startDate,
+                    lte: now,
                 },
+                store_id: store_id ? store_id : undefined,
             },
         })
 
@@ -68,6 +69,7 @@ export class DashboardService {
                 created_by: {
                     not: null,
                 },
+                store_id: store_id ? store_id : undefined,
             },
             _count: {
                 id: true,
@@ -82,6 +84,7 @@ export class DashboardService {
         const adminsDetails = await prismaClient.admin.findMany({
             where: {
                 id: { in: topAdmins.map((admin) => admin.created_by).filter((id): id is string => id !== null) },
+                store_id: store_id ? store_id : undefined,
             },
             select: {
                 id: true,

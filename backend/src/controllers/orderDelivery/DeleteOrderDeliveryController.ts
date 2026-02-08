@@ -3,11 +3,12 @@ import { DeleteOrderDeliveryService } from '../../services/orderDelivery/DeleteO
 
 class DeleteOrderDeliveryController {
     async handle(req: Request, res: Response, next: NextFunction) {
+        const store_id = req.admin?.store_id || undefined;
         const { id } = req.params;
 
         const deleteOrderDeliveryService = new DeleteOrderDeliveryService();
 
-        const result = await deleteOrderDeliveryService.execute({ id });
+        const result = await deleteOrderDeliveryService.execute({ id, store_id });
         
         return res.json(result);
     }
