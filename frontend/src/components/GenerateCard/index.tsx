@@ -122,8 +122,7 @@ export function GenerateCard({
                                     onChange={(e) => setCardFrom(e.target.value)}
                                     placeholder="Quem está enviando"
                                     readOnly={readOnly}
-                                    disabled={readOnly}
-                                    style={readOnly ? { backgroundColor: '#f5f5f5', cursor: 'not-allowed' } : {}}
+                                    style={readOnly ? { backgroundColor: '#f5f5f5', cursor: 'text' } : {}}
                                 />
                             </FormGroup>
 
@@ -134,8 +133,7 @@ export function GenerateCard({
                                     onChange={(e) => setCardTo(e.target.value)}
                                     placeholder="Para quem é o cartão"
                                     readOnly={readOnly}
-                                    disabled={readOnly}
-                                    style={readOnly ? { backgroundColor: '#f5f5f5', cursor: 'not-allowed' } : {}}
+                                    style={readOnly ? { backgroundColor: '#f5f5f5', cursor: 'text' } : {}}
                                 />
                             </FormGroup>
 
@@ -146,8 +144,7 @@ export function GenerateCard({
                                     onChange={(e) => setCardMessage(e.target.value)}
                                     placeholder="Digite sua mensagem aqui..."
                                     readOnly={readOnly}
-                                    disabled={readOnly}
-                                    style={readOnly ? { backgroundColor: '#f5f5f5', cursor: 'not-allowed' } : {}}
+                                    style={readOnly ? { backgroundColor: '#f5f5f5', cursor: 'text' } : {}}
                                 />
                             </FormGroup>
 
@@ -217,6 +214,11 @@ export function GenerateCard({
                                                     <span>{referencePoint}</span>
                                                 </div>
                                             )}
+                                            {initialOrderCode && (
+                                                <div className="store-info-item">
+                                                    <span>Pedido #{initialOrderCode}</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </PreviewContent>
@@ -235,6 +237,7 @@ export function GenerateCard({
                     logo={logoSrc}
                     backgroundImage={templateBackground}
                     elementId={elementId}
+                    orderCode={initialOrderCode}
                     instagram={instagram}
                     phoneNumber={phoneNumber}
                     referencePoint={referencePoint}

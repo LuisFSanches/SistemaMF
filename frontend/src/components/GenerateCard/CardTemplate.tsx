@@ -5,7 +5,6 @@ import {
     CardFrom,
     CardTo,
     CardMessage,
-    OrderCode,
     StoreInfoContainer,
     StoreInfoItem
 } from './style';
@@ -59,9 +58,13 @@ export const CardTemplate = ({ cardFrom, cardTo, cardMessage, fontSize, orderCod
                             <span>{referencePoint}</span>
                         </StoreInfoItem>
                     )}
+                    {orderCode && (
+                        <StoreInfoItem>
+                            <span>Pedido #{orderCode}</span>
+                        </StoreInfoItem>
+                    )}
                 </div>
             </StoreInfoContainer>
-            {orderCode && <OrderCode>Pedido #{orderCode}</OrderCode>}
         </CardWrapper>
     );
 };
