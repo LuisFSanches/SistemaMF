@@ -4,6 +4,7 @@ export const Container = styled.div`
     height: 100vh;
     flex: 5;
     padding: 0.8rem 2rem;
+    margin-bottom: 1rem;
     
     .total-spent{
         color: var(--order-green);

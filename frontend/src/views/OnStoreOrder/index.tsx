@@ -156,6 +156,8 @@ export function OnStoreOrder() {
     const [mask, setMask] = useState("(99) 99999-9999");
     const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
     const [showLoader, setShowLoader] = useState(false);
+    const [clientSearchLoading, setClientSearchLoading] = useState(false);
+    const [clientNotFound, setClientNotFound] = useState(false);
     const [query, setQuery] = useState('');
     const [products, setProducts] = useState<IProduct[]>([]);
     const [productModal, setProductModal] = useState(false);
@@ -398,21 +400,27 @@ export function OnStoreOrder() {
             const phoneNumber = rawTelephone(phone_number);
 
             if (phoneNumber && phoneNumber.length >= 10 && step === 3) {
+                setClientSearchLoading(true);
+                setClientNotFound(false);
                 try {
                     const response = await getClientByPhone(phoneNumber);
                     const { data: client } = response;
+
+                    await new Promise(resolve => setTimeout(resolve, 300));
 
                     if (!client) {
                         setClientId("");
                         setAddresses([]);
                         setValue("first_name", "");
                         setValue("last_name", "");
+                        setClientNotFound(true);
                     }
 
                     if (client) {
                         setValue("first_name", client.first_name);
                         setValue("last_name", client.last_name);
                         setClientId(client.id);
+                        setClientNotFound(false);
                         
                         const { data: addresses } = await getClientAddresses(client.id);
                     
@@ -424,11 +432,21 @@ export function OnStoreOrder() {
                     setError("phone_number", { message: "Usuário não encontrado." });
                     setClientId("");
                     setAddresses([]);
+                    setClientNotFound(true);
+                } finally {
+                    setClientSearchLoading(false);
                 }
+            } else {
+                setClientNotFound(false);
             }
         };
         
-        fetchClientData();
+        // Debounce: aguarda 800ms após o usuário parar de digitar
+        const timeoutId = setTimeout(() => {
+            fetchClientData();
+        }, 600);
+
+        return () => clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [phone_number, setValue, setError]);
 
@@ -664,7 +682,7 @@ export function OnStoreOrder() {
                 productImage={scannedProduct?.image || placeholder_products}
             />
 
-            <Loader show={showLoader} />
+            <Loader show={showLoader || clientSearchLoading} />
 
             {/* Stepper no topo */}
             <StepperContainer>
@@ -999,6 +1017,11 @@ export function OnStoreOrder() {
                                             {errors.last_name && <ErrorMessage>{errors.last_name.message}</ErrorMessage>}
                                         </FormField>
                                     </InlineFormField>
+                                    {clientNotFound && (
+                                        <ErrorMessage style={{ marginTop: '8px' }}>
+                                            Nenhum cliente foi encontrado com este telefone
+                                        </ErrorMessage>
+                                    )}
 
                                     <CheckboxContainer alignLeft>
                                         <Checkbox 
