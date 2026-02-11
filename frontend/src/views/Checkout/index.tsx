@@ -85,7 +85,7 @@ interface INewOrder {
 export function Checkout() {
     const navigate = useNavigate();
     const { slug } = useParams<{ slug: string }>();
-    const { cartItems, cartTotal, clearCart } = useCart();
+    const { cartItems, cartTotal } = useCart();
     const [showLoader, setShowLoader] = useState(false);
     const [mask, setMask] = useState("(99) 99999-9999");
     const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
@@ -217,8 +217,13 @@ export function Checkout() {
                             description: item.name,
                             picture_url: item.image,
                             quantity: item.quantity,
-                            unit_price: item.price || 0
+                            unit_price: item.price || 0,
+                            currency_id: 'BRL'
                         })),
+                        shipments: {
+                            cost: deliveryFee,
+                            mode: 'not_specified'
+                        },
                         payer: {
                             name: data.first_name,
                             surname: data.last_name,
@@ -237,15 +242,13 @@ export function Checkout() {
 
                     const preference = await createMercadoPagoPreference(preferenceData);
                     
-                    // Limpar carrinho antes de redirecionar
-                    clearCart();
-                    
                     // Redirecionar para o checkout do Mercado Pago
                     // Em produção usar init_point, em desenvolvimento usar sandbox_init_point
                     const checkoutUrl = process.env.NODE_ENV === 'production' 
                         ? preference.init_point 
                         : preference.sandbox_init_point;
                     
+                    // Manter loader ativo durante o redirecionamento
                     window.location.href = checkoutUrl;
                     return;
                 } catch (mpError: any) {

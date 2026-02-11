@@ -23,6 +23,10 @@ interface ICreatePreferenceData {
     order_id: string;
     store_slug: string;
     items: IMercadoPagoItem[];
+    shipments?: {
+        cost: number;
+        mode: string;
+    };
     payer?: IMercadoPagoPayer;
     back_urls?: {
         success: string;

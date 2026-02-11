@@ -53,6 +53,7 @@ class ProcessMercadoPagoWebhookService {
             const payment = new Payment(client);
 
             // Buscar detalhes do pagamento
+            console.log(`[ProcessMercadoPagoWebhookService] Fetching payment ${paymentId} from Mercado Pago...`);
             const paymentInfo = await payment.get({ id: paymentId });
 
             if (!paymentInfo) {
@@ -61,6 +62,14 @@ class ProcessMercadoPagoWebhookService {
                     ErrorCodes.BAD_REQUEST
                 );
             }
+
+            console.log(`[ProcessMercadoPagoWebhookService] Payment info:`, {
+                id: paymentInfo.id,
+                status: paymentInfo.status,
+                status_detail: paymentInfo.status_detail,
+                payment_type_id: paymentInfo.payment_type_id,
+                external_reference: paymentInfo.external_reference,
+            });
 
             const orderId = paymentInfo.external_reference;
 

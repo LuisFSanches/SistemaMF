@@ -6,6 +6,14 @@ class MercadoPagoWebhookController {
         const notificationData = req.body;
         const { store_slug } = req.query;
 
+        console.log('[MercadoPagoWebhookController] Webhook received:', {
+            store_slug,
+            type: notificationData.type,
+            action: notificationData.action,
+            data_id: notificationData.data?.id,
+            timestamp: new Date().toISOString(),
+        });
+
         const processMercadoPagoWebhookService = new ProcessMercadoPagoWebhookService();
 
         try {
@@ -16,6 +24,8 @@ class MercadoPagoWebhookController {
                 notificationData,
                 store_slug as string | undefined
             );
+
+            console.log('[MercadoPagoWebhookController] Webhook processed successfully:', result);
 
             // Retornar 200 OK para o Mercado Pago
             return res.status(200).json(result);

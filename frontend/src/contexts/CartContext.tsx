@@ -45,7 +45,7 @@ export const CartProvider: React.FC = ({ children }) => {
     }, 0);
 
     const addToCart = (product: IProduct, quantity: number = 1) => {
-        console.log('[CartContext] Produto sendo adicionado ao carrinho:', { id: product.id, name: product.name, quantity });
+        console.log('[CartContext] ', { id: product.id, name: product.name, quantity });
         setCartItems((prev) => {
             const existingIndex = prev.findIndex((item) => item.id === product.id);
             
@@ -59,7 +59,6 @@ export const CartProvider: React.FC = ({ children }) => {
                 return updated;
             } else {
                 const newItem = { ...product, quantity };
-                console.log('[CartContext] Novo produto adicionado:', newItem);
                 return [...prev, newItem];
             }
         });

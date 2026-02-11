@@ -3,7 +3,7 @@ import { CreateMercadoPagoPreferenceService } from '../../services/mercadoPago/C
 
 class CreateMercadoPagoPreferenceController {
     async handle(req: Request, res: Response, next: NextFunction) {
-        const { order_id, store_slug, items, payer, back_urls } = req.body;
+        const { order_id, store_slug, items, payer, back_urls, shipments } = req.body;
 
         const createMercadoPagoPreferenceService = new CreateMercadoPagoPreferenceService();
 
@@ -14,6 +14,7 @@ class CreateMercadoPagoPreferenceController {
                 items,
                 payer,
                 back_urls,
+                shipments,
             });
 
             return res.json(preference);

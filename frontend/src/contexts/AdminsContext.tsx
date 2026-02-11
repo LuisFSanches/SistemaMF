@@ -17,9 +17,6 @@ export const AdminsProvider: React.FC = ({ children }) => {
   const [admins, setAdmins] = useState<IAdmin[]>([]);
   const token = localStorage.getItem("token");
 
-  console.log('admins', admins);
-
-
   const loadAvailableAdmins = async () => {
     if (admins.length === 0) {
       const { data: { admins } } = await listAdmins();

@@ -17,7 +17,9 @@ class CreateMercadoPagoPreferenceService {
             );
         }
 
-        const { order_id, store_slug, items, payer, back_urls } = parsed.data;
+        console.log("[CreateMercadoPagoPreferenceService] Validation succeeded:", parsed.data);
+
+        const { order_id, store_slug, items, payer, back_urls, shipments } = parsed.data;
 
         // 2. Verificar se o pedido existe
         const order = await prismaClient.order.findUnique({
@@ -122,6 +124,21 @@ class CreateMercadoPagoPreferenceService {
                     };
                 }
             }
+
+            // Adicionar shipments (frete) se fornecido
+            if (shipments && shipments.cost > 0) {
+                preferenceData.shipments = {
+                    cost: shipments.cost,
+                    mode: shipments.mode || 'not_specified',
+                };
+            }
+
+            // Definir PIX como método de pagamento padrão
+            preferenceData.payment_methods = {
+                default_payment_method_id: 'pix',
+                excluded_payment_methods: [],
+                excluded_payment_types: [],
+            };
 
             const response = await preference.create({ body: preferenceData });
 

@@ -4,7 +4,7 @@ const mercadoPagoItemSchema = z.object({
     id: z.string().nonempty("Item id is required"),
     title: z.string().nonempty("Item title is required"),
     description: z.string().optional(),
-    picture_url: z.string().url().optional(),
+    picture_url: z.string().optional(),
     quantity: z.number().int().positive("Quantity must be a positive integer"),
     unit_price: z.number().positive("Unit price must be positive"),
     currency_id: z.string().default("BRL"),
@@ -29,6 +29,10 @@ export const createPreferenceSchema = z.object({
         success: z.string().url().optional(),
         failure: z.string().url().optional(),
         pending: z.string().url().optional(),
+    }).optional(),
+    shipments: z.object({
+        cost: z.number().nonnegative("Shipment cost must be non-negative"),
+        mode: z.string().optional().default("not_specified"),
     }).optional(),
 });
 

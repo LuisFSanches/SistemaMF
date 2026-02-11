@@ -30,6 +30,10 @@ export interface ICreatePreference {
         failure?: string;
         pending?: string;
     };
+    shipments?: {
+        cost: number;
+        mode?: string;
+    };
 }
 
 export interface IMercadoPagoPreferenceResponse {

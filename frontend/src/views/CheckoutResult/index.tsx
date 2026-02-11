@@ -6,6 +6,7 @@ import { StoreFrontHeader } from "../../components/StoreFrontHeader";
 import { Loader } from "../../components/Loader";
 import { getMercadoPagoPaymentStatus } from "../../services/mercadoPagoService";
 import { convertMoney } from "../../utils";
+import { useCart } from "../../contexts/CartContext";
 
 import {
     Container,
@@ -37,6 +38,7 @@ export function CheckoutResult() {
     const navigate = useNavigate();
     const { slug, status: resultStatus } = useParams<{ slug: string; status: string }>();
     const [searchParams] = useSearchParams();
+    const { clearCart } = useCart();
     
     const [showLoader, setShowLoader] = useState(true);
     const [paymentInfo, setPaymentInfo] = useState<IPaymentInfo | null>(null);
@@ -64,6 +66,11 @@ export function CheckoutResult() {
 
         fetchPaymentDetails();
     }, [paymentId, slug]);
+
+    // Limpar carrinho quando chegar nas páginas de resultado
+    useEffect(() => {
+        clearCart();
+    }, [clearCart]);
 
     // Countdown para redirecionar automaticamente após sucesso
     useEffect(() => {

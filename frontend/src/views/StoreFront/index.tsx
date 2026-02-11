@@ -129,11 +129,8 @@ export function StoreFront() {
     }, []);
 
     const handleAddProduct = (product: any, quantity: number, price: number) => {
-        console.log('[StoreFront] Adicionando ao carrinho:', { id: product.id, name: product.name, price });
         addToCart({ ...product, price }, quantity);
     };
-
-    console.log(store)
 
     if (error === 'store_not_found') {
         return (
