@@ -41,6 +41,7 @@ export const useOrderSocket = (
             globalSocket.off('whatsappOrderReceived');
             globalSocket.off('storeFrontOrderReceived');
             globalSocket.off('orderDelivered');
+            globalSocket.off('orderPaymentConfirmed');
 
             globalSocket.on('whatsappOrderReceived', (data) => {
                 callbackRef.current(data, 'whatsappOrder');
@@ -52,6 +53,10 @@ export const useOrderSocket = (
 
             globalSocket.on('orderDelivered', (data) => {
                 callbackRef.current(data, 'orderDelivered');
+            });
+
+            globalSocket.on('orderPaymentConfirmed', (data) => {
+                callbackRef.current(data, 'orderPaymentConfirmed');
             });
 
             return;
@@ -88,6 +93,10 @@ export const useOrderSocket = (
 
         globalSocket.on('orderDelivered', (data) => {
             callbackRef.current(data, 'orderDelivered');
+        });
+
+        globalSocket.on('orderPaymentConfirmed', (data) => {
+            callbackRef.current(data, 'orderPaymentConfirmed');
         });
 
         return () => {

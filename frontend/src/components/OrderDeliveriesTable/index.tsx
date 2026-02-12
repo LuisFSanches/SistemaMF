@@ -49,7 +49,7 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
             await loadOrderDeliveries(page, pageSize, query, filter);
             setConfirmPayModal(false);
             setSelectedDeliveryId("");
-            showSuccess("Pagamento confirmado com sucesso!");
+            showSuccess("Novo pedido online recebido! 🛍️");
         } catch (error) {
             console.error("Error confirming payment:", error);
             alert("Erro ao confirmar pagamento. Tente novamente.");

@@ -3,6 +3,7 @@ import { IMercadoPagoPaymentNotification } from "../../interfaces/IMercadoPago";
 import prismaClient from "../../prisma";
 import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
+import { orderEmitter, OrderEvents } from "../../events/orderEvents";
 
 class ProcessMercadoPagoWebhookService {
     async execute(data: IMercadoPagoPaymentNotification, store_slug?: string) {
@@ -119,17 +120,40 @@ class ProcessMercadoPagoWebhookService {
             }
 
             // Atualizar pedido
-            await prismaClient.order.update({
+            const updatedOrder = await prismaClient.order.update({
                 where: { id: orderId },
                 data: {
                     payment_received: paymentReceived,
                     payment_method: paymentMethod,
                     status: orderStatus,
                     updated_at: new Date(),
+                },
+                include: {
+                    client: true,
+                    clientAddress: true,
+                    orderItems: {
+                        include: {
+                            product: true
+                        }
+                    }
                 }
             });
 
             console.log(`[ProcessMercadoPagoWebhookService] Order ${orderId} updated - Payment: ${paymentStatus}, Received: ${paymentReceived}`);
+
+            // Emitir evento se pagamento foi aprovado e mudou de PENDING_PAYMENT para OPENED
+            if (paymentStatus === 'approved' && order.status === 'PENDING_PAYMENT' && orderStatus === 'OPENED') {
+                console.log(`[ProcessMercadoPagoWebhookService] Emitting OrderPaymentConfirmed event for order ${orderId}`);
+                orderEmitter.emit(OrderEvents.OrderPaymentConfirmed, {
+                    order: updatedOrder,
+                    store_id: order.store_id,
+                    payment_info: {
+                        payment_id: paymentInfo.id,
+                        payment_type: paymentInfo.payment_type_id,
+                        amount: paymentInfo.transaction_amount,
+                    }
+                });
+            }
 
             return {
                 success: true,

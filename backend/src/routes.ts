@@ -152,6 +152,7 @@ import { DeleteStoreHolidayController } from './controllers/storeHoliday/DeleteS
 
 import { CreateMercadoPagoPreferenceController } from './controllers/mercadoPago/CreateMercadoPagoPreferenceController';
 import { MercadoPagoWebhookController } from './controllers/mercadoPago/MercadoPagoWebhookController';
+import { TestMercadoPagoWebhookController } from './controllers/mercadoPago/TestMercadoPagoWebhookController';
 import { GetMercadoPagoPaymentStatusController } from './controllers/mercadoPago/GetMercadoPagoPaymentStatusController';
 
 import adminAuthMiddleware from './middlewares/admin_auth';
@@ -349,6 +350,7 @@ router.delete('/storeHoliday/:id', adminAuthMiddleware, new DeleteStoreHolidayCo
 //-- ROTAS MERCADO PAGO (STOREFRONT) --
 router.post('/mercadopago/preference', new CreateMercadoPagoPreferenceController().handle);
 router.post('/webhook/mercadopago', new MercadoPagoWebhookController().handle);
+router.post('/webhook/mercadopago/test', new TestMercadoPagoWebhookController().handle);
 router.get('/mercadopago/payment/:payment_id', new GetMercadoPagoPaymentStatusController().handle);
 
 export { router };

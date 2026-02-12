@@ -8,13 +8,15 @@ export const Container = styled.div`
     z-index: 1000;
 `;
 
-export const AlertContent = styled.div <{ isDelivery?: boolean }>`
+export const AlertContent = styled.div <{ isDelivery?: boolean; isPaymentConfirmed?: boolean }>`
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    background: ${({ isDelivery }) => (isDelivery ? '#FFEEDD' : '#DDFFE9')};
-    border: 2px solid ${({ isDelivery }) => (isDelivery ? '#FFCCAA' : '#AAFFBB')};
+    background: ${({ isDelivery, isPaymentConfirmed }) => 
+        isPaymentConfirmed ? '#D1FAE5' : (isDelivery ? '#FFEEDD' : '#DDFFE9')};
+    border: 2px solid ${({ isDelivery, isPaymentConfirmed }) => 
+        isPaymentConfirmed ? '#10B981' : (isDelivery ? '#FFCCAA' : '#AAFFBB')};
     border-radius: 15px;
     padding: 15px;
 

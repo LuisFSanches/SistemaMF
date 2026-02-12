@@ -42,6 +42,15 @@ orderEmitter.on(OrderEvents.orderDelivered, (data) => {
   }
 });
 
+orderEmitter.on(OrderEvents.OrderPaymentConfirmed, (data) => {
+  const storeId = data?.store_id;
+  if (storeId) {
+    io.to(`store_${storeId}`).emit(OrderEvents.OrderPaymentConfirmed, data);
+  } else {
+    io.emit(OrderEvents.OrderPaymentConfirmed, data);
+  }
+});
+
 const app = express();
 
 app.use(cors({

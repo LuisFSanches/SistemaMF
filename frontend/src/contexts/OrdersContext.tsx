@@ -110,6 +110,19 @@ export const OrdersProvider: React.FC = ({ children }) => {
       }));
     }
 
+    if (eventType === 'orderPaymentConfirmed' && window.location.href.includes('backoffice')) {
+      console.log('Emitting payment confirmed notification with data:', data);
+        window.dispatchEvent(new CustomEvent('order-payment-confirmed', {
+          detail: {
+            message: '💐🛒 Novo Pedido via loja online recebido!',
+            orderCode: `#${data.order.code}`,
+            clientName: `${data.order.client.first_name} ${data.order.client.last_name}`,
+            amount: data.payment_info.amount,
+            paymentType: data.payment_info.payment_type,
+          }
+      }));
+    }
+
     loadOnGoingOrders(true);
   }, adminData.store_id || undefined);
 
