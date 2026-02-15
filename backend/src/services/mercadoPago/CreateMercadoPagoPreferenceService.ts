@@ -19,7 +19,7 @@ class CreateMercadoPagoPreferenceService {
 
         console.log("[CreateMercadoPagoPreferenceService] Validation succeeded:", parsed.data);
 
-        const { order_id, store_slug, items, payer, back_urls, shipments } = parsed.data;
+        const { order_id, store_slug, order_email, items, payer, back_urls, shipments } = parsed.data;
 
         // 2. Verificar se o pedido existe
         const order = await prismaClient.order.findUnique({
@@ -109,19 +109,30 @@ class CreateMercadoPagoPreferenceService {
                 preferenceData.auto_return = 'approved';
             }
 
-            // Adicionar payer se fornecido
-            if (payer) {
+            // Adicionar payer (priorizar order_email para evitar preenchimento duplicado)
+            const payerEmail = order_email || payer?.email || order.client?.email || '';
+            
+            if (payer || order_email) {
                 preferenceData.payer = {
-                    name: payer.name || '',
-                    surname: payer.surname || '',
-                    email: payer.email || '',
+                    name: payer?.name || order.client?.first_name || '',
+                    surname: payer?.surname || order.client?.last_name || '',
+                    email: payerEmail,
                 };
                 
-                if (payer.phone?.area_code && payer.phone?.number) {
+                if (payer?.phone?.area_code && payer?.phone?.number) {
                     preferenceData.payer.phone = {
                         area_code: payer.phone.area_code,
                         number: payer.phone.number,
                     };
+                } else if (order.client?.phone_number) {
+                    // Tentar extrair DDD do telefone do cliente
+                    const phoneMatch = order.client.phone_number.match(/^\(?([0-9]{2})\)?\s?([0-9]{4,5})-?([0-9]{4})$/);
+                    if (phoneMatch) {
+                        preferenceData.payer.phone = {
+                            area_code: phoneMatch[1],
+                            number: phoneMatch[2] + phoneMatch[3],
+                        };
+                    }
                 }
             }
 

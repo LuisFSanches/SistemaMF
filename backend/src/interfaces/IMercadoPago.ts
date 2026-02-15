@@ -21,6 +21,7 @@ export interface IMercadoPagoPayer {
 export interface ICreatePreference {
     order_id: string;
     store_slug: string;
+    order_email?: string;
     items: IMercadoPagoItem[];
     payer?: IMercadoPagoPayer;
     external_reference?: string;

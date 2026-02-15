@@ -89,7 +89,9 @@ export const OrdersProvider: React.FC = ({ children }) => {
       }));
     }
 
-    if (eventType === 'storeFrontOrder' && !window.location.href.includes('completarPedido')) {
+    if (eventType === 'storeFrontOrder'
+        && !window.location.href.includes('completarPedido')
+      && data.status !== 'PENDING_PAYMENT') {
         window.dispatchEvent(new CustomEvent('new-order', {
           detail: {
             message: '💐 Novo Pedido via loja online recebido!',

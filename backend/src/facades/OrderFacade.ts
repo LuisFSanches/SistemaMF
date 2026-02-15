@@ -115,7 +115,8 @@ class OrderFacade {
                 store_front_order: data.store_front_order,
                 online_code: data.online_code,
                 is_delivery: data.is_delivery,
-                store_id
+                store_id,
+                order_email: data.order_email
             },
             data.products,
             store_id

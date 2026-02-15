@@ -13,7 +13,7 @@ export const Container = styled.div`
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: #e57a7a;
+    background: #4caf50;
     text-align: center;
     font-size: 15px;
     font-weight: 500;

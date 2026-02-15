@@ -104,6 +104,67 @@ class EmailService {
             html,
         });
     }
+
+    async sendVerificationCodeEmail(email: string, code: string, firstName: string) {
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background-color: #EC4899; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+                    .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px; }
+                    .code-box { background-color: white; border: 2px solid #EC4899; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }
+                    .code { font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #EC4899; font-family: 'Courier New', monospace; }
+                    .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+                    .warning { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>🔐 Código de Verificação</h1>
+                    </div>
+                    <div class="content">
+                        <p>Olá, <strong>${firstName}</strong>!</p>
+                        
+                        <p>Recebemos uma solicitação para completar seu pedido em nossa loja online.</p>
+                        
+                        <p>Use o código abaixo para confirmar sua identidade:</p>
+                        
+                        <div class="code-box">
+                            <div class="code">${code}</div>
+                        </div>
+                        
+                        <div class="warning">
+                            <strong>⚠️ Importante:</strong>
+                            <ul>
+                                <li>Este código expira em <strong>15 minutos</strong></li>
+                                <li>Digite o código exatamente como mostrado acima</li>
+                                <li>Se você não solicitou este código, ignore este email</li>
+                                <li>Nunca compartilhe este código com ninguém</li>
+                            </ul>
+                        </div>
+                        
+                        <p>Obrigado por escolher nossa loja!</p>
+                    </div>
+                    <div class="footer">
+                        <p>© ${new Date().getFullYear()} Sistema MF. Todos os direitos reservados.</p>
+                        <p>Este é um email automático, por favor não responda.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        return this.sendEmail({
+            to: email,
+            subject: 'Código de Verificação - Sistema MF',
+            html,
+        });
+    }
 }
 
 export { EmailService };

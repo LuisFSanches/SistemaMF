@@ -29,6 +29,7 @@ export const Banner = styled.img`
 
     @media (max-width: 768px) {
         height: 150px;
+        object-fit: fill;
     }
 `;
 

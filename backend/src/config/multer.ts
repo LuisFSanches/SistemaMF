@@ -53,7 +53,7 @@ export const uploadStore = multer({
     storage: storeStorage,
     fileFilter,
     limits: {
-        fileSize: 500 * 1024, // 500KB para logo e banner
+        fileSize: 2048 * 1024, // 2MB para logo e banner
     }
 });
 

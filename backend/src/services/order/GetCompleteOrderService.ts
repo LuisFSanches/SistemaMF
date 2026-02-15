@@ -46,12 +46,50 @@ class GetCompleteOrderService {
                 return { error: true, message: 'Order not found', code: ErrorCodes.BAD_REQUEST }
             }
 
-            return order;
+            // Buscar dados do cliente pelo receiver_phone
+            let clientData = null;
+            if (order.receiver_phone) {
+                const client = await prismaClient.client.findFirst({
+                    where: {
+                        phone_number: order.receiver_phone
+                    },
+                    select: {
+                        id: true,
+                        first_name: true,
+                        last_name: true,
+                        phone_number: true,
+                        email: true,
+                        addresses: {
+                            select: {
+                                id: true,
+                                street: true,
+                                street_number: true,
+                                complement: true,
+                                neighborhood: true,
+                                reference_point: true,
+                                city: true,
+                                state: true,
+                                postal_code: true,
+                                country: true,
+                                created_at: true,
+                                updated_at: true
+                            }
+                        }
+                    }
+                });
+
+                clientData = client;
+            }
+
+            return {
+                ...order,
+                client: clientData
+            };
         }
         catch(error: any) {
             throw new BadRequestException(
-                "Client already created",
-                ErrorCodes.USER_ALREADY_EXISTS
+                "Error fetching order",
+                ErrorCodes.SYSTEM_ERROR
             );
         }
     }

@@ -5,12 +5,13 @@ import InputMask from "react-input-mask";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleQuestion } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
-import { getClientByPhone, createClientOnline } from "../../services/clientService";
-import { getClientAddresses, getPickupAddress } from "../../services/addressService";
+import { createClientOnline, requestVerificationCode, validateVerificationCode } from "../../services/clientService";
+import { getPickupAddress } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
 import { createMercadoPagoPreference } from "../../services/mercadoPagoService";
 import { Loader } from "../../components/Loader";
 import { ErrorAlert } from "../../components/ErrorAlert";
+import { SuccessAlert } from "../../components/SuccessAlert";
 import { WelcomeBackModal } from "../../components/WelcomeBackModal";
 import { RememberCardModal } from "../../components/RememberCardModal";
 import { TooltipModal } from "../../components/Tooltip";
@@ -60,6 +61,8 @@ interface INewOrder {
     first_name: string;
     last_name: string;
     phone_number: string;
+    email: string;
+    verification_code: string;
     addressId: string;
     pickup_on_store: boolean;
     type_of_delivery: string;
@@ -101,10 +104,14 @@ export function Checkout() {
     const [cardModalShowed, setCardModalShowed] = useState(false);
     const [showToolTipModal, setShowToolTipModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
     const [currentOrder] = useState<any>(null);
     const cardSectionRef = useRef<HTMLDivElement>(null);
-    const hasShownWelcomeModal = useRef(false);
-    const [identifiedUser, setIdentifiedUser] = useState("");
+    const previousPhoneRef = useRef<string>("");
+    const [awaitingVerification, setAwaitingVerification] = useState(false);
+    const [clientExists, setClientExists] = useState(false);
+    const [formStarted, setFormStarted] = useState(false);
+    const [welcomeClientName, setWelcomeClientName] = useState("");
     const tooltipMessage = `Para entregas em outras regiões,
         por favor entre em contato conosco pelo whatsapp.`;
 
@@ -117,6 +124,7 @@ export function Checkout() {
         watch,
         setValue,
         setError,
+        clearErrors,
         formState: { errors, submitCount },
     } = useForm<INewOrder>({
         defaultValues: {
@@ -163,6 +171,7 @@ export function Checkout() {
             phone_number: rawTelephone(data.phone_number),
             first_name: data.first_name,
             last_name: data.last_name,
+            order_email: data.email,
             pickup_on_store: pickupOnStore,
             address_id: addressId,
             type_of_delivery: data.type_of_delivery,
@@ -211,6 +220,7 @@ export function Checkout() {
                     const preferenceData = {
                         order_id: response.id,
                         store_slug: slug,
+                        order_email: data.email,
                         items: cartItems.map(item => ({
                             id: item.id || '',
                             title: item.name,
@@ -266,59 +276,59 @@ export function Checkout() {
         }
     };
 
-    const phone_number = watch("phone_number");
     const typeOfDelivery = watch("type_of_delivery");
     const hasCard = watch("has_card");
     const watchReceiverPhone = watch("receiver_phone");
     const watchPhoneNumber = watch("phone_number");
 
-    useEffect(() => {
-        const fetchClientData = async () => {
-            const phoneNumber = rawTelephone(phone_number);
-
-            if (phoneNumber && phoneNumber.length >= 10 && phoneNumber !== identifiedUser) {
-                try {
-                    setShowLoader(true);
-                    const response = await getClientByPhone(phoneNumber);
-                    const { data: client } = response;
-
-                    if (!client) {
-                        setClientId("");
-                        setValue("first_name", "");
-                        setValue("last_name", "");
-                        setShowLoader(false);
-                    }
-
-                    if (client) {
-                        setValue("first_name", client.first_name);
-                        setValue("last_name", client.last_name);
-                        setClientId(client.id);
-                        const { data: addresses } = await getClientAddresses(client.id);
-
-                        if (addresses) {
-                            setAddresses(addresses);
-                        }
-
-                        setShowLoader(false);
-
-                        if (!hasShownWelcomeModal.current || identifiedUser !== client.phone_number) {
-                            setIdentifiedUser(client.phone_number);
-                            setShowWelcomeModal(true);
-                            hasShownWelcomeModal.current = true;
-                        }
-                    }
-                } catch (error) {
-                    setClientId("");
-                    setShowLoader(false);
-                }
-            }
-        };
-
-        setTimeout(() => {
-            fetchClientData();
-        }, 900);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [phone_number, setValue]);
+    // Busca automática desativada por questões de LGPD
+    // useEffect(() => {
+    //     const fetchClientData = async () => {
+    //         const phoneNumber = rawTelephone(phone_number);
+    //
+    //         if (phoneNumber && phoneNumber.length >= 10 && phoneNumber !== identifiedUser) {
+    //             try {
+    //                 setShowLoader(true);
+    //                 const response = await getClientByPhone(phoneNumber);
+    //                 const { data: client } = response;
+    //
+    //                 if (!client) {
+    //                     setClientId("");
+    //                     setValue("first_name", "");
+    //                     setValue("last_name", "");
+    //                     setShowLoader(false);
+    //                 }
+    //
+    //                 if (client) {
+    //                     setValue("first_name", client.first_name);
+    //                     setValue("last_name", client.last_name);
+    //                     setClientId(client.id);
+    //                     const { data: addresses } = await getClientAddresses(client.id);
+    //
+    //                     if (addresses) {
+    //                         setAddresses(addresses);
+    //                     }
+    //
+    //                     setShowLoader(false);
+    //
+    //                     if (!hasShownWelcomeModal.current || identifiedUser !== client.phone_number) {
+    //                         setIdentifiedUser(client.phone_number);
+    //                         setShowWelcomeModal(true);
+    //                         hasShownWelcomeModal.current = true;
+    //                     }
+    //                 }
+    //             } catch (error) {
+    //                 setClientId("");
+    //                 setShowLoader(false);
+    //             }
+    //         }
+    //     };
+    //
+    //     setTimeout(() => {
+    //         fetchClientData();
+    //     }, 900);
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [phone_number, setValue]);
 
     useEffect(() => {
         const phoneNumber = watch("receiver_phone") || "";
@@ -393,6 +403,36 @@ export function Checkout() {
         }
     }, [submitCount, errors]);
 
+    // Resetar formulário quando o telefone for alterado
+    useEffect(() => {
+        const phoneNumber = watch("phone_number") || "";
+        const numericValue = rawTelephone(phoneNumber);
+
+        // Se já tinha iniciado o formulário e o telefone mudou
+        if (formStarted && numericValue.length >= 10) {
+            const previousPhone = previousPhoneRef.current;
+            
+            // Se o telefone realmente mudou
+            if (previousPhone && previousPhone !== numericValue) {
+                // Resetar estados e campos
+                setClientId("");
+                setClientExists(false);
+                setAwaitingVerification(false);
+                setFormStarted(false);
+                setValue("first_name", "");
+                setValue("last_name", "");
+                setValue("verification_code", "");
+                setAddresses([]);
+                clearErrors(["first_name", "last_name", "verification_code"]);
+            }
+        }
+        
+        // Atualizar o telefone anterior
+        if (numericValue.length >= 10) {
+            previousPhoneRef.current = numericValue;
+        }
+    }, [watchPhoneNumber, formStarted, watch, setValue, clearErrors]);
+
     const handlePickUpAddress = async (value: boolean) => {
         if (value) {
             const { data: pickUpAddress } = await getPickupAddress() as any;
@@ -423,34 +463,112 @@ export function Checkout() {
 
     const handleCreateUser = async () => {
         const phoneNumber = watch('phone_number');
+        const email = watch('email');
         const firstName = watch('first_name');
         const lastName = watch('last_name');
 
-        if (!firstName || !lastName || !phoneNumber) {
-            setError("phone_number", { message: "Preencha todos os campos" });
-            setError("first_name", { message: "Preencha todos os campos" });
-            setError("last_name", { message: "Preencha todos os campos" });
+        if (!phoneNumber || !email) {
+            setError("phone_number", { message: "Preencha o telefone e o email" });
+            setError("email", { message: "Preencha o telefone e o email" });
             return;
         }
 
         setError("phone_number", { message: "" });
-        setError("first_name", { message: "" });
-        setError("last_name", { message: "" });
+        setError("email", { message: "" });
 
+        setShowLoader(true);
+        setFormStarted(true);
+
+        try {
+            const { data } = await requestVerificationCode({
+                phone_number: rawTelephone(phoneNumber),
+                email: email,
+            });
+
+            // Armazenar o telefone atual como referência
+            previousPhoneRef.current = rawTelephone(phoneNumber);
+
+            if (data.client_exists) {
+                // Cliente existe, solicitar código de verificação
+                setClientExists(true);
+                setAwaitingVerification(true);
+                setWelcomeClientName(data.first_name);
+                setShowWelcomeModal(true);
+            } else {
+                // Cliente não existe, criar novo cliente
+                if (!firstName || !lastName) {
+                    setError("first_name", { message: "Preencha seu nome" });
+                    setError("last_name", { message: "Preencha seu sobrenome" });
+                    setShowLoader(false);
+                    return;
+                }
+
+                const { data: clientData } = await createClientOnline({
+                    first_name: firstName,
+                    last_name: lastName,
+                    phone_number: rawTelephone(phoneNumber),
+                    email: email,
+                });
+
+                setClientId(clientData.id);
+                setSuccessMessage('Cliente criado com sucesso!');
+                setTimeout(() => { setSuccessMessage('') }, 3000);
+            }
+        } catch (error: any) {
+            console.error(error);            
+            let errorMsg = 'Algo deu errado, por favor tente novamente';
+            
+            setErrorMessage(errorMsg);
+            setTimeout(() => { setErrorMessage('') }, 5000);
+        } finally {
+            setShowLoader(false);
+        }
+    };
+
+    const handleValidateCode = async () => {
+        const phoneNumber = watch('phone_number');
+        const code = watch('verification_code');
+
+        if (!code || code.length !== 6) {
+            setError("verification_code", { message: "Digite o código de 6 dígitos" });
+            return;
+        }
+
+        setError("verification_code", { message: "" });
         setShowLoader(true);
 
         try {
-            const { data: clientData } = await createClientOnline({
-                first_name: firstName,
-                last_name: lastName,
+            const { data } = await validateVerificationCode({
                 phone_number: rawTelephone(phoneNumber),
+                code: code,
             });
 
-            setClientId(clientData.id);
+            if (data.valid && data.client) {
+                // Preencher dados do cliente
+                setValue("first_name", data.client.first_name);
+                setValue("last_name", data.client.last_name);
+                // Email já está preenchido pelo usuário, não precisa setValue
+                
+                // Limpar erros de validação dos campos preenchidos
+                clearErrors(["first_name", "last_name"]);
+                
+                setClientId(data.client.id);
+
+                // Carregar endereços
+                if (data.client.addresses && data.client.addresses.length > 0) {
+                    setAddresses(data.client.addresses);
+                }
+
+                setAwaitingVerification(false);
+                setSuccessMessage('Código validado com sucesso!');
+                setTimeout(() => { setSuccessMessage('') }, 3000);
+            }
         } catch (error: any) {
             console.error(error);
-            setErrorMessage('Algo deu errado, por favor tente novamente');
-            setTimeout(() => { setErrorMessage('') }, 1500);
+            const errorMsg = error?.response?.data?.message || 'Código inválido ou expirado';
+            setError("verification_code", { message: errorMsg });
+            setErrorMessage(errorMsg);
+            setTimeout(() => { setErrorMessage('') }, 3000);
         } finally {
             setShowLoader(false);
         }
@@ -461,7 +579,8 @@ export function Checkout() {
             <WelcomeBackModal
                 isOpen={showWelcomeModal}
                 onRequestClose={() => setShowWelcomeModal(false)}
-                name={`${watch("first_name")} ${watch("last_name")}`}
+                name={welcomeClientName}
+                textBody="Digite o código enviado para o seu e-mail para confirmar sua identidade"
             />
             <RememberCardModal
                 isOpen={showRememberCardModal}
@@ -479,6 +598,7 @@ export function Checkout() {
             />
             <Loader show={showLoader} />
             {errorMessage && <ErrorAlert message={errorMessage} />}
+            {successMessage && <SuccessAlert message={successMessage} />}
 
             <StoreFrontHeader 
                 showBackButton 
@@ -536,6 +656,7 @@ export function Checkout() {
                                         alwaysShowMask={false}
                                         placeholder='Telefone'
                                         value={watch("phone_number") || ""}
+                                        disabled={awaitingVerification}
                                         {...register("phone_number", {
                                             required: "Telefone inválido",
                                             validate: (value) => {
@@ -548,33 +669,94 @@ export function Checkout() {
                                     />
                                     {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
                                 </FormField>
-                                <InlineFormField>
+                                <FormField>
+                                    <Label>
+                                        Seu email
+                                        <span>*</span>
+                                    </Label>
+                                    <Input 
+                                        type="email" 
+                                        autoComplete="email" 
+                                        placeholder="Digite seu email"
+                                        disabled={awaitingVerification || !!client_id}
+                                        {...register("email", {
+                                            required: "Email inválido",
+                                            pattern: {
+                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                message: "Email inválido"
+                                            }
+                                        })}
+                                    />
+                                    {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
+                                </FormField>
+
+                                {awaitingVerification && (
                                     <FormField>
                                         <Label>
-                                            Seu nome
+                                            Código de Verificação
                                             <span>*</span>
                                         </Label>
-                                        <Input type="text" autoComplete="off" placeholder="Digite seu nome"
-                                            {...register("first_name", {
-                                                required: "Nome inválido",
+                                        <Input 
+                                            type="text" 
+                                            autoComplete="off" 
+                                            placeholder="Digite o código de 6 dígitos"
+                                            maxLength={6}
+                                            {...register("verification_code", {
+                                                required: "Digite o código",
+                                                minLength: {
+                                                    value: 6,
+                                                    message: "Código deve ter 6 dígitos"
+                                                },
+                                                maxLength: {
+                                                    value: 6,
+                                                    message: "Código deve ter 6 dígitos"
+                                                }
                                             })}
                                         />
-                                        {errors.first_name && <ErrorMessage>{errors.first_name.message}</ErrorMessage>}
+                                        {errors.verification_code && <ErrorMessage>{errors.verification_code.message}</ErrorMessage>}
+                                        <PrimaryButton type="button" onClick={handleValidateCode} style={{ marginTop: '10px' }}>
+                                            Validar Código
+                                        </PrimaryButton>
                                     </FormField>
-                                    <FormField>
-                                        <Label>
-                                            Seu sobrenome
-                                            <span>*</span>
-                                        </Label>
-                                        <Input type="text" placeholder="Digite seu sobrenome"
-                                            {...register("last_name", {
-                                                required: "Sobrenome inválido",
-                                            })}
-                                        />
-                                        {errors.last_name && <ErrorMessage>{errors.last_name.message}</ErrorMessage>}
-                                    </FormField>
-                                </InlineFormField>
-                                {!client_id &&
+                                )}
+
+                                {((formStarted && !awaitingVerification && !clientExists) || client_id) && (
+                                    <InlineFormField>
+                                        <FormField>
+                                            <Label>
+                                                Seu nome
+                                                <span>*</span>
+                                            </Label>
+                                            <Input 
+                                                type="text" 
+                                                autoComplete="off" 
+                                                placeholder="Digite seu nome"
+                                                disabled={!!client_id}
+                                                {...register("first_name", {
+                                                    required: "Nome inválido",
+                                                })}
+                                            />
+                                            {errors.first_name && <ErrorMessage>{errors.first_name.message}</ErrorMessage>}
+                                        </FormField>
+                                        <FormField>
+                                            <Label>
+                                                Seu sobrenome
+                                                <span>*</span>
+                                            </Label>
+                                            <Input 
+                                                type="text" 
+                                                placeholder="Digite seu sobrenome"
+                                                disabled={!!client_id}
+                                                {...register("last_name", {
+                                                    required: "Sobrenome inválido",
+                                                })}
+                                            />
+                                            {errors.last_name && <ErrorMessage>{errors.last_name.message}</ErrorMessage>}
+                                        </FormField>
+                                    </InlineFormField>
+                                )}
+
+                                {!client_id && !awaitingVerification &&
                                     <PrimaryButton type="button" onClick={handleCreateUser}>
                                         Continuar
                                     </PrimaryButton>

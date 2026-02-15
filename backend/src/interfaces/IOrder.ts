@@ -27,4 +27,5 @@ export interface IOrder {
     products?: any,
     is_delivery?: boolean,
     store_id?: string,
+    order_email?: string;
 }

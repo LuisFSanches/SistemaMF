@@ -7,6 +7,8 @@ import { GetClientController } from './controllers/client/GetClientController'
 import { GetClientByPhoneNumbeController } from './controllers/client/GetClientByPhoneNumbeController'
 import { CreateClientController } from './controllers/client/CreateClientController'
 import { UpdateClientController } from './controllers/client/UpdateClientController';
+import { RequestVerificationController } from './controllers/client/RequestVerificationController';
+import { ValidateCodeController } from './controllers/client/ValidateCodeController';
 
 import { CreateCategoryController } from './controllers/category/CreateCategoryController';
 import { GetAllCategoriesController } from './controllers/category/GetAllCategoriesController';
@@ -155,11 +157,14 @@ import { MercadoPagoWebhookController } from './controllers/mercadoPago/MercadoP
 import { TestMercadoPagoWebhookController } from './controllers/mercadoPago/TestMercadoPagoWebhookController';
 import { GetMercadoPagoPaymentStatusController } from './controllers/mercadoPago/GetMercadoPagoPaymentStatusController';
 
+import { SendWhatsAppMessageController } from './controllers/whatsapp/SendWhatsAppMessageController';
+
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 import sysAdminAuthMiddleware from './middlewares/sys_admin_auth';
 import { upload, uploadStore, uploadCategory, uploadExcel } from './config/multer';
 import { processImage } from './middlewares/process_image';
+import { processBannerImage } from './middlewares/process_banner_image';
 import { handleMulterError } from './middlewares/multer_error';
 
 
@@ -171,8 +176,10 @@ router.get('/dashboard', adminAuthMiddleware, new DashboardController().handle);
 //-- ROTAS CLIENT --
 router.post('/client', adminAuthMiddleware, new CreateClientController().handle)
 router.post('/client/new/online', new CreateClientController().handle)
+router.post('/client/verification/request', new RequestVerificationController().handle)
+router.post('/client/verification/validate', new ValidateCodeController().handle)
 router.get('/clients/all', adminAuthMiddleware, new GetAllClientController().handle)
-router.get('/client/phone_number', new GetClientByPhoneNumbeController().handle)
+router.get('/client/phone_number', adminAuthMiddleware, new GetClientByPhoneNumbeController().handle)
 router.get('/client/:id', superAdminAuthMiddleware, new GetClientController().handle)
 router.put('/client/:id', adminAuthMiddleware, new UpdateClientController().handle)
 
@@ -322,9 +329,9 @@ router.put('/store/:id/credentials', superAdminAuthMiddleware, new UpdateStoreCr
 router.put('/store/:id/schedules', adminAuthMiddleware, new UpdateStoreSchedulesController().handle);
 router.delete('/store/:id', superAdminAuthMiddleware, new DeleteStoreController().handle);
 router.post('/store/:id/logo', superAdminAuthMiddleware, uploadStore.single('logo'), handleMulterError, processImage, new UploadStoreLogoController().handle);
-router.post('/store/:id/banner', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processImage, new UploadStoreBannerController().handle);
-router.post('/store/:id/banner-2', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processImage, new UploadStoreBanner2Controller().handle);
-router.post('/store/:id/banner-3', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processImage, new UploadStoreBanner3Controller().handle);
+router.post('/store/:id/banner', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processBannerImage, new UploadStoreBannerController().handle);
+router.post('/store/:id/banner-2', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processBannerImage, new UploadStoreBanner2Controller().handle);
+router.post('/store/:id/banner-3', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processBannerImage, new UploadStoreBanner3Controller().handle);
 
 //-- ROTAS STORE ADDRESS --
 router.post('/storeAddress', adminAuthMiddleware, new CreateStoreAddressController().handle);
@@ -352,5 +359,8 @@ router.post('/mercadopago/preference', new CreateMercadoPagoPreferenceController
 router.post('/webhook/mercadopago', new MercadoPagoWebhookController().handle);
 router.post('/webhook/mercadopago/test', new TestMercadoPagoWebhookController().handle);
 router.get('/mercadopago/payment/:payment_id', new GetMercadoPagoPaymentStatusController().handle);
+
+//-- ROTAS WHATSAPP (MENSAGERIA) --
+router.post('/whatsapp/send', new SendWhatsAppMessageController().handle);
 
 export { router };

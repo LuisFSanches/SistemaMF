@@ -171,6 +171,10 @@ export const CartItem = styled.div`
     &:hover {
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
+
+    @media (max-width: 768px) {
+        flex-wrap: wrap;
+    }
 `;
 
 export const CartItemImage = styled.img`
@@ -208,6 +212,13 @@ export const CartItemActions = styled.div`
     display: flex;
     align-items: center;
     gap: 12px;
+
+    @media (max-width: 768px) {
+        width: 100%;
+        justify-content: space-between;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+    }
 `;
 
 export const QuantityControl = styled.div`

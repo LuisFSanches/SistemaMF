@@ -6,10 +6,11 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 interface WelcomeBackModalProps{
     isOpen: boolean;
     onRequestClose: ()=> void;
-    name: string
+    name: string,
+    textBody?: string
 }
 
-export function WelcomeBackModal({isOpen, onRequestClose, name}:WelcomeBackModalProps){
+export function WelcomeBackModal({isOpen, onRequestClose, name, textBody}:WelcomeBackModalProps){
     return(
         <Modal 
             isOpen={isOpen}
@@ -23,7 +24,11 @@ export function WelcomeBackModal({isOpen, onRequestClose, name}:WelcomeBackModal
 
             <Container>
                 <h2>Bem vindo {name}, ficamos muito felizes em ter você de volta! 😃</h2>
-                <p>Ao preencher o formulário, selecione um endereço já cadastrado, ou crie um novo caso deseje.</p>
+                <p>{textBody ||
+                    "Ao preencher o formulário, selecione um endereço já cadastrado, ou crie um novo caso deseje."
+                    }
+                </p>
+                <button onClick={onRequestClose}>Continuar</button>
             </Container>
         </Modal>
     )

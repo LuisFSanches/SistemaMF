@@ -39,12 +39,28 @@ model Client {
   first_name String
   last_name String
   phone_number String
+  email String? @unique
   addresses Address[]
   orders Order[]
+  verificationCodes VerificationCode[]
   created_at DateTime? @default(now())
   updated_at DateTime? @default(now())
 
   @@map("clients")
+}
+
+model VerificationCode {
+  id          String   @id @default(uuid())
+  client_id   String
+  code        String
+  expires_at  DateTime
+  is_used     Boolean  @default(false)
+  created_at  DateTime @default(now())
+
+  client      Client   @relation(fields: [client_id], references: [id], onDelete: Cascade)
+
+  @@index([client_id])
+  @@map("verification_codes")
 }
 
 model Address {
@@ -187,6 +203,7 @@ model Order {
   pickup_on_store Boolean    @default(false)
   receiver_name     String?
   receiver_phone    String?
+  order_email       String?
   products_value    Float
   delivery_fee      Float
   discount          Float        @default(0)

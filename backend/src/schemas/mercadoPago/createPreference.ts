@@ -23,6 +23,7 @@ const mercadoPagoPayerSchema = z.object({
 export const createPreferenceSchema = z.object({
     order_id: z.string().nonempty("Order ID is required"),
     store_slug: z.string().nonempty("Store slug is required"),
+    order_email: z.string().email("Invalid email format").optional(),
     items: z.array(mercadoPagoItemSchema).min(1, "At least one item is required"),
     payer: mercadoPagoPayerSchema,
     back_urls: z.object({

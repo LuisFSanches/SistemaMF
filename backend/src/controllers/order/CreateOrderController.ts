@@ -27,6 +27,7 @@ class CreateOrderController{
 
 	handle = async (req: Request, res: Response, next: NextFunction) => {
 		const data = req.body;
+		console.log("[CreateOrderController] Received request body:", data.order_email);
 		const store_id = data.store_id ?? req.admin?.store_id;
 		const order = await this.orderFacade.createOrder(data, store_id as string);
 

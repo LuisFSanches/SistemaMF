@@ -38,7 +38,8 @@ export const createOrder = async ({
 	card_from,
 	card_to,
 	card_message,
-	store_id: receivedStoreId
+	store_id: receivedStoreId,
+	order_email
 }: any) => {
 	// Usar store_id recebido (do storefront) ou obter do admin logado
 	const store_id = receivedStoreId || getStoreId();
@@ -82,7 +83,8 @@ export const createOrder = async ({
 		is_delivery,
 		card_from,
 		card_to,
-		card_message
+		card_message,
+		order_email
 	});
 
 	return response;

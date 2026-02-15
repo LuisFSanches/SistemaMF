@@ -7,6 +7,7 @@ import { BadRequestException } from "../../exceptions/bad-request";
 class CreateOrderService{
 	async execute(data: IOrder, products: any, store_id?: string) {
 		const { delivery_date } = data;
+		console.log("[CreateOrderService] Received data:", data.order_email);
 
 		try {
 			const formattedDeliveryDate = moment.utc(delivery_date)

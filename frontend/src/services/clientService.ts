@@ -37,11 +37,37 @@ export const createClientOnline = async ({
   first_name,
   last_name,
   phone_number,
+  email,
 }: any) => {
   const response = await api.post("/client/new/online", {
     first_name,
     last_name,
     phone_number,
+    email,
+  });
+  
+  return response;
+}
+
+export const requestVerificationCode = async ({
+  phone_number,
+  email,
+}: any) => {
+  const response = await api.post("/client/verification/request", {
+    phone_number,
+    email,
+  });
+  
+  return response;
+}
+
+export const validateVerificationCode = async ({
+  phone_number,
+  code,
+}: any) => {
+  const response = await api.post("/client/verification/validate", {
+    phone_number,
+    code,
   });
   
   return response;

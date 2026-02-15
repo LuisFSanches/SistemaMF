@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { IOrder } from "../../interfaces/IOrder";
-import { getClientByPhone } from "../../services/clientService";
-import { getClientAddresses } from "../../services/addressService";
 import { getPickupAddress } from "../../services/addressService";
 import { finishOnlineOrder } from "../../services/orderService";
 import { getCompletedOrder } from "../../services/orderService";
@@ -83,7 +81,6 @@ export function CompleteOrder() {
     const [showToolTipModal, setShowToolTipModal] = useState(false);
     const cardSectionRef = useRef<HTMLDivElement>(null);
     const hasShownWelcomeModal = useRef(false);
-    const [identifiedUser, setIdentifiedUser] = useState("");
     const tooltipMessage = `Para entregas em outras regiões,
         por favor entre em contato conosco pelo whatsapp.`
 
@@ -189,59 +186,32 @@ export function CompleteOrder() {
                 setStoreName(order.store.name || "");
                 setStoreCNPJ(order.store.cnpj || "");
                 setStorePhone(order.store.phone_number || "");
+                
+                // Preencher dados do cliente se já existir no pedido
+                if (order.client) {
+                    setValue("phone_number", order.client.phone_number);
+                    setValue("first_name", order.client.first_name);
+                    setValue("last_name", order.client.last_name);
+                    setClientId(order.client.id);
+                    
+                    // Preencher endereços se existirem
+                    if (order.client.addresses && order.client.addresses.length > 0) {
+                        setAddresses(order.client.addresses);
+                    }
+                    
+                    // Exibir modal de boas-vindas
+                    setShowWelcomeModal(true);
+                    hasShownWelcomeModal.current = true;
+                }
             }
             setShowLoader(false);
         }
 
         fetchOrderData();
-    }, [orderId]);
+    }, [orderId, setValue]);
 
-    useEffect(() => {
-        const fetchClientData = async () => {
-            const phoneNumber = rawTelephone(phone_number);
-
-            if (phoneNumber && phoneNumber.length >= 10 && phoneNumber !== identifiedUser) {
-                try {
-                    setShowLoader(true);
-                    const response = await getClientByPhone(phoneNumber);
-                    const { data: client } = response;
-
-                    if (!client) {
-                        setClientId("");
-                        setValue("first_name", "");
-                        setValue("last_name", "");
-                        setShowLoader(false);
-                    }
-
-                    if (client) {
-                        setValue("first_name", client.first_name);
-                        setValue("last_name", client.last_name);
-                        setClientId(client.id);
-                        const { data: addresses } = await getClientAddresses(client.id);
-                    
-                        if (addresses) {
-                            setAddresses(addresses);
-                        }
-                        setShowLoader(false);
-                        
-                        if (!hasShownWelcomeModal.current || identifiedUser !== client.phone_number) {
-                            setIdentifiedUser(client.phone_number);
-                            setShowWelcomeModal(true);
-                            hasShownWelcomeModal.current = true;
-                        }
-                    }
-                } catch (error) {
-                    setClientId("");
-                    setShowLoader(false);
-                }
-            }
-        };
-        
-        setTimeout(() => {
-            fetchClientData();
-        }, 600);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [phone_number, setValue, setError]);
+    // useEffect de busca por telefone removido por questões de LGPD
+    // Os dados do cliente agora vêm diretamente da API getCompletedOrder
 
     useEffect(() => {
         const phoneNumber = watch("receiver_phone") || "";
@@ -367,8 +337,16 @@ export function CompleteOrder() {
 
         } catch (error: any) {
             console.error(error);
-            setErrorMessage('Algo deu errado, por favor tente novamente');
-            setTimeout(()=>{setErrorMessage('')}, 1500);
+            
+            // Verificar se é erro de cliente já cadastrado
+            if (error.response?.data?.errorCode === 400 && 
+                error.response?.data?.message === "Client already created") {
+                setErrorMessage('Este número de telefone já está cadastrado no sistema. Para qualquer dúvida, entre em contato com a loja.');
+                setTimeout(() => { setErrorMessage('') }, 4000);
+            } else {
+                setErrorMessage('Algo deu errado, por favor tente novamente');
+                setTimeout(() => { setErrorMessage('') }, 1500);
+            }
         } finally {
             setShowLoader(false);
         }
@@ -471,6 +449,7 @@ export function CompleteOrder() {
                                 alwaysShowMask={false}
                                 placeholder='Telefone'
                                 value={watch("phone_number") || ""}
+                                disabled={!!client_id}
                                 {...register("phone_number", { 
                                     required: "Telefone inválido",
                                     validate: (value) => {
