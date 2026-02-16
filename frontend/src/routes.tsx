@@ -40,6 +40,7 @@ import StoreSettings from "./views/StoreSettings";
 import { ForgotPasswordPage } from "./views/ForgotPasswordPage";
 import { ResetPasswordPage } from "./views/ResetPasswordPage";
 import { CategoriesPage } from "./views/Categories";
+import { Home } from "./views/Home";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -67,6 +68,7 @@ export default function routes(){
         <>
             <BrowserRouter>
                 <Routes>
+                    <Route path="/" element={<Home />} />
                     <Route element={<SideBarLayout/>}>
                         <Route path ="/backoffice/dashboard" element={
                             <PrivateRoute>

@@ -17,7 +17,7 @@ import {
 
 export function StoreFrontFooter() {
     return (
-        <FooterContainer>
+        <FooterContainer id="contato">
             <FooterContent>
                 <FooterColumn>
                     <img src={logo} alt="Minhas Flores Logo" />
@@ -32,23 +32,23 @@ export function StoreFrontFooter() {
                     <FooterTitle>Produto</FooterTitle>
                     <FooterLinkList>
                         <li>
-                            <FooterLink href="https://sistema-mf.netlify.app/" target="_blank" rel="noopener noreferrer">
+                            <FooterLink href="/#funcionalidades">
                                 Funcionalidades
                             </FooterLink>
                         </li>
                         <li>
-                            <FooterLink href="https://sistema-mf.netlify.app/" target="_blank" rel="noopener noreferrer">
+                            <FooterLink href="/#precos">
                                 Preços
                             </FooterLink>
                         </li>
                         <li>
-                            <FooterLink href="https://sistema-mf.netlify.app/" target="_blank" rel="noopener noreferrer">
-                                Demonstração
+                            <FooterLink href="/#metricas">
+                                Resultados
                             </FooterLink>
                         </li>
                         <li>
-                            <FooterLink href="https://sistema-mf.netlify.app/" target="_blank" rel="noopener noreferrer">
-                                Casos de Sucesso
+                            <FooterLink href="/#beneficios">
+                                Benefícios
                             </FooterLink>
                         </li>
                     </FooterLinkList>
@@ -58,23 +58,23 @@ export function StoreFrontFooter() {
                     <FooterTitle>Empresa</FooterTitle>
                     <FooterLinkList>
                         <li>
-                            <FooterLink href="https://sistema-mf.netlify.app/" target="_blank" rel="noopener noreferrer">
-                                Sobre Nós
+                            <FooterLink href="/#hero">
+                                Início
                             </FooterLink>
                         </li>
                         <li>
-                            <FooterLink href="https://sistema-mf.netlify.app/" target="_blank" rel="noopener noreferrer">
-                                Blog
+                            <FooterLink href="/cadastro">
+                                Cadastro
                             </FooterLink>
                         </li>
                         <li>
-                            <FooterLink href="https://sistema-mf.netlify.app/" target="_blank" rel="noopener noreferrer">
-                                Suporte
+                            <FooterLink href="/login">
+                                Login
                             </FooterLink>
                         </li>
                         <li>
-                            <FooterLink href="https://sistema-mf.netlify.app/" target="_blank" rel="noopener noreferrer">
-                                Documentação
+                            <FooterLink href="/#contato">
+                                Contato
                             </FooterLink>
                         </li>
                     </FooterLinkList>
@@ -84,11 +84,11 @@ export function StoreFrontFooter() {
                     <FooterTitle>Contato</FooterTitle>
                     <ContactItem>
                         <FontAwesomeIcon icon={faEnvelope} />
-                        <span>contato@sistemamf.com.br</span>
+                        <span>sistema.mf.flores@gmail.com</span>
                     </ContactItem>
                     <ContactItem>
                         <FontAwesomeIcon icon={faPhone} />
-                        <span>(11) 99999-9999</span>
+                        <span>(22) 99751-7940</span>
                     </ContactItem>
                 </FooterColumn>
             </FooterContent>
@@ -96,10 +96,10 @@ export function StoreFrontFooter() {
             <FooterBottom>
                 <Copyright>© 2025 SistemaMF. Todos os direitos reservados.</Copyright>
                 <BottomLinks>
-                    <FooterLink href="https://sistema-mf.netlify.app/" target="_blank" rel="noopener noreferrer">
+                    <FooterLink href="#">
                         Política de Privacidade
                     </FooterLink>
-                    <FooterLink href="https://sistema-mf.netlify.app/" target="_blank" rel="noopener noreferrer">
+                    <FooterLink href="#">
                         Termos de Uso
                     </FooterLink>
                 </BottomLinks>

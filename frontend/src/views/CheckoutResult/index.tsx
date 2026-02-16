@@ -3,9 +3,11 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle, faTimesCircle, faClock } from "@fortawesome/free-solid-svg-icons";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
+import { StoreFrontFooter } from "../../components/StoreFrontFooter";
 import { Loader } from "../../components/Loader";
+import { OrderStatusStepper, OrderStatusStep } from "../../components/OrderStatusStepper";
 import { getMercadoPagoPaymentStatus } from "../../services/mercadoPagoService";
-import { convertMoney } from "../../utils";
+import { convertMoney, rawTelephone } from "../../utils";
 import { useCart } from "../../contexts/CartContext";
 
 import {
@@ -20,7 +22,6 @@ import {
     ButtonsContainer,
     PrimaryButton,
     SecondaryButton,
-    CountdownText,
     LoadingSpinner
 } from "./style";
 
@@ -28,7 +29,6 @@ type ResultStatus = 'approved' | 'failure' | 'pending';
 
 interface IPaymentInfo {
     id: number;
-    status: string;
     transaction_amount: number;
     payment_method_id: string;
     payment_type_id: string;
@@ -43,56 +43,78 @@ export function CheckoutResult() {
     
     const [showLoader, setShowLoader] = useState(true);
     const [paymentInfo, setPaymentInfo] = useState<IPaymentInfo | null>(null);
-    const [countdown, setCountdown] = useState(15);
+    const [orderStep, setOrderStep] = useState<OrderStatusStep>('validating');
 
     // Parâmetros retornados pelo Mercado Pago
     const paymentId = searchParams.get('payment_id');
     const externalReference = searchParams.get('external_reference'); // order_id
-    const mpStatus = searchParams.get('status');
 
     const initialStatus: ResultStatus = (resultStatus as ResultStatus) || 'pending';
     const [status, setStatus] = useState<ResultStatus>(initialStatus);
 
     useEffect(() => {
+        let attemptCount = 0;
+        const maxAttempts = 5;
+        const intervalTime = 10000;
+        let intervalId: NodeJS.Timeout;
+
         const fetchPaymentDetails = async () => {
             if (paymentId && slug) {
                 try {
+                    attemptCount++;
+                    
                     const details = await getMercadoPagoPaymentStatus(paymentId, slug);
                     setPaymentInfo(details);
                     setStatus(details.status as ResultStatus);
+
+                    // Se o pagamento foi aprovado, para de fazer requisições
+                    if (details.status === 'approved') {
+                        setOrderStep('received');
+                        clearInterval(intervalId);
+                        setShowLoader(false);
+                    } else if (attemptCount >= maxAttempts) {
+                        clearInterval(intervalId);
+                        setShowLoader(false);
+                    }
                 } catch (error) {
                     console.error("Erro ao buscar detalhes do pagamento:", error);
+                    
+                    if (attemptCount >= maxAttempts) {
+                        clearInterval(intervalId);
+                        setShowLoader(false);
+                    }
                 }
+            } else {
+                setShowLoader(false);
             }
-            setShowLoader(false);
         };
 
-        setTimeout(fetchPaymentDetails, 2000);
+        const initialTimeout = setTimeout(() => {
+            fetchPaymentDetails();
+            
+            intervalId = setInterval(() => {
+                if (attemptCount < maxAttempts) {
+                    fetchPaymentDetails();
+                } else {
+                    clearInterval(intervalId);
+                }
+            }, intervalTime);
+        }, 2000);
+
+        // Cleanup function
+        return () => {
+            clearTimeout(initialTimeout);
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        };
     }, [paymentId, slug]);
 
     // Limpar carrinho quando chegar nas páginas de resultado
     useEffect(() => {
         clearCart();
-    }, [clearCart]);
-
-    // Countdown para redirecionar automaticamente após sucesso
-    useEffect(() => {
-        console.log("Status do pagamento:", status);
-        if (status === 'approved' && !showLoader) {
-            const timer = setInterval(() => {
-                setCountdown((prev) => {
-                    if (prev <= 1) {
-                        clearInterval(timer);
-                        navigate(`/${slug}`);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 4000);
-
-            return () => clearInterval(timer);
-        }
-    }, [status, showLoader, navigate, slug]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const getStatusConfig = () => {
         switch (status) {
@@ -100,7 +122,7 @@ export function CheckoutResult() {
                 return {
                     icon: faCheckCircle,
                     title: 'Pagamento Aprovado!',
-                    message: 'Seu pagamento foi processado com sucesso. Seu pedido já está sendo preparado.',
+                    message: 'Seu pagamento foi processado com sucesso. Seu pedido foi entregue a loja e logo será preparado.',
                     showOrderInfo: true
                 };
             case 'failure':
@@ -114,7 +136,7 @@ export function CheckoutResult() {
                 return {
                     icon: faClock,
                     title: 'Pagamento Pendente',
-                    message: 'Seu pagamento está sendo processado. Assim que tivermos uma atualização, você será notificado via e-mail.',
+                    message: 'Estamos processando seu pagamento, aguarde um momento.',
                     showOrderInfo: true
                 };
             default:
@@ -152,8 +174,16 @@ export function CheckoutResult() {
     };
 
     const handleContactStore = () => {
-        // Podemos adicionar redirecionamento para WhatsApp da loja futuramente
-        navigate(`/${slug}`);
+        const storePhone = localStorage.getItem('storefront_store_phone');
+        
+        if (storePhone) {
+            const cleanPhone = rawTelephone(storePhone);
+            const message = encodeURIComponent('Olá! Gostaria de obter informações sobre meu pedido.');
+            const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${message}`;
+            window.open(whatsappUrl, '_blank');
+        } else {
+            navigate(`/${slug}`);
+        }
     };
 
     if (showLoader) {
@@ -166,6 +196,7 @@ export function CheckoutResult() {
                         <Message>Verificando status do pagamento...</Message>
                     </ResultCard>
                 </Content>
+                <StoreFrontFooter />
             </Container>
         );
     }
@@ -176,6 +207,8 @@ export function CheckoutResult() {
             <StoreFrontHeader slug={slug} />
             
             <Content>
+                <OrderStatusStepper currentStep={orderStep} />
+                
                 <ResultCard>
                     <IconWrapper status={status}>
                         <FontAwesomeIcon icon={config.icon} />
@@ -203,17 +236,6 @@ export function CheckoutResult() {
                                         <span>{getPaymentMethodLabel(paymentInfo.payment_method_id)}</span>
                                     </OrderInfoRow>
                                 </>
-                            )}
-                            {mpStatus && (
-                                <OrderInfoRow>
-                                    <span>Status:</span>
-                                    <span>
-                                        {mpStatus === 'approved' && 'Aprovado ✅'}
-                                        {mpStatus === 'pending' && 'Pendente ⏳'}
-                                        {mpStatus === 'rejected' && 'Rejeitado ❌'}
-                                        {mpStatus === 'in_process' && 'Em processamento ⏳'}
-                                    </span>
-                                </OrderInfoRow>
                             )}
                         </OrderInfo>
                     )}
@@ -247,14 +269,10 @@ export function CheckoutResult() {
                             </>
                         )}
                     </ButtonsContainer>
-
-                    {status === 'approved' && (
-                        <CountdownText>
-                            Você será redirecionado em {countdown} segundo{countdown !== 1 ? 's' : ''}...
-                        </CountdownText>
-                    )}
                 </ResultCard>
             </Content>
+            
+            <StoreFrontFooter />
         </Container>
     );
 }

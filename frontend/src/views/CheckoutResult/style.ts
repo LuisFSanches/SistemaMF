@@ -10,9 +10,10 @@ export const Container = styled.div`
 
 export const Content = styled.main`
     flex: 1;
-    max-width: 800px;
+    max-width: 1440px;
+    width: 100%;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 0px 20px 40px 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
