@@ -87,7 +87,7 @@ class CreateMercadoPagoPreferenceService {
             const preferenceData: any = {
                 items: items.map(item => ({
                     id: item.id,
-                    title: `[#${order.code}] ${item.title}`,
+                    title: item.title,
                     description: item.description || '',
                     picture_url: item.picture_url || '',
                     quantity: item.quantity,

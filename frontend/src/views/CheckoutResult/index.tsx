@@ -50,7 +50,8 @@ export function CheckoutResult() {
     const externalReference = searchParams.get('external_reference'); // order_id
     const mpStatus = searchParams.get('status');
 
-    const status: ResultStatus = (resultStatus as ResultStatus) || 'pending';
+    const initialStatus: ResultStatus = (resultStatus as ResultStatus) || 'pending';
+    const [status, setStatus] = useState<ResultStatus>(initialStatus);
 
     useEffect(() => {
         const fetchPaymentDetails = async () => {
@@ -58,6 +59,7 @@ export function CheckoutResult() {
                 try {
                     const details = await getMercadoPagoPaymentStatus(paymentId, slug);
                     setPaymentInfo(details);
+                    setStatus(details.status as ResultStatus);
                 } catch (error) {
                     console.error("Erro ao buscar detalhes do pagamento:", error);
                 }
