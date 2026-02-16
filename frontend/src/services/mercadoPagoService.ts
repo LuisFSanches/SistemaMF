@@ -54,18 +54,18 @@ export const createMercadoPagoPreference = async (data: ICreatePreferenceData): 
 };
 
 /**
- * Consulta o status de um pagamento e detalhes do pedido
+ * Consulta o status de um pagamento específico
  * @param paymentId ID do pagamento
  * @param storeSlug Slug da loja (opcional)
- * @returns Detalhes completos do pagamento e pedido
+ * @returns Detalhes do pagamento
  */
 export const getMercadoPagoPaymentStatus = async (
     paymentId: string,
     storeSlug?: string
 ): Promise<IPaymentSuccessResponse> => {
-    const params = storeSlug ? `?payment_id=${paymentId}&store_slug=${storeSlug}` : `?payment_id=${paymentId}`;
-    const response = await api.get<IPaymentSuccessResponse>(`/mercadopago/payment/status${params}`);
+    const params = storeSlug ? `?store_slug=${storeSlug}` : "";
+    const response = await api.get<IPaymentSuccessResponse>(`/mercadopago/payment/${paymentId}${params}`);
     return response.data;
 };
 
-export type { IMercadoPagoItem, IMercadoPagoPayer, ICreatePreferenceData, IPreferenceResponse };
+export type { IMercadoPagoItem, IMercadoPagoPayer, ICreatePreferenceData, IPreferenceResponse, IPaymentSuccessResponse };
