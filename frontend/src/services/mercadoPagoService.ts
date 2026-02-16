@@ -1,4 +1,5 @@
 import { api } from "./api";
+import { IPaymentSuccessResponse } from "../interfaces/IPaymentSuccessResponse";
 
 interface IMercadoPagoItem {
     id: string;
@@ -42,25 +43,6 @@ interface IPreferenceResponse {
     sandbox_init_point: string;
 }
 
-interface IPaymentDetails {
-    id: number;
-    status: string;
-    status_detail: string;
-    external_reference: string;
-    transaction_amount: number;
-    currency_id: string;
-    payment_method_id: string;
-    payment_type_id: string;
-    date_approved: string;
-    date_created: string;
-    payer: {
-        email: string;
-        first_name: string;
-        last_name: string;
-    };
-    order_code: string;
-}
-
 /**
  * Cria uma preferência de pagamento no Mercado Pago
  * @param data Dados para criar a preferência
@@ -72,18 +54,18 @@ export const createMercadoPagoPreference = async (data: ICreatePreferenceData): 
 };
 
 /**
- * Consulta o status de um pagamento específico
+ * Consulta o status de um pagamento e detalhes do pedido
  * @param paymentId ID do pagamento
  * @param storeSlug Slug da loja (opcional)
- * @returns Detalhes do pagamento
+ * @returns Detalhes completos do pagamento e pedido
  */
 export const getMercadoPagoPaymentStatus = async (
     paymentId: string,
     storeSlug?: string
-): Promise<IPaymentDetails> => {
-    const params = storeSlug ? `?store_slug=${storeSlug}` : "";
-    const response = await api.get<IPaymentDetails>(`/mercadopago/payment/${paymentId}${params}`);
+): Promise<IPaymentSuccessResponse> => {
+    const params = storeSlug ? `?payment_id=${paymentId}&store_slug=${storeSlug}` : `?payment_id=${paymentId}`;
+    const response = await api.get<IPaymentSuccessResponse>(`/mercadopago/payment/status${params}`);
     return response.data;
 };
 
-export type { IMercadoPagoItem, IMercadoPagoPayer, ICreatePreferenceData, IPreferenceResponse, IPaymentDetails };
+export type { IMercadoPagoItem, IMercadoPagoPayer, ICreatePreferenceData, IPreferenceResponse };

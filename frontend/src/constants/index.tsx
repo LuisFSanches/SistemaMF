@@ -17,6 +17,28 @@ export const PAYMENT_METHODS = {
   "MERCADO_PAGO": "Mercado Pago"
 }
 
+export const MERCADO_PAGO_PAYMENT_METHODS: Record<string, string> = {
+  "pix": "PIX",
+  "visa": "Cartão Visa",
+  "master": "Cartão Mastercard",
+  "elo": "Cartão Elo",
+  "hipercard": "Hipercard",
+  "amex": "American Express",
+  "bolbradesco": "Boleto Bancário",
+  "account_money": "Mercado Pago",
+  "credit_card": "Cartão de Crédito",
+  "debit_card": "Cartão de Débito"
+}
+
+export const MERCADO_PAGO_PAYMENT_STATUS: Record<string, string> = {
+  "approved": "Aprovado",
+  "pending": "Pendente",
+  "rejected": "Rejeitado",
+  "cancelled": "Cancelado",
+  "refunded": "Estornado",
+  "charged_back": "Chargeback"
+}
+
 export const PAYMENT_RECEIVED = {
   "true": "Pago",
   "false": "Não pago"

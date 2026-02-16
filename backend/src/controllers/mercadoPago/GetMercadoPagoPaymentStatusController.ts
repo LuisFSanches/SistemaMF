@@ -3,7 +3,8 @@ import { GetMercadoPagoPaymentStatusService } from '../../services/mercadoPago/G
 
 class GetMercadoPagoPaymentStatusController {
     async handle(req: Request, res: Response, next: NextFunction) {
-        const { payment_id } = req.params;
+        // Aceita payment_id via params (rota legacy) ou query params
+        const payment_id = (req.params.payment_id || req.query.payment_id) as string;
         const { store_slug } = req.query;
 
         const getMercadoPagoPaymentStatusService = new GetMercadoPagoPaymentStatusService();

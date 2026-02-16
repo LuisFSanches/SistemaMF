@@ -358,7 +358,8 @@ router.delete('/storeHoliday/:id', adminAuthMiddleware, new DeleteStoreHolidayCo
 router.post('/mercadopago/preference', new CreateMercadoPagoPreferenceController().handle);
 router.post('/webhook/mercadopago', new MercadoPagoWebhookController().handle);
 router.post('/webhook/mercadopago/test', new TestMercadoPagoWebhookController().handle);
-router.get('/mercadopago/payment/:payment_id', new GetMercadoPagoPaymentStatusController().handle);
+router.get('/mercadopago/payment/:payment_id', new GetMercadoPagoPaymentStatusController().handle); // Rota legacy
+router.get('/mercadopago/payment/status', new GetMercadoPagoPaymentStatusController().handle); // Rota com query params
 
 //-- ROTAS WHATSAPP (MENSAGERIA) --
 router.post('/whatsapp/send', new SendWhatsAppMessageController().handle);
