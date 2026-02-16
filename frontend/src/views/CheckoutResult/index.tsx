@@ -24,7 +24,7 @@ import {
     LoadingSpinner
 } from "./style";
 
-type ResultStatus = 'success' | 'failure' | 'pending';
+type ResultStatus = 'approved' | 'failure' | 'pending';
 
 interface IPaymentInfo {
     id: number;
@@ -32,6 +32,7 @@ interface IPaymentInfo {
     transaction_amount: number;
     payment_method_id: string;
     payment_type_id: string;
+    order_code: string;
 }
 
 export function CheckoutResult() {
@@ -64,7 +65,7 @@ export function CheckoutResult() {
             setShowLoader(false);
         };
 
-        fetchPaymentDetails();
+        setTimeout(fetchPaymentDetails, 2000);
     }, [paymentId, slug]);
 
     // Limpar carrinho quando chegar nas páginas de resultado
@@ -74,7 +75,8 @@ export function CheckoutResult() {
 
     // Countdown para redirecionar automaticamente após sucesso
     useEffect(() => {
-        if (status === 'success' && !showLoader) {
+        console.log("Status do pagamento:", status);
+        if (status === 'approved' && !showLoader) {
             const timer = setInterval(() => {
                 setCountdown((prev) => {
                     if (prev <= 1) {
@@ -84,7 +86,7 @@ export function CheckoutResult() {
                     }
                     return prev - 1;
                 });
-            }, 1000);
+            }, 4000);
 
             return () => clearInterval(timer);
         }
@@ -92,7 +94,7 @@ export function CheckoutResult() {
 
     const getStatusConfig = () => {
         switch (status) {
-            case 'success':
+            case 'approved':
                 return {
                     icon: faCheckCircle,
                     title: 'Pagamento Aprovado!',
@@ -110,7 +112,7 @@ export function CheckoutResult() {
                 return {
                     icon: faClock,
                     title: 'Pagamento Pendente',
-                    message: 'Seu pagamento está sendo processado. Assim que for confirmado, você receberá uma notificação e seu pedido será preparado.',
+                    message: 'Seu pagamento está sendo processado. Assim que tivermos uma atualização, você será notificado via e-mail.',
                     showOrderInfo: true
                 };
             default:
@@ -185,7 +187,7 @@ export function CheckoutResult() {
                             {externalReference && (
                                 <OrderInfoRow>
                                     <span>Pedido:</span>
-                                    <span>#{externalReference.substring(0, 8).toUpperCase()}</span>
+                                    <span>#{paymentInfo?.order_code}</span>
                                 </OrderInfoRow>
                             )}
                             {paymentInfo && (
@@ -215,7 +217,7 @@ export function CheckoutResult() {
                     )}
 
                     <ButtonsContainer>
-                        {status === 'success' && (
+                        {status === 'approved' && (
                             <PrimaryButton onClick={handleGoToStore}>
                                 Voltar para a Loja
                             </PrimaryButton>
@@ -244,7 +246,7 @@ export function CheckoutResult() {
                         )}
                     </ButtonsContainer>
 
-                    {status === 'success' && (
+                    {status === 'approved' && (
                         <CountdownText>
                             Você será redirecionado em {countdown} segundo{countdown !== 1 ? 's' : ''}...
                         </CountdownText>

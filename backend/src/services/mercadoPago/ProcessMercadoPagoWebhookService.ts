@@ -79,7 +79,7 @@ class ProcessMercadoPagoWebhookService {
                 return { success: true, message: 'Payment has no external reference' };
             }
 
-            // Buscar pedido no banco
+            // Buscar pedido no banco pelo ID
             const order = await prismaClient.order.findUnique({
                 where: { id: orderId }
             });
@@ -139,11 +139,8 @@ class ProcessMercadoPagoWebhookService {
                 }
             });
 
-            console.log(`[ProcessMercadoPagoWebhookService] Order ${orderId} updated - Payment: ${paymentStatus}, Received: ${paymentReceived}`);
-
             // Emitir evento se pagamento foi aprovado e mudou de PENDING_PAYMENT para OPENED
             if (paymentStatus === 'approved' && order.status === 'PENDING_PAYMENT' && orderStatus === 'OPENED') {
-                console.log(`[ProcessMercadoPagoWebhookService] Emitting OrderPaymentConfirmed event for order ${orderId}`);
                 orderEmitter.emit(OrderEvents.OrderPaymentConfirmed, {
                     order: updatedOrder,
                     store_id: order.store_id,
@@ -159,6 +156,7 @@ class ProcessMercadoPagoWebhookService {
                 success: true,
                 message: 'Payment processed successfully',
                 order_id: orderId,
+                order_code: order.code,
                 payment_status: paymentStatus,
                 payment_received: paymentReceived,
             };

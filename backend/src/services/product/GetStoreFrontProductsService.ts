@@ -133,6 +133,7 @@ class GetStoreFrontProductsService{
 						google_rating_value: store.google_rating_value,
 						google_rating_count: store.google_rating_count,
 						google_rating_url: store.google_rating_url,
+						phone_number: store.phone_number,
 					}
 				};
 			}
@@ -216,6 +217,7 @@ class GetStoreFrontProductsService{
 					google_rating_value: store.google_rating_value,
 					google_rating_count: store.google_rating_count,
 					google_rating_url: store.google_rating_url,
+					phone_number: store.phone_number,
 				}
 			};
 

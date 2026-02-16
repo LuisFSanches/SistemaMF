@@ -58,6 +58,7 @@ interface IPaymentDetails {
         first_name: string;
         last_name: string;
     };
+    order_code: string;
 }
 
 /**

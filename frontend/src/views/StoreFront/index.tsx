@@ -66,7 +66,7 @@ export function StoreFront() {
         try {
             setError(null);
             const { data: { products, total, store } } = await listStoreFrontProducts(slug, page, pageSize, "", categorySlug);
-
+            console.log('store data', store);
             // Salvar store_id, store_name, phone_number e schedules no localStorage para uso no checkout e PDP
             if (store?.id) {
                 localStorage.setItem('storefront_store_id', store.id);
@@ -79,6 +79,10 @@ export function StoreFront() {
             }
             if (store?.schedules) {
                 localStorage.setItem('storefront_store_schedules', JSON.stringify(store.schedules));
+            }
+
+            if (store.logo) {
+                localStorage.setItem('storefront_store_logo', store.logo);
             }
             
             setProducts(products);

@@ -58,12 +58,32 @@ class GetMercadoPagoPaymentStatusService {
                 );
             }
 
+            // Buscar informações do pedido no banco
+            let orderCode = null;
+            let orderTotal = null;
+
+            if (paymentInfo.external_reference) {
+                const order = await prismaClient.order.findUnique({
+                    where: { id: paymentInfo.external_reference },
+                    select: { 
+                        code: true,
+                        total: true,
+                    }
+                });
+                
+                if (order) {
+                    orderCode = order.code;
+                    orderTotal = order.total;
+                }
+            }
+
             return {
                 id: paymentInfo.id,
                 status: paymentInfo.status,
                 status_detail: paymentInfo.status_detail,
                 external_reference: paymentInfo.external_reference,
-                transaction_amount: paymentInfo.transaction_amount,
+                order_code: orderCode,
+                transaction_amount: orderTotal || paymentInfo.transaction_amount, // Usar total do pedido
                 currency_id: paymentInfo.currency_id,
                 payment_method_id: paymentInfo.payment_method_id,
                 payment_type_id: paymentInfo.payment_type_id,

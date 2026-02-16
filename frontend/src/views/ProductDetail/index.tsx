@@ -175,10 +175,12 @@ export function ProductDetail() {
     const handleWhatsAppOrder = () => {
         if (!product) return;
         
-        // Tentar obter o número de telefone salvo no localStorage
-        const storePhoneNumber = localStorage.getItem('storefront_store_phone') || "5522997517940"; // número padrão de fallback
+        const storePhoneNumber = localStorage.getItem('storefront_store_phone') || '';
+        const cleanNumber = storePhoneNumber.replace(/[^0-9]/g, '');
+        const formattedNumber = cleanNumber.startsWith('55') ? cleanNumber : `55${cleanNumber}`;
+        
         const message = `Olá! Gostaria de comprar:\n\n*${product.product.name}*\nQuantidade: ${quantity}\nPreço: R$ ${product.price.toFixed(2)}`;
-        const whatsappUrl = `https://wa.me/${storePhoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+        const whatsappUrl = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, "_blank");
     };
 
@@ -333,7 +335,7 @@ export function ProductDetail() {
                                     <PaymentIcon className="cash">
                                         <FontAwesomeIcon icon={faMoneyBill as any} />
                                     </PaymentIcon>
-                                    <span>Dinheiro</span>
+                                    <span>Saldo da conta</span>
                                 </PaymentMethod>
                             </PaymentMethods>
                             <MercadoPagoInfo>

@@ -32,7 +32,7 @@ export const ResultCard = styled.div`
     }
 `;
 
-export const IconWrapper = styled.div<{ status: 'success' | 'failure' | 'pending' }>`
+export const IconWrapper = styled.div<{ status: 'approved' | 'failure' | 'pending' }>`
     width: 100px;
     height: 100px;
     border-radius: 50%;
@@ -44,7 +44,7 @@ export const IconWrapper = styled.div<{ status: 'success' | 'failure' | 'pending
     
     ${({ status }) => {
         switch (status) {
-            case 'success':
+            case 'approved':
                 return `
                     background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
                     color: #28a745;
@@ -63,14 +63,14 @@ export const IconWrapper = styled.div<{ status: 'success' | 'failure' | 'pending
     }}
 `;
 
-export const Title = styled.h1<{ status: 'success' | 'failure' | 'pending' }>`
+export const Title = styled.h1<{ status: 'approved' | 'failure' | 'pending' }>`
     font-size: 28px;
     margin-bottom: 16px;
     font-family: "Poppins", sans-serif;
     
     ${({ status }) => {
         switch (status) {
-            case 'success':
+            case 'approved':
                 return `color: #28a745;`;
             case 'failure':
                 return `color: #dc3545;`;

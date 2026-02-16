@@ -5,7 +5,6 @@ import { useCart } from "../../contexts/CartContext";
 import { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { listStoreFrontProducts } from "../../services/productService";
-import logoFull from "../../assets/images/original_logo.png";
 import {
     Header,
     LogoContainer,
@@ -62,10 +61,12 @@ export function StoreFrontHeader({
     const [isSearching, setIsSearching] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
     const [internalSearchTerm, setInternalSearchTerm] = useState(searchTerm);
+    const logoFromStorage = localStorage.getItem('storefront_store_logo');
+    const storeNameFromStorage = localStorage.getItem('storefront_store_name');
 
     // Usar logo customizado ou da loja se disponível, caso contrário usar logo mocada
-    const logoSrc = customLogoSrc || storeData?.logo || logoFull;
-    const storeName = customStoreName || storeData?.name || "Loja";
+    const logoSrc = customLogoSrc || storeData?.logo || logoFromStorage;
+    const storeName = customStoreName || storeData?.name || storeNameFromStorage || "";
 
     // Realizar busca quando o usuário digita
     useEffect(() => {
@@ -153,7 +154,7 @@ export function StoreFrontHeader({
     return (
         <Header>
             <LogoContainer onClick={handleLogoClick}>
-                <Logo src={logoSrc} alt={storeName} />
+                <Logo src={logoSrc as string} alt={storeName} />
                 <StoreName>{storeName}</StoreName>
             </LogoContainer>
             {showSearch && (
