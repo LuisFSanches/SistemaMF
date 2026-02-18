@@ -4,6 +4,7 @@ import prismaClient from "../../prisma";
 import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 import { orderEmitter, OrderEvents } from "../../events/orderEvents";
+import { SendWhatsAppMessageService } from "../whatsapp/SendWhatsAppMessageService";
 
 class ProcessMercadoPagoWebhookService {
     async execute(data: IMercadoPagoPaymentNotification, store_slug?: string) {
@@ -54,7 +55,6 @@ class ProcessMercadoPagoWebhookService {
             const payment = new Payment(client);
 
             // Buscar detalhes do pagamento
-            console.log(`[ProcessMercadoPagoWebhookService] Fetching payment ${paymentId} from Mercado Pago...`);
             const paymentInfo = await payment.get({ id: paymentId });
 
             if (!paymentInfo) {
@@ -64,18 +64,9 @@ class ProcessMercadoPagoWebhookService {
                 );
             }
 
-            console.log(`[ProcessMercadoPagoWebhookService] Payment info:`, {
-                id: paymentInfo.id,
-                status: paymentInfo.status,
-                status_detail: paymentInfo.status_detail,
-                payment_type_id: paymentInfo.payment_type_id,
-                external_reference: paymentInfo.external_reference,
-            });
-
             const orderId = paymentInfo.external_reference;
 
             if (!orderId) {
-                console.log(`[ProcessMercadoPagoWebhookService] Payment ${paymentId} has no external reference`);
                 return { success: true, message: 'Payment has no external reference' };
             }
 
@@ -85,7 +76,6 @@ class ProcessMercadoPagoWebhookService {
             });
 
             if (!order) {
-                console.log(`[ProcessMercadoPagoWebhookService] Order ${orderId} not found`);
                 return { success: true, message: 'Order not found' };
             }
 
@@ -131,6 +121,7 @@ class ProcessMercadoPagoWebhookService {
                 include: {
                     client: true,
                     clientAddress: true,
+                    store: true,
                     orderItems: {
                         include: {
                             product: true
@@ -141,6 +132,20 @@ class ProcessMercadoPagoWebhookService {
 
             // Emitir evento se pagamento foi aprovado e mudou de PENDING_PAYMENT para OPENED
             if (paymentStatus === 'approved' && order.status === 'PENDING_PAYMENT' && orderStatus === 'OPENED') {
+                try {
+                    const sendWhatsAppService = new SendWhatsAppMessageService();
+                    const customerName = `${updatedOrder.client.first_name} ${updatedOrder.client.last_name}`;
+                    const storeName = updatedOrder.store?.name || 'Nossa Loja';
+
+                    await sendWhatsAppService.execute({
+                        phone_number: updatedOrder.client.phone_number,
+                        customer_name: customerName,
+                        order_number: updatedOrder.code.toString(),
+                        store_name: storeName
+                    });
+
+                } catch (whatsappError: any) {}
+
                 orderEmitter.emit(OrderEvents.OrderPaymentConfirmed, {
                     order: updatedOrder,
                     store_id: order.store_id,

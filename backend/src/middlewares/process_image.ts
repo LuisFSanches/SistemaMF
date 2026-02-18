@@ -34,7 +34,6 @@ export const processImage = async (
         const stats = fs.statSync(outputPath);
         const fileSizeInKB = stats.size / 1024;
 
-        console.log('[processImage] Image processed. Size:', fileSizeInKB.toFixed(2), 'KB');
 
         if (fileSizeInKB > 100) {
             await sharp(inputPath)
@@ -42,13 +41,11 @@ export const processImage = async (
                     fit: 'inside',
                     withoutEnlargement: true
                 })
-                .jpeg({ quality: 60 })
+                .jpeg({ quality: 75 })
                 .toFile(outputPath);
 
             const newStats = fs.statSync(outputPath);
             const newFileSizeInKB = newStats.size / 1024;
-
-            console.log('[processImage] Image recompressed. New size:', newFileSizeInKB.toFixed(2), 'KB');
 
             if (newFileSizeInKB > 100) {
                 fs.unlinkSync(inputPath);
@@ -68,8 +65,6 @@ export const processImage = async (
         req.file.filename = outputFilename;
         req.file.path = outputPath;
         req.file.size = fs.statSync(outputPath).size;
-
-        console.log('[processImage] Success. Final filename:', outputFilename);
 
         next();
     } catch (error: any) {

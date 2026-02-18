@@ -37,7 +37,9 @@ export const ResultCard = styled.div`
     }
 `;
 
-export const IconWrapper = styled.div<{ status: 'approved' | 'failure' | 'pending' }>`
+export const IconWrapper = styled.div<{
+        status: 'approved' | 'failure' | 'pending' | 'in_progress' | 'in_delivery' | 'done'
+    }>`
     width: 100px;
     height: 100px;
     border-radius: 50%;
@@ -64,11 +66,26 @@ export const IconWrapper = styled.div<{ status: 'approved' | 'failure' | 'pendin
                     background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
                     color: #ffc107;
                 `;
+            case 'in_progress':
+                return `
+                    background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+                    color: #ffc107;
+                `;
+            case 'in_delivery':
+                return `
+                    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+                    color: #17a2b8;
+                `;
+            case 'done':
+                return `
+                    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+                    color: #28a745;
+                `;
         }
     }}
 `;
 
-export const Title = styled.h1<{ status: 'approved' | 'failure' | 'pending' }>`
+export const Title = styled.h1<{ status: 'approved' | 'failure' | 'pending' | 'in_progress' | 'in_delivery' | 'done' }>`
     font-size: 28px;
     margin-bottom: 16px;
     font-family: "Poppins", sans-serif;
@@ -81,6 +98,12 @@ export const Title = styled.h1<{ status: 'approved' | 'failure' | 'pending' }>`
                 return `color: #dc3545;`;
             case 'pending':
                 return `color: #856404;`;
+            case 'in_progress':
+                return `color: #856404;`;
+            case 'in_delivery':
+                return `color: #17a2b8;`;
+            case 'done':
+                return `color: #28a745;`;
         }
     }}
 

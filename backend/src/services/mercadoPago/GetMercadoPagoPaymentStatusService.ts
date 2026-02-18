@@ -150,10 +150,18 @@ class GetMercadoPagoPaymentStatusService {
                 };
             });
 
-            // Determinar o status baseado no status do pagamento Mercado Pago
+            // Determinar o status baseado no status do pagamento Mercado Pago e Banco de Dados
             let orderStatus = 'pending';
             if (paymentInfo.status === 'approved') {
-                orderStatus = 'approved';
+                if (orderDetails.status === 'OPENED') {
+                    orderStatus = 'approved';
+                } else if (orderDetails.status === 'IN_PROGRESS') {
+                    orderStatus = 'in_progress';
+                } else if (orderDetails.status === 'IN_DELIVERY') {
+                    orderStatus = 'in_delivery';
+                } else if (orderDetails.status === 'DONE') {
+                    orderStatus = 'done';
+                }
             } else if (paymentInfo.status === 'rejected' || paymentInfo.status === 'cancelled') {
                 orderStatus = 'failure';
             }

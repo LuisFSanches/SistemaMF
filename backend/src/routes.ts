@@ -154,10 +154,8 @@ import { DeleteStoreHolidayController } from './controllers/storeHoliday/DeleteS
 
 import { CreateMercadoPagoPreferenceController } from './controllers/mercadoPago/CreateMercadoPagoPreferenceController';
 import { MercadoPagoWebhookController } from './controllers/mercadoPago/MercadoPagoWebhookController';
-import { TestMercadoPagoWebhookController } from './controllers/mercadoPago/TestMercadoPagoWebhookController';
+// import { TestMercadoPagoWebhookController } from './controllers/mercadoPago/TestMercadoPagoWebhookController';
 import { GetMercadoPagoPaymentStatusController } from './controllers/mercadoPago/GetMercadoPagoPaymentStatusController';
-
-import { SendWhatsAppMessageController } from './controllers/whatsapp/SendWhatsAppMessageController';
 
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
@@ -357,11 +355,8 @@ router.delete('/storeHoliday/:id', adminAuthMiddleware, new DeleteStoreHolidayCo
 //-- ROTAS MERCADO PAGO (STOREFRONT) --
 router.post('/mercadopago/preference', new CreateMercadoPagoPreferenceController().handle);
 router.post('/webhook/mercadopago', new MercadoPagoWebhookController().handle);
-router.post('/webhook/mercadopago/test', new TestMercadoPagoWebhookController().handle);
+// router.post('/webhook/mercadopago/test', new TestMercadoPagoWebhookController().handle);
 router.get('/mercadopago/payment/:payment_id', new GetMercadoPagoPaymentStatusController().handle); // Rota legacy
 router.get('/mercadopago/payment/status', new GetMercadoPagoPaymentStatusController().handle); // Rota com query params
-
-//-- ROTAS WHATSAPP (MENSAGERIA) --
-router.post('/whatsapp/send', new SendWhatsAppMessageController().handle);
 
 export { router };

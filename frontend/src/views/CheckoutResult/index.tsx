@@ -68,7 +68,7 @@ import {
     CardMessageSignature,
 } from "./style";
 
-type ResultStatus = 'approved' | 'failure' | 'pending';
+type ResultStatus = 'approved' | 'failure' | 'pending' | 'in_progress' | 'in_delivery' | 'done';
 
 moment.locale('pt-br');
 
@@ -104,8 +104,11 @@ export function CheckoutResult() {
                     setStatus(details.order.status as ResultStatus);
 
                     // Se o pagamento foi aprovado, para de fazer requisições
-                    if (details.order.status === 'approved') {
-                        setOrderStep('received');
+                    if (details.order.status === 'approved' ||
+                        details.order.status === 'in_progress' ||
+                        details.order.status === 'in_delivery' ||
+                        details.order.status === 'done') {
+                        setOrderStep(details.order.status as OrderStatusStep);
                         clearInterval(intervalId);
                         setShowLoader(false);
                     } else if (attemptCount >= maxAttempts) {
@@ -173,6 +176,27 @@ export function CheckoutResult() {
                     icon: faClock,
                     title: 'Pagamento Pendente',
                     message: 'Estamos processando seu pagamento, aguarde um momento.',
+                    showOrderInfo: true
+                };
+            case 'in_progress':
+                return {
+                    icon: faClock,
+                    title: 'Pedido em Produção',
+                    message: 'Seu pedido está sendo preparado pela loja.',
+                    showOrderInfo: true
+                };
+            case 'in_delivery':
+                return {
+                    icon: faTruck,
+                    title: 'Pedido em Rota',
+                    message: 'Seu pedido saiu para entrega e está a caminho do endereço informado.',
+                    showOrderInfo: true
+                };
+            case 'done':
+                return {
+                    icon: faCheckCircle,
+                    title: 'Pedido Entregue',
+                    message: 'Seu pedido foi entregue com sucesso. Agradecemos pela preferência!',
                     showOrderInfo: true
                 };
             default:

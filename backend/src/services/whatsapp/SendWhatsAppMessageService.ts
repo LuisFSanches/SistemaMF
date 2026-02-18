@@ -64,12 +64,7 @@ class SendWhatsAppMessageService {
                     ]
                 }
             };
-
-            console.log('payload', payload);
-            console.log('apiversion', whatsappApiVersion);
-            console.log('phoneNumberId', whatsappPhoneNumberId);
-            console.log('accessToken', whatsappAccessToken);
-
+            
             // 5. Enviar mensagem via WhatsApp Business API oficial
             const response = await axios.post(
                 `https://graph.facebook.com/${whatsappApiVersion}/${whatsappPhoneNumberId}/messages`,

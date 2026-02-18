@@ -78,8 +78,6 @@ class CreateMercadoPagoPreferenceService {
             const failureUrl = back_urls?.failure || `${frontendUrl}/${store_slug}/checkout/failure`;
             const pendingUrl = back_urls?.pending || `${frontendUrl}/${store_slug}/checkout/pending`;
 
-            console.log('[CreateMercadoPagoPreferenceService] Back URLs:', { successUrl, failureUrl, pendingUrl });
-
             // Verificar se está em ambiente de desenvolvimento (localhost)
             const isLocalhost = successUrl.includes('localhost') || successUrl.includes('127.0.0.1');
 
@@ -159,8 +157,6 @@ class CreateMercadoPagoPreferenceService {
                     ErrorCodes.SYSTEM_ERROR
                 );
             }
-
-            console.log(`[CreateMercadoPagoPreferenceService] Preference created: ${response.id} for order: ${order_id}`);
 
             return {
                 id: response.id,
