@@ -320,7 +320,7 @@ export const CardWrapper = styled.div<{ $backgroundImage: string }>`
     height: 830px;
     background: white;
     background-image: url('/${props => props.$backgroundImage}');
-    background-size: cover;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     padding: 120px 110px;
@@ -329,6 +329,9 @@ export const CardWrapper = styled.div<{ $backgroundImage: string }>`
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    color: #363636;
+    letter-spacing: 0.02em;
+    line-height: 20px;
 `;
 
 export const LogoTop = styled.img`
@@ -412,7 +415,7 @@ export const CardTo = styled.div<{ fontSize: number }>`
 
 export const CardMessage = styled.div<{ fontSize: number }>`
     font-size: ${props => props.fontSize}px;
-    line-height: 18px;
+    line-height: 20px;
     white-space: pre-wrap;
     word-wrap: break-word;
     color: #000;
