@@ -28,7 +28,7 @@ export const processImage = async (
                 fit: 'inside',
                 withoutEnlargement: true
             })
-            .jpeg({ quality: 80 })
+            .jpeg({ quality: 90 })
             .toFile(outputPath);
 
         const stats = fs.statSync(outputPath);
@@ -41,7 +41,7 @@ export const processImage = async (
                     fit: 'inside',
                     withoutEnlargement: true
                 })
-                .jpeg({ quality: 75 })
+                .jpeg({ quality: 90 })
                 .toFile(outputPath);
 
             const newStats = fs.statSync(outputPath);
