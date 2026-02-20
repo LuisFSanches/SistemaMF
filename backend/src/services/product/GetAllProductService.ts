@@ -18,7 +18,7 @@ class GetAllProductService{
 
 				const productsRaw = await prismaClient.$queryRawUnsafe<any[]>(
 					`
-						SELECT p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store, p.sales_count, p.description
+						SELECT p.id, p.name, p.image, p.image_2, p.image_3, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store, p.sales_count, p.description
 						FROM "products" p
 						WHERE p.enabled = true
 						AND ${conditions}
@@ -55,7 +55,7 @@ class GetAllProductService{
 
 			const [productsRaw, total] = await Promise.all([
 				prismaClient.$queryRaw<any[]>`
-					SELECT p.id, p.name, p.image, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store, p.sales_count, p.description
+					SELECT p.id, p.name, p.image, p.image_2, p.image_3, p.price, p.unity, p.stock, p.enabled, p.qr_code, p.visible_in_store, p.sales_count, p.description
 					FROM "products" p
 					WHERE p.enabled = true
 					ORDER BY p.sales_count DESC, p.created_at DESC
