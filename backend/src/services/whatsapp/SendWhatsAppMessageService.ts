@@ -16,7 +16,6 @@ class SendWhatsAppMessageService {
             );
         }
 
-        // 2. Validar variáveis de ambiente (WhatsApp Business API oficial)
         const whatsappAccessToken = process.env.WHATSAPP_ACCESS_TOKEN;
         const whatsappPhoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
         const whatsappApiVersion = process.env.WHATSAPP_API_VERSION || 'v22.0';
@@ -30,13 +29,12 @@ class SendWhatsAppMessageService {
         }
 
         try {
-            // 3. Formatar número de telefone (remover caracteres especiais)
             const cleanPhone = data.phone_number.replace(/\D/g, '');
+            const phoneWithCountryCode = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
 
-            // 4. Preparar payload para WhatsApp Business API oficial
             const payload: any = {
                 messaging_product: 'whatsapp',
-                to: cleanPhone,
+                to: phoneWithCountryCode,
                 type: 'template',
                 template: {
                     name: 'pedido_recebido',
@@ -93,8 +91,6 @@ class SendWhatsAppMessageService {
                 phone: data.phone_number
             });
             
-            // Não lançar erro para não quebrar o fluxo principal
-            // Apenas logar o erro
             return {
                 success: false,
                 error: errorMessage

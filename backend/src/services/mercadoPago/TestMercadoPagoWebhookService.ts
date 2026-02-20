@@ -2,6 +2,7 @@ import prismaClient from "../../prisma";
 import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 import { orderEmitter, OrderEvents } from "../../events/orderEvents";
+import { SendWhatsAppMessageService } from "../whatsapp/SendWhatsAppMessageService";
 
 interface ITestWebhookData {
     order_id: string;
@@ -84,6 +85,7 @@ class TestMercadoPagoWebhookService {
                 include: {
                     client: true,
                     clientAddress: true,
+                    store: true,
                     orderItems: {
                         include: {
                             product: true
@@ -92,11 +94,23 @@ class TestMercadoPagoWebhookService {
                 }
             });
 
-            console.log(`[TestMercadoPagoWebhookService] Order ${order_id} updated - Payment: ${payment_status}, Received: ${paymentReceived}`);
-
-            // Emitir evento se pagamento foi aprovado e mudou de PENDING_PAYMENT para OPENED
             if (payment_status === 'approved' && order.status === 'PENDING_PAYMENT' && orderStatus === 'OPENED') {
-                console.log(`[TestMercadoPagoWebhookService] Emitting OrderPaymentConfirmed event for order ${order_id}`);
+                try {
+                    const sendWhatsAppService = new SendWhatsAppMessageService();
+                    const customerName = `${updatedOrder.client.first_name} ${updatedOrder.client.last_name}`;
+                    const storeName = 'Loja Teste';
+
+                    await sendWhatsAppService.execute({
+                        phone_number: updatedOrder.client.phone_number,
+                        customer_name: customerName,
+                        order_number: updatedOrder.code.toString(),
+                        store_name: storeName
+                    });
+
+                } catch (whatsappError: any) {
+                    console.log(`[TestMercadoPagoWebhookService] Failed to send WhatsApp message for order ${order_id}:`, whatsappError);
+                }
+
                 orderEmitter.emit(OrderEvents.OrderPaymentConfirmed, {
                     order: updatedOrder,
                     store_id: order.store_id,
