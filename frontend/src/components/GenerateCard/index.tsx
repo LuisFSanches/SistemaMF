@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import Modal from 'react-modal';
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { AuthContext } from '../../contexts/AuthContext';
@@ -64,6 +64,13 @@ export function GenerateCard({
     const [showError, setShowError] = useState(false);
     const [internalIsOpen, setInternalIsOpen] = useState(false);
 
+    // Atualizar estados quando props iniciais mudarem (importante para pedidos)
+    useEffect(() => {
+        setCardFrom(initialCardFrom);
+        setCardTo(initialCardTo);
+        setCardMessage(initialCardMessage);
+    }, [initialCardFrom, initialCardTo, initialCardMessage]);
+
     const logoSrc = storeData?.logo_base64 || '';
     const instagram = storeData?.instagram;
     const phoneNumber = storeData?.phone_number;
@@ -76,6 +83,14 @@ export function GenerateCard({
     const generatePDF = async () => {
         try {
             setShowLoader(true);
+            setShowError(false);
+            
+            // Validação básica
+            if (!cardMessage && !cardFrom && !cardTo) {
+                setShowError(true);
+                setShowLoader(false);
+                return;
+            }
             
             const filename = initialOrderCode 
                 ? `#${initialOrderCode}-${cardFrom}- Cartão de mensagem.pdf`
@@ -228,7 +243,15 @@ export function GenerateCard({
             </Modal>
 
             {/* Cartão invisível para geração do PDF */}
-            <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+            <div style={{ 
+                position: 'fixed', 
+                left: 0, 
+                top: 0, 
+                opacity: 0, 
+                pointerEvents: 'none',
+                zIndex: -9999,
+                overflow: 'hidden'
+            }}>
                 <CardTemplate
                     cardFrom={cardFrom}
                     cardTo={cardTo}
