@@ -27,7 +27,7 @@ interface CardTemplateProps {
     referencePoint?: string;
 }
 
-export const CardTemplate = ({ cardFrom, cardTo, cardMessage, fontSize, orderCode, logo, backgroundImage = 'card_background_1.png', elementId = 'card-to-print', instagram, phoneNumber, referencePoint }: CardTemplateProps) => {   
+export const CardTemplate = ({ cardFrom, cardTo, cardMessage, fontSize, orderCode, logo, backgroundImage = 'card_background_1.png', elementId = 'card-to-print', instagram, phoneNumber, referencePoint }: CardTemplateProps) => {
     return (
         <CardWrapper id={elementId} $backgroundImage={backgroundImage}>
             <ContentWrapper>
