@@ -17,6 +17,9 @@ export const PrintCardMessage = ({
     isOpen,
     onRequestClose 
 }: PrintCardMessageProps) => {
+    // Cria um ID único para cada pedido
+    const uniqueElementId = `card-to-print-order-${order_code}`;
+    
     return (
         <GenerateCard
             isOpen={isOpen}
@@ -26,7 +29,7 @@ export const PrintCardMessage = ({
             initialCardMessage={card_message}
             initialOrderCode={order_code}
             readOnly={true}
-            elementId="card-to-print-order"
+            elementId={uniqueElementId}
             showButton={false}
         />
     );

@@ -320,7 +320,7 @@ export const CardWrapper = styled.div<{ $backgroundImage: string }>`
     height: 830px;
     background: white;
     background-image: url('/${props => props.$backgroundImage}');
-    background-size: contain;
+    background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
     padding: 120px 110px;
@@ -366,7 +366,7 @@ export const StoreInfoContainer = styled.div`
     .store-info {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 0px;
 
         span, svg {
             font-size: 9px;

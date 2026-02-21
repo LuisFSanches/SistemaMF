@@ -2,7 +2,11 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 export const generateCardPDF = async (elementId: string, filename: string): Promise<void> => {
+    // Aguarda um pequeno delay para garantir que o React atualizou o DOM
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const element = document.getElementById(elementId);
+    console.log('Elemento para PDF:', element);
     
     if (!element) {
         throw new Error('Elemento não encontrado para gerar PDF');
