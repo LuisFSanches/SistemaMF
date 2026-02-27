@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
+import moment from "moment";
+import "moment/locale/pt-br";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleQuestion } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
@@ -56,6 +58,20 @@ import {
     StepLabel,
     StepSubLabel,
 } from "./style";
+
+moment.locale('pt-br');
+
+interface Schedule {
+    id: string;
+    day_of_week: string;
+    is_closed: boolean;
+    opening_time: string | null;
+    closing_time: string | null;
+    lunch_break_start: string | null;
+    lunch_break_end: string | null;
+    created_at: string;
+    updated_at: string;
+}
 
 interface INewOrder {
     first_name: string;
@@ -112,12 +128,62 @@ export function Checkout() {
     const [clientExists, setClientExists] = useState(false);
     const [formStarted, setFormStarted] = useState(false);
     const [welcomeClientName, setWelcomeClientName] = useState("");
+    const [storeSchedules, setStoreSchedules] = useState<Schedule[]>([]);
     const tooltipMessage = `Para entregas em outras regiões,
         por favor entre em contato conosco pelo whatsapp.`;
 
     const DEFAULT_DELIVERY_FEE = 8.0;
     const deliveryFee = pickupOnStore ? 0 : DEFAULT_DELIVERY_FEE;
     const totalWithDelivery = cartTotal + deliveryFee;
+
+    const DAY_OF_WEEK_MAP: { [key: string]: number } = {
+        'SUNDAY': 0,
+        'MONDAY': 1,
+        'TUESDAY': 2,
+        'WEDNESDAY': 3,
+        'THURSDAY': 4,
+        'FRIDAY': 5,
+        'SATURDAY': 6
+    };
+
+    const isValidDeliveryDate = (dateString: string): boolean => {
+        if (!dateString || storeSchedules.length === 0) return true;
+
+        const selectedDate = moment(dateString);
+        const today = moment();
+        const dayOfWeek = selectedDate.day();
+
+        if (selectedDate.isBefore(today, 'day')) {
+            return false;
+        }
+
+        const schedule = storeSchedules.find(s => {
+            const scheduleDayNumber = DAY_OF_WEEK_MAP[s.day_of_week];
+            return scheduleDayNumber === dayOfWeek;
+        });
+
+        if (!schedule || schedule.is_closed) {
+            return false;
+        }
+
+        if (selectedDate.isSame(today, 'day') && schedule.closing_time) {
+            const now = moment();
+            const [closingHour, closingMinute] = schedule.closing_time.split(':').map(Number);
+            const closingTime = moment().set({
+                hour: closingHour,
+                minute: closingMinute,
+                second: 0,
+                millisecond: 0
+            });
+
+            if (now.isSameOrAfter(closingTime)) {
+                return false;
+            }
+        }
+
+        return true;
+    };
+
     const {
         register,
         handleSubmit,
@@ -329,6 +395,18 @@ export function Checkout() {
     //     }, 900);
     //     // eslint-disable-next-line react-hooks/exhaustive-deps
     // }, [phone_number, setValue]);
+
+    // Carregar schedules da loja do localStorage
+    useEffect(() => {
+        const savedSchedules = localStorage.getItem('storefront_store_schedules');
+        if (savedSchedules) {
+            try {
+                setStoreSchedules(JSON.parse(savedSchedules));
+            } catch (error) {
+                console.error('Erro ao carregar schedules do localStorage:', error);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         const phoneNumber = watch("receiver_phone") || "";
@@ -1006,9 +1084,27 @@ export function Checkout() {
                                                 Data de Entrega
                                                 <span>*</span>
                                             </Label>
-                                            <Input type="date" {...register("delivery_date", {
-                                                required: "Data de entrega é obrigatória",
-                                            })} />
+                                            <Input 
+                                                type="date" 
+                                                min={moment().format('YYYY-MM-DD')}
+                                                {...register("delivery_date", {
+                                                    required: "Data de entrega é obrigatória",
+                                                    validate: (value) => {
+                                                        if (!isValidDeliveryDate(value)) {
+                                                            const selectedDate = moment(value);
+                                                            const dayName = selectedDate.format('dddd');
+                                                            
+                                                            // Verificar se é hoje e o horário já passou
+                                                            if (selectedDate.isSame(moment(), 'day')) {
+                                                                return "O horário de funcionamento da loja já passou para hoje. Escolha outra data.";
+                                                            }
+                                                            
+                                                            return `A loja não funciona ${dayName}. Por favor, escolha outro dia.`;
+                                                        }
+                                                        return true;
+                                                    }
+                                                })} 
+                                            />
                                             {errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
                                         </FormField>
 

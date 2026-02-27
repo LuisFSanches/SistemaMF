@@ -7,8 +7,6 @@ import {
     faClock, 
     faBox, 
     faTruck, 
-    faCreditCard, 
-    faMapMarkerAlt, 
     faEnvelope,
     faCheck
 } from "@fortawesome/free-solid-svg-icons";
@@ -329,9 +327,6 @@ export function CheckoutResult() {
                 {config.showOrderInfo && orderData && orderData.items && orderData.items.length > 0 && (
                     <DetailsSection>
                         <SectionHeader>
-                            <SectionIcon>
-                                <FontAwesomeIcon icon={faBox} />
-                            </SectionIcon>
                             <SectionTitle>📦 Itens do Pedido</SectionTitle>
                         </SectionHeader>
 
@@ -392,13 +387,6 @@ export function CheckoutResult() {
                 {config.showOrderInfo && orderData && orderData.delivery && (
                     <DetailsSection>
                         <SectionHeader>
-                            <SectionIcon>
-                                {orderData.delivery.is_pickup ? (
-                                    <FontAwesomeIcon icon={faMapMarkerAlt} />
-                                ) : (
-                                    <FontAwesomeIcon icon={faTruck} />
-                                )}
-                            </SectionIcon>
                             <SectionTitle>
                                 {orderData.delivery.is_pickup ? '📍 Retirada na Loja' : '🚚 Informações de Entrega'}
                             </SectionTitle>
@@ -446,9 +434,6 @@ export function CheckoutResult() {
                 {config.showOrderInfo && orderData && orderData.payment && (
                     <DetailsSection>
                         <SectionHeader>
-                            <SectionIcon>
-                                <FontAwesomeIcon icon={faCreditCard} />
-                            </SectionIcon>
                             <SectionTitle>💳 Informações de Pagamento</SectionTitle>
                         </SectionHeader>
 
@@ -456,7 +441,6 @@ export function CheckoutResult() {
                             <InfoRow>
                                 <InfoLabel>Método de Pagamento</InfoLabel>
                                 <PaymentMethodBadge>
-                                    <FontAwesomeIcon icon={faCreditCard} />
                                     {getPaymentMethodLabel(orderData.payment.method_id)}
                                 </PaymentMethodBadge>
                             </InfoRow>
@@ -507,9 +491,6 @@ export function CheckoutResult() {
                         {orderData.additional_info.card_message?.has_card && (
                             <DetailsSection>
                                 <SectionHeader>
-                                    <SectionIcon>
-                                        <FontAwesomeIcon icon={faEnvelope} />
-                                    </SectionIcon>
                                     <SectionTitle>💌 Mensagem do Cartão</SectionTitle>
                                 </SectionHeader>
                                 <CardMessageSection>

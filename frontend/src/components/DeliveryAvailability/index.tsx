@@ -58,7 +58,24 @@ export function DeliveryAvailability({ schedules, isPDP = false }: DeliveryAvail
                 return scheduleDayNumber === dayOfWeek;
             });
 
-            const isAvailable = !!(schedule && !schedule.is_closed);
+            let isAvailable = !!(schedule && !schedule.is_closed);
+
+            // Para o dia de hoje, verificar se o horário de fechamento já passou
+            if (i === 0 && isAvailable && schedule?.closing_time) {
+                const now = moment();
+                const [closingHour, closingMinute] = schedule.closing_time.split(':').map(Number);
+                const closingTime = moment().set({
+                    hour: closingHour,
+                    minute: closingMinute,
+                    second: 0,
+                    millisecond: 0
+                });
+
+                // Se o horário atual for maior ou igual ao horário de fechamento, a loja está fechada
+                if (now.isSameOrAfter(closingTime)) {
+                    isAvailable = false;
+                }
+            }
             
             // Get day label
             let dayLabel = '';
