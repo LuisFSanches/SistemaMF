@@ -68,15 +68,17 @@ class RequestVerificationService {
                 },
             });
 
-            // 7. Enviar email com código
-            const emailService = new EmailService();
-            await emailService.sendVerificationCodeEmail(
-                email,
-                code,
-                client.first_name
-            );
-
-            console.log(`[RequestVerificationService] Code sent to ${email} for client ${client.id}`);
+            // 7. Enviar email com código (somente em produção)
+            if (process.env.IS_PRODUCTION === 'true') {
+                const emailService = new EmailService();
+                await emailService.sendVerificationCodeEmail(
+                    email,
+                    code,
+                    client.first_name
+                );
+            } else {
+                console.log(`[RequestVerificationService] DEV MODE - Code not sent. Email: ${email}, Code: ${code}, Client: ${client.id}`);
+            }
 
             // 8. Retornar apenas o primeiro nome do cliente
             return {

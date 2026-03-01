@@ -1,5 +1,6 @@
 import { useContext } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useParams } from "react-router-dom";
+import { CartProvider } from "./contexts/CartContext";
 import { AuthContext } from "./contexts/AuthContext";
 
 import { Dashboard } from "./views/Dashboard";
@@ -53,6 +54,15 @@ function PrivateRoute({ children }: IPrivateRouteProps) {
     }
 
     return isAuthenticated ? children : <Navigate to="/login" />;
+}
+
+function StoreCartLayout() {
+    const { slug } = useParams<{ slug: string }>();
+    return (
+        <CartProvider slug={slug || ""}>
+            <Outlet />
+        </CartProvider>
+    );
 }
 
 function IsAuthenticatedRoutes({ children }: IPrivateRouteProps) {
@@ -196,12 +206,14 @@ export default function routes(){
                             </PrivateRoute>
                         }/>
                     </Route>
-                    <Route path="/:slug" element={<StoreFront />} />
-                    <Route path="/:slug/categoria/:categorySlug" element={<StoreFront />} />
-                    <Route path="/:slug/produto/:productId" element={<ProductDetail />} />
-                    <Route path="/:slug/carrinho" element={<Cart />} />
-                    <Route path="/:slug/checkout" element={<Checkout />} />
-                    <Route path="/:slug/checkout/:status" element={<CheckoutResult />} />
+                    <Route path="/:slug" element={<StoreCartLayout />}>
+                        <Route index element={<StoreFront />} />
+                        <Route path="categoria/:categorySlug" element={<StoreFront />} />
+                        <Route path="produto/:productId" element={<ProductDetail />} />
+                        <Route path="carrinho" element={<Cart />} />
+                        <Route path="checkout" element={<Checkout />} />
+                        <Route path="checkout/:status" element={<CheckoutResult />} />
+                    </Route>
                     <Route path="/cadastro" element={<StoreRegistration />} />
                     <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />

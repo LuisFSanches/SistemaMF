@@ -1,15 +1,17 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart, faTrash, faPlus, faMinus, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { faShoppingCart, faTrash, faPlus, faMinus, faArrowRight, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
+import { FreightCalculator } from "../../components/FreightCalculator";
 import placeholder_products from "../../assets/images/placeholder_products.png";
 import { convertMoney } from "../../utils";
 import { PrimaryButton } from "../../styles/global";
 import {
     Container,
     Content,
-    CartSection,
+    ProductsSection,
+    ObservationsSection,
     SectionTitle,
     CartItem,
     CartItemImage,
@@ -33,6 +35,10 @@ import {
     StepCircle,
     StepLabel,
     StepSubLabel,
+    FreightSection,
+    CheckoutWarning,
+    DesktopCheckoutActions,
+    MobileCheckoutActions,
 } from "./style";
 
 export function Cart() {
@@ -42,17 +48,19 @@ export function Cart() {
         cartItems,
         cartTotal,
         observations,
+        deliveryInfo,
+        isDeliveryCalculated,
         updateQuantity,
         removeFromCart,
         setObservations
     } = useCart();
 
-    const DEFAULT_DELIVERY_FEE = 8.0;
-    const deliveryFee = DEFAULT_DELIVERY_FEE;
+    const deliveryFee = deliveryInfo?.fee ?? 0;
     const totalWithDelivery = cartTotal + deliveryFee;
 
     const handleGoToCheckout = () => {
         if (cartItems.length === 0) return;
+        if (!isDeliveryCalculated) return;
         navigate(`/${slug}/checkout`);
     };
 
@@ -98,7 +106,7 @@ export function Cart() {
             </StepperContainer>
 
             <Content>
-                <CartSection>
+                <ProductsSection>
                     <SectionTitle>
                         <FontAwesomeIcon icon={faShoppingCart as any} />
                         Seu Carrinho
@@ -150,10 +158,10 @@ export function Cart() {
                             ))}
                         </>
                     )}
-                </CartSection>
+                </ProductsSection>
 
                 {cartItems.length > 0 && (
-                    <CartSection>
+                    <ObservationsSection>
                         <SectionTitle>Observações</SectionTitle>
                         <ObservationsField>
                             <Textarea
@@ -164,35 +172,70 @@ export function Cart() {
                             />
                             <p>Demais informações como o cartão de mensagem serão preenchidos no checkout.</p>
                         </ObservationsField>
-                    </CartSection>
+                    </ObservationsSection>
                 )}
 
                 <OrderSummary>
                     <SectionTitle>Resumo do Pedido</SectionTitle>
+
+                    {cartItems.length > 0 && (
+                        <FreightSection>
+                            <FreightCalculator />
+                        </FreightSection>
+                    )}
+
                     <SummaryRow>
                         <span>Subtotal:</span>
                         <strong>{convertMoney(cartTotal)}</strong>
                     </SummaryRow>
-                    {cartTotal > 0 &&
+                    {isDeliveryCalculated && deliveryInfo && (
                         <SummaryRow>
                             <span>Taxa de Entrega:</span>
                             <strong>{convertMoney(deliveryFee)}</strong>
                         </SummaryRow>
-                    }
-                    {cartTotal > 0 &&
+                    )}
+                    {isDeliveryCalculated && deliveryInfo && cartTotal > 0 && (
                         <SummaryRow className="total">
                             <span>Total:</span>
                             <span>{convertMoney(totalWithDelivery)}</span>
                         </SummaryRow>
-                    }
+                    )}
+
+                    {cartItems.length > 0 && !isDeliveryCalculated && (
+                        <DesktopCheckoutActions>
+                            <CheckoutWarning>
+                                <FontAwesomeIcon icon={faExclamationCircle as any} />
+                                Calcule o frete para continuar
+                            </CheckoutWarning>
+                        </DesktopCheckoutActions>
+                    )}
+
+                    <DesktopCheckoutActions>
+                        <CheckoutButton 
+                            onClick={handleGoToCheckout}
+                            disabled={cartItems.length === 0 || !isDeliveryCalculated}
+                        >
+                            Ir para Checkout
+                            <FontAwesomeIcon icon={faArrowRight as any} />
+                        </CheckoutButton>
+                    </DesktopCheckoutActions>
+                </OrderSummary>
+
+                <MobileCheckoutActions>
+                    {cartItems.length > 0 && !isDeliveryCalculated && (
+                        <CheckoutWarning>
+                            <FontAwesomeIcon icon={faExclamationCircle as any} />
+                            Calcule o frete para continuar
+                        </CheckoutWarning>
+                    )}
                     <CheckoutButton 
                         onClick={handleGoToCheckout}
-                        disabled={cartItems.length === 0}
+                        disabled={cartItems.length === 0 || !isDeliveryCalculated}
                     >
                         Ir para Checkout
                         <FontAwesomeIcon icon={faArrowRight as any} />
                     </CheckoutButton>
-                </OrderSummary>
+                </MobileCheckoutActions>
             </Content>
         </Container>
     );

@@ -10,7 +10,6 @@ import { ProductsProvider } from './contexts/ProductsContext';
 import { SuccessMessageProvider } from './contexts/SuccessMessageContext';
 import { OrdersToReceiveProvider } from './contexts/OrdersToReceiveContext';
 import { OrderDeliveriesProvider } from './contexts/OrderDeliveriesContext';
-import { CartProvider } from './contexts/CartContext';
 
 ReactDOM.render(
 	<React.StrictMode>
@@ -21,11 +20,9 @@ ReactDOM.render(
 						<OrdersToReceiveProvider>
 							<OrderDeliveriesProvider>
 								<ProductsProvider>
-									<CartProvider>
-										<SuccessMessageProvider>
-											<Routes/>
-										</SuccessMessageProvider>
-									</CartProvider>
+								<SuccessMessageProvider>
+									<Routes/>
+								</SuccessMessageProvider>
 								</ProductsProvider>
 							</OrderDeliveriesProvider>
 						</OrdersToReceiveProvider>

@@ -11,6 +11,7 @@ import { StoreFrontFooter } from "../../components/StoreFrontFooter";
 import { CategoryMenu } from "../../components/CategoryMenu";
 import { Loader } from "../../components/Loader";
 import { DeliveryAvailability } from "../../components/DeliveryAvailability";
+import { FreightCalculator } from "../../components/FreightCalculator";
 import placeholder_products from "../../assets/images/placeholder_products.png";
 import mercadoPagoLogo from "../../assets/images/mercado-pago-logo.png";
 import {
@@ -100,17 +101,17 @@ export function ProductDetail() {
             setShowLoader(true);
             loadProductDetail(productId);
             
-            // Carregar schedules e nome da loja do localStorage (salvos pelo StoreFront)
-            const savedSchedules = localStorage.getItem('storefront_store_schedules');
+            // Carregar schedules e nome da loja do sessionStorage (salvos pelo StoreFront)
+            const savedSchedules = sessionStorage.getItem('storefront_store_schedules');
             if (savedSchedules) {
                 try {
                     setStoreSchedules(JSON.parse(savedSchedules));
                 } catch (error) {
-                    console.error('Erro ao carregar schedules do localStorage:', error);
+                    console.error('Erro ao carregar schedules do sessionStorage:', error);
                 }
             }
             
-            const savedStoreName = localStorage.getItem('storefront_store_name');
+            const savedStoreName = sessionStorage.getItem('storefront_store_name');
             if (savedStoreName) {
                 setStoreName(savedStoreName);
             }
@@ -175,7 +176,7 @@ export function ProductDetail() {
     const handleWhatsAppOrder = () => {
         if (!product) return;
         
-        const storePhoneNumber = localStorage.getItem('storefront_store_phone') || '';
+        const storePhoneNumber = sessionStorage.getItem('storefront_store_phone') || '';
         const cleanNumber = storePhoneNumber.replace(/[^0-9]/g, '');
         const formattedNumber = cleanNumber.startsWith('55') ? cleanNumber : `55${cleanNumber}`;
         
@@ -316,6 +317,11 @@ export function ProductDetail() {
                             </>
                         )}
 
+                        <SectionTitle style={{ marginBottom: '0px' }}>
+                            Calcular Frete
+                        </SectionTitle>
+                        <FreightCalculator hideTitle />
+
                         <PaymentSection>
                             <SectionTitle>Formas de Pagamento</SectionTitle>
                             <PaymentMethods>
@@ -347,7 +353,7 @@ export function ProductDetail() {
                         <ObservationSection>
                             <SectionTitle>Observações Importantes</SectionTitle>
                             <ObservationText>
-                                • Este produto será preparado pela <strong>Loja {localStorage.getItem('storefront_store_name') || 'parceira'}</strong>
+                                • Este produto será preparado pela <strong>Loja {sessionStorage.getItem('storefront_store_name') || 'parceira'}</strong>
                             </ObservationText>
                             <ObservationText>
                                 • As características do produto podem variar ligeiramente em relação às imagens, 

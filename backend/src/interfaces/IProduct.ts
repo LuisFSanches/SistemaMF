@@ -7,4 +7,5 @@ export interface IProduct {
     enabled: boolean;
     image?: string;
     visible_in_store?: boolean;
+    description?: string;
 }

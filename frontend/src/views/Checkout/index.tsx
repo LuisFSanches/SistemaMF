@@ -4,8 +4,6 @@ import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import moment from "moment";
 import "moment/locale/pt-br";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleQuestion } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
 import { createClientOnline, requestVerificationCode, validateVerificationCode } from "../../services/clientService";
 import { getPickupAddress } from "../../services/addressService";
@@ -19,7 +17,7 @@ import { RememberCardModal } from "../../components/RememberCardModal";
 import { TooltipModal } from "../../components/Tooltip";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
 import { convertMoney, rawTelephone } from "../../utils";
-import { TYPES_OF_DELIVERY, STATES } from "../../constants";
+import { TYPES_OF_DELIVERY } from "../../constants";
 
 import {
     FormField,
@@ -104,7 +102,7 @@ interface INewOrder {
 export function Checkout() {
     const navigate = useNavigate();
     const { slug } = useParams<{ slug: string }>();
-    const { cartItems, cartTotal } = useCart();
+    const { cartItems, cartTotal, deliveryInfo, isDeliveryCalculated } = useCart();
     const [showLoader, setShowLoader] = useState(false);
     const [mask, setMask] = useState("(99) 99999-9999");
     const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
@@ -132,8 +130,7 @@ export function Checkout() {
     const tooltipMessage = `Para entregas em outras regiões,
         por favor entre em contato conosco pelo whatsapp.`;
 
-    const DEFAULT_DELIVERY_FEE = 8.0;
-    const deliveryFee = pickupOnStore ? 0 : DEFAULT_DELIVERY_FEE;
+    const deliveryFee = pickupOnStore ? 0 : (deliveryInfo?.fee ?? 0);
     const totalWithDelivery = cartTotal + deliveryFee;
 
     const DAY_OF_WEEK_MAP: { [key: string]: number } = {
@@ -195,9 +192,11 @@ export function Checkout() {
     } = useForm<INewOrder>({
         defaultValues: {
             country: "Brasil",
-            state: "RJ",
-            city: "Itaperuna",
-            postal_code: "28300-000",
+            state: deliveryInfo?.state || "",
+            city: deliveryInfo?.city || "",
+            postal_code: deliveryInfo?.cep || "",
+            street: deliveryInfo?.street || "",
+            neighborhood: deliveryInfo?.neighborhood || "",
             payment_method: "MERCADO_PAGO",
         }
     });
@@ -215,6 +214,20 @@ export function Checkout() {
             return;
         }
 
+        // Validar que CEP e Cidade batem com o frete calculado
+        if (!pickupOnStore && deliveryInfo) {
+            const normalizedFormCep = data.postal_code?.replace(/\D/g, '');
+            const normalizedDeliveryCep = deliveryInfo.cep?.replace(/\D/g, '');
+            const cityMatch = data.city?.trim().toLowerCase() === deliveryInfo.city?.trim().toLowerCase();
+            if (normalizedFormCep !== normalizedDeliveryCep || !cityMatch) {
+                setErrorMessage(
+                    `O CEP e a cidade do endereço (${data.city}) devem ser os mesmos utilizados no cálculo do frete (${deliveryInfo.city}).`
+                );
+                setTimeout(() => setErrorMessage(""), 6000);
+                return;
+            }
+        }
+
         setShowLoader(true);
 
         const description = cartItems
@@ -228,8 +241,8 @@ export function Checkout() {
             quantity: item.quantity
         }));
 
-        // Obter store_id do localStorage (salvo no StoreFront)
-        const storefrontStoreId = localStorage.getItem('storefront_store_id');
+        // Obter store_id do sessionStorage (salvo no StoreFront)
+        const storefrontStoreId = sessionStorage.getItem('storefront_store_id');
 
         const orderData = {
             store_id: storefrontStoreId,
@@ -396,14 +409,14 @@ export function Checkout() {
     //     // eslint-disable-next-line react-hooks/exhaustive-deps
     // }, [phone_number, setValue]);
 
-    // Carregar schedules da loja do localStorage
+    // Carregar schedules da loja do sessionStorage
     useEffect(() => {
-        const savedSchedules = localStorage.getItem('storefront_store_schedules');
+        const savedSchedules = sessionStorage.getItem('storefront_store_schedules');
         if (savedSchedules) {
             try {
                 setStoreSchedules(JSON.parse(savedSchedules));
             } catch (error) {
-                console.error('Erro ao carregar schedules do localStorage:', error);
+                console.error('Erro ao carregar schedules do sessionStorage:', error);
             }
         }
     }, []);
@@ -443,6 +456,25 @@ export function Checkout() {
             navigate(`/${slug}`);
         }
     }, [cartItems, currentOrder, navigate, slug]);
+
+    // Redirecionar ao carrinho se o frete não foi calculado
+    useEffect(() => {
+        if (!isDeliveryCalculated && cartItems.length > 0) {
+            navigate(`/${slug}/carrinho`);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Preencher campos de endereço com dados do cálculo de frete
+    useEffect(() => {
+        if (deliveryInfo) {
+            setValue("postal_code", deliveryInfo.cep);
+            setValue("city", deliveryInfo.city);
+            setValue("state", deliveryInfo.state);
+            setValue("street", deliveryInfo.street);
+            setValue("neighborhood", deliveryInfo.neighborhood);
+        }
+    }, [deliveryInfo, setValue]);
 
     useEffect(() => {
         if (currentOrder?.id) {
@@ -589,7 +621,7 @@ export function Checkout() {
                 });
 
                 setClientId(clientData.id);
-                setSuccessMessage('Cliente criado com sucesso!');
+                clearErrors(["first_name", "last_name"]);
                 setTimeout(() => { setSuccessMessage('') }, 3000);
             }
         } catch (error: any) {
@@ -843,6 +875,16 @@ export function Checkout() {
                                 {client_id && (
                                     <>
                                         <FormFieldTitle>Informações de Entrega</FormFieldTitle>
+
+                                        <FormField>
+                                            <Label>CEP</Label>
+                                            <Input
+                                                type="text"
+                                                disabled
+                                                {...register("postal_code")}
+                                            />
+                                        </FormField>
+
                                         <FormField>
                                             <Label>
                                                 Informe sobre a entrega
@@ -903,54 +945,69 @@ export function Checkout() {
 
                                         {addresses.length > 0 && (
                                             <>
-                                                {!pickupOnStore &&
-                                                    <FormField>
-                                                        <Label>
-                                                            Selecione o Endereço (Ou cadastre um novo)
-                                                            <span>*</span>
-                                                        </Label>
-                                                        <Select
-                                                            {...register("addressId")}
-                                                            onChange={(e) => {
-                                                                const selectedAddressId = e.target.value;
-                                                                const selectedAddress: any = addresses.find((address: any) => address.id === selectedAddressId);
-                                                                setSelectedAddress(selectedAddress);
-                                                                if (selectedAddress) {
-                                                                    setValue("postal_code", selectedAddress.postal_code);
-                                                                    setValue("street", selectedAddress.street);
-                                                                    setValue("street_number", selectedAddress.street_number);
-                                                                    setValue("city", selectedAddress.city);
-                                                                    setValue("neighborhood", selectedAddress.neighborhood);
-                                                                    setValue("complement", selectedAddress.complement);
-                                                                    setValue("reference_point", selectedAddress.reference_point);
-                                                                    setValue("state", selectedAddress.state);
-                                                                    setValue("country", selectedAddress.country);
-                                                                    setAddressId(selectedAddressId);
-                                                                }
-
-                                                                if (!selectedAddress) {
-                                                                    setValue("postal_code", "");
-                                                                    setValue("street", "");
-                                                                    setValue("street_number", "");
-                                                                    setValue("city", "");
-                                                                    setValue("neighborhood", "");
-                                                                    setValue("complement", "");
-                                                                    setValue("reference_point", "");
-                                                                    setValue("state", "");
-                                                                    setValue("country", "");
-                                                                    setAddressId("");
-                                                                }
-                                                            }}
-                                                        >
-                                                            <option value="">Selecione um endereço</option>
-                                                            {addresses.map((address: any) => (
-                                                                <option key={address.id} value={address.id}>
-                                                                    {address.street}, {address.number} - {address.city}
-                                                                </option>
-                                                            ))}
-                                                        </Select>
-                                                    </FormField>
-                                                }
+                                                {!pickupOnStore && (() => {
+                                                    const compatibleAddresses = addresses.filter((address: any) => {
+                                                        const addrCep = address.postal_code?.replace(/\D/g, '');
+                                                        const freightCep = deliveryInfo?.cep?.replace(/\D/g, '');
+                                                        const cityOk = address.city?.trim().toLowerCase() === deliveryInfo?.city?.trim().toLowerCase();
+                                                        return addrCep === freightCep && cityOk;
+                                                    });
+                                                    return (
+                                                        <FormField>
+                                                            <Label>
+                                                                Selecione o Endereço (Ou cadastre um novo)
+                                                                <span>*</span>
+                                                            </Label>
+                                                            {compatibleAddresses.length === 0 && (
+                                                                <ErrorMessage>
+                                                                    Nenhum endereço salvo corresponde ao CEP/cidade do frete calculado. Cadastre um novo endereço abaixo.
+                                                                </ErrorMessage>
+                                                            )}
+                                                            <Select
+                                                                {...register("addressId")}
+                                                                onChange={(e) => {
+                                                                    const selectedAddressId = e.target.value;
+                                                                    const selectedAddress: any = compatibleAddresses.find((address: any) => address.id === selectedAddressId);
+                                                                    setSelectedAddress(selectedAddress);
+                                                                    if (selectedAddress) {
+                                                                        // Preenche os campos editáveis do endereço salvo,
+                                                                        // mas mantém CEP, cidade e estado fixos do frete
+                                                                        setValue("street", selectedAddress.street);
+                                                                        setValue("street_number", selectedAddress.street_number);
+                                                                        setValue("neighborhood", selectedAddress.neighborhood);
+                                                                        setValue("complement", selectedAddress.complement);
+                                                                        setValue("reference_point", selectedAddress.reference_point);
+                                                                        setValue("country", selectedAddress.country || "Brasil");
+                                                                        // CEP, cidade e estado sempre do frete calculado
+                                                                        setValue("postal_code", deliveryInfo?.cep || "");
+                                                                        setValue("city", deliveryInfo?.city || "");
+                                                                        setValue("state", deliveryInfo?.state || "");
+                                                                        setAddressId(selectedAddressId);
+                                                                    }
+                                                                    if (!selectedAddress) {
+                                                                        setValue("street", deliveryInfo?.street || "");
+                                                                        setValue("street_number", "");
+                                                                        setValue("neighborhood", deliveryInfo?.neighborhood || "");
+                                                                        setValue("complement", "");
+                                                                        setValue("reference_point", "");
+                                                                        // Sempre do frete
+                                                                        setValue("postal_code", deliveryInfo?.cep || "");
+                                                                        setValue("city", deliveryInfo?.city || "");
+                                                                        setValue("state", deliveryInfo?.state || "");
+                                                                        setAddressId("");
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <option value="">Selecione um endereço</option>
+                                                                {compatibleAddresses.map((address: any) => (
+                                                                    <option key={address.id} value={address.id}>
+                                                                        {address.street}, {address.street_number} - {address.city}
+                                                                    </option>
+                                                                ))}
+                                                            </Select>
+                                                        </FormField>
+                                                    );
+                                                })()}
 
                                                 <InlineFormField>
                                                     <CheckboxContainer>
@@ -1044,34 +1101,22 @@ export function Checkout() {
                                                             Estado
                                                             <span>*</span>
                                                         </Label>
-                                                        <Select disabled {...register("state", {
-                                                            required: "Estado inválido",
-                                                        })}>
-                                                            <option value="">Selecionar</option>
-                                                            {Object.entries(STATES).map(([key, value]) => (
-                                                                <option key={key} value={key}>{value}</option>
-                                                            ))}
-                                                        </Select>
+                                                        <Input
+                                                            type="text"
+                                                            disabled
+                                                            {...register("state", { required: "Estado inválido" })}
+                                                        />
                                                         {errors.state && <ErrorMessage>{errors.state.message}</ErrorMessage>}
                                                     </FormField>
                                                     <FormField>
-                                                        <Label style={{ display: "flex" }}>
-                                                            <div>
-                                                                Cidade
-                                                                <span>*</span>
-                                                            </div>
-                                                            <button
-                                                                type="button"
-                                                                className="label-question"
-                                                                onClick={() => setShowToolTipModal(!showToolTipModal)}>
-                                                                <FontAwesomeIcon icon={faCircleQuestion as any}
-                                                                />
-                                                            </button>
+                                                        <Label>
+                                                            Cidade
+                                                            <span>*</span>
                                                         </Label>
-                                                        <Input type="text" placeholder="Cidade" {...register("city", {
-                                                            required: "Cidade inválido",
-                                                        })}
+                                                        <Input
+                                                            type="text"
                                                             disabled
+                                                            {...register("city", { required: "Cidade inválida" })}
                                                         />
                                                         {errors.city && <ErrorMessage>{errors.city.message}</ErrorMessage>}
                                                     </FormField>

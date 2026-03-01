@@ -123,13 +123,13 @@ export const Content = styled.main`
     padding: 20px 20px;
     display: grid;
     grid-template-columns: 1fr 400px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+        "products summary"
+        "observations summary";
     gap: 20px;
 
     @media (max-width: 1024px) {
-        grid-template-columns: 1fr;
-    }
-
-    @media (max-width: 768px) {
         display: flex;
         flex-direction: column;
     }
@@ -143,6 +143,22 @@ export const CartSection = styled.div`
 
     @media (max-width: 768px) {
         padding: 15px;
+    }
+`;
+
+export const ProductsSection = styled(CartSection)`
+    grid-area: products;
+
+    @media (max-width: 1024px) {
+        order: 1;
+    }
+`;
+
+export const ObservationsSection = styled(CartSection)`
+    grid-area: observations;
+
+    @media (max-width: 1024px) {
+        order: 3;
     }
 `;
 
@@ -305,13 +321,17 @@ export const OrderSummary = styled.div`
     height: fit-content;
     position: sticky;
     top: 100px;
+    grid-area: summary;
+    align-self: start;
 
     @media (max-width: 1024px) {
         position: relative;
         top: 0;
+        order: 2;
     }
 
     @media (max-width: 768px) {
+        width: 100%;
         padding: 15px;
     }
 `;
@@ -394,5 +414,50 @@ export const Textarea = styled.textarea`
 
     &::placeholder {
         color: #999;
+    }
+
+    @media (max-width: 1024px) {
+        min-height: 60px;
+        max-height: 80px;
+    }
+`;
+
+export const DesktopCheckoutActions = styled.div`
+    @media (max-width: 1024px) {
+        display: none;
+    }
+`;
+
+export const MobileCheckoutActions = styled.div`
+    display: none;
+
+    @media (max-width: 1024px) {
+        display: block;
+        order: 4;
+    }
+`;
+
+export const FreightSection = styled.div`
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f0f0f0;
+`;
+
+export const CheckoutWarning = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #C2410C;
+    font-weight: 500;
+    margin-bottom: 12px;
+
+    svg {
+        flex-shrink: 0;
+        font-size: 15px;
     }
 `;

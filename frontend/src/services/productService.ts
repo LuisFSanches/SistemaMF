@@ -65,6 +65,7 @@ export const updateProduct = async(product: any) => {
         stock: parseFloat(product.stock),
         enabled: product.enabled,
         visible_in_store: product.visible_in_store,
+        description: product.description,
         image: product.image,
     });
     

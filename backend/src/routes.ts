@@ -134,6 +134,13 @@ import { UpdateStoreProductController } from './controllers/storeProduct/UpdateS
 import { DeleteStoreProductController } from './controllers/storeProduct/DeleteStoreProductController';
 import { SearchStoreProductsController } from './controllers/storeProduct/SearchStoreProductsController';
 
+import { CreateStoreCarouselController } from './controllers/storeCarousel/CreateStoreCarouselController';
+import { GetAllStoreCarouselsController } from './controllers/storeCarousel/GetAllStoreCarouselsController';
+import { GetStoreCarouselController } from './controllers/storeCarousel/GetStoreCarouselController';
+import { UpdateStoreCarouselController } from './controllers/storeCarousel/UpdateStoreCarouselController';
+import { DeleteStoreCarouselController } from './controllers/storeCarousel/DeleteStoreCarouselController';
+import { GetStoreFrontCarouselsController } from './controllers/storeCarousel/GetStoreFrontCarouselsController';
+
 import { CreateStoreAddressController } from './controllers/storeAddress/CreateStoreAddressController';
 import { GetAllStoreAddressesController } from './controllers/storeAddress/GetAllStoreAddressesController';
 import { GetStoreAddressController } from './controllers/storeAddress/GetStoreAddressController';
@@ -152,9 +159,19 @@ import { GetStoreHolidayController } from './controllers/storeHoliday/GetStoreHo
 import { UpdateStoreHolidayController } from './controllers/storeHoliday/UpdateStoreHolidayController';
 import { DeleteStoreHolidayController } from './controllers/storeHoliday/DeleteStoreHolidayController';
 
+import { CreateStoreAttendedCityController } from './controllers/storeAttendedCity/CreateStoreAttendedCityController';
+import { GetAllStoreAttendedCitiesController } from './controllers/storeAttendedCity/GetAllStoreAttendedCitiesController';
+import { DeleteStoreAttendedCityController } from './controllers/storeAttendedCity/DeleteStoreAttendedCityController';
+
+import { CreateDeliveryRangeController } from './controllers/deliveryRange/CreateDeliveryRangeController';
+import { GetAllDeliveryRangesController } from './controllers/deliveryRange/GetAllDeliveryRangesController';
+import { DeleteDeliveryRangeController } from './controllers/deliveryRange/DeleteDeliveryRangeController';
+
+import { CalculateDeliveryController } from './controllers/delivery/CalculateDeliveryController';
+
 import { CreateMercadoPagoPreferenceController } from './controllers/mercadoPago/CreateMercadoPagoPreferenceController';
 import { MercadoPagoWebhookController } from './controllers/mercadoPago/MercadoPagoWebhookController';
-// import { TestMercadoPagoWebhookController } from './controllers/mercadoPago/TestMercadoPagoWebhookController';
+import { TestMercadoPagoWebhookController } from './controllers/mercadoPago/TestMercadoPagoWebhookController';
 import { GetMercadoPagoPaymentStatusController } from './controllers/mercadoPago/GetMercadoPagoPaymentStatusController';
 
 import adminAuthMiddleware from './middlewares/admin_auth';
@@ -244,8 +261,16 @@ router.get('/store-product/:id', adminAuthMiddleware, new GetStoreProductControl
 router.put('/store-product/:id', adminAuthMiddleware, new UpdateStoreProductController().handle)
 router.delete('/store-product/:id', adminAuthMiddleware, new DeleteStoreProductController().handle)
 
+//-- ROTAS STORE CAROUSEL (ADMIN) --
+router.post('/store-carousel', adminAuthMiddleware, new CreateStoreCarouselController().handle)
+router.get('/store-carousel/all', adminAuthMiddleware, new GetAllStoreCarouselsController().handle)
+router.get('/store-carousel/:id', adminAuthMiddleware, new GetStoreCarouselController().handle)
+router.put('/store-carousel/:id', adminAuthMiddleware, new UpdateStoreCarouselController().handle)
+router.delete('/store-carousel/:id', adminAuthMiddleware, new DeleteStoreCarouselController().handle)
+
 //-- ROTAS STOREFRONT (PÚBLICAS) --
 router.get('/storefront/:slug/products', new GetStoreFrontProductsController().handle)
+router.get('/storefront/:slug/carousels', new GetStoreFrontCarouselsController().handle)
 router.get('/storefront/product/:id', new GetStoreProductByIdController().handle)
 
 //-- ROTAS ADMIN --
@@ -352,10 +377,24 @@ router.get('/storeHoliday/:id', adminAuthMiddleware, new GetStoreHolidayControll
 router.put('/storeHoliday/:id', adminAuthMiddleware, new UpdateStoreHolidayController().handle);
 router.delete('/storeHoliday/:id', adminAuthMiddleware, new DeleteStoreHolidayController().handle);
 
+//-- ROTAS STORE ATTENDED CITIES --
+router.post('/storeAttendedCity', adminAuthMiddleware, new CreateStoreAttendedCityController().handle);
+router.get('/storeAttendedCity/store/:store_id', adminAuthMiddleware, new GetAllStoreAttendedCitiesController().handle);
+router.delete('/storeAttendedCity/:id', adminAuthMiddleware, new DeleteStoreAttendedCityController().handle);
+
+//-- ROTAS DELIVERY RANGES --
+router.post('/deliveryRange', adminAuthMiddleware, new CreateDeliveryRangeController().handle);
+router.get('/deliveryRange/store/:store_id', adminAuthMiddleware, new GetAllDeliveryRangesController().handle);
+router.delete('/deliveryRange/:id', adminAuthMiddleware, new DeleteDeliveryRangeController().handle);
+
+//-- ROTAS DELIVERY (FRETE) --
+// Pública para o storefront calcular frete antes de finalizar pedido
+router.post('/delivery/calculate', new CalculateDeliveryController().handle);
+
 //-- ROTAS MERCADO PAGO (STOREFRONT) --
 router.post('/mercadopago/preference', new CreateMercadoPagoPreferenceController().handle);
 router.post('/webhook/mercadopago', new MercadoPagoWebhookController().handle);
-// router.post('/webhook/mercadopago/test', new TestMercadoPagoWebhookController().handle);
+router.post('/webhook/mercadopago/test', new TestMercadoPagoWebhookController().handle);
 router.get('/mercadopago/payment/:payment_id', new GetMercadoPagoPaymentStatusController().handle); // Rota legacy
 router.get('/mercadopago/payment/status', new GetMercadoPagoPaymentStatusController().handle); // Rota com query params
 

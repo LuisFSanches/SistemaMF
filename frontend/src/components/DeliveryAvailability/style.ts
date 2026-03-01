@@ -22,7 +22,6 @@ export const Container = styled.div<{ isPDP?: boolean }>`
     position: relative;
 
     @media (max-width: 768px) {
-        margin-bottom: 30px;
         padding: ${props => props.isPDP ? '0px' : '0px'
     }
 `;

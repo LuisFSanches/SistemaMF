@@ -61,8 +61,8 @@ export function StoreFrontHeader({
     const [isSearching, setIsSearching] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
     const [internalSearchTerm, setInternalSearchTerm] = useState(searchTerm);
-    const logoFromStorage = localStorage.getItem('storefront_store_logo');
-    const storeNameFromStorage = localStorage.getItem('storefront_store_name');
+    const logoFromStorage = sessionStorage.getItem('storefront_store_logo');
+    const storeNameFromStorage = sessionStorage.getItem('storefront_store_name');
 
     // Usar logo customizado ou da loja se disponível, caso contrário usar logo mocada
     const logoSrc = customLogoSrc || storeData?.logo || logoFromStorage;

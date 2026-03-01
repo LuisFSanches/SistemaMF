@@ -13,6 +13,24 @@ export const Content = styled.main`
     margin: 0 auto;
     padding: 30px 12px;
     background: linear-gradient(135deg, hsl(346 77% 95%) 0%, hsl(346 77% 98%) 50%, hsl(142 71% 95%) 100%);
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        font-size: 40px;
+
+        strong {
+            color: #e95578;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+    }
 `;
 
 export const PageTitle = styled.h1`

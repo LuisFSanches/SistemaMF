@@ -9,6 +9,8 @@ import {
     PriceInput,
     BottomActions,
     QuantityInput,
+    QuantityButton,
+    QuantityControl,
     AddButton,
     PriceInputWrapper,
     MoneySign,
@@ -79,12 +81,22 @@ export function ProductCard({ product, image, onAdd, editablePrice = true, enabl
             </ClickableArea>
             <Info>
                 <BottomActions onClick={(e) => e.stopPropagation()}>
-                    <QuantityInput
-                        type="number"
-                        min={1}
-                        value={quantity}
-                        onChange={(e) => setQuantity(Number(e.target.value))}
-                    />
+                    <QuantityControl>
+                        <QuantityButton
+                            type="button"
+                            onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                        >−</QuantityButton>
+                        <QuantityInput
+                            type="number"
+                            min={1}
+                            value={quantity}
+                            onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+                        />
+                        <QuantityButton
+                            type="button"
+                            onClick={() => setQuantity(q => q + 1)}
+                        >+</QuantityButton>
+                    </QuantityControl>
                     <AddButton onClick={handleAddClick}>Adicionar</AddButton>
                 </BottomActions>
             </Info>

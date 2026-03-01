@@ -4,7 +4,7 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from '../../exceptions/bad-request';
 
 class UpdateProductService{
-	async execute({ id, name, price, unity, stock, enabled, image, visible_in_store }: IProduct) {	
+	async execute({ id, name, price, unity, stock, enabled, image, visible_in_store, description }: IProduct) {	
 		try {
 			let data = {
 				name,
@@ -13,7 +13,8 @@ class UpdateProductService{
                 stock,
                 enabled,
 				image,
-				visible_in_store
+				visible_in_store,
+				description
 			} as any;
 			
 			const updatedProduct =await prismaClient.product.update({

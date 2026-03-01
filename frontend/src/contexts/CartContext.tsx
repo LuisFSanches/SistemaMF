@@ -5,38 +5,96 @@ interface ICartProduct extends IProduct {
     quantity: number;
 }
 
+export interface IDeliveryInfo {
+    fee: number;
+    distance_km: number;
+    cep: string;
+    city: string;
+    state: string;
+    neighborhood: string;
+    street: string;
+}
+
 interface CartContextType {
     cartItems: ICartProduct[];
     cartCount: number;
     cartTotal: number;
     observations: string;
+    deliveryInfo: IDeliveryInfo | null;
+    isDeliveryCalculated: boolean;
     addToCart: (product: IProduct, quantity: number) => void;
     removeFromCart: (productId: string) => void;
     updateQuantity: (productId: string, quantity: number) => void;
     setObservations: (observations: string) => void;
+    setDeliveryInfo: (info: IDeliveryInfo) => void;
+    clearDeliveryInfo: () => void;
     clearCart: () => void;
+}
+
+interface CartProviderProps {
+    slug: string;
+    children: React.ReactNode;
+}
+
+const CART_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
+
+function saveWithExpiry<T>(storageKey: string, value: T): void {
+    localStorage.setItem(storageKey, JSON.stringify({
+        value,
+        expiresAt: Date.now() + CART_TTL_MS,
+    }));
+}
+
+function getWithExpiry<T>(storageKey: string): T | null {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return null;
+    try {
+        const parsed = JSON.parse(raw);
+        if (Date.now() > parsed.expiresAt) {
+            localStorage.removeItem(storageKey);
+            return null;
+        }
+        return parsed.value as T;
+    } catch {
+        localStorage.removeItem(storageKey);
+        return null;
+    }
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider: React.FC = ({ children }) => {
+export const CartProvider: React.FC<CartProviderProps> = ({ slug, children }) => {
+    const key = (name: string) => `${slug}:${name}`;
+
     const [cartItems, setCartItems] = useState<ICartProduct[]>(() => {
-        const savedCart = localStorage.getItem("cart");
-        return savedCart ? JSON.parse(savedCart) : [];
+        return getWithExpiry<ICartProduct[]>(key("cart")) ?? [];
     });
 
     const [observations, setObservations] = useState<string>(() => {
-        const savedObservations = localStorage.getItem("cart_observations");
-        return savedObservations ? JSON.parse(savedObservations) : "";
+        return getWithExpiry<string>(key("cart_observations")) ?? "";
+    });
+
+    const [deliveryInfo, setDeliveryInfoState] = useState<IDeliveryInfo | null>(() => {
+        return getWithExpiry<IDeliveryInfo>(key("cart_delivery_info")) ?? null;
     });
 
     useEffect(() => {
-        localStorage.setItem("cart", JSON.stringify(cartItems));
-    }, [cartItems]);
+        saveWithExpiry(key("cart"), cartItems);
+    }, [cartItems]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
-        localStorage.setItem("cart_observations", JSON.stringify(observations));
-    }, [observations]);
+        saveWithExpiry(key("cart_observations"), observations);
+    }, [observations]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        if (deliveryInfo) {
+            saveWithExpiry(key("cart_delivery_info"), deliveryInfo);
+        } else {
+            localStorage.removeItem(key("cart_delivery_info"));
+        }
+    }, [deliveryInfo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const isDeliveryCalculated = deliveryInfo !== null;
 
     const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
@@ -81,9 +139,21 @@ export const CartProvider: React.FC = ({ children }) => {
         );
     };
 
+    const setDeliveryInfo = (info: IDeliveryInfo) => {
+        setDeliveryInfoState(info);
+    };
+
+    const clearDeliveryInfo = () => {
+        setDeliveryInfoState(null);
+    };
+
     const clearCart = () => {
         setCartItems([]);
         setObservations("");
+        setDeliveryInfoState(null);
+        localStorage.removeItem(key("cart"));
+        localStorage.removeItem(key("cart_observations"));
+        localStorage.removeItem(key("cart_delivery_info"));
     };
 
     return (
@@ -93,10 +163,14 @@ export const CartProvider: React.FC = ({ children }) => {
                 cartCount,
                 cartTotal,
                 observations,
+                deliveryInfo,
+                isDeliveryCalculated,
                 addToCart,
                 removeFromCart,
                 updateQuantity,
                 setObservations,
+                setDeliveryInfo,
+                clearDeliveryInfo,
                 clearCart,
             }}
         >

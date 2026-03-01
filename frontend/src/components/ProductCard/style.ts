@@ -36,7 +36,7 @@ export const ProductImage = styled.img`
 `;
 
 export const Info = styled.div`
-    padding: 0 16px 16px;
+    padding: 0 12px 16px;
 
     @media (max-width: 768px) {
         padding: 0 12px 12px;
@@ -91,13 +91,50 @@ export const MoneySign = styled.span`
     pointer-events: none;
 `;
 
+export const QuantityControl = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 8px;
+`;
+
+export const QuantityButton = styled.button`
+    width: 28px;
+    height: 28px;
+    background-color: #EC4899;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+
+    &:hover {
+        background-color: #db277f;
+    }
+`;
+
 export const QuantityInput = styled.input`
-    width: 60px;
-    padding: 6px;
+    width: 40px;
+    padding: 6px 2px;
     font-size: 1rem;
     border-radius: 6px;
     border: 1px solid #ccc;
     text-align: center;
+
+    /* Remove native spin buttons */
+    -moz-appearance: textfield;
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 `;
 
 export const AddButton = styled.button`

@@ -3,11 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Modal from 'react-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog, faImage, faLock, faMapMarkerAlt, faCreditCard, faClock, faStore, faEye, faEyeSlash, faXmark, faShareNodes, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faImage, faLock, faMapMarkerAlt, faCreditCard, faClock, faStore, faEye, faEyeSlash, faXmark, faShareNodes, faInfoCircle, faCity, faTruck, faTrash, faPlus, faChevronLeft, faChevronRight, faLayerGroup, faPencil, faCheck, faSearch, faClose } from '@fortawesome/free-solid-svg-icons';
 import { Label, Input, Select, ErrorMessage, Checkbox, CheckboxContainer, FormField, Textarea, PasswordContainer, ModalContainer, Form } from '../../styles/global';
 import { 
     Container, 
     Header, 
+    TabsLayout,
     TabsContainer, 
     Tab, 
     TabContent,
@@ -26,18 +27,87 @@ import {
     ButtonGroup,
     SaveButton,
     CancelButton,
-    LoadingContainer
+    LoadingContainer,
+    SectionTitle,
+    AddCityForm,
+    AddButton,
+    CityList,
+    CityItem,
+    RemoveButton,
+    EmptyState,
+    FreightGrid,
+    FreightRangeRow,
+    RangeLabel,
+    PriceInputWrapper,
+    InlineError,
+    FeedbackMessage,
+    BannerCarouselWrapper,
+    BannerCarouselSlide,
+    BannerCarouselControls,
+    BannerCarouselNavBtn,
+    BannerCarouselDots,
+    BannerCarouselDot,
+    CarouselList,
+    CarouselCard,
+    CarouselCardHeader,
+    CarouselCardBody,
+    CarouselExpandButton,
+    ToggleActiveButton,
+    CreateCarouselForm,
+    CarouselNameInput,
+    ProductSearchInput,
+    ProductSelectionGrid,
+    ProductSelectionItem,
+    SelectedCount,
+    CarouselProductGrid,
+    CarouselProductItem,
 } from './style';
 import { getStoreById, updateStore, uploadStoreLogo, uploadStoreBanner, uploadStoreBanner2, uploadStoreBanner3, updateStoreSchedules, updateStoreCredentials } from '../../services/storeService';
+import {
+    getAttendedCities,
+    createAttendedCity,
+    deleteAttendedCity,
+    getDeliveryRanges,
+    createDeliveryRange,
+    deleteDeliveryRange,
+    IAttendedCity,
+    IDeliveryRange
+} from '../../services/deliveryService';
 import { getStoreAddresses, updateStoreAddress, createStoreAddress } from '../../services/storeAddressService';
 import { getStoreSchedules } from '../../services/storeScheduleService';
 import { resetPasswordByEmail } from '../../services/adminService';
+import { listCarousels, createCarousel, updateCarousel, deleteCarousel } from '../../services/carouselService';
+import { listStoreProducts } from '../../services/storeProductService';
+import { IStoreCarousel } from '../../interfaces/IStoreCarousel';
 import { IStore } from '../../interfaces/IStore';
 import { IStoreAddress } from '../../interfaces/IStoreAddress';
 import { IStoreSchedule, DayOfWeek } from '../../interfaces/IStoreSchedule';
 import { STATES } from '../../constants';
 
-type TabType = 'general' | 'media' | 'password' | 'address' | 'payment' | 'schedule' | 'social';
+type TabType = 'general' | 'media' | 'password' | 'address' | 'payment' | 'schedule' | 'social' | 'cities' | 'freight' | 'catalog';
+
+const FIXED_FREIGHT_RANGES = [
+    { min_km: 0, max_km: 5 },
+    { min_km: 5, max_km: 10 },
+    { min_km: 10, max_km: 15 },
+    { min_km: 15, max_km: 20 },
+    { min_km: 20, max_km: 25 },
+    { min_km: 25, max_km: 30 },
+    { min_km: 30, max_km: 35 },
+    { min_km: 35, max_km: 40 },
+    { min_km: 40, max_km: 45 },
+    { min_km: 45, max_km: 50 },
+];
+
+interface FreightRangeState {
+    rangeId?: string;
+    min_km: number;
+    max_km: number;
+    originalPrice?: number;
+    enabled: boolean;
+    price: string;
+    error?: string;
+}
 
 interface GeneralFormData {
     cnpj?: string;
@@ -110,11 +180,47 @@ export default function StoreSettings() {
     const [bannerFile, setBannerFile] = useState<File | null>(null);
     const [banner2File, setBanner2File] = useState<File | null>(null);
     const [banner3File, setBanner3File] = useState<File | null>(null);
+    const [activeBannerSlide, setActiveBannerSlide] = useState(0);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [showEmailModal, setShowEmailModal] = useState(false);
     const [emailForConfirm, setEmailForConfirm] = useState('');
     const [pendingPasswordData, setPendingPasswordData] = useState<PasswordFormData | null>(null);
+
+    // ── Cidades Atendidas
+    const [attendedCities, setAttendedCities] = useState<IAttendedCity[]>([]);
+    const [citiesLoaded, setCitiesLoaded] = useState(false);
+    const [newCityName, setNewCityName] = useState('');
+    const [newCityState, setNewCityState] = useState('');
+    const [cityFeedback, setCityFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [cityAddLoading, setCityAddLoading] = useState(false);
+
+    // ── Catálogo / Carrosséis
+    const [carousels, setCarousels] = useState<IStoreCarousel[]>([]);
+    const [catalogLoaded, setCatalogLoaded] = useState(false);
+    const [catalogFeedback, setCatalogFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [storeProducts, setStoreProducts] = useState<any[]>([]);
+    const [productsSearched, setProductsSearched] = useState(false);
+    const [productsSearching, setProductsSearching] = useState(false);
+    const [productSearch, setProductSearch] = useState('');
+    const [newCarouselName, setNewCarouselName] = useState('');
+    const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+    const [catalogSaving, setCatalogSaving] = useState(false);
+    const [expandedCarouselId, setExpandedCarouselId] = useState<string | null>(null);
+    const [editingCarouselId, setEditingCarouselId] = useState<string | null>(null);
+    const [editCarouselName, setEditCarouselName] = useState('');
+    const [editSelectedProductIds, setEditSelectedProductIds] = useState<string[]>([]);
+    const [editProductSearch, setEditProductSearch] = useState('');
+    const [editProductsSearched, setEditProductsSearched] = useState(false);
+    const [editProductsSearching, setEditProductsSearching] = useState(false);
+
+    // ── Faixas de Frete
+    const [freightRanges, setFreightRanges] = useState<FreightRangeState[]>(
+        FIXED_FREIGHT_RANGES.map(r => ({ ...r, enabled: false, price: '' }))
+    );
+    const [freightLoaded, setFreightLoaded] = useState(false);
+    const [freightFeedback, setFreightFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [freightSaving, setFreightSaving] = useState(false);
 
     const { register: registerGeneral, handleSubmit: handleSubmitGeneral, formState: { errors: errorsGeneral }, reset: resetGeneral } = useForm<GeneralFormData>();
     const { register: registerPassword, handleSubmit: handleSubmitPassword, formState: { errors: errorsPassword }, reset: resetPassword } = useForm<PasswordFormData>();
@@ -126,7 +232,7 @@ export default function StoreSettings() {
 
     useEffect(() => {
         const tab = searchParams.get('tab');
-        if (tab && ['general', 'media', 'password', 'address', 'payment', 'schedule', 'social'].includes(tab)) {
+        if (tab && ['general', 'media', 'password', 'address', 'payment', 'schedule', 'social', 'cities', 'freight', 'catalog'].includes(tab)) {
             setActiveTab(tab as TabType);
         }
     }, [searchParams]);
@@ -218,6 +324,308 @@ export default function StoreSettings() {
     const handleTabChange = (tab: TabType) => {
         setActiveTab(tab);
         setSearchParams({ tab });
+    };
+
+    // Carrega cidades atendidas ao abrir a aba (lazy)
+    useEffect(() => {
+        if (activeTab === 'cities' && !citiesLoaded && store) {
+            loadAttendedCities();
+        }
+        if (activeTab === 'freight' && !freightLoaded && store) {
+            loadFreightRanges();
+        }
+        if (activeTab === 'catalog' && !catalogLoaded && store) {
+            loadCatalogData();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeTab, store]);
+
+    const getStoreId = (): string => {
+        const adminData = localStorage.getItem('adminData');
+        if (!adminData) return '';
+        return JSON.parse(adminData).store_id || '';
+    };
+
+    const loadAttendedCities = async () => {
+        try {
+            const storeId = getStoreId();
+            const cities = await getAttendedCities(storeId);
+            setAttendedCities(cities);
+            setCitiesLoaded(true);
+        } catch (error) {
+            console.error('Erro ao carregar cidades atendidas:', error);
+        }
+    };
+
+    const handleAddCity = async () => {
+        if (!newCityName.trim()) {
+            setCityFeedback({ type: 'error', message: 'Informe o nome da cidade.' });
+            return;
+        }
+        if (!newCityState) {
+            setCityFeedback({ type: 'error', message: 'Selecione o estado.' });
+            return;
+        }
+        setCityAddLoading(true);
+        setCityFeedback(null);
+        try {
+            const storeId = getStoreId();
+            const created = await createAttendedCity({ store_id: storeId, city: newCityName.trim(), state: newCityState });
+            setAttendedCities(prev => [...prev, created].sort((a, b) => a.city.localeCompare(b.city)));
+            setNewCityName('');
+            setNewCityState('');
+            setCityFeedback({ type: 'success', message: 'Cidade adicionada com sucesso!' });
+        } catch (error: any) {
+            const msg = error?.response?.data?.message || 'Erro ao adicionar cidade.';
+            setCityFeedback({ type: 'error', message: msg.includes('already') ? 'Cidade já cadastrada para esta loja.' : msg });
+        } finally {
+            setCityAddLoading(false);
+        }
+    };
+
+    const handleRemoveCity = async (id: string) => {
+        setCityFeedback(null);
+        try {
+            await deleteAttendedCity(id);
+            setAttendedCities(prev => prev.filter(c => c.id !== id));
+            setCityFeedback({ type: 'success', message: 'Cidade removida com sucesso!' });
+        } catch (error) {
+            setCityFeedback({ type: 'error', message: 'Erro ao remover cidade.' });
+        }
+    };
+
+    const loadCatalogData = async () => {
+        try {
+            const storeId = getStoreId();
+            const carouselsData = await listCarousels(storeId);
+            setCarousels(carouselsData);
+            setCatalogLoaded(true);
+        } catch (error) {
+            console.error('Erro ao carregar catálogo:', error);
+        }
+    };
+
+    const extractProductsArray = (response: any): any[] => {
+        const raw = response?.data ?? response;
+        if (Array.isArray(raw)) return raw;
+        if (Array.isArray(raw?.data)) return raw.data;
+        if (Array.isArray(raw?.products)) return raw.products;
+        return [];
+    };
+
+    const handleSearchProducts = async () => {
+        if (!productSearch.trim()) return;
+        setProductsSearching(true);
+        try {
+            const storeId = getStoreId();
+            const response = await listStoreProducts(storeId, productSearch.trim());
+            const arr = extractProductsArray(response);
+            setStoreProducts(arr);
+            setProductsSearched(true);
+        } catch (error) {
+            console.error('Erro ao buscar produtos:', error);
+        } finally {
+            setProductsSearching(false);
+        }
+    };
+
+    const handleSearchEditProducts = async () => {
+        if (!editProductSearch.trim()) return;
+        setEditProductsSearching(true);
+        try {
+            const storeId = getStoreId();
+            const response = await listStoreProducts(storeId, editProductSearch.trim());
+            const arr = extractProductsArray(response);
+            setStoreProducts(arr);
+            setEditProductsSearched(true);
+        } catch (error) {
+            console.error('Erro ao buscar produtos:', error);
+        } finally {
+            setEditProductsSearching(false);
+        }
+    };
+
+    const handleCreateCarousel = async () => {
+        if (!newCarouselName.trim()) {
+            setCatalogFeedback({ type: 'error', message: 'Informe o nome do carrossel.' });
+            return;
+        }
+        if (selectedProductIds.length === 0) {
+            setCatalogFeedback({ type: 'error', message: 'Selecione ao menos um produto.' });
+            return;
+        }
+        setCatalogSaving(true);
+        setCatalogFeedback(null);
+        try {
+            const storeId = getStoreId();
+            await createCarousel({ store_id: storeId, name: newCarouselName.trim(), product_ids: selectedProductIds });
+            setNewCarouselName('');
+            setSelectedProductIds([]);
+            setProductSearch('');
+            setCatalogFeedback({ type: 'success', message: 'Carrossel criado com sucesso!' });
+            setCatalogLoaded(false);
+            await loadCatalogData();
+        } catch (error: any) {
+            const msg = error?.response?.data?.message || 'Erro ao criar carrossel.';
+            setCatalogFeedback({ type: 'error', message: msg });
+        } finally {
+            setCatalogSaving(false);
+        }
+    };
+
+    const handleToggleCarouselActive = async (carousel: IStoreCarousel) => {
+        try {
+            await updateCarousel(carousel.id, { is_active: !carousel.is_active });
+            setCarousels(prev =>
+                prev.map(c => c.id === carousel.id ? { ...c, is_active: !c.is_active } : c)
+            );
+        } catch (error) {
+            setCatalogFeedback({ type: 'error', message: 'Erro ao atualizar status do carrossel.' });
+        }
+    };
+
+    const handleDeleteCarousel = async (id: string) => {
+        if (!window.confirm('Tem certeza que deseja excluir este carrossel?')) return;
+        try {
+            await deleteCarousel(id);
+            setCarousels(prev => prev.filter(c => c.id !== id));
+            setCatalogFeedback({ type: 'success', message: 'Carrossel excluído com sucesso!' });
+            if (expandedCarouselId === id) setExpandedCarouselId(null);
+            if (editingCarouselId === id) setEditingCarouselId(null);
+        } catch (error) {
+            setCatalogFeedback({ type: 'error', message: 'Erro ao excluir carrossel.' });
+        }
+    };
+
+    const handleStartEditCarousel = (carousel: IStoreCarousel) => {
+        setEditingCarouselId(carousel.id);
+        setEditCarouselName(carousel.name);
+        setEditSelectedProductIds(carousel.items.map(item => item.store_product_id));
+        setEditProductSearch('');
+        setEditProductsSearched(false);
+        setStoreProducts([]);
+        setExpandedCarouselId(carousel.id);
+    };
+
+    const handleSaveEditCarousel = async (id: string) => {
+        if (!editCarouselName.trim()) {
+            setCatalogFeedback({ type: 'error', message: 'Informe o nome do carrossel.' });
+            return;
+        }
+        if (editSelectedProductIds.length === 0) {
+            setCatalogFeedback({ type: 'error', message: 'Selecione ao menos um produto.' });
+            return;
+        }
+        setCatalogSaving(true);
+        setCatalogFeedback(null);
+        try {
+            await updateCarousel(id, { name: editCarouselName.trim(), product_ids: editSelectedProductIds });
+            setCatalogFeedback({ type: 'success', message: 'Carrossel atualizado com sucesso!' });
+            setEditingCarouselId(null);
+            setCatalogLoaded(false);
+            await loadCatalogData();
+        } catch (error: any) {
+            const msg = error?.response?.data?.message || 'Erro ao atualizar carrossel.';
+            setCatalogFeedback({ type: 'error', message: msg });
+        } finally {
+            setCatalogSaving(false);
+        }
+    };
+
+    const handleToggleProductSelection = (id: string, selected: string[], setSelected: (v: string[]) => void) => {
+        setSelected(selected.includes(id) ? selected.filter(p => p !== id) : [...selected, id]);
+    };
+
+    const loadFreightRanges = async () => {
+        try {
+            const storeId = getStoreId();
+            const ranges: IDeliveryRange[] = await getDeliveryRanges(storeId);
+            setFreightRanges(
+                FIXED_FREIGHT_RANGES.map(fixed => {
+                    const existing = ranges.find(r => r.min_km === fixed.min_km && r.max_km === fixed.max_km);
+                    if (existing) {
+                        return {
+                            rangeId: existing.id,
+                            ...fixed,
+                            originalPrice: existing.price,
+                            enabled: true,
+                            price: String(existing.price)
+                        };
+                    }
+                    return { ...fixed, enabled: false, price: '' };
+                })
+            );
+            setFreightLoaded(true);
+        } catch (error) {
+            console.error('Erro ao carregar faixas de frete:', error);
+        }
+    };
+
+    const handleFreightChange = (index: number, field: 'enabled' | 'price', value: string | boolean) => {
+        setFreightRanges(prev =>
+            prev.map((r, i) =>
+                i === index
+                    ? { ...r, [field]: value, error: undefined }
+                    : r
+            )
+        );
+    };
+
+    const handleSaveFreightRanges = async () => {
+        // Validação
+        let hasError = false;
+        const validated = freightRanges.map(r => {
+            if (!r.enabled) return { ...r, error: undefined };
+            const val = parseFloat(r.price.replace(',', '.'));
+            if (!r.price || isNaN(val) || val <= 0) {
+                hasError = true;
+                return { ...r, error: 'Informe um valor maior que zero.' };
+            }
+            return { ...r, error: undefined };
+        });
+
+        if (hasError) {
+            setFreightRanges(validated);
+            return;
+        }
+
+        const activeCount = validated.filter(r => r.enabled).length;
+        if (activeCount === 0) {
+            setFreightFeedback({ type: 'error', message: 'Habilite pelo menos uma faixa de frete.' });
+            return;
+        }
+
+        setFreightSaving(true);
+        setFreightFeedback(null);
+        const storeId = getStoreId();
+
+        try {
+            for (const r of validated) {
+                if (r.enabled) {
+                    const price = parseFloat(r.price.replace(',', '.'));
+                    if (r.rangeId) {
+                        if (price !== r.originalPrice) {
+                            await deleteDeliveryRange(r.rangeId);
+                            await createDeliveryRange({ store_id: storeId, min_km: r.min_km, max_km: r.max_km, price });
+                        }
+                    } else {
+                        await createDeliveryRange({ store_id: storeId, min_km: r.min_km, max_km: r.max_km, price });
+                    }
+                } else {
+                    if (r.rangeId) {
+                        await deleteDeliveryRange(r.rangeId);
+                    }
+                }
+            }
+            setFreightFeedback({ type: 'success', message: 'Faixas de frete salvas com sucesso!' });
+            setFreightLoaded(false);
+            await loadFreightRanges();
+        } catch (error: any) {
+            const msg = error?.response?.data?.message || 'Erro ao salvar faixas de frete.';
+            setFreightFeedback({ type: 'error', message: msg });
+        } finally {
+            setFreightSaving(false);
+        }
     };
 
     const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -543,62 +951,84 @@ export default function StoreSettings() {
                 </ImagePreview>
             </ImageUploadArea>
 
-            <ImageUploadArea>
-                <h3>
-                    <FontAwesomeIcon icon={faImage} /> Banner 1 (Carousel)
-                </h3>
-                <ImagePreview>
-                    <BannerPreview>
-                        {bannerPreview ? (
-                            <img src={bannerPreview} alt="Banner 1 da loja" />
-                        ) : (
-                            <FontAwesomeIcon icon={faImage} />
-                        )}
-                    </BannerPreview>
-                    <FileInputLabel>
-                        Escolher Imagem
-                        <input type="file" accept="image/*" onChange={handleBannerChange} />
-                    </FileInputLabel>
-                </ImagePreview>
-            </ImageUploadArea>
+            <BannerCarouselWrapper>
+                <h2><FontAwesomeIcon icon={faImage} /> Banners da Loja</h2>
+                <BannerCarouselSlide $visible={activeBannerSlide === 0}>
+                    <h3>Banner Principal</h3>
+                    <ImagePreview>
+                        <BannerPreview>
+                            {bannerPreview ? (
+                                <img src={bannerPreview} alt="Banner 1 da loja" />
+                            ) : (
+                                <FontAwesomeIcon icon={faImage} />
+                            )}
+                        </BannerPreview>
+                        <FileInputLabel>
+                            Escolher Imagem
+                            <input type="file" accept="image/*" onChange={handleBannerChange} />
+                        </FileInputLabel>
+                    </ImagePreview>
+                </BannerCarouselSlide>
 
-            <ImageUploadArea>
-                <h3>
-                    <FontAwesomeIcon icon={faImage} /> Banner 2 (Carousel)
-                </h3>
-                <ImagePreview>
-                    <BannerPreview>
-                        {banner2Preview ? (
-                            <img src={banner2Preview} alt="Banner 2 da loja" />
-                        ) : (
-                            <FontAwesomeIcon icon={faImage} />
-                        )}
-                    </BannerPreview>
-                    <FileInputLabel>
-                        Escolher Imagem
-                        <input type="file" accept="image/*" onChange={handleBanner2Change} />
-                    </FileInputLabel>
-                </ImagePreview>
-            </ImageUploadArea>
+                <BannerCarouselSlide $visible={activeBannerSlide === 1}>
+                    <h3><FontAwesomeIcon icon={faImage} /> Banner 2</h3>
+                    <ImagePreview>
+                        <BannerPreview>
+                            {banner2Preview ? (
+                                <img src={banner2Preview} alt="Banner 2 da loja" />
+                            ) : (
+                                <FontAwesomeIcon icon={faImage} />
+                            )}
+                        </BannerPreview>
+                        <FileInputLabel>
+                            Escolher Imagem
+                            <input type="file" accept="image/*" onChange={handleBanner2Change} />
+                        </FileInputLabel>
+                    </ImagePreview>
+                </BannerCarouselSlide>
 
-            <ImageUploadArea>
-                <h3>
-                    <FontAwesomeIcon icon={faImage} /> Banner 3 (Carousel)
-                </h3>
-                <ImagePreview>
-                    <BannerPreview>
-                        {banner3Preview ? (
-                            <img src={banner3Preview} alt="Banner 3 da loja" />
-                        ) : (
-                            <FontAwesomeIcon icon={faImage} />
-                        )}
-                    </BannerPreview>
-                    <FileInputLabel>
-                        Escolher Imagem
-                        <input type="file" accept="image/*" onChange={handleBanner3Change} />
-                    </FileInputLabel>
-                </ImagePreview>
-            </ImageUploadArea>
+                <BannerCarouselSlide $visible={activeBannerSlide === 2}>
+                    <h3><FontAwesomeIcon icon={faImage} /> Banner 3</h3>
+                    <ImagePreview>
+                        <BannerPreview>
+                            {banner3Preview ? (
+                                <img src={banner3Preview} alt="Banner 3 da loja" />
+                            ) : (
+                                <FontAwesomeIcon icon={faImage} />
+                            )}
+                        </BannerPreview>
+                        <FileInputLabel>
+                            Escolher Imagem
+                            <input type="file" accept="image/*" onChange={handleBanner3Change} />
+                        </FileInputLabel>
+                    </ImagePreview>
+                </BannerCarouselSlide>
+
+                <BannerCarouselControls>
+                    <BannerCarouselNavBtn
+                        type="button"
+                        onClick={() => setActiveBannerSlide((prev) => (prev === 0 ? 2 : prev - 1))}
+                    >
+                        <FontAwesomeIcon icon={faChevronLeft} />
+                    </BannerCarouselNavBtn>
+                    <BannerCarouselDots>
+                        {[0, 1, 2].map((i) => (
+                            <BannerCarouselDot
+                                key={i}
+                                type="button"
+                                $active={activeBannerSlide === i}
+                                onClick={() => setActiveBannerSlide(i)}
+                            />
+                        ))}
+                    </BannerCarouselDots>
+                    <BannerCarouselNavBtn
+                        type="button"
+                        onClick={() => setActiveBannerSlide((prev) => (prev === 2 ? 0 : prev + 1))}
+                    >
+                        <FontAwesomeIcon icon={faChevronRight} />
+                    </BannerCarouselNavBtn>
+                </BannerCarouselControls>
+            </BannerCarouselWrapper>
 
             <ButtonGroup>
                 <SaveButton onClick={handleSaveMedia}>Salvar Alterações</SaveButton>
@@ -885,6 +1315,370 @@ export default function StoreSettings() {
         </form>
     );
 
+    const renderCitiesTab = () => (
+        <div>
+            <SectionTitle>
+                <FontAwesomeIcon icon={faCity} /> Cidades Atendidas
+            </SectionTitle>
+
+            {cityFeedback && (
+                <FeedbackMessage $type={cityFeedback.type}>
+                    {cityFeedback.message}
+                </FeedbackMessage>
+            )}
+
+            <AddCityForm>
+                <FormField>
+                    <Label>Cidade</Label>
+                    <Input
+                        type="text"
+                        placeholder="Nome da cidade"
+                        value={newCityName}
+                        onChange={e => { setNewCityName(e.target.value); setCityFeedback(null); }}
+                        onKeyDown={e => e.key === 'Enter' && handleAddCity()}
+                    />
+                </FormField>
+                <FormField>
+                    <Label>Estado</Label>
+                    <Select
+                        value={newCityState}
+                        onChange={e => { setNewCityState(e.target.value); setCityFeedback(null); }}
+                    >
+                        <option value="">Selecione...</option>
+                        {Object.entries(STATES).map(([key, value]) => (
+                            <option key={key} value={key}>{key} — {value}</option>
+                        ))}
+                    </Select>
+                </FormField>
+                <AddButton type="button" onClick={handleAddCity} disabled={cityAddLoading}>
+                    <FontAwesomeIcon icon={faPlus} /> Adicionar
+                </AddButton>
+            </AddCityForm>
+
+            <CityList>
+                {attendedCities.length === 0 ? (
+                    <EmptyState>Nenhuma cidade cadastrada ainda. Adicione cidades acima.</EmptyState>
+                ) : (
+                    attendedCities.map(city => (
+                        <CityItem key={city.id}>
+                            <div>
+                                <span>{city.city}</span>
+                                <span className="state-badge">{city.state}</span>
+                            </div>
+                            <RemoveButton type="button" onClick={() => handleRemoveCity(city.id)}>
+                                <FontAwesomeIcon icon={faTrash} /> Remover
+                            </RemoveButton>
+                        </CityItem>
+                    ))
+                )}
+            </CityList>
+        </div>
+    );
+
+    const renderCatalogTab = () => {
+        return (
+            <div>
+                <SectionTitle>
+                    <FontAwesomeIcon icon={faLayerGroup} /> Carrosséis Customizados
+                </SectionTitle>
+
+                <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                    Crie seções especiais na sua loja online com produtos selecionados. Cada carrossel
+                    aparece logo abaixo do banner da loja quando estiver ativo.
+                </p>
+
+                {catalogFeedback && (
+                    <FeedbackMessage $type={catalogFeedback.type}>
+                        {catalogFeedback.message}
+                    </FeedbackMessage>
+                )}
+
+                {/* Formulário de criação */}
+                <CreateCarouselForm>
+                    <h3><FontAwesomeIcon icon={faPlus} /> Novo Carrossel</h3>
+
+                    <Label>Nome do Carrossel<span>*</span></Label>
+                    <CarouselNameInput
+                        type="text"
+                        placeholder="Ex: Ideal para o Dia das Mães"
+                        value={newCarouselName}
+                        onChange={e => setNewCarouselName(e.target.value)}
+                    />
+
+                    <Label>Buscar Produtos</Label>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                        <ProductSearchInput
+                            style={{ marginBottom: 0, flex: 1 }}
+                            type="text"
+                            placeholder="Digite para filtrar por nome..."
+                            value={productSearch}
+                            onChange={e => setProductSearch(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleSearchProducts()}
+                        />
+                        <SaveButton
+                            type="button"
+                            onClick={handleSearchProducts}
+                            disabled={productsSearching}
+                            style={{ whiteSpace: 'nowrap', padding: '0 1rem' }}
+                        >
+                            <FontAwesomeIcon icon={faSearch as any} /> {productsSearching ? 'Buscando...' : 'Buscar'}
+                        </SaveButton>
+                    </div>
+
+                    {productsSearched && (
+                        <>
+                            {selectedProductIds.length > 0 && (
+                                <SelectedCount>{selectedProductIds.length} produto(s) selecionado(s)</SelectedCount>
+                            )}
+
+                            <ProductSelectionGrid>
+                                {storeProducts.length === 0 ? (
+                                    <p style={{ padding: '1rem', color: '#999', gridColumn: '1/-1' }}>Nenhum produto encontrado.</p>
+                                ) : (
+                                    storeProducts.map((sp: any) => {
+                                        const name = sp.name || 'Produto';
+                                        const image = sp.image || null;
+                                        const price = sp.price ?? sp.product?.price ?? 0;
+                                        const isSelected = selectedProductIds.includes(sp.id);
+                                        return (
+                                            <ProductSelectionItem key={sp.id} $selected={isSelected}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isSelected}
+                                                    onChange={() => handleToggleProductSelection(sp.id, selectedProductIds, setSelectedProductIds)}
+                                                />
+                                                {image && <img src={image} alt={name} />}
+                                                <div className="product-info">
+                                                    <span>{name}</span>
+                                                    <span className="price">R$ {Number(price).toFixed(2)}</span>
+                                                </div>
+                                            </ProductSelectionItem>
+                                        );
+                                    })
+                                )}
+                            </ProductSelectionGrid>
+                        </>
+                    )}
+
+                    <ButtonGroup>
+                        <CancelButton
+                            type="button"
+                            onClick={() => { setNewCarouselName(''); setSelectedProductIds([]); setProductSearch(''); setProductsSearched(false); setStoreProducts([]); }}
+                        >
+                            Limpar
+                        </CancelButton>
+                        <SaveButton type="button" onClick={handleCreateCarousel} disabled={catalogSaving}>
+                            {catalogSaving ? 'Criando...' : 'Criar Carrossel'}
+                        </SaveButton>
+                    </ButtonGroup>
+                </CreateCarouselForm>
+
+                {/* Lista de carrosséis existentes */}
+                {carousels.length === 0 ? (
+                    <EmptyState>Nenhum carrossel criado ainda. Use o formulário acima para criar o primeiro.</EmptyState>
+                ) : (
+                    <CarouselList>
+                        {carousels.map(carousel => {
+                            const isExpanded = expandedCarouselId === carousel.id;
+                            const isEditing = editingCarouselId === carousel.id;
+
+                            return (
+                                <CarouselCard key={carousel.id}>
+                                    <CarouselCardHeader>
+                                        <div>
+                                            <span className="carousel-name">{carousel.name}</span>
+                                            <ToggleActiveButton
+                                                    $active={carousel.is_active}
+                                                    onClick={() => handleToggleCarouselActive(carousel)}
+                                                >
+                                                {carousel.is_active ? 'Ativo' : 'Inativo'}
+                                            </ToggleActiveButton>
+                                        </div>
+                                        <div className="carousel-actions">
+                                            <CarouselExpandButton
+                                                onClick={() => {
+                                                    if (isEditing) return;
+                                                    setExpandedCarouselId(isExpanded ? null : carousel.id);
+                                                }}
+                                            >
+                                                {isExpanded ? <FontAwesomeIcon icon={faClose as any} /> 
+                                                : <FontAwesomeIcon icon={faSearch as any} />}
+                                                {isExpanded ? 'Fechar' : 'Ver produtos'}
+                                            </CarouselExpandButton>
+                                            <CarouselExpandButton
+                                                onClick={() =>
+                                                    isEditing
+                                                        ? setEditingCarouselId(null)
+                                                        : handleStartEditCarousel(carousel)
+                                                }
+                                            >
+                                                <FontAwesomeIcon icon={faPencil as any} />
+                                                {isEditing ? 'Cancelar edição' : 'Editar'}
+                                            </CarouselExpandButton>
+                                            <RemoveButton type="button" onClick={() => handleDeleteCarousel(carousel.id)}>
+                                                <FontAwesomeIcon icon={faTrash} />
+                                            </RemoveButton>
+                                        </div>
+                                    </CarouselCardHeader>
+
+                                    <CarouselCardBody $open={isExpanded}>
+                                        {isEditing ? (
+                                            <>
+                                                <Label>Nome do Carrossel<span>*</span></Label>
+                                                <CarouselNameInput
+                                                    type="text"
+                                                    value={editCarouselName}
+                                                    onChange={e => setEditCarouselName(e.target.value)}
+                                                />
+
+                                                <Label>Buscar Produtos</Label>
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                                                    <ProductSearchInput
+                                                        style={{ marginBottom: 0, flex: 1 }}
+                                                        type="text"
+                                                        placeholder="Digite para filtrar por nome..."
+                                                        value={editProductSearch}
+                                                        onChange={e => setEditProductSearch(e.target.value)}
+                                                        onKeyDown={e => e.key === 'Enter' && handleSearchEditProducts()}
+                                                    />
+                                                    <SaveButton
+                                                        type="button"
+                                                        onClick={handleSearchEditProducts}
+                                                        disabled={editProductsSearching}
+                                                        style={{ whiteSpace: 'nowrap', padding: '0 1rem' }}
+                                                    >
+                                                        <FontAwesomeIcon icon={faSearch as any} /> {editProductsSearching ? 'Buscando...' : 'Buscar'}
+                                                    </SaveButton>
+                                                </div>
+
+                                                {editProductsSearched && (
+                                                    <>
+                                                        {editSelectedProductIds.length > 0 && (
+                                                            <SelectedCount>{editSelectedProductIds.length} produto(s) selecionado(s)</SelectedCount>
+                                                        )}
+
+                                                        <ProductSelectionGrid>
+                                                            {storeProducts.map((sp: any) => {
+                                                                const name = sp.product?.name || sp.name || 'Produto';
+                                                                const image = sp.product?.image || sp.image || null;
+                                                                const price = sp.price ?? sp.product?.price ?? 0;
+                                                                const isSelected = editSelectedProductIds.includes(sp.id);
+                                                                return (
+                                                                    <ProductSelectionItem key={sp.id} $selected={isSelected}>
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={isSelected}
+                                                                            onChange={() => handleToggleProductSelection(sp.id, editSelectedProductIds, setEditSelectedProductIds)}
+                                                                            style={{ flexShrink: 0 }}
+                                                                        />
+                                                                        {image && <img src={image} alt={name} />}
+                                                                        <span>{name}</span>
+                                                                        <span className="price">R$ {Number(price).toFixed(2)}</span>
+                                                                    </ProductSelectionItem>
+                                                                );
+                                                            })}
+                                                        </ProductSelectionGrid>
+                                                    </>
+                                                )}
+
+                                                <ButtonGroup>
+                                                    <CancelButton type="button" onClick={() => setEditingCarouselId(null)}>Cancelar</CancelButton>
+                                                    <SaveButton type="button" onClick={() => handleSaveEditCarousel(carousel.id)} disabled={catalogSaving}>
+                                                        <FontAwesomeIcon icon={faCheck as any} /> {catalogSaving ? 'Salvando...' : 'Salvar'}
+                                                    </SaveButton>
+                                                </ButtonGroup>
+                                            </>
+                                        ) : (
+                                            <CarouselProductGrid>
+                                                {carousel.items.length === 0 ? (
+                                                    <p style={{ color: '#999', fontSize: '13px', gridColumn: '1/-1' }}>Nenhum produto visível neste carrossel.</p>
+                                                ) : (
+                                                    carousel.items
+                                                        .sort((a, b) => a.position - b.position)
+                                                        .map(item => {
+                                                            const name = item.storeProduct?.product?.name || 'Produto';
+                                                            const image = item.storeProduct?.product?.image || null;
+                                                            const price = item.storeProduct?.price ?? 0;
+                                                            return (
+                                                                <CarouselProductItem key={item.id}>
+                                                                    {image && <img src={image} alt={name} />}
+                                                                    <span>{name}</span>
+                                                                    <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#EC4899', fontWeight: 700 }}>R$ {Number(price).toFixed(2)}</span>
+                                                                </CarouselProductItem>
+                                                            );
+                                                        })
+                                                )}
+                                            </CarouselProductGrid>
+                                        )}
+                                    </CarouselCardBody>
+                                </CarouselCard>
+                            );
+                        })}
+                    </CarouselList>
+                )}
+            </div>
+        );
+    };
+
+    const renderFreightTab = () => (
+        <div>
+            <SectionTitle>
+                <FontAwesomeIcon icon={faTruck} /> Faixas de Frete
+            </SectionTitle>
+
+            <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Habilite as faixas de distância que você atende e defina o valor do frete para cada uma.
+                Ao menos uma faixa deve estar ativa.
+            </p>
+
+            {freightFeedback && (
+                <FeedbackMessage $type={freightFeedback.type}>
+                    {freightFeedback.message}
+                </FeedbackMessage>
+            )}
+
+            <FreightGrid>
+                {freightRanges.map((range, index) => (
+                    <FreightRangeRow key={index} $disabled={!range.enabled}>
+                        <CheckboxContainer style={{ margin: 0 }}>
+                            <Checkbox
+                                type="checkbox"
+                                checked={range.enabled}
+                                onChange={e => handleFreightChange(index, 'enabled', e.target.checked)}
+                            />
+                        </CheckboxContainer>
+
+                        <RangeLabel>{range.min_km} — {range.max_km} km</RangeLabel>
+
+                        <PriceInputWrapper>
+                            <span className="prefix">R$</span>
+                            <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder="0,00"
+                                value={range.price}
+                                disabled={!range.enabled}
+                                onChange={e => handleFreightChange(index, 'price', e.target.value)}
+                            />
+                        </PriceInputWrapper>
+
+                        {range.error && <InlineError>{range.error}</InlineError>}
+                    </FreightRangeRow>
+                ))}
+            </FreightGrid>
+
+            <ButtonGroup>
+                <CancelButton type="button" onClick={() => { setFreightLoaded(false); setFreightFeedback(null); loadFreightRanges(); }}>
+                    Cancelar
+                </CancelButton>
+                <SaveButton type="button" onClick={handleSaveFreightRanges} disabled={freightSaving}>
+                    {freightSaving ? 'Salvando...' : 'Salvar Faixas'}
+                </SaveButton>
+            </ButtonGroup>
+        </div>
+    );
+
     const renderScheduleTab = () => (
         <>
             <ScheduleGrid>
@@ -967,39 +1761,53 @@ export default function StoreSettings() {
                 </h1>
             </Header>
 
-            <TabsContainer>
-                <Tab $active={activeTab === 'general'} onClick={() => handleTabChange('general')}>
-                    <FontAwesomeIcon icon={faInfoCircle} /> Informações Gerais
-                </Tab>
-                <Tab $active={activeTab === 'media'} onClick={() => handleTabChange('media')}>
-                    <FontAwesomeIcon icon={faImage} /> Mídia
-                </Tab>
-                <Tab $active={activeTab === 'password'} onClick={() => handleTabChange('password')}>
-                    <FontAwesomeIcon icon={faLock} /> Senha
-                </Tab>
-                <Tab $active={activeTab === 'address'} onClick={() => handleTabChange('address')}>
-                    <FontAwesomeIcon icon={faMapMarkerAlt} /> Endereço
-                </Tab>
-                <Tab $active={activeTab === 'payment'} onClick={() => handleTabChange('payment')}>
-                    <FontAwesomeIcon icon={faCreditCard} /> Pagamento
-                </Tab>
-                <Tab $active={activeTab === 'schedule'} onClick={() => handleTabChange('schedule')}>
-                    <FontAwesomeIcon icon={faClock} /> Horários de Funcionamento
-                </Tab>
-                <Tab $active={activeTab === 'social'} onClick={() => handleTabChange('social')}>
-                    <FontAwesomeIcon icon={faShareNodes} /> Redes Sociais
-                </Tab>
-            </TabsContainer>
+            <TabsLayout>
+                <TabsContainer>
+                    <Tab $active={activeTab === 'general'} onClick={() => handleTabChange('general')}>
+                        <FontAwesomeIcon icon={faInfoCircle} /> Informações Gerais
+                    </Tab>
+                    <Tab $active={activeTab === 'media'} onClick={() => handleTabChange('media')}>
+                        <FontAwesomeIcon icon={faImage} /> Mídia
+                    </Tab>
+                    <Tab $active={activeTab === 'password'} onClick={() => handleTabChange('password')}>
+                        <FontAwesomeIcon icon={faLock} /> Senha
+                    </Tab>
+                    <Tab $active={activeTab === 'address'} onClick={() => handleTabChange('address')}>
+                        <FontAwesomeIcon icon={faMapMarkerAlt} /> Endereço
+                    </Tab>
+                    <Tab $active={activeTab === 'payment'} onClick={() => handleTabChange('payment')}>
+                        <FontAwesomeIcon icon={faCreditCard} /> Pagamento
+                    </Tab>
+                    <Tab $active={activeTab === 'schedule'} onClick={() => handleTabChange('schedule')}>
+                        <FontAwesomeIcon icon={faClock} /> Horários de Funcionamento
+                    </Tab>
+                    <Tab $active={activeTab === 'social'} onClick={() => handleTabChange('social')}>
+                        <FontAwesomeIcon icon={faShareNodes} /> Redes Sociais
+                    </Tab>
+                    <Tab $active={activeTab === 'cities'} onClick={() => handleTabChange('cities')}>
+                        <FontAwesomeIcon icon={faCity} /> Cidades Atendidas
+                    </Tab>
+                    <Tab $active={activeTab === 'freight'} onClick={() => handleTabChange('freight')}>
+                        <FontAwesomeIcon icon={faTruck} /> Faixas de Frete
+                    </Tab>
+                    <Tab $active={activeTab === 'catalog'} onClick={() => handleTabChange('catalog')}>
+                        <FontAwesomeIcon icon={faLayerGroup} /> Catálogo
+                    </Tab>
+                </TabsContainer>
 
-            <TabContent>
-                {activeTab === 'general' && renderGeneralTab()}
-                {activeTab === 'media' && renderMediaTab()}
-                {activeTab === 'password' && renderPasswordTab()}
-                {activeTab === 'address' && renderAddressTab()}
-                {activeTab === 'payment' && renderPaymentTab()}
-                {activeTab === 'schedule' && renderScheduleTab()}
-                {activeTab === 'social' && renderSocialTab()}
-            </TabContent>
+                <TabContent>
+                    {activeTab === 'general' && renderGeneralTab()}
+                    {activeTab === 'media' && renderMediaTab()}
+                    {activeTab === 'password' && renderPasswordTab()}
+                    {activeTab === 'address' && renderAddressTab()}
+                    {activeTab === 'payment' && renderPaymentTab()}
+                    {activeTab === 'schedule' && renderScheduleTab()}
+                    {activeTab === 'social' && renderSocialTab()}
+                    {activeTab === 'cities' && renderCitiesTab()}
+                    {activeTab === 'freight' && renderFreightTab()}
+                    {activeTab === 'catalog' && renderCatalogTab()}
+                </TabContent>
+            </TabsLayout>
 
             <Modal 
                 isOpen={showEmailModal}

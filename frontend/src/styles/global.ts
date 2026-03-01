@@ -246,7 +246,7 @@ table{
         border: 1px solid #e7b7c2;
         outline: none;
         font-size: 16px;
-        background: var(--white-background);
+        background: white;
     }
 
 button{

@@ -4,12 +4,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
 import { listStoreFrontProducts } from "../../services/productService";
+import { listStorefrontCarousels } from "../../services/carouselService";
+import { IStoreCarousel } from "../../interfaces/IStoreCarousel";
 import { ProductCard } from "../../components/ProductCard";
 import { Pagination } from "../../components/Pagination";
 import { Loader } from "../../components/Loader";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
 import { CategoryMenu } from "../../components/CategoryMenu";
 import { BannerCarousel } from "../../components/BannerCarousel";
+import { StorefrontCarousel } from "../../components/StorefrontCarousel";
 import { DeliveryAvailability } from "../../components/DeliveryAvailability";
 import { GoogleRating } from "../../components/GoogleRating";
 import { StoreFrontFooter } from "../../components/StoreFrontFooter";
@@ -61,28 +64,29 @@ export function StoreFront() {
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
+    const [storeCarousels, setStoreCarousels] = useState<IStoreCarousel[]>([]);
 
     const loadAvailableProducts = async (slug: string, page: number, pageSize: number, categorySlug?: string) => {
         try {
             setError(null);
             const { data: { products, total, store } } = await listStoreFrontProducts(slug, page, pageSize, "", categorySlug);
             console.log('store data', store);
-            // Salvar store_id, store_name, phone_number e schedules no localStorage para uso no checkout e PDP
+            // Salvar store_id, store_name, phone_number e schedules no sessionStorage para uso no checkout e PDP
             if (store?.id) {
-                localStorage.setItem('storefront_store_id', store.id);
+                sessionStorage.setItem('storefront_store_id', store.id);
             }
             if (store?.name) {
-                localStorage.setItem('storefront_store_name', store.name);
+                sessionStorage.setItem('storefront_store_name', store.name);
             }
             if (store?.phone_number) {
-                localStorage.setItem('storefront_store_phone', store.phone_number);
+                sessionStorage.setItem('storefront_store_phone', store.phone_number);
             }
             if (store?.schedules) {
-                localStorage.setItem('storefront_store_schedules', JSON.stringify(store.schedules));
+                sessionStorage.setItem('storefront_store_schedules', JSON.stringify(store.schedules));
             }
 
             if (store.logo) {
-                localStorage.setItem('storefront_store_logo', store.logo);
+                sessionStorage.setItem('storefront_store_logo', store.logo);
             }
             
             setProducts(products);
@@ -114,6 +118,13 @@ export function StoreFront() {
         });
 
     }, [slug, page, pageSize, categorySlug]);
+
+    useEffect(() => {
+        if (!slug || categorySlug) return;
+        listStorefrontCarousels(slug)
+            .then(data => setStoreCarousels(data))
+            .catch(() => setStoreCarousels([]));
+    }, [slug, categorySlug]);
 
     useEffect(() => {
         function handleResize() {
@@ -220,8 +231,13 @@ export function StoreFront() {
                     </EmptyState>
                 )}
 
+                {!showLoader && !categorySlug && storeCarousels.map(carousel => (
+                    <StorefrontCarousel key={carousel.id} carousel={carousel} />
+                ))}
+
                 {!showLoader && products.length > 0 && (
                     <>
+                    <h2 className="section-title">Outros <strong>Produtos</strong></h2>
                         <ProductGrid>
                             {products
                                 .filter((product) => product.enabled && product.stock > 0)

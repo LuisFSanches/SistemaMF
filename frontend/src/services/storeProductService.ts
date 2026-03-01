@@ -12,8 +12,8 @@ export const createStoreProduct = async (data: {
     return response;
 };
 
-export const listStoreProducts = async (storeId: string) => {
-    const response = await api.get(`/store-product/all?store_id=${storeId}`);
+export const listStoreProducts = async (storeId: string, query: string = '') => {
+    const response = await api.get(`/store-product/all?store_id=${storeId}&query=${encodeURIComponent(query)}`);
     return response;
 };
 
