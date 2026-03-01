@@ -281,6 +281,7 @@ export const Description = styled.p`
     color: #939393;
     line-height: 1.6;
     font-size: 1rem;
+    white-space: pre-wrap;
 `;
 
 export const PaymentSection = styled.div`

@@ -70,7 +70,6 @@ export function StoreFront() {
         try {
             setError(null);
             const { data: { products, total, store } } = await listStoreFrontProducts(slug, page, pageSize, "", categorySlug);
-            console.log('store data', store);
             // Salvar store_id, store_name, phone_number e schedules no sessionStorage para uso no checkout e PDP
             if (store?.id) {
                 sessionStorage.setItem('storefront_store_id', store.id);
