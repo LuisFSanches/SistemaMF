@@ -237,7 +237,7 @@ export function StoreFront() {
 
                 {!showLoader && products.length > 0 && (
                     <>
-                    <h2 className="section-title">Outros <strong>Produtos</strong></h2>
+                    <h2 className="section-title">Nossos <strong>Produtos</strong></h2>
                         <ProductGrid>
                             {products
                                 .filter((product) => product.enabled && product.stock > 0)
