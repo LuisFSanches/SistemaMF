@@ -109,6 +109,7 @@ model Product {
   @@map("products")
 }
 
+
 model Category {
   id        String @id @default(uuid())
   name      String
@@ -169,6 +170,7 @@ model StoreProduct {
   stockTransactions StockTransaction[]
 
   orderItems OrderItem[]
+  carouselItems StoreCarouselItem[]
 
   @@unique([store_id, product_id])
   @@map("store_products")
@@ -343,6 +345,10 @@ model Store {
   google_rating_count Int?
   google_rating_url   String?
   
+  // Localização (para cálculo de frete)
+  latitude         Float?
+  longitude        Float?
+
   // Configurações
   payment_enabled  Boolean  @default(false)
   is_active        Boolean  @default(true)
@@ -368,8 +374,38 @@ model Store {
   stockTransactions StockTransaction[]
   deliveryMen      DeliveryMan[]
   storeProducts    StoreProduct[]
+  attendedCities   StoreAttendedCity[]
+  deliveryRanges   DeliveryRange[]
+  storeCarousels   StoreCarousel[]
 
   @@map("stores")
+}
+
+model StoreAttendedCity {
+  id         String   @id @default(uuid())
+  store_id   String
+  city       String
+  state      String
+  created_at DateTime @default(now())
+
+  store      Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@index([store_id])
+  @@map("store_attended_cities")
+}
+
+model DeliveryRange {
+  id         String   @id @default(uuid())
+  store_id   String
+  min_km     Float
+  max_km     Float
+  price      Float
+  created_at DateTime @default(now())
+
+  store      Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@index([store_id])
+  @@map("delivery_ranges")
 }
 
 model StoreAddress {
@@ -425,4 +461,32 @@ model StoreHoliday {
   
   @@unique([store_id, date])
   @@map("store_holidays")
+}
+
+model StoreCarousel {
+  id         String   @id @default(uuid())
+  store_id   String
+  name       String
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  store      Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  items      StoreCarouselItem[]
+
+  @@map("store_carousels")
+}
+
+model StoreCarouselItem {
+  id               String   @id @default(uuid())
+  carousel_id      String
+  store_product_id String
+  position         Int      @default(0)
+  created_at       DateTime @default(now())
+
+  carousel         StoreCarousel @relation(fields: [carousel_id], references: [id], onDelete: Cascade)
+  storeProduct     StoreProduct  @relation(fields: [store_product_id], references: [id], onDelete: Cascade)
+
+  @@unique([carousel_id, store_product_id])
+  @@map("store_carousel_items")
 }
