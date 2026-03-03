@@ -202,6 +202,8 @@ export function CompleteOrder() {
                     // Exibir modal de boas-vindas
                     setShowWelcomeModal(true);
                     hasShownWelcomeModal.current = true;
+                } else {
+                    setValue('phone_number', order.receiver_phone);
                 }
             }
             setShowLoader(false);
@@ -449,7 +451,7 @@ export function CompleteOrder() {
                                 alwaysShowMask={false}
                                 placeholder='Telefone'
                                 value={watch("phone_number") || ""}
-                                disabled={!!client_id}
+                                disabled={true}
                                 {...register("phone_number", { 
                                     required: "Telefone inválido",
                                     validate: (value) => {
