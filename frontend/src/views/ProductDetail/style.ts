@@ -46,7 +46,7 @@ export const ImageCarousel = styled.div`
     position: relative;
     width: 100%;
     aspect-ratio: 1;
-    background: var(--background);
+    background: white;
     border-radius: 8px;
     overflow: hidden;
 `;
@@ -54,7 +54,7 @@ export const ImageCarousel = styled.div`
 export const MainImage = styled.img`
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
 `;
 
 export const CarouselButton = styled.button<{ position: 'left' | 'right' }>`
