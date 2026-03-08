@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 export const Card = styled.div<{ clickable?: boolean }>`
     width: 220px;
+    min-width: 220px;
     border: 1px solid #ddd;
     border-radius: 12px;
     overflow: hidden;
@@ -18,7 +19,8 @@ export const Card = styled.div<{ clickable?: boolean }>`
     }
 
     @media (max-width: 768px) {
-        width: 100%;
+        width: 170px;
+        min-width: 170px;
     }
         
 `;

@@ -17,6 +17,18 @@ export const formatTelephone = (phoneNumber: string,) => {
     }
 }
 
+export const formatCep = (cep: string) => {
+    if (!cep) return "";
+
+    const numericValue = cep.replace(/[^0-9]/g, "");
+
+    if (numericValue.length === 8) {
+        return `${numericValue.slice(0, 5)}-${numericValue.slice(5)}`;
+    } else {
+        return cep;
+    }
+}
+
 export const convertMoney = (value: number) => {
     if (value === null || value === undefined) return "";
     const numericValue = typeof value === "string" ? parseFloat(value) : value

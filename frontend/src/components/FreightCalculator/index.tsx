@@ -16,7 +16,7 @@ import {
 } from '../../services/deliveryService';
 import { useCart } from '../../contexts/CartContext';
 import { RegionNotServedModal } from '../RegionNotServedModal';
-import { convertMoney } from '../../utils';
+import { convertMoney, formatCep } from '../../utils';
 import {
     Wrapper,
     Title,
@@ -310,7 +310,7 @@ export function FreightCalculator({ compact = false, hideTitle = false }: Freigh
                                     {[
                                         addressPreview.street,
                                         addressPreview.neighborhood,
-                                        `${addressPreview.city} - ${addressPreview.state}`,
+                                        `${addressPreview.city} - ${addressPreview.state} - ${formatCep(deliveryInfo.cep)}`,
                                     ]
                                         .filter(Boolean)
                                         .join(', ')}

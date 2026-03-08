@@ -813,7 +813,7 @@ export function Checkout() {
                                         <Input 
                                             type="text" 
                                             autoComplete="off" 
-                                            placeholder="Digite o código de 6 dígitos"
+                                            placeholder="Digite o código enviado para o email"
                                             maxLength={6}
                                             {...register("verification_code", {
                                                 required: "Digite o código",
