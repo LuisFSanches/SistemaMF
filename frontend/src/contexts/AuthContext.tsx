@@ -207,7 +207,6 @@ export function AuthProvider({ children }: IAuthProviderProps) {
     if (storedStoreData) {
       try {
         const store = JSON.parse(storedStoreData);
-        console.log("Loaded store from localStorage:", store);
         setStoreData(store);
         setNeedsOnboarding(store.is_first_access);
       } catch (error) {

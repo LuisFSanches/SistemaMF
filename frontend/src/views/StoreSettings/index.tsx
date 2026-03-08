@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Modal from 'react-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog, faImage, faLock, faMapMarkerAlt, faCreditCard, faClock, faStore, faEye, faEyeSlash, faXmark, faShareNodes, faInfoCircle, faCity, faTruck, faTrash, faPlus, faChevronLeft, faChevronRight, faLayerGroup, faPencil, faCheck, faSearch, faClose } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faImage, faLock, faMapMarkerAlt, faCreditCard, faClock, faStore, faEye, faEyeSlash, faXmark, faShareNodes, faInfoCircle, faCity, faTruck, faTrash, faPlus, faChevronLeft, faChevronRight, faLayerGroup, faPencil, faCheck, faSearch, faClose, faReceipt } from '@fortawesome/free-solid-svg-icons';
 import { Label, Input, Select, ErrorMessage, Checkbox, CheckboxContainer, FormField, Textarea, PasswordContainer, ModalContainer, Form } from '../../styles/global';
 import { 
     Container, 
@@ -78,13 +78,14 @@ import { getStoreSchedules } from '../../services/storeScheduleService';
 import { resetPasswordByEmail } from '../../services/adminService';
 import { listCarousels, createCarousel, updateCarousel, deleteCarousel } from '../../services/carouselService';
 import { listStoreProducts } from '../../services/storeProductService';
+import { BillingTab } from '../../components/BillingTab';
 import { IStoreCarousel } from '../../interfaces/IStoreCarousel';
 import { IStore } from '../../interfaces/IStore';
 import { IStoreAddress } from '../../interfaces/IStoreAddress';
 import { IStoreSchedule, DayOfWeek } from '../../interfaces/IStoreSchedule';
 import { STATES } from '../../constants';
 
-type TabType = 'general' | 'media' | 'password' | 'address' | 'payment' | 'schedule' | 'social' | 'cities' | 'freight' | 'catalog';
+type TabType = 'general' | 'media' | 'password' | 'address' | 'payment' | 'schedule' | 'social' | 'cities' | 'freight' | 'catalog' | 'billing';
 
 const FIXED_FREIGHT_RANGES = [
     { min_km: 0, max_km: 5 },
@@ -232,7 +233,7 @@ export default function StoreSettings() {
 
     useEffect(() => {
         const tab = searchParams.get('tab');
-        if (tab && ['general', 'media', 'password', 'address', 'payment', 'schedule', 'social', 'cities', 'freight', 'catalog'].includes(tab)) {
+        if (tab && ['general', 'media', 'password', 'address', 'payment', 'schedule', 'social', 'cities', 'freight', 'catalog', 'billing'].includes(tab)) {
             setActiveTab(tab as TabType);
         }
     }, [searchParams]);
@@ -1749,6 +1750,10 @@ export default function StoreSettings() {
         </>
     );
 
+    const renderBillingTab = () => {
+        return <BillingTab />;
+    };
+
     if (loading) {
         return <LoadingContainer>Carregando...</LoadingContainer>;
     }
@@ -1793,6 +1798,9 @@ export default function StoreSettings() {
                     <Tab $active={activeTab === 'catalog'} onClick={() => handleTabChange('catalog')}>
                         <FontAwesomeIcon icon={faLayerGroup} /> Catálogo
                     </Tab>
+                    <Tab $active={activeTab === 'billing'} onClick={() => handleTabChange('billing')}>
+                        <FontAwesomeIcon icon={faReceipt} /> Faturamento
+                    </Tab>
                 </TabsContainer>
 
                 <TabContent>
@@ -1806,6 +1814,7 @@ export default function StoreSettings() {
                     {activeTab === 'cities' && renderCitiesTab()}
                     {activeTab === 'freight' && renderFreightTab()}
                     {activeTab === 'catalog' && renderCatalogTab()}
+                    {activeTab === 'billing' && renderBillingTab()}
                 </TabContent>
             </TabsLayout>
 

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faTrash, faPlus, faMinus, faArrowRight, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
@@ -54,6 +55,10 @@ export function Cart() {
         removeFromCart,
         setObservations
     } = useCart();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const deliveryFee = deliveryInfo?.fee ?? 0;
     const totalWithDelivery = cartTotal + deliveryFee;

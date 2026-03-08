@@ -107,6 +107,10 @@ export function StoreFront() {
     }
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [slug, categorySlug]);
+
+    useEffect(() => {
         if (!slug) return;
         
         setShowLoader(true);

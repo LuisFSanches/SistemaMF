@@ -130,6 +130,10 @@ export function Checkout() {
     const tooltipMessage = `Para entregas em outras regiões,
         por favor entre em contato conosco pelo whatsapp.`;
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     const deliveryFee = pickupOnStore ? 0 : (deliveryInfo?.fee ?? 0);
     const totalWithDelivery = cartTotal + deliveryFee;
 

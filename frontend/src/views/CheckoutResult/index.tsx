@@ -80,6 +80,10 @@ export function CheckoutResult() {
     const [orderData, setOrderData] = useState<IPaymentSuccessResponse | null>(null);
     const [orderStep, setOrderStep] = useState<OrderStatusStep>('validating');
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     // Parâmetros retornados pelo Mercado Pago
     const paymentId = searchParams.get('payment_id');
 

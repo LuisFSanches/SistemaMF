@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faArrowRight,
@@ -12,7 +13,6 @@ import {
     faTruck,
     faStore,
     faWandMagicSparkles,
-    faCommentDots,
     faFileLines,
     faBolt,
     faShield,
@@ -151,12 +151,6 @@ const features = [
             "Criação de pedidos por linguagem natural. Cliente descreve o pedido e a IA extrai automaticamente os dados.",
     },
     {
-        icon: faCommentDots,
-        title: "Integração WhatsApp",
-        description:
-            "Receba pedidos automaticamente via WhatsApp com notificações em tempo real usando Socket.IO.",
-    },
-    {
         icon: faFileLines,
         title: "Gestão de Cartões",
         description:
@@ -202,7 +196,6 @@ const pricingFeatures = [
     "CRM com análise de clientes",
     "Controle de estoque com QR Code",
     "Loja online integrada",
-    "Integração WhatsApp",
     "IA para criação de pedidos",
     "Dashboard em tempo real",
     "Gestão de entregas",
@@ -256,6 +249,8 @@ export function Home() {
         }
     };
 
+    const navigate = useNavigate();
+
     return (
         <HomeContainer>
             {/* Navbar */}
@@ -280,7 +275,12 @@ export function Home() {
                             <NavButton onClick={() => scrollToSection("contato")}>
                                 Contato
                             </NavButton>
-                            <PrimaryButton $size="sm">Começar Agora</PrimaryButton>
+                            <PrimaryButton
+                                $size="sm"
+                                onClick={() => navigate("/cadastro")}
+                            >
+                                Começar Agora
+                            </PrimaryButton>
                         </DesktopNav>
 
                         <MobileMenuButton onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -302,7 +302,12 @@ export function Home() {
                             <MobileNavButton onClick={() => scrollToSection("contato")}>
                                 Contato
                             </MobileNavButton>
-                            <PrimaryButton $size="sm">Começar Agora</PrimaryButton>
+                            <PrimaryButton
+                                $size="sm"
+                                onClick={() => navigate("/cadastro")}
+                            >
+                                Começar Agora
+                            </PrimaryButton>
                         </MobileNavInner>
                     </MobileNav>
                 </NavbarContent>
@@ -331,7 +336,10 @@ export function Home() {
                             </HeroDescription>
 
                             <HeroButtons>
-                                <PrimaryButton $size="lg">
+                                <PrimaryButton
+                                    $size="lg"
+                                    onClick={() => navigate("/cadastro")}
+                                >
                                     Começar Agora
                                     <FontAwesomeIcon icon={faArrowRight} />
                                 </PrimaryButton>
@@ -439,13 +447,17 @@ export function Home() {
                                 </PricingDescription>
                                 <PricingPriceContainer>
                                     <PricingPrice>
-                                        <PricingAmount>R$ 75</PricingAmount>
+                                        <PricingAmount>R$ 80</PricingAmount>
                                         <PricingPeriod>/mês</PricingPeriod>
                                     </PricingPrice>
                                 </PricingPriceContainer>
                             </PricingHeader>
                             <PricingContent>
-                                <OutlineButton $size="lg" $fullWidth>
+                                <OutlineButton
+                                    $size="lg"
+                                    $fullWidth
+                                    onClick={() => navigate("/cadastro")}
+                                >
                                     Começar Agora
                                 </OutlineButton>
                                 <PricingFeaturesList>
@@ -473,10 +485,10 @@ export function Home() {
                                         <PricingPeriod>/mês</PricingPeriod>
                                     </PricingPrice>
                                     <PricingDiscount>
-                                        <PricingOldPrice>R$ 900/ano</PricingOldPrice>
+                                        <PricingOldPrice>R$ 960/ano</PricingOldPrice>
                                         <PricingNewPrice>R$ 840/ano</PricingNewPrice>
                                     </PricingDiscount>
-                                    <PricingSavings>Economize R$ 60 por ano</PricingSavings>
+                                    <PricingSavings>Economize R$ 120 por ano</PricingSavings>
                                 </PricingPriceContainer>
                             </PricingHeader>
                             <PricingContent>

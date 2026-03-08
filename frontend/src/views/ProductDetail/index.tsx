@@ -97,6 +97,10 @@ export function ProductDetail() {
     };
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [productId, slug]);
+
+    useEffect(() => {
         if (productId) {
             setShowLoader(true);
             loadProductDetail(productId);

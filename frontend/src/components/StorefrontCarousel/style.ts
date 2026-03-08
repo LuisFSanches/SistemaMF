@@ -8,6 +8,7 @@ export const CarouselSection = styled.section`
     @media (max-width: 768px) {
         padding: 0 0.5rem;
         margin-bottom: 1.5rem;
+        overflow: hidden;
     }
 `;
 
@@ -72,7 +73,7 @@ export const NavButton = styled.button<{ direction: "left" | "right" }>`
         border-color: #EC4899;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
         display: none;
     }
 `;
@@ -84,6 +85,7 @@ export const CarouselTrack = styled.div`
     overflow-x: auto;
     scroll-behavior: smooth;
     padding: 0.5rem 0.25rem 0.75rem;
+    -webkit-overflow-scrolling: touch;
 
     /* esconde scrollbar visualmente mas mantém funcionalidade */
     scrollbar-width: thin;
@@ -103,8 +105,11 @@ export const CarouselTrack = styled.div`
     }
 
     /* Telas menores: deslizar com o dedo */
-    @media (max-width: 600px) {
-        scroll-snap-type: x mandatory;
+    @media (max-width: 768px) {
+        gap: 0.75rem;
+        scroll-snap-type: x proximity;
+        padding: 0.5rem 0 0.75rem;
+        padding-right: 3rem;
 
         & > * {
             scroll-snap-align: start;
