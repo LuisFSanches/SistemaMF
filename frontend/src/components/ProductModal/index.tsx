@@ -107,8 +107,8 @@ export function ProductModal({
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            if (file.size > 100 * 1024) {
-                alert("A imagem deve ter no máximo 100KB. Escolha outra imagem por favor.");
+            if (file.size > 150 * 1024) {
+                alert("A imagem deve ter no máximo 150KB. Escolha outra imagem por favor.");
                 return;
             }
 
@@ -131,8 +131,8 @@ export function ProductModal({
     const handleImageChange2 = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            if (file.size > 100 * 1024) {
-                alert("A imagem deve ter no máximo 100KB. Escolha outra imagem por favor.");
+            if (file.size > 150 * 1024) {
+                alert("A imagem deve ter no máximo 150KB. Escolha outra imagem por favor.");
                 return;
             }
 
@@ -155,8 +155,8 @@ export function ProductModal({
     const handleImageChange3 = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            if (file.size > 100 * 1024) {
-                alert("A imagem deve ter no máximo 100KB. Escolha outra imagem por favor.");
+            if (file.size > 150 * 1024) {
+                alert("A imagem deve ter no máximo 150KB. Escolha outra imagem por favor.");
                 return;
             }
 
@@ -641,7 +641,7 @@ export function ProductModal({
                                                 <UploadLabel>
                                                     <FontAwesomeIcon icon={faCloudArrowUp} />
                                                     <span>Clique aqui</span>
-                                                    <span style={{ fontSize: "0.65rem" }}>Máx. 100KB</span>
+                                                    <span style={{ fontSize: "0.65rem" }}>Máx. 150KB</span>
                                                 </UploadLabel>
                                             </ImagePreviewBox>
                                         )}
@@ -690,7 +690,7 @@ export function ProductModal({
                                                 <UploadLabel>
                                                     <FontAwesomeIcon icon={faCloudArrowUp} />
                                                     <span>Clique aqui</span>
-                                                    <span style={{ fontSize: "0.65rem" }}>Máx. 100KB</span>
+                                                    <span style={{ fontSize: "0.65rem" }}>Máx. 150KB</span>
                                                 </UploadLabel>
                                             </ImagePreviewBox>
                                         )}
@@ -739,7 +739,7 @@ export function ProductModal({
                                                 <UploadLabel>
                                                     <FontAwesomeIcon icon={faCloudArrowUp} />
                                                     <span>Clique aqui</span>
-                                                    <span style={{ fontSize: "0.65rem" }}>Máx. 100KB</span>
+                                                    <span style={{ fontSize: "0.65rem" }}>Máx. 150KB</span>
                                                 </UploadLabel>
                                             </ImagePreviewBox>
                                         )}

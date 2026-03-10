@@ -93,7 +93,7 @@ export function StoreProductModal({
         const file = event.target.files?.[0];
         if (file) {
             if (file.size > 100 * 1024) {
-                alert("A imagem deve ter no máximo 100KB. Escolha outra imagem por favor.");
+                alert("A imagem deve ter no máximo 150KB. Escolha outra imagem por favor.");
             }
 
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];

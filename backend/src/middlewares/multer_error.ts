@@ -13,7 +13,7 @@ export const handleMulterError = (
         if (err.code === 'LIMIT_FILE_SIZE') {
             return next(
                 new BadRequestException(
-                    'File is too large. Maximum size is 100KB',
+                    'File is too large. Maximum size is 150KB',
                     ErrorCodes.VALIDATION_ERROR
                 )
             );
