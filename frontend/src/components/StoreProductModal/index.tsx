@@ -179,7 +179,7 @@ export function StoreProductModal({
         setValue("unity", product.unity);
         setValue("stock", 0);
         setValue("enabled", true);
-        setValue("visible_in_store", false);
+        setValue("visible_for_online_store", false);
         setImagePreview(product.image || "");
     };
 
@@ -256,7 +256,7 @@ export function StoreProductModal({
             setValue("unity", currentProduct.unity);
             setValue("stock", currentProduct.stock);
             setValue("enabled", Boolean(currentProduct.enabled));
-            setValue("visible_in_store", Boolean(currentProduct.visible_in_store));
+            setValue("visible_for_online_store", Boolean(currentProduct.visible_for_online_store));
             
             if (currentProduct.image) {
                 setImagePreview(currentProduct.image);
@@ -275,7 +275,7 @@ export function StoreProductModal({
             setValue("unity", "");
             setValue("stock", 0);
             setValue("enabled", true);
-            setValue("visible_in_store", false);
+            setValue("visible_for_online_store", false);
             setImagePreview("");
             setImageFile(null);
         }
@@ -433,16 +433,16 @@ export function StoreProductModal({
 
                             <Switch>
                                 <span>
-                                    {watch("visible_in_store") ? "Visível para o cliente" : "Oculto para o cliente"}
+                                    {watch("visible_for_online_store") ? "Visível para o cliente" : "Oculto para o cliente"}
                                 </span>
                                 <Input
                                     id="switch-visible"
                                     type="checkbox"
-                                    checked={watch("visible_in_store") ?? false}
+                                    checked={watch("visible_for_online_store") ?? false}
                                     placeholder='Visível na Loja' 
-                                    {...register("visible_in_store")}
+                                    {...register("visible_for_online_store")}
                                 />
-                                <StyledSwitch htmlFor="switch-visible" $checked={watch("visible_in_store") ?? false} />
+                                <StyledSwitch htmlFor="switch-visible" $checked={watch("visible_for_online_store") ?? false} />
                             </Switch>
                         </SwitchActions>
 
@@ -559,7 +559,7 @@ export function StoreProductModal({
                     unity: "",
                     stock: 0,
                     enabled: true,
-                    visible_in_store: false
+                    visible_for_online_store: false
                 }}
             />
         </Modal>

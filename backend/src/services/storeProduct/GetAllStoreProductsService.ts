@@ -147,7 +147,7 @@ class GetAllStoreProductsService {
                 price: sp.price,
                 stock: sp.stock,
                 enabled: sp.enabled,
-                visible_in_store: sp.visible_for_online_store,
+                visible_for_online_store: sp.visible_for_online_store,
                 created_at: sp.created_at,
                 updated_at: sp.updated_at,
                 parent_product: {
