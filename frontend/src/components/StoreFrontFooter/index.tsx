@@ -96,10 +96,10 @@ export function StoreFrontFooter() {
             <FooterBottom>
                 <Copyright>© 2025 SistemaMF. Todos os direitos reservados.</Copyright>
                 <BottomLinks>
-                    <FooterLink href="#">
+                    <FooterLink href="/politica-de-privacidade">
                         Política de Privacidade
                     </FooterLink>
-                    <FooterLink href="#">
+                    <FooterLink href="/termos-de-uso">
                         Termos de Uso
                     </FooterLink>
                 </BottomLinks>
