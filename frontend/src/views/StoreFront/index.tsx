@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
@@ -65,6 +65,7 @@ export function StoreFront() {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
     const [storeCarousels, setStoreCarousels] = useState<IStoreCarousel[]>([]);
+    const productsSectionRef = useRef<HTMLDivElement>(null);
 
     const loadAvailableProducts = async (slug: string, page: number, pageSize: number, categorySlug?: string) => {
         try {
@@ -108,6 +109,7 @@ export function StoreFront() {
 
     useEffect(() => {
         window.scrollTo(0, 0);
+        setPage(1);
     }, [slug, categorySlug]);
 
     useEffect(() => {
@@ -117,6 +119,16 @@ export function StoreFront() {
         loadAvailableProducts(slug, page, pageSize, categorySlug).then(() => {
             setTimeout(() => {
                 setShowLoader(false);
+                // Scroll suave até a seção de produtos quando mudar de página (não na primeira carga)
+                if (page > 1 && productsSectionRef.current) {
+                    let yOffset = -150;
+                    if (window.innerWidth > 700) {
+                        yOffset = -70;
+                    }
+                    const element = productsSectionRef.current;
+                    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }
             }, 350);
         });
 
@@ -239,8 +251,8 @@ export function StoreFront() {
                 ))}
 
                 {!showLoader && products.length > 0 && (
-                    <>
-                    <h2 className="section-title">Nossos <strong>Produtos</strong></h2>
+                    <div ref={productsSectionRef}>
+                        <h2 className="section-title">Nossos <strong>Produtos</strong></h2>
                         <ProductGrid>
                             {products
                                 .filter((product) => product.enabled && product.stock > 0)
@@ -262,7 +274,7 @@ export function StoreFront() {
                             pageSize={pageSize}
                             onPageChange={setPage}
                         />
-                    </>
+                    </div>
                 )}
 
                 {!categorySlug && store?.schedules && store.schedules.length > 0 && (

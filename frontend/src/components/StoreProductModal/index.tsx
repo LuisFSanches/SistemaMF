@@ -229,7 +229,7 @@ export function StoreProductModal({
                 const { data: productData } = await updateStoreProduct({
                     id: currentProduct.id as string,
                     price: parseFloat(formData.price as any) as number,
-                    stock: formData.stock as number,
+                    stock: parseFloat(formData.stock as any) as number,
                     enabled: formData.enabled,
                     visible_for_online_store: formData.visible_in_store ?? false,
                 });
