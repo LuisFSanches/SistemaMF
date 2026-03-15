@@ -13,6 +13,7 @@ import { RememberCardModal } from "../../components/RememberCardModal";
 import { formatDescription } from "../../utils";
 import { ErrorAlert } from "../../components/ErrorAlert";
 import { convertMoney } from "../../utils";
+import { CookieConsent } from "../../components/CookieConsent";
 import {
     FormField,
     Label,
@@ -785,6 +786,7 @@ export function CompleteOrder() {
                     }
                 </Form>
             }
+            <CookieConsent />
         </Container>
     );
 }

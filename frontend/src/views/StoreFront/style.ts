@@ -143,3 +143,34 @@ export const SessionContent = styled.div`
         }
     }
 `;
+
+export const FloatingWhatsAppButton = styled.button`
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 65px;
+    height: 65px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    padding: 0;
+
+    &:hover {
+        transform: scale(1.1);
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    @media (max-width: 768px) {
+        bottom: 20px;
+        right: 20px;
+        width: 55px;
+        height: 55px;
+    }
+`;

@@ -214,7 +214,7 @@ export function StoreProductModal({
                     price: parseFloat(formData.price as any) as number,
                     stock: parseFloat(formData.stock as any) as number,
                     enabled: formData.enabled,
-                    visible_for_online_store: formData.visible_in_store ?? false,
+                    visible_for_online_store: formData.visible_for_online_store ?? false,
                 });
 
                 addProduct(productData);
@@ -231,7 +231,7 @@ export function StoreProductModal({
                     price: parseFloat(formData.price as any) as number,
                     stock: parseFloat(formData.stock as any) as number,
                     enabled: formData.enabled,
-                    visible_for_online_store: formData.visible_in_store ?? false,
+                    visible_for_online_store: formData.visible_for_online_store ?? false,
                 });
 
                 editProduct(productData);

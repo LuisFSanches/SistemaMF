@@ -16,7 +16,9 @@ import { StorefrontCarousel } from "../../components/StorefrontCarousel";
 import { DeliveryAvailability } from "../../components/DeliveryAvailability";
 import { GoogleRating } from "../../components/GoogleRating";
 import { StoreFrontFooter } from "../../components/StoreFrontFooter";
+import { CookieConsent } from "../../components/CookieConsent";
 import placeholder_products from "../../assets/images/placeholder_products.png";
+import whatsappButtonIcon from "../../assets/icons/whatsapp_button.png";
 import {
     Container,
     Content,
@@ -25,7 +27,8 @@ import {
     DeliverySession,
     SessionTitle,
     SessionContent,
-    ReviewSession
+    ReviewSession,
+    FloatingWhatsAppButton
 } from "./style";
 
 interface Schedule {
@@ -49,6 +52,7 @@ interface Store {
     banner_2?: string | null;
     banner_3?: string | null;
     schedules?: Schedule[];
+    phone_number?: string;
     google_rating_value: number | null;
     google_rating_count: number | null;
     google_rating_url: string | null;
@@ -160,6 +164,16 @@ export function StoreFront() {
 
     const handleAddProduct = (product: any, quantity: number, price: number) => {
         addToCart({ ...product, price }, quantity);
+    };
+
+    const handleWhatsAppClick = () => {
+        const storePhoneNumber = sessionStorage.getItem('storefront_store_phone') || '';
+        const cleanNumber = storePhoneNumber.replace(/[^0-9]/g, '');
+        const formattedNumber = cleanNumber.startsWith('55') ? cleanNumber : `55${cleanNumber}`;
+        
+        const message = `Olá! Visitei sua loja online e gostaria de fazer um pedido.`;
+        const whatsappUrl = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, "_blank");
     };
 
     if (error === 'store_not_found') {
@@ -300,7 +314,15 @@ export function StoreFront() {
                     </ReviewSession>
                 )}
             </Content>
+            
+            {store?.phone_number && (
+                <FloatingWhatsAppButton onClick={handleWhatsAppClick} aria-label="Entrar em contato via WhatsApp">
+                    <img src={whatsappButtonIcon} alt="WhatsApp" />
+                </FloatingWhatsAppButton>
+            )}
+            
             <StoreFrontFooter />
+            <CookieConsent />
         </Container>
     );
 }

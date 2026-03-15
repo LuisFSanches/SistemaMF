@@ -10,5 +10,6 @@ export interface IProduct {
     stock: number;
     enabled: boolean;
     visible_in_store?: boolean;
+    visible_for_online_store?: boolean;
     qr_code?: string;
 }
