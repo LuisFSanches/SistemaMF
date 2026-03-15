@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useParams } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
 import { AuthContext } from "./contexts/AuthContext";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 import { Dashboard } from "./views/Dashboard";
 import { OnStoreOrder } from "./views/OnStoreOrder";
@@ -42,6 +43,8 @@ import { ForgotPasswordPage } from "./views/ForgotPasswordPage";
 import { ResetPasswordPage } from "./views/ResetPasswordPage";
 import { CategoriesPage } from "./views/Categories";
 import { Home } from "./views/Home";
+import { TermsOfService } from "./views/TermsOfService";
+import { PrivacyPolicy } from "./views/PrivacyPolicy";
 
 interface IPrivateRouteProps {
     children: JSX.Element;
@@ -77,6 +80,7 @@ export default function routes(){
     return(
         <>
             <BrowserRouter>
+                <ScrollToTop />
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route element={<SideBarLayout/>}>
@@ -217,6 +221,8 @@ export default function routes(){
                     <Route path="/cadastro" element={<StoreRegistration />} />
                     <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/termos-de-uso" element={<TermsOfService />} />
+                    <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
                     <Route path="completarPedido/:id" element={
                         <CompleteOrder/>
                     }/>
