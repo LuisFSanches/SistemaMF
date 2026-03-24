@@ -44,7 +44,7 @@ import { ForgotPasswordPage } from "./views/ForgotPasswordPage";
 import { ResetPasswordPage } from "./views/ResetPasswordPage";
 import { CategoriesPage } from "./views/Categories";
 import { Home } from "./views/Home";
-import { SubscriptionPlans } from "./views/SubscriptionPlans";
+// import { SubscriptionPlans } from "./views/SubscriptionPlans";
 import { TermsOfService } from "./views/TermsOfService";
 import { PrivacyPolicy } from "./views/PrivacyPolicy";
 
@@ -211,11 +211,11 @@ export default function routes(){
                                 <AdminsPage/>
                             </PrivateRoute>
                         }/>
-                        <Route path="/backoffice/planos-assinatura" element={
+                        {/*<Route path="/backoffice/planos-assinatura" element={
                             <PrivateRoute>
                                 <SubscriptionPlans/>
                             </PrivateRoute>
-                        }/>
+                        }/>*/}
                         <Route path="/backoffice/configuracoes" element={
                             <PrivateRoute>
                                 <StoreSettings/>
