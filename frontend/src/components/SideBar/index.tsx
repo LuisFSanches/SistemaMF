@@ -8,7 +8,8 @@ import {
     faRightFromBracket,
     faReceipt,
     faHome,
-    faWarehouse
+    faWarehouse,
+    faCreditCard
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { NavLink} from 'react-router-dom'
@@ -40,7 +41,8 @@ export function SideBar(){
         meusProdutos: false,
         generalCatalog: false,
         produtosPais: false,
-        motoboys: false
+        motoboys: false,
+        planosAssinatura: false
     })
     
     const handleActiveMenuButton = useCallback((name:string) => {
@@ -217,6 +219,7 @@ export function SideBar(){
             case 'produtos':
             case 'meus-produtos':
             case 'catalogo-geral':
+            case 'produtos-online':
             case 'produtos-pais':
                 setActive({...isActive, 
                     'dashboard':false,
@@ -326,7 +329,32 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "entregas": false,
-                    "motoboys": true
+                    "motoboys": true,
+                    "planosAssinatura": false
+                })
+            break;
+
+            case 'planos-assinatura':
+            case 'planosAssinatura':
+                setActive({...isActive,
+                    'valoresAReceber':false,
+                    'estoque':false,
+                    'dashboard':false,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'pedidosMenu': false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false,
+                    "entregas": false,
+                    "motoboys": false,
+                    "planosAssinatura": true
                 })
             break;
         }
@@ -428,6 +456,11 @@ export function SideBar(){
                                 Catálogo Geral
                             </button>
                         </NavLink>
+                        <NavLink to="/backoffice/produtos-online">
+                            <button className="submenu-item" onClick={()=>handleActiveMenuButton('produtos-online')}>
+                                Produtos Online
+                            </button>
+                        </NavLink>
                         {adminData.role === 'SYS_ADMIN' && (
                             <NavLink to="/backoffice/produtos-pais">
                                 <button className="submenu-item" onClick={()=>handleActiveMenuButton('produtos-pais')}>
@@ -517,6 +550,21 @@ export function SideBar(){
                         </SideBarButton>
                     </SideBarItemContainer>
                 </NavLink>
+
+                {adminData.role === 'SYS_ADMIN' && (
+                    <NavLink to="/backoffice/planos-assinatura">
+                        <SideBarItemContainer onClick={()=>handleActiveMenuButton('planosAssinatura')}>
+                            <SideBarButton
+                                isActive={isActive['planosAssinatura']}
+                                isMinimizedActive
+                                title="Planos de Assinatura"
+                            >
+                                <FontAwesomeIcon icon={faCreditCard} className="Side-Bar-Icon"/>
+                                <span>Planos</span>
+                            </SideBarButton>
+                        </SideBarItemContainer>
+                    </NavLink>
+                )}
 
                 <CompanyInfoContainer
                     isMinimizedActive

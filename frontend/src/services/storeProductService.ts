@@ -17,6 +17,11 @@ export const listStoreProducts = async (storeId: string, query: string = '') => 
     return response;
 };
 
+export const listOnlineStoreProducts = async (storeId: string, page: number = 1, pageSize: number = 8, query: string = '') => {
+    const response = await api.get(`/store-product/online?store_id=${storeId}&page=${page}&pageSize=${pageSize}&query=${encodeURIComponent(query)}`);
+    return response;
+};
+
 export const getStoreProductById = async (id: string) => {
     const response = await api.get(`/store-product/${id}`);
     return response;

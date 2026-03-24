@@ -23,6 +23,7 @@ import { StockPage } from "./views/Stock";
 import { ProductStockDetail } from "./views/ProductStockDetail";
 import { GeneralCatalog } from "./views/GeneralCatalog";
 import { ParentProducts } from "./views/ParentProducts";
+import { OnlineStoreProducts } from "./views/OnlineStoreProducts";
 import { OrdersToReceivePage } from "./views/OrdersToReceive";
 import { OrderDeliveriesPage } from "./views/OrderDeliveries";
 import { CompleteDelivery } from "./views/CompleteDelivery";
@@ -43,6 +44,7 @@ import { ForgotPasswordPage } from "./views/ForgotPasswordPage";
 import { ResetPasswordPage } from "./views/ResetPasswordPage";
 import { CategoriesPage } from "./views/Categories";
 import { Home } from "./views/Home";
+import { SubscriptionPlans } from "./views/SubscriptionPlans";
 import { TermsOfService } from "./views/TermsOfService";
 import { PrivacyPolicy } from "./views/PrivacyPolicy";
 
@@ -129,6 +131,11 @@ export default function routes(){
                                 <ParentProducts/>
                             </PrivateRoute>
                         }/>
+                        <Route path="/backoffice/produtos-online" element={
+                            <PrivateRoute>
+                                <OnlineStoreProducts/>
+                            </PrivateRoute>
+                        }/>
                         <Route path="/backoffice/estoque" element={
                             <PrivateRoute>
                                 <StockPage/>
@@ -202,6 +209,11 @@ export default function routes(){
                         <Route path="/backoffice/administradores" element={
                             <PrivateRoute>
                                 <AdminsPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/planos-assinatura" element={
+                            <PrivateRoute>
+                                <SubscriptionPlans/>
                             </PrivateRoute>
                         }/>
                         <Route path="/backoffice/configuracoes" element={

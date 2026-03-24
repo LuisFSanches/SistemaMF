@@ -128,6 +128,7 @@ import { UploadStoreBanner3Controller } from './controllers/store/UploadStoreBan
 
 import { CreateStoreProductController } from './controllers/storeProduct/CreateStoreProductController';
 import { GetAllStoreProductsController } from './controllers/storeProduct/GetAllStoreProductsController';
+import { GetOnlineStoreProductsController } from './controllers/storeProduct/GetOnlineStoreProductsController';
 import { GetStoreProductController } from './controllers/storeProduct/GetStoreProductController';
 import { GetStoreProductByIdController } from './controllers/storeProduct/GetStoreProductByIdController';
 import { UpdateStoreProductController } from './controllers/storeProduct/UpdateStoreProductController';
@@ -174,9 +175,23 @@ import { MercadoPagoWebhookController } from './controllers/mercadoPago/MercadoP
 import { TestMercadoPagoWebhookController } from './controllers/mercadoPago/TestMercadoPagoWebhookController';
 import { GetMercadoPagoPaymentStatusController } from './controllers/mercadoPago/GetMercadoPagoPaymentStatusController';
 
+// Subscription Controllers
+//import { CreateSubscriptionPlanController } from './controllers/subscription/CreateSubscriptionPlanController';
+//import { GetAllSubscriptionPlansController } from './controllers/subscription/GetAllSubscriptionPlansController';
+//import { GetSubscriptionPlanController } from './controllers/subscription/GetSubscriptionPlanController';
+//import { UpdateSubscriptionPlanController } from './controllers/subscription/UpdateSubscriptionPlanController';
+//import { DeleteSubscriptionPlanController } from './controllers/subscription/DeleteSubscriptionPlanController';
+//import { CreateSubscriptionController } from './controllers/subscription/CreateSubscriptionController';
+//import { CheckSubscriptionStatusController } from './controllers/subscription/CheckSubscriptionStatusController';
+//import { UpdateSubscriptionController } from './controllers/subscription/UpdateSubscriptionController';
+//import { CancelSubscriptionController } from './controllers/subscription/CancelSubscriptionController';
+//import { GetStoreSubscriptionBillingController } from './controllers/subscription/GetStoreSubscriptionBillingController';
+
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 import sysAdminAuthMiddleware from './middlewares/sys_admin_auth';
+//import subscriptionAuthMiddleware from './middlewares/subscription_auth';
+//import subscriptionWarningMiddleware from './middlewares/subscription_warning';
 import { upload, uploadStore, uploadCategory, uploadExcel } from './config/multer';
 import { processImage } from './middlewares/process_image';
 import { processBannerImage } from './middlewares/process_banner_image';
@@ -256,6 +271,7 @@ router.put('/store-product/update/excel', adminAuthMiddleware, uploadExcel.singl
 //-- ROTAS STORE PRODUCTS --
 router.post('/store-product', adminAuthMiddleware, new CreateStoreProductController().handle)
 router.get('/store-product/all', adminAuthMiddleware, new GetAllStoreProductsController().handle)
+router.get('/store-product/online', adminAuthMiddleware, new GetOnlineStoreProductsController().handle)
 router.get('/store-product/search', adminAuthMiddleware, new SearchStoreProductsController().handle)
 router.get('/store-product/:id', adminAuthMiddleware, new GetStoreProductController().handle)
 router.put('/store-product/:id', adminAuthMiddleware, new UpdateStoreProductController().handle)
@@ -397,5 +413,25 @@ router.post('/webhook/mercadopago', new MercadoPagoWebhookController().handle);
 router.post('/webhook/mercadopago/test', new TestMercadoPagoWebhookController().handle);
 router.get('/mercadopago/payment/:payment_id', new GetMercadoPagoPaymentStatusController().handle); // Rota legacy
 router.get('/mercadopago/payment/status', new GetMercadoPagoPaymentStatusController().handle); // Rota com query params
+
+//-- ROTAS SUBSCRIPTION PLANS (SYS_ADMIN) --
+//router.post('/subscription/plans', sysAdminAuthMiddleware, new CreateSubscriptionPlanController().handle);
+//router.get('/subscription/plans', sysAdminAuthMiddleware, new GetAllSubscriptionPlansController().handle);
+//router.get('/subscription/plans/:id', sysAdminAuthMiddleware, new GetSubscriptionPlanController().handle);
+//router.put('/subscription/plans/:id', sysAdminAuthMiddleware, new UpdateSubscriptionPlanController().handle);
+//router.delete('/subscription/plans/:id', sysAdminAuthMiddleware, new DeleteSubscriptionPlanController().handle);
+
+//-- ROTAS SUBSCRIPTION (ADMIN) --
+//router.post('/subscription', adminAuthMiddleware, new CreateSubscriptionController().handle);
+//router.get('/subscription/status', adminAuthMiddleware, new CheckSubscriptionStatusController().handle);
+//router.get('/subscription/status/:store_id', sysAdminAuthMiddleware, new CheckSubscriptionStatusController().handle);
+//router.put('/subscription/:store_id', sysAdminAuthMiddleware, new UpdateSubscriptionController().handle);
+//router.delete('/subscription/:store_id', adminAuthMiddleware, new CancelSubscriptionController().handle);
+
+//-- ROTAS BILLING & ORDER CHARGES --
+//router.get('/subscription/billing', adminAuthMiddleware, new GetStoreSubscriptionBillingController().handle);
+
+//-- ROTAS PÚBLICAS PARA PLANOS (STOREFRONT) --
+//router.get('/subscription/public/plans', new GetAllSubscriptionPlansController().handle);
 
 export { router };
