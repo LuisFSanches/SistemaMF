@@ -91,10 +91,14 @@ export const OnlineBadge = styled.div`
 `;
 
 export const ProductsTable = styled.div`
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
     margin-top: 1.5rem;
+
+    @media (max-width: 1024px) {
+        grid-template-columns: 1fr;
+    }
 `;
 
 export const ProductRow = styled.div`
