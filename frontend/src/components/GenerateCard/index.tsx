@@ -60,6 +60,7 @@ export function GenerateCard({
     const [cardTo, setCardTo] = useState(initialCardTo);
     const [cardMessage, setCardMessage] = useState(initialCardMessage);
     const [templateBackground, setTemplateBackground] = useState('card_background_1.png');
+    const [fontSize, setFontSize] = useState(16);
     const [showLoader, setShowLoader] = useState(false);
     const [showError, setShowError] = useState(false);
     const [internalIsOpen, setInternalIsOpen] = useState(false);
@@ -149,6 +150,18 @@ export function GenerateCard({
                             </FormGroup>
 
                             <FormGroup>
+                                <label>Tamanho da Fonte: {fontSize}px</label>
+                                <input
+                                    type="range"
+                                    min="10"
+                                    max="24"
+                                    value={fontSize}
+                                    onChange={(e) => setFontSize(Number(e.target.value))}
+                                    style={{ width: '100%', cursor: 'pointer' }}
+                                />
+                            </FormGroup>
+
+                            <FormGroup>
                                 <label>Selecione o Template:</label>
                                 <TemplateSelector>
                                     <TemplateOption 
@@ -183,7 +196,7 @@ export function GenerateCard({
 
                         <PreviewSection>
                             <PreviewCard $backgroundImage={templateBackground}>
-                                <PreviewContent fontSize={16}>
+                                <PreviewContent fontSize={fontSize}>
                                     <img src={logoSrc} alt="Logo" className="logo-top"/>
                                     {cardFrom && <div className="card-from">De: {cardFrom}</div>}
                                     {cardTo && <div className="card-to">Para: {cardTo}</div>}
@@ -233,7 +246,7 @@ export function GenerateCard({
                     cardFrom={cardFrom}
                     cardTo={cardTo}
                     cardMessage={cardMessage}
-                    fontSize={16}
+                    fontSize={fontSize}
                     logo={logoSrc}
                     backgroundImage={templateBackground}
                     elementId={elementId}
