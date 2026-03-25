@@ -8,7 +8,7 @@ export const Container = styled.div`
 export const ModalContainer = styled.div`
     display: flex;
     gap: 20px;
-    height: 82vh;
+    height: 85vh;
     max-width: 1200px;
     width: 100%;
 
