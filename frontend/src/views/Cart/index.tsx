@@ -170,12 +170,9 @@ export function Cart() {
                         <SectionTitle style={{ marginBottom: '10px' }}>
                             Observações
                         </SectionTitle>
-                        <span style={{ color: 'red' }}>
-                            * Informe o horário de entrega ⏰. Isso evita tentativas sem sucesso e agiliza o envio.
-                        </span>
                         <ObservationsField>
                             <Textarea
-                                placeholder={"Adicione observações sobre seu pedido.\nExemplo: Entregar às 10h, por favor!"}
+                                placeholder={"Adicione observações sobre seu pedido."}
                                 value={observations}
                                 onChange={(e) => setObservations(e.target.value)}
                                 rows={8}
