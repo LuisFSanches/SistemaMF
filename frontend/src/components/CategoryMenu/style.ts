@@ -139,7 +139,7 @@ export const CategoryName = styled.span`
     font-weight: 600;
     color: var(--text-body);
     text-align: center;
-    max-width: 135px;
+    max-width: 155px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
