@@ -36,13 +36,13 @@ export const CarouselWrapper = styled.div`
 
 export const CategoryList = styled.div`
     display: flex;
-    gap: 30px;
+    gap: 20px;
     justify-content: flex-start;
     min-width: min-content;
     padding: 0 10px;
 
     @media (max-width: 768px) {
-        gap: 20px;
+        gap: 0px;
     }
 `;
 
@@ -155,7 +155,7 @@ export const CategoryName = styled.span`
 
     @media (max-width: 768px) {
         font-size: 12px;
-        max-width: 100px;
+        max-width: 110px;
     }
 `;
 

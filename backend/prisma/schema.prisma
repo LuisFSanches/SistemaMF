@@ -161,6 +161,9 @@ model StoreProduct {
   stock      Float
   enabled    Boolean @default(true)
   visible_for_online_store    Boolean @default(false)
+  image      String?
+  image_2    String?
+  image_3    String?
   
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt @default(now())
@@ -358,6 +361,11 @@ model Store {
   banner_2         String?
   banner_3         String?
   
+  // Campos de assinatura
+  trial_end_date      DateTime?
+  subscription_status String   @default("TRIAL") // TRIAL, ACTIVE, INACTIVE, EXPIRED 
+  current_plan_id     String?
+  
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
   
@@ -377,6 +385,7 @@ model Store {
   attendedCities   StoreAttendedCity[]
   deliveryRanges   DeliveryRange[]
   storeCarousels   StoreCarousel[]
+  subscription     Subscription?
 
   @@map("stores")
 }
@@ -490,3 +499,40 @@ model StoreCarouselItem {
   @@unique([carousel_id, store_product_id])
   @@map("store_carousel_items")
 }
+
+// Sistema de Assinaturas
+model SubscriptionPlan {
+  id            String   @id @default(uuid())
+  name          String   // "Mensal", "Anual"
+  description   String?
+  price         Float    // 80.00 (mensal), 70.00 (anual)
+  billing_cycle String   // "MONTHLY", "ANNUAL"
+  mp_plan_id    String?  // ID do plano no Mercado Pago
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id                    String   @id @default(uuid())
+  store_id              String   @unique
+  subscription_plan_id  String
+  mp_subscription_id    String?  // ID da assinatura no Mercado Pago
+  status                String   @default("PENDING") // PENDING, ACTIVE, CANCELLED, EXPIRED
+  start_date            DateTime @default(now())
+  end_date              DateTime?
+  next_billing_date     DateTime?
+  trial_end_date        DateTime?
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  store                 Store           @relation(fields: [store_id], references: [id])
+  subscriptionPlan      SubscriptionPlan @relation(fields: [subscription_plan_id], references: [id])
+
+  @@map("subscriptions")
+}
+

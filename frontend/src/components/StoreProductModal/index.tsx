@@ -23,7 +23,19 @@ import {
     QRCodeActions,
     QRCodeButton,
     QRCodeInfo,
-    SwitchActions
+    SwitchActions,
+    TabsContainer,
+    TabsList,
+    TabButton,
+    TabContent,
+    MultiImageGrid,
+    ImageSlot,
+    ImageSlotLabel,
+    ImageActions,
+    ImageActionButton,
+    SyncConfirmationModal,
+    SyncConfirmationBox,
+    SyncConfirmationActions
 } from './style';
 import { 
     SearchContainer,
@@ -37,9 +49,10 @@ import {
     ValidationWarning
 } from './style';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faXmark, faQrcode, faPrint, faDownload, faSearch, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faXmark, faQrcode, faPrint, faDownload, faSearch, faPlus, faCloudArrowUp, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { UploadLabel } from './style';
 import { IProduct } from "../../interfaces/IProduct";
-import { createStoreProduct, updateStoreProduct } from "../../services/storeProductService";
+import { createStoreProduct, updateStoreProduct, uploadStoreProductImage, uploadStoreProductImage2, uploadStoreProductImage3, deleteStoreProductImage, syncStoreProductImageToGlobal } from "../../services/storeProductService";
 import { searchProducts } from "../../services/productService";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { useProducts } from "../../contexts/ProductsContext";
@@ -76,9 +89,19 @@ export function StoreProductModal({
         watch
     } = useForm<IProduct>();
     const [showLoader, setShowLoader] = useState(false);
+    
+    // Estados para as 3 imagens
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string>("");
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    const [imageFile2, setImageFile2] = useState<File | null>(null);
+    const [imagePreview2, setImagePreview2] = useState<string>("");
+    const fileInputRef2 = useRef<HTMLInputElement>(null);
+    
+    const [imageFile3, setImageFile3] = useState<File | null>(null);
+    const [imagePreview3, setImagePreview3] = useState<string>("");
+    const fileInputRef3 = useRef<HTMLInputElement>(null);
     
     // Estados para busca de produtos
     const [searchQuery, setSearchQuery] = useState("");
@@ -88,12 +111,27 @@ export function StoreProductModal({
     
     // Estados para ProductModal
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+    
+    // Tabs state
+    const [activeTab, setActiveTab] = useState<'basic' | 'image' | 'qrcode'>('basic');
+    
+    // Sync confirmation state
+    const [syncConfirmation, setSyncConfirmation] = useState<{
+        show: boolean;
+        imageFields: Array<'image' | 'image_2' | 'image_3'>;
+        parentProduct: IProduct | null;
+    }>({
+        show: false,
+        imageFields: [],
+        parentProduct: null
+    });
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            if (file.size > 100 * 1024) {
+            if (file.size > 150 * 1024) {
                 alert("A imagem deve ter no máximo 150KB. Escolha outra imagem por favor.");
+                return;
             }
 
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -109,6 +147,149 @@ export function StoreProductModal({
                 setImagePreview(reader.result as string);
             };
             reader.readAsDataURL(file);
+        }
+    };
+
+    const handleImageChange2 = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (file.size > 150 * 1024) {
+                alert("A imagem deve ter no máximo 150KB. Escolha outra imagem por favor.");
+                return;
+            }
+
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                alert("Formato inválido. Use JPEG, JPG, PNG, WEBP.");
+                return;
+            }
+
+            setImageFile2(file);
+            
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview2(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleImageChange3 = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (file.size > 150 * 1024) {
+                alert("A imagem deve ter no máximo 150KB. Escolha outra imagem por favor.");
+                return;
+            }
+
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                alert("Formato inválido. Use JPEG, JPG, PNG, WEBP.");
+                return;
+            }
+
+            setImageFile3(file);
+            
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview3(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveImage = async () => {
+        if (currentProduct.id && currentProduct.image) {
+            try {
+                setShowLoader(true);
+                await deleteStoreProductImage(currentProduct.id, 'image');
+                setImagePreview("");
+                setImageFile(null);
+                setValue("image", "");
+                if (adminData.store_id) {
+                    await loadData(adminData.store_id);
+                }
+                setShowLoader(false);
+                showSuccess("Imagem removida com sucesso!");
+            } catch (error) {
+                setShowLoader(false);
+                alert("Erro ao remover imagem");
+            }
+        } else {
+            setImagePreview("");
+            setImageFile(null);
+        }
+    };
+
+    const handleRemoveImage2 = async () => {
+        if (currentProduct.id && currentProduct.image_2) {
+            try {
+                setShowLoader(true);
+                await deleteStoreProductImage(currentProduct.id, 'image_2');
+                setImagePreview2("");
+                setImageFile2(null);
+                setValue("image_2", "");
+                if (adminData.store_id) {
+                    await loadData(adminData.store_id);
+                }
+                setShowLoader(false);
+                showSuccess("Imagem 2 removida com sucesso!");
+            } catch (error) {
+                setShowLoader(false);
+                alert("Erro ao remover imagem 2");
+            }
+        } else {
+            setImagePreview2("");
+            setImageFile2(null);
+        }
+    };
+
+    const handleRemoveImage3 = async () => {
+        if (currentProduct.id && currentProduct.image_3) {
+            try {
+                setShowLoader(true);
+                await deleteStoreProductImage(currentProduct.id, 'image_3');
+                setImagePreview3("");
+                setImageFile3(null);
+                setValue("image_3", "");
+                if (adminData.store_id) {
+                    await loadData(adminData.store_id);
+                }
+                setShowLoader(false);
+                showSuccess("Imagem 3 removida com sucesso!");
+            } catch (error) {
+                setShowLoader(false);
+                alert("Erro ao remover imagem 3");
+            }
+        } else {
+            setImagePreview3("");
+            setImageFile3(null);
+        }
+    };
+
+    const handleSyncImageToGlobal = async (imageFields: Array<'image' | 'image_2' | 'image_3'>) => {
+        if (!currentProduct.id || imageFields.length === 0) return;
+
+        try {
+            setShowLoader(true);
+            
+            // Sincronizar todas as imagens sequencialmente
+            for (const imageField of imageFields) {
+                await syncStoreProductImageToGlobal(currentProduct.id, imageField);
+            }
+            
+            setShowLoader(false);
+            const message = imageFields.length === 1 
+                ? "Imagem sincronizada com o catálogo global com sucesso!"
+                : `${imageFields.length} imagens sincronizadas com o catálogo global com sucesso!`;
+            showSuccess(message);
+            setSyncConfirmation({ show: false, imageFields: [], parentProduct: null });
+            onRequestClose();
+        } catch (error: any) {
+            setShowLoader(false);
+            const errorMessage = error.response?.data?.message || "Erro ao sincronizar imagem";
+            alert(errorMessage);
+            setSyncConfirmation({ show: false, imageFields: [], parentProduct: null });
         }
     };
 
@@ -234,12 +415,42 @@ export function StoreProductModal({
                     visible_for_online_store: formData.visible_for_online_store ?? false,
                 });
 
+                // Upload sequencial das imagens se houver novos arquivos
+                const uploadedImageFields: Array<'image' | 'image_2' | 'image_3'> = [];
+
+                if (currentProduct.id) {
+                    if (imageFile) {
+                        await uploadStoreProductImage(currentProduct.id, imageFile);
+                        uploadedImageFields.push('image');
+                    }
+                    if (imageFile2) {
+                        await uploadStoreProductImage2(currentProduct.id, imageFile2);
+                        uploadedImageFields.push('image_2');
+                    }
+                    if (imageFile3) {
+                        await uploadStoreProductImage3(currentProduct.id, imageFile3);
+                        uploadedImageFields.push('image_3');
+                    }
+                }
+
                 editProduct(productData);
                 showSuccess("Produto atualizado com sucesso!");
+                
                 if (adminData.store_id) {
                     await loadData(adminData.store_id);
                 }
-                onRequestClose();
+
+                // Verificar se deve mostrar modal de sincronização
+                // Mostra modal para todas as imagens enviadas nesta sessão
+                if (uploadedImageFields.length > 0) {
+                    setSyncConfirmation({
+                        show: true,
+                        imageFields: uploadedImageFields,
+                        parentProduct: { name: currentProduct.name } as IProduct
+                    });
+                } else {
+                    onRequestClose();
+                }
             }
 
             setShowLoader(false);
@@ -258,13 +469,29 @@ export function StoreProductModal({
             setValue("enabled", Boolean(currentProduct.enabled));
             setValue("visible_for_online_store", Boolean(currentProduct.visible_for_online_store));
             
+            // Carregar preview das 3 imagens
             if (currentProduct.image) {
                 setImagePreview(currentProduct.image);
             } else {
                 setImagePreview("");
             }
             
+            if (currentProduct.image_2) {
+                setImagePreview2(currentProduct.image_2);
+            } else {
+                setImagePreview2("");
+            }
+            
+            if (currentProduct.image_3) {
+                setImagePreview3(currentProduct.image_3);
+            } else {
+                setImagePreview3("");
+            }
+            
+            // Resetar arquivos selecionados
             setImageFile(null);
+            setImageFile2(null);
+            setImageFile3(null);
         } else {
             // Reset para criação
             setSearchQuery("");
@@ -277,9 +504,18 @@ export function StoreProductModal({
             setValue("enabled", true);
             setValue("visible_for_online_store", false);
             setImagePreview("");
+            setImagePreview2("");
+            setImagePreview3("");
             setImageFile(null);
+            setImageFile2(null);
+            setImageFile3(null);
         }
-    }, [currentProduct, setValue, action]);
+        
+        // Reset to first tab when modal opens
+        if (isOpen) {
+            setActiveTab('basic');
+        }
+    }, [currentProduct, setValue, action, isOpen]);
 
     // Debounce para busca de produtos
     useEffect(() => {
@@ -446,99 +682,329 @@ export function StoreProductModal({
                             </Switch>
                         </SwitchActions>
 
-                        <Input 
-                            placeholder='Nome' 
-                            {...register("name", {required: "Nome inválido"})}
-                            disabled={action === "create"}
-                        />
-                        {errors.name && <ErrorMessage>{errors.name.message}</ErrorMessage>}
-                        <Input type="number" step="0.01" placeholder='Preço' {...register("price", { required: "Preço inválido" })}/>
-                        {errors.price && <ErrorMessage>{errors.price.message}</ErrorMessage>}
-                        <InlineFormField fullWidth>
-                            <FormField style={{ marginTop: "0px"}}>
-                                <Select 
-                                    placeholder='Unidade' 
-                                    {...register("unity", { required: "Unidade invária" })} 
-                                    style={{ height: "4rem" }}
-                                    disabled={true}
-                                >
-                                    <option value="">Selecione a unidade</option>
-                                    {Object.entries(UNITIES).map(([key, value]) => (
-                                        <option key={key} value={key}>{value}</option>
-                                    ))}
-                                </Select>
-                                {errors.unity && <ErrorMessage>{errors.unity.message}</ErrorMessage>}
-                            </FormField>
+                        {action === "edit" ? (
+                            <TabsContainer>
+                                <TabsList>
+                                    <TabButton 
+                                        type="button"
+                                        $active={activeTab === 'basic'} 
+                                        onClick={() => setActiveTab('basic')}
+                                    >
+                                        Dados Básicos
+                                    </TabButton>
+                                    <TabButton 
+                                        type="button"
+                                        $active={activeTab === 'image'} 
+                                        onClick={() => setActiveTab('image')}
+                                    >
+                                        Imagens
+                                    </TabButton>
+                                    <TabButton 
+                                        type="button"
+                                        $active={activeTab === 'qrcode'} 
+                                        onClick={() => setActiveTab('qrcode')}
+                                    >
+                                        QR Code
+                                    </TabButton>
+                                </TabsList>
 
-                            <FormField style={{ marginTop: "0px"}}>
-                                <Input type="number" placeholder='Estoque'
-                                    {...register("stock", { required: "Estoque inválido" })}
-                                    style={{ marginBottom: "0px" }}
+                                {activeTab === 'basic' && (
+                                    <TabContent>
+                                        <Input 
+                                            placeholder='Nome' 
+                                            {...register("name", {required: "Nome inválido"})}
+                                            disabled={true}
+                                        />
+                                        {errors.name && <ErrorMessage>{errors.name.message}</ErrorMessage>}
+                                        <Input type="number" step="0.01" placeholder='Preço' {...register("price", { required: "Preço inválido" })}/>
+                                        {errors.price && <ErrorMessage>{errors.price.message}</ErrorMessage>}
+                                        <InlineFormField fullWidth>
+                                            <FormField style={{ marginTop: "0px"}}>
+                                                <Select 
+                                                    placeholder='Unidade' 
+                                                    {...register("unity", { required: "Unidade invária" })} 
+                                                    style={{ height: "4rem" }}
+                                                    disabled={true}
+                                                >
+                                                    <option value="">Selecione a unidade</option>
+                                                    {Object.entries(UNITIES).map(([key, value]) => (
+                                                        <option key={key} value={key}>{value}</option>
+                                                    ))}
+                                                </Select>
+                                                {errors.unity && <ErrorMessage>{errors.unity.message}</ErrorMessage>}
+                                            </FormField>
+
+                                            <FormField style={{ marginTop: "0px"}}>
+                                                <Input type="number" placeholder='Estoque'
+                                                    {...register("stock", { required: "Estoque inválido" })}
+                                                    style={{ marginBottom: "0px" }}
+                                                />
+                                                {errors.stock && <ErrorMessage>{errors.stock.message}</ErrorMessage>}
+                                            </FormField>
+                                        </InlineFormField>
+                                    </TabContent>
+                                )}
+
+                                {activeTab === 'image' && (
+                                    <TabContent>
+                                        <MultiImageGrid>
+                                            {/* Imagem 1 - Principal */}
+                                            <ImageSlot>
+                                                <ImageSlotLabel>
+                                                    Imagem 1 <span className="badge">Principal</span>
+                                                </ImageSlotLabel>
+                                                <HiddenFileInput
+                                                    ref={fileInputRef}
+                                                    type="file"
+                                                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                                                    onChange={handleImageChange}
+                                                />
+                                                {imagePreview ? (
+                                                    <>
+                                                        <ImagePreviewBox>
+                                                            <img src={imagePreview} alt="Preview 1" />
+                                                        </ImagePreviewBox>
+                                                        <ImageActions>
+                                                            <ImageActionButton
+                                                                type="button"
+                                                                className="change"
+                                                                onClick={() => fileInputRef.current?.click()}
+                                                            >
+                                                                Trocar
+                                                            </ImageActionButton>
+                                                            <ImageActionButton
+                                                                type="button"
+                                                                className="remove"
+                                                                onClick={handleRemoveImage}
+                                                            >
+                                                                Remover
+                                                            </ImageActionButton>
+                                                        </ImageActions>
+                                                    </>
+                                                ) : (
+                                                    <ImagePreviewBox onClick={() => fileInputRef.current?.click()}>
+                                                        <UploadLabel>
+                                                            <FontAwesomeIcon icon={faCloudArrowUp} />
+                                                            <span>Clique aqui</span>
+                                                            <span style={{ fontSize: "0.65rem" }}>Máx. 150KB</span>
+                                                        </UploadLabel>
+                                                    </ImagePreviewBox>
+                                                )}
+                                                {imageFile && (
+                                                    <ImageInfo>
+                                                        {imageFile.name} ({(imageFile.size / 1024).toFixed(2)} KB)
+                                                    </ImageInfo>
+                                                )}
+                                            </ImageSlot>
+
+                                            {/* Imagem 2 */}
+                                            <ImageSlot>
+                                                <ImageSlotLabel>
+                                                    Imagem 2
+                                                </ImageSlotLabel>
+                                                <HiddenFileInput
+                                                    ref={fileInputRef2}
+                                                    type="file"
+                                                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                                                    onChange={handleImageChange2}
+                                                />
+                                                {imagePreview2 ? (
+                                                    <>
+                                                        <ImagePreviewBox>
+                                                            <img src={imagePreview2} alt="Preview 2" />
+                                                        </ImagePreviewBox>
+                                                        <ImageActions>
+                                                            <ImageActionButton
+                                                                type="button"
+                                                                className="change"
+                                                                onClick={() => fileInputRef2.current?.click()}
+                                                            >
+                                                                Trocar
+                                                            </ImageActionButton>
+                                                            <ImageActionButton
+                                                                type="button"
+                                                                className="remove"
+                                                                onClick={handleRemoveImage2}
+                                                            >
+                                                                Remover
+                                                            </ImageActionButton>
+                                                        </ImageActions>
+                                                    </>
+                                                ) : (
+                                                    <ImagePreviewBox onClick={() => fileInputRef2.current?.click()}>
+                                                        <UploadLabel>
+                                                            <FontAwesomeIcon icon={faCloudArrowUp} />
+                                                            <span>Clique aqui</span>
+                                                            <span style={{ fontSize: "0.65rem" }}>Máx. 150KB</span>
+                                                        </UploadLabel>
+                                                    </ImagePreviewBox>
+                                                )}
+                                                {imageFile2 && (
+                                                    <ImageInfo>
+                                                        {imageFile2.name} ({(imageFile2.size / 1024).toFixed(2)} KB)
+                                                    </ImageInfo>
+                                                )}
+                                            </ImageSlot>
+
+                                            {/* Imagem 3 */}
+                                            <ImageSlot>
+                                                <ImageSlotLabel>
+                                                    Imagem 3
+                                                </ImageSlotLabel>
+                                                <HiddenFileInput
+                                                    ref={fileInputRef3}
+                                                    type="file"
+                                                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                                                    onChange={handleImageChange3}
+                                                />
+                                                {imagePreview3 ? (
+                                                    <>
+                                                        <ImagePreviewBox>
+                                                            <img src={imagePreview3} alt="Preview 3" />
+                                                        </ImagePreviewBox>
+                                                        <ImageActions>
+                                                            <ImageActionButton
+                                                                type="button"
+                                                                className="change"
+                                                                onClick={() => fileInputRef3.current?.click()}
+                                                            >
+                                                                Trocar
+                                                            </ImageActionButton>
+                                                            <ImageActionButton
+                                                                type="button"
+                                                                className="remove"
+                                                                onClick={handleRemoveImage3}
+                                                            >
+                                                                Remover
+                                                            </ImageActionButton>
+                                                        </ImageActions>
+                                                    </>
+                                                ) : (
+                                                    <ImagePreviewBox onClick={() => fileInputRef3.current?.click()}>
+                                                        <UploadLabel>
+                                                            <FontAwesomeIcon icon={faCloudArrowUp} />
+                                                            <span>Clique aqui</span>
+                                                            <span style={{ fontSize: "0.65rem" }}>Máx. 150KB</span>
+                                                        </UploadLabel>
+                                                    </ImagePreviewBox>
+                                                )}
+                                                {imageFile3 && (
+                                                    <ImageInfo>
+                                                        {imageFile3.name} ({(imageFile3.size / 1024).toFixed(2)} KB)
+                                                    </ImageInfo>
+                                                )}
+                                            </ImageSlot>
+                                        </MultiImageGrid>
+                                    </TabContent>
+                                )}
+
+                                {activeTab === 'qrcode' && (
+                                    <TabContent>
+                                        {currentProduct.qr_code ? (
+                                            <QRCodeContainer>
+                                                <QRCodeTitle>
+                                                    <FontAwesomeIcon icon={faQrcode as any} />
+                                                    QR Code do Produto
+                                                </QRCodeTitle>
+                                                <QRCodeImageBox>
+                                                    <img src={currentProduct.qr_code} alt={`QR Code - ${currentProduct.name}`} />
+                                                </QRCodeImageBox>
+                                                <QRCodeInfo>
+                                                    Use este QR Code para adicionar o produto rapidamente ao pedido
+                                                </QRCodeInfo>
+                                                <QRCodeActions>
+                                                    <QRCodeButton
+                                                        type="button"
+                                                        className="print"
+                                                        onClick={handlePrintQRCode}
+                                                    >
+                                                        <FontAwesomeIcon icon={faPrint as any} />
+                                                        Imprimir QR Code
+                                                    </QRCodeButton>
+                                                    <QRCodeButton
+                                                        type="button"
+                                                        className="download"
+                                                        onClick={handleDownloadQRCode}
+                                                    >
+                                                        <FontAwesomeIcon icon={faDownload as any} />
+                                                        Baixar QR Code
+                                                    </QRCodeButton>
+                                                </QRCodeActions>
+                                            </QRCodeContainer>
+                                        ) : (
+                                            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-light)' }}>
+                                                Este produto ainda não possui QR Code
+                                            </div>
+                                        )}
+                                    </TabContent>
+                                )}
+                            </TabsContainer>
+                        ) : (
+                            <>
+                                {/* Form fields for create mode */}
+                                <Input 
+                                    placeholder='Nome' 
+                                    {...register("name", {required: "Nome inválido"})}
+                                    disabled={action === "create"}
                                 />
-                                {errors.stock && <ErrorMessage>{errors.stock.message}</ErrorMessage>}
-                            </FormField>
-                        </InlineFormField>
+                                {errors.name && <ErrorMessage>{errors.name.message}</ErrorMessage>}
+                                <Input type="number" step="0.01" placeholder='Preço' {...register("price", { required: "Preço inválido" })}/>
+                                {errors.price && <ErrorMessage>{errors.price.message}</ErrorMessage>}
+                                <InlineFormField fullWidth>
+                                    <FormField style={{ marginTop: "0px"}}>
+                                        <Select 
+                                            placeholder='Unidade' 
+                                            {...register("unity", { required: "Unidade invária" })} 
+                                            style={{ height: "4rem" }}
+                                            disabled={true}
+                                        >
+                                            <option value="">Selecione a unidade</option>
+                                            {Object.entries(UNITIES).map(([key, value]) => (
+                                                <option key={key} value={key}>{value}</option>
+                                            ))}
+                                        </Select>
+                                        {errors.unity && <ErrorMessage>{errors.unity.message}</ErrorMessage>}
+                                    </FormField>
 
-                        <ImageUploadContainer>
-                            <HiddenFileInput
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/jpeg,image/jpg,image/png,image/webp"
-                                onChange={handleImageChange}
-                                disabled
-                            />
+                                    <FormField style={{ marginTop: "0px"}}>
+                                        <Input type="number" placeholder='Estoque'
+                                            {...register("stock", { required: "Estoque inválido" })}
+                                            style={{ marginBottom: "0px" }}
+                                        />
+                                        {errors.stock && <ErrorMessage>{errors.stock.message}</ErrorMessage>}
+                                    </FormField>
+                                </InlineFormField>
 
-                            {imagePreview ? (
-                                <>
-                                    <ImagePreviewBox>
-                                        <img src={imagePreview} alt="Preview" />
-                                    </ImagePreviewBox>
-                                </>
-                            ) : (
-                                <ImagePreviewBox style={{ cursor: 'not-allowed', opacity: 0.6 }}>
-                                    <img src={placeholder_products} alt="Placeholder" />
-                                </ImagePreviewBox>
-                            )}
-                            
-                            {imageFile && (
-                                <ImageInfo>
-                                    Arquivo selecionado: {imageFile.name} ({(imageFile.size / 1024).toFixed(2)} KB)
-                                </ImageInfo>
-                            )}
-                        </ImageUploadContainer>
+                                <ImageUploadContainer>
+                                    <HiddenFileInput
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                                        onChange={handleImageChange}
+                                        disabled
+                                    />
 
-                        {action === "edit" && currentProduct.qr_code && (
-                            <QRCodeContainer>
-                                <QRCodeTitle>
-                                    <FontAwesomeIcon icon={faQrcode as any} />
-                                    QR Code do Produto
-                                </QRCodeTitle>
-                                <QRCodeImageBox>
-                                    <img src={currentProduct.qr_code} alt={`QR Code - ${currentProduct.name}`} />
-                                </QRCodeImageBox>
-                                <QRCodeInfo>
-                                    Use este QR Code para adicionar o produto rapidamente ao pedido
-                                </QRCodeInfo>
-                                <QRCodeActions>
-                                    <QRCodeButton
-                                        type="button"
-                                        className="print"
-                                        onClick={handlePrintQRCode}
-                                    >
-                                        <FontAwesomeIcon icon={faPrint as any} />
-                                        Imprimir QR Code
-                                    </QRCodeButton>
-                                    <QRCodeButton
-                                        type="button"
-                                        className="download"
-                                        onClick={handleDownloadQRCode}
-                                    >
-                                        <FontAwesomeIcon icon={faDownload as any} />
-                                        Baixar QR Code
-                                    </QRCodeButton>
-                                </QRCodeActions>
-                            </QRCodeContainer>
+                                    {imagePreview ? (
+                                        <>
+                                            <ImagePreviewBox>
+                                                <img src={imagePreview} alt="Preview" />
+                                            </ImagePreviewBox>
+                                        </>
+                                    ) : (
+                                        <ImagePreviewBox style={{ cursor: 'not-allowed', opacity: 0.6 }}>
+                                            <img src={placeholder_products} alt="Placeholder" />
+                                        </ImagePreviewBox>
+                                    )}
+                                    
+                                    {imageFile && (
+                                        <ImageInfo>
+                                            Arquivo selecionado: {imageFile.name} ({(imageFile.size / 1024).toFixed(2)} KB)
+                                        </ImageInfo>
+                                    )}
+                                </ImageUploadContainer>
+                            </>
                         )}
+
                         <button type="submit" className="create-button">
                             {action === "create" ? "Adicionar à Loja" : "Editar"}
                         </button>
@@ -562,6 +1028,48 @@ export function StoreProductModal({
                     visible_for_online_store: false
                 }}
             />
+
+            {/* Sync Confirmation Modal */}
+            {syncConfirmation.show && (
+                <SyncConfirmationModal onClick={() => setSyncConfirmation({ show: false, imageFields: [], parentProduct: null })}>
+                    <SyncConfirmationBox onClick={(e) => e.stopPropagation()}>
+                        <h3>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            Sincronizar com Catálogo Global?
+                        </h3>
+                        <p>
+                            Você adicionou <strong>{syncConfirmation.imageFields.length}</strong> {syncConfirmation.imageFields.length === 1 ? 'imagem' : 'imagens'} ao produto <strong>{syncConfirmation.parentProduct?.name}</strong>.
+                        </p>
+                        <p>
+                            Podemos usar {syncConfirmation.imageFields.length === 1 ? 'esta imagem' : 'estas imagens'} no catálogo global? Isso permitirá que outras lojas também vejam 
+                            {syncConfirmation.imageFields.length === 1 ? ' esta imagem' : ' estas imagens'} quando adicionarem este produto e nos ajudará a manter o catálogo atualizado para todos os lojistas.
+                        </p>
+                        <SyncConfirmationActions>
+                            <button 
+                                type="button" 
+                                className="cancel"
+                                onClick={() => {
+                                    setSyncConfirmation({ show: false, imageFields: [], parentProduct: null });
+                                    onRequestClose();
+                                }}
+                            >
+                                Não, manter apenas na minha loja
+                            </button>
+                            <button 
+                                type="button" 
+                                className="confirm"
+                                onClick={() => {
+                                    if (syncConfirmation.imageFields.length > 0) {
+                                        handleSyncImageToGlobal(syncConfirmation.imageFields);
+                                    }
+                                }}
+                            >
+                                Sim, sincronizar {syncConfirmation.imageFields.length > 1 ? `todas as ${syncConfirmation.imageFields.length} imagens` : 'imagem'}
+                            </button>
+                        </SyncConfirmationActions>
+                    </SyncConfirmationBox>
+                </SyncConfirmationModal>
+            )}
         </Modal>
     )
 }

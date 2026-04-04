@@ -343,3 +343,151 @@ export const ValidationWarning = styled.div`
     font-size: 0.875rem;
     font-weight: 500;
 `;
+
+export const TabsContainer = styled.div`
+    width: 100%;
+    margin-bottom: 1rem;
+`;
+
+export const TabsList = styled.div`
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+    margin-bottom: 1.5rem;
+`;
+
+interface TabButtonProps {
+    $active: boolean;
+}
+
+export const TabButton = styled.button<TabButtonProps>`
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    color: ${props => props.$active ? 'var(--primary-color)' : 'var(--text-light)'};
+    font-weight: ${props => props.$active ? '600' : '400'};
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+
+    &:hover {
+        color: var(--primary-color);
+    }
+
+    ${props => props.$active && `
+        border-bottom-color: var(--primary-color);
+    `}
+`;
+
+export const TabContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+`;
+
+export const MultiImageGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+`;
+
+export const ImageSlot = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+`;
+
+export const ImageSlotLabel = styled.div`
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-title);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .badge {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.125rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.625rem;
+    }
+`;
+
+export const SyncConfirmationModal = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+`;
+
+export const SyncConfirmationBox = styled.div`
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+
+    h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.25rem;
+        color: var(--text-title);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        svg {
+            color: var(--primary-color);
+        }
+    }
+
+    p {
+        margin: 0 0 1.5rem 0;
+        color: var(--text-body);
+        line-height: 1.6;
+        font-size: 0.9rem;
+    }
+`;
+
+export const SyncConfirmationActions = styled.div`
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+
+    button {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+            filter: brightness(0.9);
+        }
+
+        &.cancel {
+            background: #e9ecef;
+            color: var(--text-title);
+        }
+
+        &.confirm {
+            background: var(--primary-color);
+            color: white;
+        }
+    }
+`;

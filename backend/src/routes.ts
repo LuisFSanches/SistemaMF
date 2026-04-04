@@ -134,6 +134,11 @@ import { GetStoreProductByIdController } from './controllers/storeProduct/GetSto
 import { UpdateStoreProductController } from './controllers/storeProduct/UpdateStoreProductController';
 import { DeleteStoreProductController } from './controllers/storeProduct/DeleteStoreProductController';
 import { SearchStoreProductsController } from './controllers/storeProduct/SearchStoreProductsController';
+import { UploadStoreProductImageController } from './controllers/storeProduct/UploadStoreProductImageController';
+import { UploadStoreProductImage2Controller } from './controllers/storeProduct/UploadStoreProductImage2Controller';
+import { UploadStoreProductImage3Controller } from './controllers/storeProduct/UploadStoreProductImage3Controller';
+import { DeleteStoreProductImageController } from './controllers/storeProduct/DeleteStoreProductImageController';
+import { SyncStoreProductImageToGlobalController } from './controllers/storeProduct/SyncStoreProductImageToGlobalController';
 
 import { CreateStoreCarouselController } from './controllers/storeCarousel/CreateStoreCarouselController';
 import { GetAllStoreCarouselsController } from './controllers/storeCarousel/GetAllStoreCarouselsController';
@@ -276,6 +281,13 @@ router.get('/store-product/search', adminAuthMiddleware, new SearchStoreProducts
 router.get('/store-product/:id', adminAuthMiddleware, new GetStoreProductController().handle)
 router.put('/store-product/:id', adminAuthMiddleware, new UpdateStoreProductController().handle)
 router.delete('/store-product/:id', adminAuthMiddleware, new DeleteStoreProductController().handle)
+
+//-- ROTAS STORE PRODUCT IMAGES --
+router.post('/store-product/:id/image', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadStoreProductImageController().handle)
+router.post('/store-product/:id/image-2', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadStoreProductImage2Controller().handle)
+router.post('/store-product/:id/image-3', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadStoreProductImage3Controller().handle)
+router.delete('/store-product/:id/image', adminAuthMiddleware, new DeleteStoreProductImageController().handle)
+router.post('/store-product/:id/sync-image-to-global', adminAuthMiddleware, new SyncStoreProductImageToGlobalController().handle)
 
 //-- ROTAS STORE CAROUSEL (ADMIN) --
 router.post('/store-carousel', adminAuthMiddleware, new CreateStoreCarouselController().handle)

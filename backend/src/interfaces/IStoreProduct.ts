@@ -6,4 +6,7 @@ export interface IStoreProduct {
     stock: number
     enabled?: boolean
     visible_for_online_store?: boolean
+    image?: string
+    image_2?: string
+    image_3?: string
 }
