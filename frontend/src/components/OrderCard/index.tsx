@@ -88,7 +88,7 @@ export function OrderCard({
 				if (order.discount > 0) {
 					message += `• Desconto: R$ ${order.discount}\n`;
 				}
-				message += `• Taxa de entrega: R$ ${order.delivery_fee}\n`;
+				message += `• Serviço de Entrega: R$ ${order.delivery_fee}\n`;
 				message += `💵 Total: R$ ${order.total}*\n`;
 				message += `💳 Pagamento: ${PAYMENT_METHODS[order.payment_method as keyof typeof PAYMENT_METHODS]}`;
 				break;
