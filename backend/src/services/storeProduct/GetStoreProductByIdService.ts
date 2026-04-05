@@ -53,6 +53,8 @@ class GetStoreProductByIdService {
                 stock: storeProduct.stock,
                 enabled: storeProduct.enabled,
                 visible_for_online_store: storeProduct.visible_for_online_store,
+                description: storeProduct.description || storeProduct.product.description,
+                is_description_from_parent: !storeProduct.description,
                 product: {
                     id: storeProduct.product.id,
                     name: storeProduct.product.name,

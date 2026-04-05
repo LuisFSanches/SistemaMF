@@ -6,6 +6,8 @@ export interface IStoreProductDetail {
     stock: number;
     enabled: boolean;
     visible_for_online_store: boolean;
+    description: string | null;
+    is_description_from_parent?: boolean;
     product: {
         id: string;
         name: string;

@@ -24,7 +24,7 @@ const slideOut = keyframes`
 
 export const Container = styled.div<{ $isVisible: boolean }>`
     position: fixed;
-    top: 20px;
+    top: 50px;
     right: 20px;
     z-index: 10000;
     

@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp, faPix } from "@fortawesome/free-brands-svg-icons";
 import { faMoneyBill, faChevronLeft, faChevronRight, faCreditCard as faCardSolid } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
+import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { getStoreFrontProductDetail } from "../../services/productService";
 import { IStoreProductDetail } from "../../interfaces/IStoreProductDetail";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
@@ -68,6 +69,7 @@ export function ProductDetail() {
     const { slug, productId } = useParams<{ slug: string; productId: string }>();
     const navigate = useNavigate();
     const { addToCart } = useCart();
+    const { showSuccess } = useSuccessMessage();
     const [product, setProduct] = useState<IStoreProductDetail | null>(null);
     const [showLoader, setShowLoader] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -157,6 +159,7 @@ export function ProductDetail() {
             enabled: product.enabled,
         };
         addToCart(cartProduct, quantity);
+        showSuccess(`x${quantity} ${product.product.name} adicionado ao pedido!`, 1800);
     };
 
     const handleBuyNow = () => {
@@ -174,6 +177,7 @@ export function ProductDetail() {
             enabled: product.enabled,
         };
         addToCart(cartProduct, quantity);
+        showSuccess(`x${quantity} ${product.product.name} adicionado ao pedido!`, 1800);
         navigate(`/${slug}/checkout`);
     };
 
@@ -305,10 +309,10 @@ export function ProductDetail() {
                             </ActionButtons>
                         )}
 
-                        {product.product.description && (
+                        {product.description && (
                             <DescriptionSection>
                                 <SectionTitle>Descrição</SectionTitle>
-                                <Description>{product.product.description}</Description>
+                                <Description>{product.description}</Description>
                             </DescriptionSection>
                         )}
                     </InfoSection>

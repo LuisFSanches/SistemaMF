@@ -39,6 +39,7 @@ export const updateStoreProduct = async (data: {
     stock?: number;
     enabled?: boolean;
     visible_for_online_store?: boolean;
+    description?: string;
 }) => {
     const response = await api.put(`/store-product/${data.id}`, data);
     return response;

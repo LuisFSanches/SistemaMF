@@ -9,7 +9,9 @@ export interface IStoreProduct {
     image?: string
     image_2?: string
     image_3?: string
+    description?: string
     is_image_from_parent?: boolean
     is_image_2_from_parent?: boolean
     is_image_3_from_parent?: boolean
+    is_description_from_parent?: boolean
 }

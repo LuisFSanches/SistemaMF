@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const ConsentOverlay = styled.div`
     position: fixed;
     bottom: 20px;
-    right: 20px;
+    left: 20px;
     z-index: 9999;
     animation: slideIn 0.3s ease-out;
 

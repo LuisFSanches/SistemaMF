@@ -164,6 +164,7 @@ model StoreProduct {
   image      String?
   image_2    String?
   image_3    String?
+  description String?
   
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt @default(now())

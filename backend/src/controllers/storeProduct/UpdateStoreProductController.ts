@@ -4,7 +4,7 @@ import { UpdateStoreProductService } from '../../services/storeProduct/UpdateSto
 class UpdateStoreProductController {
     async handle(req: Request, res: Response, next: NextFunction) {
         const { id } = req.params;
-        const { price, stock, enabled, visible_for_online_store } = req.body;
+        const { price, stock, enabled, visible_for_online_store, description } = req.body;
 
         const updateStoreProductService = new UpdateStoreProductService();
 
@@ -14,6 +14,7 @@ class UpdateStoreProductController {
             stock,
             enabled,
             visible_for_online_store,
+            description,
         });
 
         return res.json(storeProduct);

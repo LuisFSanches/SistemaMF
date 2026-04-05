@@ -8,6 +8,7 @@ export const updateStoreProductSchema = z.object({
     image: z.string().url("image must be a valid URL").optional(),
     image_2: z.string().url("image_2 must be a valid URL").optional(),
     image_3: z.string().url("image_3 must be a valid URL").optional(),
+    description: z.string().max(1000, "description must be at most 1000 characters").optional(),
 });
 
 export type UpdateStoreProductSchemaType = z.infer<typeof updateStoreProductSchema>;
