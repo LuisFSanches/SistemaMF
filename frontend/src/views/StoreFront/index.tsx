@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
+import { useGTM } from "../../hooks/useGTM";
 import { listStoreFrontProducts } from "../../services/productService";
 import { listStorefrontCarousels } from "../../services/carouselService";
 import { IStoreCarousel } from "../../interfaces/IStoreCarousel";
@@ -61,6 +62,7 @@ interface Store {
 export function StoreFront() {
     const { slug, categorySlug } = useParams<{ slug: string; categorySlug?: string }>();
     const { addToCart } = useCart();
+    const { trackPageView, trackViewItemList } = useGTM();
     const [products, setProducts] = useState<any[]>([]);
     const [totalProducts, setTotalProducts] = useState(0);
     const [store, setStore] = useState<Store | null>(null);
@@ -96,6 +98,14 @@ export function StoreFront() {
             setProducts(products);
             setTotalProducts(total);
             setStore(store);
+            
+            // GTM - Track View Item List quando produtos são carregados
+            if (products && products.length > 0) {
+                const listName = categorySlug 
+                    ? `Categoria: ${categorySlug}` 
+                    : 'Página Inicial';
+                trackViewItemList(products, listName);
+            }
         } catch (err: any) {
             console.error('Erro ao carregar produtos:', err);
             if (err.response?.status === 404) {
@@ -114,7 +124,13 @@ export function StoreFront() {
     useEffect(() => {
         window.scrollTo(0, 0);
         setPage(1);
-    }, [slug, categorySlug]);
+        
+        // GTM - Track Page View
+        const pageTitle = categorySlug 
+            ? `Categoria: ${categorySlug}` 
+            : 'Página Inicial';
+        trackPageView(pageTitle);
+    }, [categorySlug, trackPageView]);
 
     useEffect(() => {
         if (!slug) return;

@@ -11,6 +11,7 @@ import {
     faCheck
 } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment";
+// @ts-ignore - locale import
 import "moment/locale/pt-br";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
 import { StoreFrontFooter } from "../../components/StoreFrontFooter";
@@ -19,6 +20,7 @@ import { OrderStatusStepper, OrderStatusStep } from "../../components/OrderStatu
 import { getMercadoPagoPaymentStatus } from "../../services/mercadoPagoService";
 import { convertMoney, rawTelephone } from "../../utils";
 import { useCart } from "../../contexts/CartContext";
+import { useGTM } from "../../hooks/useGTM";
 import { IPaymentSuccessResponse } from "../../interfaces/IPaymentSuccessResponse";
 import { MERCADO_PAGO_PAYMENT_METHODS } from "../../constants";
 
@@ -75,14 +77,18 @@ export function CheckoutResult() {
     const { slug, status: resultStatus } = useParams<{ slug: string; status: string }>();
     const [searchParams] = useSearchParams();
     const { clearCart } = useCart();
+    const { trackPageView, trackPurchase } = useGTM();
     
     const [showLoader, setShowLoader] = useState(true);
     const [orderData, setOrderData] = useState<IPaymentSuccessResponse | null>(null);
     const [orderStep, setOrderStep] = useState<OrderStatusStep>('validating');
+    const [purchaseTracked, setPurchaseTracked] = useState(false);
 
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, []);
+        // GTM - Track Page View
+        trackPageView('Resultado do Checkout');
+    }, [trackPageView]);
 
     // Parâmetros retornados pelo Mercado Pago
     const paymentId = searchParams.get('payment_id');
@@ -156,6 +162,24 @@ export function CheckoutResult() {
         clearCart();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // GTM - Track Purchase quando pagamento for aprovado
+    useEffect(() => {
+        if (orderData && status === 'approved' && !purchaseTracked) {
+            const deliveryFee = orderData.financial?.delivery_fee || 0;
+            const subtotal = orderData.financial?.subtotal || 0;
+            
+            trackPurchase(
+                orderData.order.order_id.toString(),
+                orderData.items,
+                subtotal,
+                deliveryFee,
+                orderData.payment?.method_id || 'unknown'
+            );
+            
+            setPurchaseTracked(true);
+        }
+    }, [orderData, status, purchaseTracked, trackPurchase]);
 
     const getStatusConfig = () => {
         switch (status) {

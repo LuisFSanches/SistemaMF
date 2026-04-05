@@ -5,6 +5,7 @@ import { faWhatsapp, faPix } from "@fortawesome/free-brands-svg-icons";
 import { faMoneyBill, faChevronLeft, faChevronRight, faCreditCard as faCardSolid } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
+import { useGTM } from "../../hooks/useGTM";
 import { getStoreFrontProductDetail } from "../../services/productService";
 import { IStoreProductDetail } from "../../interfaces/IStoreProductDetail";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
@@ -70,6 +71,7 @@ export function ProductDetail() {
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const { showSuccess } = useSuccessMessage();
+    const { trackPageView, trackViewItem, trackAddToCart } = useGTM();
     const [product, setProduct] = useState<IStoreProductDetail | null>(null);
     const [showLoader, setShowLoader] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -100,7 +102,9 @@ export function ProductDetail() {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, [productId, slug]);
+        // GTM - Track Page View
+        trackPageView('Detalhes do Produto');
+    }, [productId, slug, trackPageView]);
 
     useEffect(() => {
         if (productId) {
@@ -123,6 +127,13 @@ export function ProductDetail() {
             }
         }
     }, [productId]);
+
+    // GTM - Track View Item quando o produto for carregado
+    useEffect(() => {
+        if (product) {
+            trackViewItem(product);
+        }
+    }, [product, trackViewItem]);
 
     const images = product
         ? [
@@ -159,6 +170,10 @@ export function ProductDetail() {
             enabled: product.enabled,
         };
         addToCart(cartProduct, quantity);
+        
+        // GTM - Track Add to Cart
+        trackAddToCart(product, quantity);
+        
         showSuccess(`x${quantity} ${product.product.name} adicionado ao pedido!`, 1800);
     };
 

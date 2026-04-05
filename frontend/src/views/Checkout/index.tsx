@@ -3,8 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import moment from "moment";
-import "moment/locale/pt-br";
 import { useCart } from "../../contexts/CartContext";
+import { useGTM } from "../../hooks/useGTM";
 import { createClientOnline, requestVerificationCode, validateVerificationCode } from "../../services/clientService";
 import { getPickupAddress } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
@@ -103,6 +103,7 @@ export function Checkout() {
     const navigate = useNavigate();
     const { slug } = useParams<{ slug: string }>();
     const { cartItems, cartTotal, deliveryInfo, isDeliveryCalculated } = useCart();
+    const { trackPageView, trackBeginCheckout, trackAddShippingInfo } = useGTM();
     const [showLoader, setShowLoader] = useState(false);
     const [mask, setMask] = useState("(99) 99999-9999");
     const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
@@ -127,15 +128,45 @@ export function Checkout() {
     const [formStarted, setFormStarted] = useState(false);
     const [welcomeClientName, setWelcomeClientName] = useState("");
     const [storeSchedules, setStoreSchedules] = useState<Schedule[]>([]);
+    const [shippingInfoTracked, setShippingInfoTracked] = useState(false);
     const tooltipMessage = `Para entregas em outras regiões,
         por favor entre em contato conosco pelo whatsapp.`;
 
     useEffect(() => {
         window.scrollTo(0, 0);
+        // GTM - Track Page View
+        trackPageView('Checkout');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // GTM - Track Begin Checkout
+    useEffect(() => {
+        if (cartItems.length > 0) {
+            trackBeginCheckout(cartItems, cartTotal);
+        }
+    }, [cartItems, cartTotal, trackBeginCheckout]);
 
     const deliveryFee = pickupOnStore ? 0 : (deliveryInfo?.fee ?? 0);
     const totalWithDelivery = cartTotal + deliveryFee;
+
+    // GTM - Track Add Shipping Info quando endereço for selecionado/preenchido
+    useEffect(() => {
+        // Dispara quando:
+        // 1. Endereço selecionado E frete calculado (entrega) OU
+        // 2. Retirada na loja selecionada
+        const shouldTrack = (addressId && deliveryInfo) || (pickupOnStore && addressId);
+        
+        if (shouldTrack && cartItems.length > 0 && !shippingInfoTracked) {
+            const fee = pickupOnStore ? 0 : (deliveryInfo?.fee ?? 0);
+            trackAddShippingInfo(cartItems, cartTotal, fee);
+            setShippingInfoTracked(true);
+        }
+    }, [addressId, deliveryInfo, pickupOnStore, cartItems, cartTotal, shippingInfoTracked, trackAddShippingInfo]);
+
+    // Reset do flag quando o endereço ou tipo de entrega mudar
+    useEffect(() => {
+        setShippingInfoTracked(false);
+    }, [addressId, pickupOnStore]);
 
     const DAY_OF_WEEK_MAP: { [key: string]: number } = {
         'SUNDAY': 0,

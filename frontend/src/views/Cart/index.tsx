@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faTrash, faPlus, faMinus, faArrowRight, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
+import { useGTM } from "../../hooks/useGTM";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
 import { FreightCalculator } from "../../components/FreightCalculator";
 import placeholder_products from "../../assets/images/placeholder_products.png";
@@ -45,6 +46,7 @@ import {
 export function Cart() {
     const navigate = useNavigate();
     const { slug } = useParams<{ slug: string }>();
+    const { trackPageView, trackViewCart, trackRemoveFromCart } = useGTM();
     const {
         cartItems,
         cartTotal,
@@ -58,7 +60,16 @@ export function Cart() {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, []);
+        // GTM - Track Page View
+        trackPageView('Carrinho');
+    }, [trackPageView]);
+
+    // GTM - Track View Cart
+    useEffect(() => {
+        if (cartItems.length > 0) {
+            trackViewCart(cartItems, cartTotal);
+        }
+    }, [cartItems, cartTotal, trackViewCart]);
 
     const deliveryFee = deliveryInfo?.fee ?? 0;
     const totalWithDelivery = cartTotal + deliveryFee;
@@ -67,6 +78,12 @@ export function Cart() {
         if (cartItems.length === 0) return;
         if (!isDeliveryCalculated) return;
         navigate(`/${slug}/checkout`);
+    };
+
+    const handleRemoveFromCart = (item: any) => {
+        // GTM - Track Remove from Cart
+        trackRemoveFromCart(item, item.quantity);
+        removeFromCart(item.id!);
     };
 
     const steps = ["Carrinho", "Informações do Pedido", "Pagamento"];
@@ -155,7 +172,7 @@ export function Cart() {
                                                 <FontAwesomeIcon icon={faPlus as any} />
                                             </QuantityButton>
                                         </QuantityControl>
-                                        <RemoveButton onClick={() => removeFromCart(item.id!)}>
+                                        <RemoveButton onClick={() => handleRemoveFromCart(item)}>
                                             <FontAwesomeIcon icon={faTrash as any} />
                                         </RemoveButton>
                                     </CartItemActions>
