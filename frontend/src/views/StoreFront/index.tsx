@@ -152,6 +152,7 @@ export function StoreFront() {
             }, 350);
         });
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [slug, page, pageSize, categorySlug]);
 
     useEffect(() => {

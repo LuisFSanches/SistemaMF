@@ -12,6 +12,16 @@ declare global {
 
 export const useGTM = () => {
     const pushToDataLayer = useCallback((data: any) => {
+        // Não enviar eventos em ambiente de desenvolvimento (localhost)
+        const isLocalhost = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname.includes('localhost');
+        
+        if (isLocalhost) {
+            console.log('GTM Event (NOT SENT - localhost):', data);
+            return;
+        }
+        
         if (typeof window !== 'undefined' && window.dataLayer) {
             window.dataLayer.push(data);
             console.log('GTM Event:', data); // Log para debug
