@@ -10,7 +10,8 @@ import {
     InlineFormField,
     FormField,
     Switch,
-    StyledSwitch
+    StyledSwitch,
+    Textarea
 } from '../../styles/global';
 import { 
     ImageUploadContainer,
@@ -414,6 +415,7 @@ export function StoreProductModal({
                     stock: parseFloat(formData.stock as any) as number,
                     enabled: formData.enabled,
                     visible_for_online_store: formData.visible_for_online_store ?? false,
+                    description: formData.description || undefined,
                 });
 
                 // Upload sequencial das imagens se houver novos arquivos
@@ -469,6 +471,7 @@ export function StoreProductModal({
             setValue("stock", currentProduct.stock);
             setValue("enabled", Boolean(currentProduct.enabled));
             setValue("visible_for_online_store", Boolean(currentProduct.visible_for_online_store));
+            setValue("description", currentProduct.description || "");
             
             // Carregar preview das 3 imagens
             if (currentProduct.image) {
@@ -743,6 +746,18 @@ export function StoreProductModal({
                                                 {errors.stock && <ErrorMessage>{errors.stock.message}</ErrorMessage>}
                                             </FormField>
                                         </InlineFormField>
+                                        <Textarea 
+                                            placeholder='Descrição do produto' 
+                                            rows={5}
+                                            {...register("description")}
+                                        />
+                                        {errors.description && <ErrorMessage>{errors.description.message}</ErrorMessage>}
+                                        {(currentProduct.is_description_from_parent && currentProduct.description) && (
+                                            <GlobalImageBadge style={{ marginTop: '0px' }}>
+                                                <FontAwesomeIcon icon={faBox} />
+                                                Descrição do catálogo global
+                                            </GlobalImageBadge>
+                                        )}
                                     </TabContent>
                                 )}
 
