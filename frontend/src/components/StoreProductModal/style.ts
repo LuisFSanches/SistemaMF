@@ -64,7 +64,7 @@ export const ImageActions = styled.div`
     display: flex;
     gap: 0.5rem;
     justify-content: center;
-    margin-top: 0.5rem;
+    margin-top: 0px;
 `;
 
 export const ImageActionButton = styled.button`
@@ -96,6 +96,26 @@ export const ImageInfo = styled.div`
     color: var(--text-light);
     text-align: center;
     margin-top: 0.5rem;
+`;
+
+export const GlobalImageBadge = styled.div`
+    font-size: 0.7rem;
+    color: #1971c2;
+    background: #e7f5ff;
+    border: 1px solid #339af0;
+    border-radius: 4px;
+    padding: 0.4rem 0.75rem;
+    text-align: center;
+    margin-top: 0px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+
+    svg {
+        font-size: 0.85rem;
+    }
 `;
 
 export const QRCodeContainer = styled.div`

@@ -17,6 +17,7 @@ import {
     ImagePreviewBox,
     HiddenFileInput,
     ImageInfo,
+    GlobalImageBadge,
     QRCodeContainer,
     QRCodeTitle,
     QRCodeImageBox,
@@ -49,7 +50,7 @@ import {
     ValidationWarning
 } from './style';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faXmark, faQrcode, faPrint, faDownload, faSearch, faPlus, faCloudArrowUp, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { faXmark, faQrcode, faPrint, faDownload, faSearch, faPlus, faCloudArrowUp, faInfoCircle, faBox } from "@fortawesome/free-solid-svg-icons";
 import { UploadLabel } from './style';
 import { IProduct } from "../../interfaces/IProduct";
 import { createStoreProduct, updateStoreProduct, uploadStoreProductImage, uploadStoreProductImage2, uploadStoreProductImage3, deleteStoreProductImage, syncStoreProductImageToGlobal } from "../../services/storeProductService";
@@ -764,22 +765,40 @@ export function StoreProductModal({
                                                         <ImagePreviewBox>
                                                             <img src={imagePreview} alt="Preview 1" />
                                                         </ImagePreviewBox>
-                                                        <ImageActions>
-                                                            <ImageActionButton
-                                                                type="button"
-                                                                className="change"
-                                                                onClick={() => fileInputRef.current?.click()}
-                                                            >
-                                                                Trocar
-                                                            </ImageActionButton>
-                                                            <ImageActionButton
-                                                                type="button"
-                                                                className="remove"
-                                                                onClick={handleRemoveImage}
-                                                            >
-                                                                Remover
-                                                            </ImageActionButton>
-                                                        </ImageActions>
+                                                        {currentProduct.is_image_from_parent ? (
+                                                            <>
+                                                                <GlobalImageBadge>
+                                                                    <FontAwesomeIcon icon={faBox} />
+                                                                    Imagem do catálogo global
+                                                                </GlobalImageBadge>
+                                                                <ImageActions>
+                                                                    <ImageActionButton
+                                                                        type="button"
+                                                                        className="change"
+                                                                        onClick={() => fileInputRef.current?.click()}
+                                                                    >
+                                                                        Adicionar imagem personalizada
+                                                                    </ImageActionButton>
+                                                                </ImageActions>
+                                                            </>
+                                                        ) : (
+                                                            <ImageActions>
+                                                                <ImageActionButton
+                                                                    type="button"
+                                                                    className="change"
+                                                                    onClick={() => fileInputRef.current?.click()}
+                                                                >
+                                                                    Trocar
+                                                                </ImageActionButton>
+                                                                <ImageActionButton
+                                                                    type="button"
+                                                                    className="remove"
+                                                                    onClick={handleRemoveImage}
+                                                                >
+                                                                    Remover
+                                                                </ImageActionButton>
+                                                            </ImageActions>
+                                                        )}
                                                     </>
                                                 ) : (
                                                     <ImagePreviewBox onClick={() => fileInputRef.current?.click()}>
@@ -813,22 +832,40 @@ export function StoreProductModal({
                                                         <ImagePreviewBox>
                                                             <img src={imagePreview2} alt="Preview 2" />
                                                         </ImagePreviewBox>
-                                                        <ImageActions>
-                                                            <ImageActionButton
-                                                                type="button"
-                                                                className="change"
-                                                                onClick={() => fileInputRef2.current?.click()}
-                                                            >
-                                                                Trocar
-                                                            </ImageActionButton>
-                                                            <ImageActionButton
-                                                                type="button"
-                                                                className="remove"
-                                                                onClick={handleRemoveImage2}
-                                                            >
-                                                                Remover
-                                                            </ImageActionButton>
-                                                        </ImageActions>
+                                                        {currentProduct.is_image_2_from_parent ? (
+                                                            <>
+                                                                <GlobalImageBadge>
+                                                                    <FontAwesomeIcon icon={faBox} />
+                                                                    Imagem do catálogo global
+                                                                </GlobalImageBadge>
+                                                                <ImageActions>
+                                                                    <ImageActionButton
+                                                                        type="button"
+                                                                        className="change"
+                                                                        onClick={() => fileInputRef2.current?.click()}
+                                                                    >
+                                                                        Adicionar imagem personalizada
+                                                                    </ImageActionButton>
+                                                                </ImageActions>
+                                                            </>
+                                                        ) : (
+                                                            <ImageActions>
+                                                                <ImageActionButton
+                                                                    type="button"
+                                                                    className="change"
+                                                                    onClick={() => fileInputRef2.current?.click()}
+                                                                >
+                                                                    Trocar
+                                                                </ImageActionButton>
+                                                                <ImageActionButton
+                                                                    type="button"
+                                                                    className="remove"
+                                                                    onClick={handleRemoveImage2}
+                                                                >
+                                                                    Remover
+                                                                </ImageActionButton>
+                                                            </ImageActions>
+                                                        )}
                                                     </>
                                                 ) : (
                                                     <ImagePreviewBox onClick={() => fileInputRef2.current?.click()}>
@@ -862,22 +899,40 @@ export function StoreProductModal({
                                                         <ImagePreviewBox>
                                                             <img src={imagePreview3} alt="Preview 3" />
                                                         </ImagePreviewBox>
-                                                        <ImageActions>
-                                                            <ImageActionButton
-                                                                type="button"
-                                                                className="change"
-                                                                onClick={() => fileInputRef3.current?.click()}
-                                                            >
-                                                                Trocar
-                                                            </ImageActionButton>
-                                                            <ImageActionButton
-                                                                type="button"
-                                                                className="remove"
-                                                                onClick={handleRemoveImage3}
-                                                            >
-                                                                Remover
-                                                            </ImageActionButton>
-                                                        </ImageActions>
+                                                        {currentProduct.is_image_3_from_parent ? (
+                                                            <>
+                                                                <GlobalImageBadge>
+                                                                    <FontAwesomeIcon icon={faBox} />
+                                                                    Imagem do catálogo global
+                                                                </GlobalImageBadge>
+                                                                <ImageActions>
+                                                                    <ImageActionButton
+                                                                        type="button"
+                                                                        className="change"
+                                                                        onClick={() => fileInputRef3.current?.click()}
+                                                                    >
+                                                                        Adicionar imagem personalizada
+                                                                    </ImageActionButton>
+                                                                </ImageActions>
+                                                            </>
+                                                        ) : (
+                                                            <ImageActions>
+                                                                <ImageActionButton
+                                                                    type="button"
+                                                                    className="change"
+                                                                    onClick={() => fileInputRef3.current?.click()}
+                                                                >
+                                                                    Trocar
+                                                                </ImageActionButton>
+                                                                <ImageActionButton
+                                                                    type="button"
+                                                                    className="remove"
+                                                                    onClick={handleRemoveImage3}
+                                                                >
+                                                                    Remover
+                                                                </ImageActionButton>
+                                                            </ImageActions>
+                                                        )}
                                                     </>
                                                 ) : (
                                                     <ImagePreviewBox onClick={() => fileInputRef3.current?.click()}>

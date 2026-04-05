@@ -16,8 +16,10 @@ class DeleteStoreProductImageService {
         const backendUrl = process.env.BACKEND_URL || 'http://localhost:3334';
         const useR2 = process.env.USE_R2_STORAGE === 'true';
         
+        // Buscar store_product com produto pai relacionado
         const storeProduct = await prismaClient.storeProduct.findFirst({
             where: { id: store_product_id },
+            include: { product: true },
         });
 
         if (!storeProduct) {
@@ -37,18 +39,28 @@ class DeleteStoreProductImageService {
         }
 
         try {
-            if (useR2 && imageUrl.includes(process.env.R2_PUBLIC_URL || '')) {
-                const r2Service = new CloudflareR2Service();
-                await r2Service.delete({ fileUrl: imageUrl });
-            } else {
-                const imagePath = imageUrl.replace(`${backendUrl}/uploads/products/`, '');
-                const filePath = path.join(productsUploadDir, imagePath);
+            // Verificar se o produto pai está usando a mesma imagem
+            const parentImageUrl = storeProduct.product[image_field];
+            const parentIsUsingThisImage = parentImageUrl === imageUrl;
 
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
+            // Só deletar o arquivo físico se o produto pai NÃO estiver usando
+            if (!parentIsUsingThisImage) {
+                if (useR2 && imageUrl.includes(process.env.R2_PUBLIC_URL || '')) {
+                    const r2Service = new CloudflareR2Service();
+                    await r2Service.delete({ fileUrl: imageUrl });
+                } else {
+                    const imagePath = imageUrl.replace(`${backendUrl}/uploads/products/`, '');
+                    const filePath = path.join(productsUploadDir, imagePath);
+
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                    }
                 }
+            } else {
+                console.log(`[DeleteStoreProductImageService] Skipping file deletion: parent product is using ${image_field}`);
             }
 
+            // Sempre remover a referência do store_product
             const updatedStoreProduct = await prismaClient.storeProduct.update({
                 where: { id: store_product_id },
                 data: { [image_field]: null },
