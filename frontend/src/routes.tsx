@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet, useParams } from "react
 import { CartProvider } from "./contexts/CartContext";
 import { AuthContext } from "./contexts/AuthContext";
 import { ScrollToTop } from "./components/ScrollToTop";
+import { GTMLoader } from "./components/GTMLoader";
 
 import { Dashboard } from "./views/Dashboard";
 import { OnStoreOrder } from "./views/OnStoreOrder";
@@ -82,6 +83,7 @@ export default function routes(){
     return(
         <>
             <BrowserRouter>
+                <GTMLoader />
                 <ScrollToTop />
                 <Routes>
                     <Route path="/" element={<Home />} />

@@ -1,9 +1,5 @@
-// Hook para rastreamento de eventos do Google Tag Manager
-// Implementa eventos GA4 Enhanced Ecommerce
-
 import { useCallback } from 'react';
 
-// Declarar o dataLayer global
 declare global {
     interface Window {
         dataLayer: any[];
@@ -17,14 +13,19 @@ export const useGTM = () => {
                            window.location.hostname === '127.0.0.1' ||
                            window.location.hostname.includes('localhost');
         
+        // Não enviar eventos em rotas do backoffice
+        const isBackoffice = window.location.pathname.startsWith('/backoffice');
+        
         if (isLocalhost) {
-            console.log('GTM Event (NOT SENT - localhost):', data);
+            return;
+        }
+        
+        if (isBackoffice) {
             return;
         }
         
         if (typeof window !== 'undefined' && window.dataLayer) {
             window.dataLayer.push(data);
-            console.log('GTM Event:', data); // Log para debug
         }
     }, []);
 
