@@ -119,7 +119,7 @@ export const useGTM = () => {
                 items: cartItems.map((item, index) => ({
                     item_id: item.id || item.product_id || item.product?.id,
                     item_name: item.name || item.product?.name,
-                    item_category: item.category || item.product?.category?.name,
+                    item_category: item.category || '',
                     price: parseFloat(item.price || item.product?.price || 0),
                     quantity: item.quantity,
                     index: index,
@@ -138,10 +138,9 @@ export const useGTM = () => {
                 items: cartItems.map((item, index) => ({
                     item_id: item.id || item.product_id || item.product?.id,
                     item_name: item.name || item.product?.name,
-                    item_category: item.category || item.product?.category?.name,
+                    item_category: '',
                     price: parseFloat(item.price || item.product?.price || 0),
                     quantity: item.quantity,
-                    index: index,
                 })),
             },
         });
@@ -181,16 +180,15 @@ export const useGTM = () => {
             ecommerce: {
                 transaction_id: orderId,
                 currency: 'BRL',
-                value: cartTotal + deliveryFee,
+                value: cartTotal,
                 shipping: deliveryFee,
                 payment_type: paymentMethod,
-                items: cartItems.map((item, index) => ({
+                items: cartItems.map((item) => ({
                     item_id: item.id || item.product_id || item.product?.id,
-                    item_name: item.name || item.product?.name,
-                    item_category: item.category || item.product?.category?.name,
-                    price: parseFloat(item.price || item.product?.price || 0),
+                    item_name: item.product_name,
+                    item_category: item.category || '',
+                    price: parseFloat(item.unit_price || 0),
                     quantity: item.quantity,
-                    index: index,
                 })),
             },
         });

@@ -170,6 +170,7 @@ class GetMercadoPagoPaymentStatusService {
             return {
                 // 1. Informações básicas do pedido
                 order: {
+                    id: orderDetails.id,
                     order_id: orderDetails.code,
                     order_code: String(orderDetails.code),
                     status: orderStatus,

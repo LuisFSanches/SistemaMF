@@ -170,7 +170,7 @@ export function CheckoutResult() {
             const subtotal = orderData.financial?.subtotal || 0;
             
             trackPurchase(
-                orderData.order.order_id.toString(),
+                orderData.order.id.toString(),
                 orderData.items,
                 subtotal,
                 deliveryFee,

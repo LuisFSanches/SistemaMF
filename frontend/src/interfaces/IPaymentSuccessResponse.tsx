@@ -1,4 +1,5 @@
 export interface IOrderInfo {
+    id: string;
     order_id: number;
     order_code: string;
     status: 'approved' | 'pending' | 'in_progress' | 'in_delivery' | 'done' | 'failure';
