@@ -5,6 +5,9 @@ export const sendWhatsAppMessageSchema = z.object({
     customer_name: z.string().optional(),
     order_number: z.string().optional(),
     store_name: z.string().optional(),
+    store_phone_number: z.string().optional(),
+    order_id: z.string().optional(),
+    store_slug: z.string().optional(),
 });
 
 export type SendWhatsAppMessageSchemaType = z.infer<typeof sendWhatsAppMessageSchema>;

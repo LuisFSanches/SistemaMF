@@ -179,3 +179,8 @@ export const deleteOrder = async(id: string) => {
 
 	return response;
 };
+
+export const getOrderStatus = async(orderId: string) => {
+	const response = await api.get(`/order/status/${orderId}`);
+	return response.data;
+};

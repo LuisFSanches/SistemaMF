@@ -3,6 +3,9 @@ export interface IWhatsAppMessage {
     customer_name?: string
     order_number?: string
     store_name?: string
+    store_phone_number?: string
+    order_id?: string
+    store_slug?: string
 }
 
 export interface IWhatsAppTemplateData {

@@ -55,6 +55,7 @@ import { UpdateOrderStatusController } from './controllers/order/UpdateOrderStat
 import { UpdateOrderPaymentController } from './controllers/order/UpdateOrderPaymentController';
 import { GetCompleteOrderController } from './controllers/order/GetCompleteOrderController';
 import { GetOrderDetailsController } from './controllers/order/GetOrderDetailsController';
+import { GetOrderStatusController } from './controllers/order/GetOrderStatusController';
 import { FinishOnlineOrderController } from './controllers/order/FinishOnlineOrderController';
 import { GetWaitingOnlineOrderController } from './controllers/order/GetWaitingOnlineOrderController';
 import { DeleteOrderController } from './controllers/order/DeleteOrderController';
@@ -241,6 +242,7 @@ router.get('/address/pickup', adminAuthMiddleware, new GetPickUpAddressControlle
 router.get('/address/:client_id', new GetAllClientAddressController().handle)
 
 //-- ROTAS ORDER --
+router.get('/order/status/:id', new GetOrderStatusController().handle); // Rota pública para consulta via WhatsApp
 router.get('/order/detail/:id', adminAuthMiddleware, new GetOrderDetailsController().handle);
 router.get('/order/completedOrder/:id', new GetCompleteOrderController().handle);
 router.get('/order/ongoing', adminAuthMiddleware, new GetOnGoingOrderController().handle);

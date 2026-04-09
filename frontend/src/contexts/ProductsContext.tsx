@@ -46,7 +46,6 @@ export const ProductsProvider: React.FC = ({ children }) => {
 
         // Busca os dados da API
         const { data: { products: fetchedProducts, total } } = await listStoreProducts(storeId, page, pageSize, query);
-        console.log("Fetched products:", fetchedProducts);
         // Atualiza o cache
         cacheRef.current.set(cacheKey, {
             products: fetchedProducts,

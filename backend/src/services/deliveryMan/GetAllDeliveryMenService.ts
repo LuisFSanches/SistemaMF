@@ -6,7 +6,9 @@ class GetAllDeliveryMenService {
     async execute(page: number = 1, pageSize: number = 10, query?: string, store_id?: string) {
         try {
             const skip = (page - 1) * pageSize;
-            let filters: any = {};
+            let filters: any = {
+                active: true
+            };
 
             // Filtro por loja (multi-tenancy)
             if (store_id) {

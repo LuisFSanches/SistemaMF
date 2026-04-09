@@ -141,7 +141,10 @@ class ProcessMercadoPagoWebhookService {
                         phone_number: updatedOrder.client.phone_number,
                         customer_name: customerName,
                         order_number: updatedOrder.code.toString(),
-                        store_name: storeName
+                        store_name: storeName,
+                        store_phone_number: updatedOrder.store?.phone_number || '',
+                        order_id: updatedOrder.id,
+                        store_slug: updatedOrder.store?.slug || 'loja'
                     });
 
                 } catch (whatsappError: any) {}

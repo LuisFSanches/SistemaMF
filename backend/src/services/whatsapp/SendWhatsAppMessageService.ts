@@ -37,7 +37,7 @@ class SendWhatsAppMessageService {
                 to: phoneWithCountryCode,
                 type: 'template',
                 template: {
-                    name: 'pedido_recebido',
+                    name: 'pedido_recebido_contato_lojista',
                     language: {
                         code: 'pt_BR'
                     },
@@ -56,6 +56,21 @@ class SendWhatsAppMessageService {
                                 {
                                     type: 'text',
                                     text: data.store_name || 'Nossa Loja'
+                                },
+                                {
+                                    type: 'text',
+                                    text: data.store_phone_number || ''
+                                }
+                            ]
+                        },
+                        {
+                            type: 'button',
+                            sub_type: 'url',
+                            index: 0,
+                            parameters: [
+                                {
+                                    type: 'text',
+                                    text: `/${data.store_slug || 'loja'}/pedido/${data.order_id || ''}`
                                 }
                             ]
                         }

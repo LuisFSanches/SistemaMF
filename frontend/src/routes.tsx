@@ -32,6 +32,7 @@ import { StoreFront } from "./views/StoreFront";
 import { Cart } from "./views/Cart";
 import { Checkout } from "./views/Checkout";
 import { CheckoutResult } from "./views/CheckoutResult";
+import { OrderStatusPage } from "./views/OrderStatusPage";
 import { ClientDetail } from "./views/ClientDetail";
 import { DeliveryMenPage } from "./views/DeliveryMen";
 import { DeliveryManDetail } from "./views/DeliveryManDetail";
@@ -231,6 +232,7 @@ export default function routes(){
                         <Route path="carrinho" element={<Cart />} />
                         <Route path="checkout" element={<Checkout />} />
                         <Route path="checkout/:status" element={<CheckoutResult />} />
+                        <Route path="pedido/:orderId" element={<OrderStatusPage />} />
                     </Route>
                     <Route path="/cadastro" element={<StoreRegistration />} />
                     <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />

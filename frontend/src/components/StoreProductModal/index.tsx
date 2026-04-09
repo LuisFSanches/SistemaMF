@@ -382,7 +382,6 @@ export function StoreProductModal({
 
     const handleProduct = async (formData: IProduct) => {
         setShowLoader(true);
-        console.log('formData', formData); 
         try {
             if (action === "create") {
                 if (!selectedParentProduct) {

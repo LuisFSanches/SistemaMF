@@ -291,6 +291,7 @@ model DeliveryMan {
   name         String
   phone_number String
   store_id     String?
+  active       Boolean  @default(true)
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
