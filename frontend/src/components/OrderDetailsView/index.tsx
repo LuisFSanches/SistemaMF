@@ -37,7 +37,6 @@ import {
     ItemImagePlaceholder,
     ItemDetails,
     ItemName,
-    ItemDescription,
     ItemQuantityPrice,
     ItemTotal,
     FinancialSummary,
@@ -274,9 +273,6 @@ export function OrderDetailsView({
                                     
                                     <ItemDetails>
                                         <ItemName>{item.product_name}</ItemName>
-                                        {item.description && (
-                                            <ItemDescription>{item.description}</ItemDescription>
-                                        )}
                                         <ItemQuantityPrice>
                                             <span>Quantidade: {item.quantity}</span>
                                             <span>•</span>
