@@ -7,7 +7,7 @@ interface CardProps {
 export const Card = styled.div<CardProps>`
     background: linear-gradient(135deg, ${props => props.color}08 0%, ${props => props.color}58 100%);
     border-radius: 16px;
-    padding: 20px;
+    padding: 13px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     border: 1px solid ${props => props.color}30;
     border-left: 4px solid ${props => props.color};

@@ -35,28 +35,32 @@ export class DashboardService {
         })
 
         // Filtra pedidos cancelados para as estatísticas principais
-        const ordersWithoutCanceled = orders.filter((o) => o.status !== 'CANCELED')
+        const ordersWithoutCanceled = orders.filter((o) =>
+            o.status !== 'CANCELED' && o.status !== 'PENDING_PAYMENT')
 
-        const totalOrders = ordersWithoutCanceled.length
         const totalAmount = ordersWithoutCanceled.reduce((acc, order) => acc + order.total, 0)
         const amountReceived = ordersWithoutCanceled
             .filter((o) => o.payment_received)
             .reduce((acc, order) => acc + order.total, 0)
         const amountPending = totalAmount - amountReceived
 
-        const inStoreOrders = orders.filter((o) => !o.online_order).length
-        const whatsAppOrders = orders.filter((o) => o.online_order).length
-        const onlineOrders = orders.filter((o) => o.store_front_order).length
+        const inStoreOrders = ordersWithoutCanceled.filter((o) => !o.online_order && !o.store_front_order).length
+        const whatsAppOrders = ordersWithoutCanceled.filter((o) => o.online_order && !o.store_front_order).length
+        const onlineOrders = ordersWithoutCanceled
+            .filter((o) => o.store_front_order && o.status !== 'PENDING_PAYMENT').length
 
-        const recentOrders = orders
-            .sort((a, b) => +new Date(b.created_at!) - +new Date(a.created_at!))
-            .slice(0, 4)
+        const totalOrders = inStoreOrders + whatsAppOrders + onlineOrders;
 
         // Contagem de métodos de pagamento
         const paymentMethods = {
-            CASH: orders.filter((o) => o.payment_method === 'CASH').length,
-            PIX: orders.filter((o) => o.payment_method === 'PIX').length,
-            CARD: orders.filter((o) => o.payment_method === 'CARD').length,
+            CASH: orders.filter((o) =>
+                o.payment_method === 'CASH' || o.payment_method === 'MercadoPago - account_money').length,
+            PIX: orders.filter((o) =>
+                o.payment_method === 'PIX'
+                || o.payment_method === 'MercadoPago - bank_transfer').length,
+            CARD: orders.filter((o) =>
+                o.payment_method === 'CARD'
+                || o.payment_method === 'MercadoPago - credit_card').length,
         }
 
         // Top administradores (filtra pedidos online sem admin)
@@ -114,7 +118,6 @@ export class DashboardService {
             inStoreOrders,
             whatsAppOrders,
             onlineOrders,
-            recentOrders,
             paymentMethods,
             admins,
         }
