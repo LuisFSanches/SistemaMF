@@ -1,6 +1,17 @@
 
 import { ReactNode } from "react";
-import { Container, AdminItem } from "./style"
+import {
+    Container,
+    AdminItem,
+    AdminInfo,
+    MedalIcon,
+    AdminDetails,
+    AdminName,
+    AdminOrders,
+    AdminsContainer
+} from "./style"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrophy } from '@fortawesome/free-solid-svg-icons';
 
 const medals: Record<number, ReactNode> = {
     0: "🥇",
@@ -11,16 +22,25 @@ const medals: Record<number, ReactNode> = {
 export function TopAdmins({ admins }: { admins: any[] }) {
     return (
         <Container>
-            <h3>Top Vendedores</h3>
-            {admins.map((admin) => (
-                <AdminItem key={admin.id}>
-                    <strong>
-                        {admin.name}
-                    </strong>
-                    - {admin.orders_count} pedido(s)
-                    {medals[admins.indexOf(admin)]}
-                </AdminItem>
-            ))}
+            <h3>
+                <FontAwesomeIcon icon={faTrophy} color="#F5CB2E" />
+                Top Vendedores
+            </h3>
+            <AdminsContainer>
+                {admins.map((admin, index) => (
+                    <AdminItem key={admin.id} position={index}>
+                        <AdminInfo>
+                            <MedalIcon>
+                                {medals[index] || "📊"}
+                            </MedalIcon>
+                            <AdminDetails>
+                                <AdminName>{admin.name}</AdminName>
+                                <AdminOrders>{admin.orders_count} pedido(s)</AdminOrders>
+                            </AdminDetails>
+                        </AdminInfo>
+                    </AdminItem>
+                ))}
+            </AdminsContainer>
         </Container>
     )
 }

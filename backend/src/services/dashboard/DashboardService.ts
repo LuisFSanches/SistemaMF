@@ -45,7 +45,8 @@ export class DashboardService {
         const amountPending = totalAmount - amountReceived
 
         const inStoreOrders = orders.filter((o) => !o.online_order).length
-        const onlineOrders = orders.filter((o) => o.online_order).length
+        const whatsAppOrders = orders.filter((o) => o.online_order).length
+        const onlineOrders = orders.filter((o) => o.store_front_order).length
 
         const recentOrders = orders
             .sort((a, b) => +new Date(b.created_at!) - +new Date(a.created_at!))
@@ -111,6 +112,7 @@ export class DashboardService {
             amountReceived,
             amountPending,
             inStoreOrders,
+            whatsAppOrders,
             onlineOrders,
             recentOrders,
             paymentMethods,

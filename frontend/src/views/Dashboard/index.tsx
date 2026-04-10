@@ -1,10 +1,19 @@
 import { useEffect, useState } from 'react'
 import { SummaryCard } from '../../components/SummaryCard'
-import { OrdersTable } from '../../components/OrdersTable'
 import { FilterToggle } from '../../components/FilterToggle'
 import { TopAdmins } from '../../components/TopAdmins'
 import { getDashboard } from '../../services/dashboard'
-import { Container, Header, Grid, Row, RecentOrders } from './style'
+import { Container, Header, Grid, SectionTitle } from './style'
+import { 
+    faShoppingCart, 
+    faMoneyBillWave, 
+    faCheckCircle, 
+    faClock,
+    faStore,
+    faGlobe,
+    faCreditCard
+} from '@fortawesome/free-solid-svg-icons'
+import { faPix, faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 
 export function Dashboard() {
     const [period, setPeriod] = useState<'day' | 'week' | 'month' | 'year'>('day')
@@ -29,33 +38,78 @@ export function Dashboard() {
             </Header>
 
             <Grid>
-                <SummaryCard title="Quantidade de Vendas" value={data.totalOrders} />
-                <SummaryCard title="Total de Vendas" value={`R$ ${data.totalAmount.toFixed(2)}`} />
-                <SummaryCard title="Recebido" value={`R$ ${data.amountReceived.toFixed(2)}`} />
-                <SummaryCard title="A Receber" value={`R$ ${data.amountPending.toFixed(2)}`} />
+                <SummaryCard 
+                    title="Quantidade de Vendas" 
+                    value={data.totalOrders} 
+                    icon={faShoppingCart}
+                    color="#8b5cf6"
+                />
+                <SummaryCard 
+                    title="Total de Vendas" 
+                    value={`R$ ${data.totalAmount.toFixed(2)}`} 
+                    icon={faMoneyBillWave}
+                    color="#22c55e"
+                />
+                <SummaryCard 
+                    title="Recebido" 
+                    value={`R$ ${data.amountReceived.toFixed(2)}`} 
+                    icon={faCheckCircle}
+                    color="#3b82f6"
+                />
+                <SummaryCard 
+                    title="A Receber" 
+                    value={`R$ ${data.amountPending.toFixed(2)}`} 
+                    icon={faClock}
+                    color="#f59e0b"
+                />
             </Grid>
 
-            <p>Tipos de Vendas</p>
+            <SectionTitle>Tipos de Vendas</SectionTitle>
             
-            <Grid style={{ gridTemplateColumns: '1fr 1fr', marginTop: '10px' }}>
-                <SummaryCard title="Vendas Via Balcão" value={data.inStoreOrders} />
-                <SummaryCard title="Vendas Via Online" value={data.onlineOrders} />
+            <Grid style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+                <SummaryCard 
+                    title="Vendas Via Balcão" 
+                    value={data.inStoreOrders} 
+                    icon={faStore}
+                    color="#71265D"
+                />
+                <SummaryCard 
+                    title="Vendas Via Whatsapp" 
+                    value={data.whatsAppOrders} 
+                    icon={faWhatsapp}
+                    color="#25D366"
+                />
+                <SummaryCard 
+                    title="Vendas Via Online" 
+                    value={data.onlineOrders} 
+                    icon={faGlobe}
+                    color="#3b82f6"
+                />
             </Grid>
 
-            <p>Formas de Pagamento</p>
-            <Grid style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginTop: '10px' }}>
-                <SummaryCard title="Dinheiro" value={data.paymentMethods.CASH} />
-                <SummaryCard title="Pix" value={data.paymentMethods.PIX} />
-                <SummaryCard title="Cartão" value={data.paymentMethods.CARD} />
+            <SectionTitle>Formas de Pagamento</SectionTitle>
+            <Grid style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+                <SummaryCard 
+                    title="Dinheiro" 
+                    value={data.paymentMethods.CASH} 
+                    icon={faMoneyBillWave}
+                    color="#10b981"
+                />
+                <SummaryCard 
+                    title="Pix" 
+                    value={data.paymentMethods.PIX} 
+                    icon={faPix}
+                    color="#00C9A7"
+                />
+                <SummaryCard 
+                    title="Cartão" 
+                    value={data.paymentMethods.CARD} 
+                    icon={faCreditCard}
+                    color="#ec4899"
+                />
             </Grid>
 
-            <Row>
-                <RecentOrders>
-                    <h2>Pedidos Recentes</h2>
-                    <OrdersTable orders={data.recentOrders} />
-                </RecentOrders>
-                <TopAdmins admins={data.admins} />
-            </Row>
+            <TopAdmins admins={data.admins} />
         </Container>
     )
 }
