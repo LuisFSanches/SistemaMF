@@ -32,6 +32,12 @@ export const OrderCardContainer= styled.div`
             cursor: pointer;
         }
 
+        div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .order-type {
             display: flex;
             align-items: center;

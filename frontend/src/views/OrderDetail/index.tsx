@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import moment from 'moment';
-import 'moment/locale/pt-br';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faArrowLeft,
@@ -20,11 +19,12 @@ import {
     faGifts,
     faPen
 } from "@fortawesome/free-solid-svg-icons";
-import { getOrderById } from "../../services/orderService";
+import { getOrderById, updateStatus } from "../../services/orderService";
 import { convertMoney, formatTitleCase, formatTelephone, formatDescriptionWithPrice } from "../../utils";
 import { Loader } from "../../components/Loader";
 import { PrintCardMessage } from "../../components/PrintCardMessage";
 import { EditOrderModal } from "../../components/EditOrderModal";
+import { ConfirmPopUp } from "../../components/ConfirmPopUp";
 import { STATUS_LABEL, PAYMENT_METHODS } from "../../constants";
 import {
     Container,
@@ -39,7 +39,6 @@ import {
 } from "./style";
 
 moment.locale('pt-br');
-
 interface IOrderDetail {
     orderInfo: {
         code: number;
@@ -99,6 +98,7 @@ export function OrderDetail() {
     const [orderData, setOrderData] = useState<IOrderDetail | null>(null);
     const [isCardModalOpen, setIsCardModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isConfirmFinishOpen, setIsConfirmFinishOpen] = useState(false);
     const [orderForEdit, setOrderForEdit] = useState<any>(null);
 
     useEffect(() => {
@@ -177,6 +177,28 @@ export function OrderDetail() {
 
     const { orderInfo, orderValues, cardDetails, clientInfo, deliveryManInfo, createdBy } = orderData;
 
+    // Função para finalizar o pedido
+    const handleFinishOrder = async () => {
+        try {
+            setLoading(true);
+            await updateStatus({
+                id: id,
+                status: "DONE"
+            });
+            
+            // Recarregar dados do pedido
+            const response = await getOrderById(id as string);
+            setOrderData(response.data);
+            
+            setIsConfirmFinishOpen(false);
+        } catch (error) {
+            console.error("Erro ao finalizar pedido:", error);
+            alert("Não foi possível finalizar o pedido. Tente novamente.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Get order type badge
     const getOrderTypeBadge = () => {
         if (orderInfo.online_order && !orderInfo.store_front_order) {
@@ -218,6 +240,15 @@ export function OrderDetail() {
                             </p>
                         </div>
                     </div>
+                    {orderInfo.status !== 'DONE' && (
+                        <button 
+                            className="finish-button"
+                            onClick={() => setIsConfirmFinishOpen(true)}
+                        >
+                            <FontAwesomeIcon icon={faCheckCircle} />
+                            Finalizar Pedido
+                        </button>
+                    )}
                     <button 
                         className="edit-button"
                         onClick={() => setIsEditModalOpen(true)}
@@ -487,6 +518,14 @@ export function OrderDetail() {
                     order={orderForEdit}
                 />
             )}
+
+            <ConfirmPopUp
+                isOpen={isConfirmFinishOpen}
+                onRequestClose={() => setIsConfirmFinishOpen(false)}
+                handleAction={handleFinishOrder}
+                actionLabel="Deseja finalizar este pedido?"
+                label="Sim, finalizar"
+            />
         </Container>
     );
 }

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IOrder } from "../../interfaces/IOrder";
 import moment from "moment";
-import 'moment/locale/pt-br';
 import { OrderDetailModal } from "../../components/OrderDetailModal";
 import { ViewCardMessage } from "../ViewCardMessage";
 import { OrderCardContainer } from "./style"
@@ -12,9 +11,12 @@ import { faAnglesRight, faAnglesLeft, faEye, faPen, faEnvelope, faGlobe } from "
 import { formatTitleCase, formatDescription } from "../../utils";
 import { PAYMENT_METHODS } from "../../constants";
 import { PrintOrder } from "../PrintOrder";
+import { PrintPickupReceipt } from "../PrintPickupReceipt";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
+
+moment.locale('pt-br');
 
 export function OrderCard({
 	order,
@@ -159,6 +161,14 @@ export function OrderCard({
 
 				<h2>*** Pedido #{order?.code} ***</h2>
 				<div>
+					{!order.is_delivery && (
+						<PrintPickupReceipt 
+							order={order}
+							orderCode={order.code}
+							clientName={`${order.client.first_name} ${order.client.last_name}`}
+							clientTelephone={order.client.phone_number}
+						/>
+					)}
 					<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
 				</div>
 

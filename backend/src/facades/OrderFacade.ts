@@ -119,7 +119,8 @@ class OrderFacade {
                 order_email: data.order_email
             },
             data.products,
-            store_id
+            store_id,
+            data.store_slug
         );
 
         return order;

@@ -158,6 +158,30 @@ export const Header = styled.div`
                 transform: translateY(-52%);
             }
         }
+
+        .finish-button {
+            position: absolute;
+            top: 50%;
+            right: 10rem;
+            transform: translateY(-50%);
+            padding: 0.75rem 1.5rem;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+
+            &:hover {
+                transform: translateY(-52%);
+                background-color: #059669;
+            }
+        }
     }
 
     @media (max-width: 768px) {

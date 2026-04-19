@@ -34,5 +34,6 @@ export interface IOrder {
   orderItems?: any;
   is_delivery?: boolean;
   store_id?: string;
+  store_slug?: string;
   created_at?: string;
 }

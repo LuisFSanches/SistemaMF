@@ -1,5 +1,4 @@
 import moment from "moment";
-import 'moment/locale/pt-br';
 import { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
@@ -54,12 +53,19 @@ export const PrintOrder = ({
 
             // URL para concluir entrega
             const deliveryUrl = `${baseUrl}concluirEntrega/${order.id}`;
-            // URL do QR Code usando API pública
+            // URL do QR Code de entrega usando API pública
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(deliveryUrl)}`;
 
-            // Aguardar o carregamento do QR Code se o pedido tiver entrega
+            // URL para página do pedido (retirada)
+            const pickupUrl = `${baseUrl}backoffice/pedido/${order.id}`;
+            // URL do QR Code de retirada usando API pública
+            const pickupQrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pickupUrl)}`;
+
+            // Aguardar o carregamento do QR Code apropriado
             if (order.is_delivery) {
                 await preloadImage(qrCodeUrl);
+            } else if (order.pickup_on_store || order.is_delivery === false) {
+                await preloadImage(pickupQrCodeUrl);
             }
 
             const receiptHTML = `
@@ -162,7 +168,12 @@ export const PrintOrder = ({
                             <img src="${qrCodeUrl}" alt="QR Code Entrega" style="width: 150px; height: 150px;" />
                             <div style="font-size: 12px; margin-top: 5px;">Escaneie para concluir entrega</div>
                             </div>`
-                        : ''
+                        : (order.pickup_on_store || order.is_delivery === false)
+                            ? `<div class="center" style="margin-top: 15px;">
+                                <img src="${pickupQrCodeUrl}" alt="QR Code Pedido" style="width: 150px; height: 150px;" />
+                                <div style="font-size: 12px; margin-top: 5px;">Escaneie para acessar o pedido</div>
+                                </div>`
+                            : ''
                     }
 
                     <div class="footer">
@@ -181,7 +192,7 @@ export const PrintOrder = ({
                 printWindow.focus();
 
                 // Aguardar todas as imagens carregarem na janela de impressão
-                if (order.is_delivery) {
+                if (order.is_delivery || order.pickup_on_store || order.is_delivery === false) {
                     const images = printWindow.document.images;
                     const imagePromises = Array.from(images).map(img => {
                         return new Promise((resolve) => {

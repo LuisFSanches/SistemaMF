@@ -39,6 +39,7 @@ export const createOrder = async ({
 	card_to,
 	card_message,
 	store_id: receivedStoreId,
+	store_slug,
 	order_email
 }: any) => {
 	// Usar store_id recebido (do storefront) ou obter do admin logado
@@ -47,6 +48,7 @@ export const createOrder = async ({
 	
 	const response = await api.post("/order", {
 		store_id,  // Adicionar store_id automaticamente
+		store_slug,  // Slug da loja extraído da URL (fallback se store_id for null)
 		clientId,
 		first_name,
 		last_name,

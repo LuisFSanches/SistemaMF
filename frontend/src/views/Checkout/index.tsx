@@ -281,6 +281,7 @@ export function Checkout() {
 
         const orderData = {
             store_id: storefrontStoreId,
+            store_slug: slug,
             client_id: client_id,
             phone_number: rawTelephone(data.phone_number),
             first_name: data.first_name,

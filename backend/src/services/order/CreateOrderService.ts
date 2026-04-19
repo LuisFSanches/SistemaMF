@@ -5,18 +5,43 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class CreateOrderService{
-	async execute(data: IOrder, products: any, store_id?: string) {
+	async execute(data: IOrder, products: any, store_id?: string, store_slug?: string) {
 		const { delivery_date } = data;
-		console.log("[CreateOrderService] Received data:", data.order_email);
 
 		try {
+			let resolvedStoreId = store_id;
+
+			if (!resolvedStoreId) {
+				if (!store_slug || store_slug.trim() === '') {
+					throw new BadRequestException(
+						'store_id ou slug são obrigatórios',
+						ErrorCodes.VALIDATION_ERROR
+					);
+				}
+
+				const store = await prismaClient.store.findUnique({
+					where: { slug: store_slug }
+				});
+
+				console.log(`[CreateOrderService] Loja encontrada: ${store ? store.name : 'Nenhuma loja encontrada'}`);
+
+				if (!store) {
+					throw new BadRequestException(
+						`Loja não encontrada com o slug: ${store_slug}`,
+						ErrorCodes.USER_NOT_FOUND
+					);
+				}
+
+				resolvedStoreId = store.id;
+			}
+
 			const formattedDeliveryDate = moment.utc(delivery_date)
 				.tz('America/Sao_Paulo', true)
 				.set({ hour: 12, minute: 0, second: 0 })
 				.toDate();
 
 			const lastOrder = await prismaClient.order.findFirst({
-				where: { store_id },
+				where: { store_id: resolvedStoreId },
 				orderBy: { code: 'desc' },
 				select: { code: true }
 			});
@@ -27,14 +52,14 @@ class CreateOrderService{
 				data: {
 					...data,
 					code: nextCode,
-					store_id,
+					store_id: resolvedStoreId,
 					delivery_date: formattedDeliveryDate,
 					orderItems: {
 						create: products.map((product: any) => ({
 							store_product_id: product.id,
 							quantity: Number(product.quantity),
 							price: Number(product.price),
-							store_id,
+							store_id: resolvedStoreId,
 						})),
 					},
 				},
