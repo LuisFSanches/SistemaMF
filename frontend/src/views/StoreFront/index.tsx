@@ -90,6 +90,9 @@ export function StoreFront() {
             if (store?.schedules) {
                 sessionStorage.setItem('storefront_store_schedules', JSON.stringify(store.schedules));
             }
+            if (store?.max_delivery_days_advance) {
+                sessionStorage.setItem('storefront_max_delivery_days_advance', String(store.max_delivery_days_advance));
+            }
 
             if (store.logo) {
                 sessionStorage.setItem('storefront_store_logo', store.logo);

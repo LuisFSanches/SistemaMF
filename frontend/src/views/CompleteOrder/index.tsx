@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
+import moment from "moment";
 import { IOrder } from "../../interfaces/IOrder";
 import { getPickupAddress } from "../../services/addressService";
 import { finishOnlineOrder } from "../../services/orderService";
@@ -80,6 +81,7 @@ export function CompleteOrder() {
     const [showRememberCardModal, setShowRememberCardModal] = useState(false);
     const [cardModalShowed, setCardModalShowed] = useState(false);
     const [showToolTipModal, setShowToolTipModal] = useState(false);
+    const [maxDeliveryDaysAdvance, setMaxDeliveryDaysAdvance] = useState<number>(30);
     const cardSectionRef = useRef<HTMLDivElement>(null);
     const hasShownWelcomeModal = useRef(false);
     const tooltipMessage = `Para entregas em outras regiões,
@@ -188,7 +190,8 @@ export function CompleteOrder() {
                 setStoreCNPJ(order.store.cnpj || "");
                 setStorePhone(order.store.phone_number || "");
                 
-                // Preencher dados do cliente se já existir no pedido
+                setMaxDeliveryDaysAdvance(order.store.max_delivery_days_advance || 30);
+                
                 if (order.client) {
                     setValue("phone_number", order.client.phone_number);
                     setValue("first_name", order.client.first_name);
@@ -741,10 +744,35 @@ export function CompleteOrder() {
                                     Data de Entrega
                                     <span>*</span>
                                 </Label>
-                                <Input type="date" {...register("delivery_date", {
-                                    required: "Data de entrega é obrigatória",
-                                })}/>
+                                <Input 
+                                    type="date" 
+                                    min={moment().format('YYYY-MM-DD')}
+                                    max={moment().add(maxDeliveryDaysAdvance, 'days').format('YYYY-MM-DD')}
+                                    {...register("delivery_date", {
+                                        required: "Data de entrega é obrigatória",
+                                        validate: (value) => {
+                                            const selectedDate = moment(value);
+                                            const today = moment();
+                                            const maxDate = moment().add(maxDeliveryDaysAdvance, 'days');
+                                            
+                                            // Verificar se a data é no passado
+                                            if (selectedDate.isBefore(today, 'day')) {
+                                                return "Não é possível selecionar uma data no passado.";
+                                            }
+                                            
+                                            // Verificar se excede o limite de dias de antecedência
+                                            if (selectedDate.isAfter(maxDate, 'day')) {
+                                                return `Desculpe, só é possível agendar entregas até ${maxDeliveryDaysAdvance} dias de antecedência.`;
+                                            }
+                                            
+                                            return true;
+                                        }
+                                    })}
+                                />
                                 {errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
+                                <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '8px' }}>
+                                    📅 Você pode agendar sua entrega com até {maxDeliveryDaysAdvance} dias de antecedência.
+                                </p>
                             </FormField>
                             <FormField>
                                 <CheckboxContainer>

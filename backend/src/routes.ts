@@ -83,6 +83,8 @@ import { GetAllStockTransactionsController } from './controllers/stockTransactio
 import { GetProductStockDetailsController } from './controllers/stockTransaction/GetProductStockDetailsController';
 import { DeleteStockTransactionController } from './controllers/stockTransaction/DeleteStockTransactionController';
 
+import { ValidateStockController } from './controllers/stock-validation/ValidateStockController';
+
 import { CreateSupplierController } from './controllers/supplier/CreateSupplierController';
 import { GetAllSuppliersController } from './controllers/supplier/GetAllSuppliersController';
 
@@ -182,22 +184,22 @@ import { TestMercadoPagoWebhookController } from './controllers/mercadoPago/Test
 import { GetMercadoPagoPaymentStatusController } from './controllers/mercadoPago/GetMercadoPagoPaymentStatusController';
 
 // Subscription Controllers
-//import { CreateSubscriptionPlanController } from './controllers/subscription/CreateSubscriptionPlanController';
-//import { GetAllSubscriptionPlansController } from './controllers/subscription/GetAllSubscriptionPlansController';
-//import { GetSubscriptionPlanController } from './controllers/subscription/GetSubscriptionPlanController';
-//import { UpdateSubscriptionPlanController } from './controllers/subscription/UpdateSubscriptionPlanController';
-//import { DeleteSubscriptionPlanController } from './controllers/subscription/DeleteSubscriptionPlanController';
-//import { CreateSubscriptionController } from './controllers/subscription/CreateSubscriptionController';
-//import { CheckSubscriptionStatusController } from './controllers/subscription/CheckSubscriptionStatusController';
-//import { UpdateSubscriptionController } from './controllers/subscription/UpdateSubscriptionController';
-//import { CancelSubscriptionController } from './controllers/subscription/CancelSubscriptionController';
-//import { GetStoreSubscriptionBillingController } from './controllers/subscription/GetStoreSubscriptionBillingController';
+import { CreateSubscriptionPlanController } from './controllers/subscription/CreateSubscriptionPlanController';
+import { GetAllSubscriptionPlansController } from './controllers/subscription/GetAllSubscriptionPlansController';
+import { GetSubscriptionPlanController } from './controllers/subscription/GetSubscriptionPlanController';
+import { UpdateSubscriptionPlanController } from './controllers/subscription/UpdateSubscriptionPlanController';
+import { DeleteSubscriptionPlanController } from './controllers/subscription/DeleteSubscriptionPlanController';
+import { CreateSubscriptionController } from './controllers/subscription/CreateSubscriptionController';
+import { CheckSubscriptionStatusController } from './controllers/subscription/CheckSubscriptionStatusController';
+import { UpdateSubscriptionController } from './controllers/subscription/UpdateSubscriptionController';
+import { CancelSubscriptionController } from './controllers/subscription/CancelSubscriptionController';
+import { GetStoreSubscriptionBillingController } from './controllers/subscription/GetStoreSubscriptionBillingController';
 
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 import sysAdminAuthMiddleware from './middlewares/sys_admin_auth';
-//import subscriptionAuthMiddleware from './middlewares/subscription_auth';
-//import subscriptionWarningMiddleware from './middlewares/subscription_warning';
+import subscriptionAuthMiddleware from './middlewares/subscription_auth';
+import subscriptionWarningMiddleware from './middlewares/subscription_warning';
 import { upload, uploadStore, uploadCategory, uploadExcel } from './config/multer';
 import { processImage } from './middlewares/process_image';
 import { processBannerImage } from './middlewares/process_banner_image';
@@ -334,6 +336,9 @@ router.get('/stockTransaction/all', adminAuthMiddleware, new GetAllStockTransact
 router.get('/stockTransaction/product/:id', adminAuthMiddleware, new GetProductStockDetailsController().handle);
 router.post('/stockTransaction', adminAuthMiddleware, new CreateStockTransactionController().handle);
 router.delete('/stockTransaction/:id', adminAuthMiddleware, new DeleteStockTransactionController().handle);
+
+//-- ROTAS STOCK VALIDATION --
+router.post('/stock/validate', new ValidateStockController().handle);
 
 //-- ROTAS SUPPLIER --
 router.post('/supplier', adminAuthMiddleware, new CreateSupplierController().handle);

@@ -23,6 +23,7 @@ class GetCompleteOrderService {
                             logo: true,
                             cnpj: true,
                             phone_number: true,
+                            max_delivery_days_advance: true,
                         }
                     },
                     orderItems: {

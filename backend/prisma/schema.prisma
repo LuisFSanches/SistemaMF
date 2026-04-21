@@ -363,6 +363,9 @@ model Store {
   banner_2         String?
   banner_3         String?
   
+  // Configurações de entrega
+  max_delivery_days_advance Int? @default(30) // Número máximo de dias de antecedência para escolher data de entrega
+  
   // Campos de assinatura
   trial_end_date      DateTime?
   subscription_status String   @default("TRIAL") // TRIAL, ACTIVE, INACTIVE, EXPIRED 

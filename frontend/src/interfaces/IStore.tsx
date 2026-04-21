@@ -72,6 +72,7 @@ export interface IStore {
     facebook?: string;
     instagram?: string;
     youtube?: string;
+    max_delivery_days_advance?: number;
     schedules?: ISchedule[];
     addresses?: IStoreAddress[];
     created_at: string;

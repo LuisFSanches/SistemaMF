@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faTrash, faPlus, faMinus, faArrowRight, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
@@ -6,6 +6,8 @@ import { useCart } from "../../contexts/CartContext";
 import { useGTM } from "../../hooks/useGTM";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
 import { FreightCalculator } from "../../components/FreightCalculator";
+import { StockValidationModal } from "../../components/StockValidationModal";
+import { stockService, InvalidStockItem } from "../../services/stockService";
 import placeholder_products from "../../assets/images/placeholder_products.png";
 import { convertMoney } from "../../utils";
 import { PrimaryButton } from "../../styles/global";
@@ -58,6 +60,10 @@ export function Cart() {
         setObservations
     } = useCart();
 
+    const [isStockModalOpen, setIsStockModalOpen] = useState(false);
+    const [invalidStockItems, setInvalidStockItems] = useState<InvalidStockItem[]>([]);
+    const [isValidatingStock, setIsValidatingStock] = useState(false);
+
     useEffect(() => {
         window.scrollTo(0, 0);
         // GTM - Track Page View
@@ -74,10 +80,36 @@ export function Cart() {
     const deliveryFee = deliveryInfo?.fee ?? 0;
     const totalWithDelivery = cartTotal + deliveryFee;
 
-    const handleGoToCheckout = () => {
+    const handleGoToCheckout = async () => {
         if (cartItems.length === 0) return;
         if (!isDeliveryCalculated) return;
-        navigate(`/${slug}/checkout`);
+
+        setIsValidatingStock(true);
+
+        try {
+            const items = cartItems.map(item => ({
+                store_product_id: item.id!,
+                quantity: item.quantity
+            }));
+
+            const validationResult = await stockService.validateStock(items);
+
+            if (validationResult.is_valid) {
+                navigate(`/${slug}/checkout`);
+            } else {
+                setInvalidStockItems(validationResult.invalid_items);
+                setIsStockModalOpen(true);
+            }
+        } catch (error) {
+            console.error('Erro ao validar estoque:', error);
+            alert('Erro ao validar estoque. Por favor, tente novamente.');
+        } finally {
+            setIsValidatingStock(false);
+        }
+    };
+
+    const handleRemoveInvalidItems = (itemIds: string[]) => {
+        itemIds.forEach(id => removeFromCart(id));
     };
 
     const handleRemoveFromCart = (item: any) => {
@@ -237,10 +269,10 @@ export function Cart() {
                     <DesktopCheckoutActions>
                         <CheckoutButton 
                             onClick={handleGoToCheckout}
-                            disabled={cartItems.length === 0 || !isDeliveryCalculated}
+                            disabled={cartItems.length === 0 || !isDeliveryCalculated || isValidatingStock}
                         >
-                            Ir para Checkout
-                            <FontAwesomeIcon icon={faArrowRight as any} />
+                            {isValidatingStock ? 'Validando...' : 'Ir para Checkout'}
+                            {!isValidatingStock && <FontAwesomeIcon icon={faArrowRight as any} />}
                         </CheckoutButton>
                     </DesktopCheckoutActions>
                 </OrderSummary>
@@ -254,13 +286,20 @@ export function Cart() {
                     )}
                     <CheckoutButton 
                         onClick={handleGoToCheckout}
-                        disabled={cartItems.length === 0 || !isDeliveryCalculated}
+                        disabled={cartItems.length === 0 || !isDeliveryCalculated || isValidatingStock}
                     >
-                        Ir para Checkout
-                        <FontAwesomeIcon icon={faArrowRight as any} />
+                        {isValidatingStock ? 'Validando...' : 'Ir para Checkout'}
+                        {!isValidatingStock && <FontAwesomeIcon icon={faArrowRight as any} />}
                     </CheckoutButton>
                 </MobileCheckoutActions>
             </Content>
+
+            <StockValidationModal
+                isOpen={isStockModalOpen}
+                onRequestClose={() => setIsStockModalOpen(false)}
+                invalidItems={invalidStockItems}
+                onRemoveItems={handleRemoveInvalidItems}
+            />
         </Container>
     );
 }

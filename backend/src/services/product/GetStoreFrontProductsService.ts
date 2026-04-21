@@ -134,6 +134,7 @@ class GetStoreFrontProductsService{
 						google_rating_count: store.google_rating_count,
 						google_rating_url: store.google_rating_url,
 						phone_number: store.phone_number,
+						max_delivery_days_advance: store.max_delivery_days_advance,
 					}
 				};
 			}
@@ -218,6 +219,7 @@ class GetStoreFrontProductsService{
 					google_rating_count: store.google_rating_count,
 					google_rating_url: store.google_rating_url,
 					phone_number: store.phone_number,
+					max_delivery_days_advance: store.max_delivery_days_advance,
 				}
 			};
 

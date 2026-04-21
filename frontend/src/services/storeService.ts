@@ -22,6 +22,7 @@ interface IUpdateStoreData {
     facebook?: string;
     instagram?: string;
     youtube?: string;
+    max_delivery_days_advance?: number;
 }
 
 interface IUpdateCredentialsData {

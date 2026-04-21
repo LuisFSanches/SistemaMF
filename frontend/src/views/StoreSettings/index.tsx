@@ -27,7 +27,7 @@ import {
     faCheck,
     faSearch,
     faClose,
-    // faReceipt
+    faReceipt
 } from '@fortawesome/free-solid-svg-icons';
 import { Label, Input, Select, ErrorMessage, Checkbox, CheckboxContainer, FormField, Textarea, PasswordContainer, ModalContainer, Form } from '../../styles/global';
 import { 
@@ -103,14 +103,14 @@ import { getStoreSchedules } from '../../services/storeScheduleService';
 import { resetPasswordByEmail } from '../../services/adminService';
 import { listCarousels, createCarousel, updateCarousel, deleteCarousel } from '../../services/carouselService';
 import { listStoreProducts } from '../../services/storeProductService';
-// import { BillingTab } from '../../components/BillingTab';
+import { BillingTab } from '../../components/BillingTab';
 import { IStoreCarousel } from '../../interfaces/IStoreCarousel';
 import { IStore } from '../../interfaces/IStore';
 import { IStoreAddress } from '../../interfaces/IStoreAddress';
 import { IStoreSchedule, DayOfWeek } from '../../interfaces/IStoreSchedule';
 import { STATES } from '../../constants';
 
-type TabType = 'general' | 'media' | 'password' | 'address' | 'payment' | 'schedule' | 'social' | 'cities' | 'freight' | 'catalog';
+type TabType = 'general' | 'media' | 'password' | 'address' | 'payment' | 'schedule' | 'social' | 'cities' | 'freight' | 'catalog' | 'billing';
 
 const FIXED_FREIGHT_RANGES = [
     { min_km: 0, max_km: 5 },
@@ -248,6 +248,8 @@ export default function StoreSettings() {
     const [freightFeedback, setFreightFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     const [freightSaving, setFreightSaving] = useState(false);
 
+    const [maxDeliveryDaysAdvance, setMaxDeliveryDaysAdvance] = useState<number>(30);
+
     const { register: registerGeneral, handleSubmit: handleSubmitGeneral, formState: { errors: errorsGeneral }, reset: resetGeneral } = useForm<GeneralFormData>();
     const { register: registerPassword, handleSubmit: handleSubmitPassword, formState: { errors: errorsPassword }, reset: resetPassword } = useForm<PasswordFormData>();
     const { register: registerAddress, handleSubmit: handleSubmitAddress, formState: { errors: errorsAddress }, reset: resetAddress } = useForm<AddressFormData>();
@@ -258,7 +260,7 @@ export default function StoreSettings() {
 
     useEffect(() => {
         const tab = searchParams.get('tab');
-        if (tab && ['general', 'media', 'password', 'address', 'payment', 'schedule', 'social', 'cities', 'freight', 'catalog'].includes(tab)) {
+        if (tab && ['general', 'media', 'password', 'address', 'payment', 'schedule', 'social', 'cities', 'freight', 'catalog', 'billing'].includes(tab)) {
             setActiveTab(tab as TabType);
         }
     }, [searchParams]);
@@ -323,6 +325,9 @@ export default function StoreSettings() {
             const schedulesData = await getStoreSchedules(storeId);
             setSchedules(schedulesData);
             setLocalSchedules(schedulesData);
+            
+            // Carregar configuração de dias de antecedência para entrega
+            setMaxDeliveryDaysAdvance(storeData.max_delivery_days_advance || 30);
 
             setValuePayment('mp_access_token', storeData.mp_access_token || '');
             setValuePayment('mp_public_key', storeData.mp_public_key || '');
@@ -872,6 +877,9 @@ export default function StoreSettings() {
             }));
 
             await updateStoreSchedules(store.id, { schedules: schedulesData });
+            
+            await updateStore(store.id, { max_delivery_days_advance: maxDeliveryDaysAdvance });
+            
             alert('Horários atualizados com sucesso!');
             loadStoreData();
         } catch (error) {
@@ -1707,6 +1715,25 @@ export default function StoreSettings() {
 
     const renderScheduleTab = () => (
         <>
+            <FormField>
+                <Label>
+                    Máximo de dias de antecedência para entrega
+                    <FontAwesomeIcon 
+                        icon={faInfoCircle} 
+                        style={{ marginLeft: '8px', cursor: 'help' }}
+                        title="Defina quantos dias de antecedência os clientes podem agendar entregas. Exemplo: Com 10 dias, se hoje é 03/04, o cliente só pode escolher até 13/04."
+                    />
+                </Label>
+                <Input
+                    type="number"
+                    min="1"
+                    max="365"
+                    value={maxDeliveryDaysAdvance}
+                    onChange={(e) => setMaxDeliveryDaysAdvance(Number(e.target.value))}
+                    placeholder="Ex: 30"
+                />
+            </FormField>
+
             <ScheduleGrid>
                 {DAYS_ORDER.map((day) => {
                     const schedule = localSchedules.find((s) => s.day_of_week === day);
@@ -1775,6 +1802,10 @@ export default function StoreSettings() {
         </>
     );
 
+    const renderBillingTab = () => {
+        return <BillingTab />;
+    };
+
     if (loading) {
         return <LoadingContainer>Carregando...</LoadingContainer>;
     }
@@ -1819,6 +1850,9 @@ export default function StoreSettings() {
                     <Tab $active={activeTab === 'catalog'} onClick={() => handleTabChange('catalog')}>
                         <FontAwesomeIcon icon={faLayerGroup} /> Catálogo
                     </Tab>
+                    <Tab $active={activeTab === 'billing'} onClick={() => handleTabChange('billing')}>
+                        <FontAwesomeIcon icon={faReceipt} /> Plano Selecionado
+                    </Tab>
                 </TabsContainer>
 
                 <TabContent>
@@ -1832,6 +1866,7 @@ export default function StoreSettings() {
                     {activeTab === 'cities' && renderCitiesTab()}
                     {activeTab === 'freight' && renderFreightTab()}
                     {activeTab === 'catalog' && renderCatalogTab()}
+                    {activeTab === 'billing' && renderBillingTab()}
                 </TabContent>
             </TabsLayout>
 

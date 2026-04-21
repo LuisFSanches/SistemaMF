@@ -129,6 +129,7 @@ export function Checkout() {
     const [welcomeClientName, setWelcomeClientName] = useState("");
     const [storeSchedules, setStoreSchedules] = useState<Schedule[]>([]);
     const [shippingInfoTracked, setShippingInfoTracked] = useState(false);
+    const [maxDeliveryDaysAdvance, setMaxDeliveryDaysAdvance] = useState<number>(30);
     const tooltipMessage = `Para entregas em outras regiões,
         por favor entre em contato conosco pelo whatsapp.`;
 
@@ -186,6 +187,12 @@ export function Checkout() {
         const dayOfWeek = selectedDate.day();
 
         if (selectedDate.isBefore(today, 'day')) {
+            return false;
+        }
+
+        // Validar se a data está dentro do limite de dias de antecedência
+        const maxDate = moment().add(maxDeliveryDaysAdvance, 'days');
+        if (selectedDate.isAfter(maxDate, 'day')) {
             return false;
         }
 
@@ -454,6 +461,12 @@ export function Checkout() {
             } catch (error) {
                 console.error('Erro ao carregar schedules do sessionStorage:', error);
             }
+        }
+        
+        // Carregar max_delivery_days_advance do sessionStorage
+        const savedMaxDeliveryDays = sessionStorage.getItem('storefront_max_delivery_days_advance');
+        if (savedMaxDeliveryDays) {
+            setMaxDeliveryDaysAdvance(Number(savedMaxDeliveryDays) || 30);
         }
     }, []);
 
@@ -1168,16 +1181,23 @@ export function Checkout() {
                                             <Input 
                                                 type="date" 
                                                 min={moment().format('YYYY-MM-DD')}
+                                                max={moment().add(maxDeliveryDaysAdvance, 'days').format('YYYY-MM-DD')}
                                                 {...register("delivery_date", {
                                                     required: "Data de entrega é obrigatória",
                                                     validate: (value) => {
                                                         if (!isValidDeliveryDate(value)) {
                                                             const selectedDate = moment(value);
                                                             const dayName = selectedDate.format('dddd');
+                                                            const maxDate = moment().add(maxDeliveryDaysAdvance, 'days');
                                                             
                                                             // Verificar se é hoje e o horário já passou
                                                             if (selectedDate.isSame(moment(), 'day')) {
                                                                 return "O horário de funcionamento da loja já passou para hoje. Escolha outra data.";
+                                                            }
+                                                            
+                                                            // Verificar se excede o limite de dias de antecedência
+                                                            if (selectedDate.isAfter(maxDate, 'day')) {
+                                                                return `Desculpe, só é possível agendar entregas até ${maxDeliveryDaysAdvance} dias de antecedência.`;
                                                             }
                                                             
                                                             return `A loja não funciona ${dayName}. Por favor, escolha outro dia.`;
@@ -1187,6 +1207,9 @@ export function Checkout() {
                                                 })} 
                                             />
                                             {errors.delivery_date && <ErrorMessage>{errors.delivery_date.message}</ErrorMessage>}
+                                            <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '8px' }}>
+                                                📅 Você pode agendar sua entrega com até {maxDeliveryDaysAdvance} dias de antecedência.
+                                            </p>
                                         </FormField>
 
                                         <FormField>

@@ -87,6 +87,7 @@ class GetStoreService {
                     banner: true,
                     banner_2: true,
                     banner_3: true,
+                    max_delivery_days_advance: true,
                     // Credenciais de pagamento (serão mascaradas)
                     mp_access_token: true,
                     mp_public_key: true,
