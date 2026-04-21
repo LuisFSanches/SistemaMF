@@ -27,7 +27,7 @@ import {
     faCheck,
     faSearch,
     faClose,
-    faReceipt
+    // faReceipt
 } from '@fortawesome/free-solid-svg-icons';
 import { Label, Input, Select, ErrorMessage, Checkbox, CheckboxContainer, FormField, Textarea, PasswordContainer, ModalContainer, Form } from '../../styles/global';
 import { 
