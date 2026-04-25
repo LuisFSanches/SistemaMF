@@ -204,10 +204,10 @@ export function OrderDetail() {
         if (orderInfo.online_order && !orderInfo.store_front_order) {
             return <span className="type-badge whatsapp">Whatsapp</span>;
         }
-        if (orderInfo.online_order && orderInfo.store_front_order) {
+        if (orderInfo.store_front_order) {
             return <span className="type-badge online">Online</span>;
         }
-        if (orderInfo.store_front_order) {
+        if (!orderInfo.store_front_order && !orderInfo.online_order) {
             return <span className="type-badge pdv">PDV</span>;
         }
         return <span className="type-badge on_store">Balcão</span>;

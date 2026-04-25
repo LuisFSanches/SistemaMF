@@ -32,6 +32,18 @@ class TestMercadoPagoWebhookService {
             const order = await this.fetchOrder(order_id);
             this.logTestInfo(order_id, order.status, payment_status);
 
+            // Não processar webhook se o pedido já foi finalizado
+            if (order.status === 'DONE') {
+                console.log(`[TestMercadoPagoWebhookService] Order ${order.code} is already DONE. Ignoring webhook.`);
+                return { 
+                    success: true, 
+                    message: 'Order already finalized, webhook ignored',
+                    order_id: order_id,
+                    order_code: order.code,
+                    current_status: order.status
+                };
+            }
+
             const { paymentReceived, orderStatus, paymentMethod } = this.mapPaymentStatus(
                 payment_status,
                 payment_type,

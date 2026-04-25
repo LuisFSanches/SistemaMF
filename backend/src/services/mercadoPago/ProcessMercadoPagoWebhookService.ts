@@ -39,6 +39,17 @@ class ProcessMercadoPagoWebhookService {
                 return { success: true, message: 'Order not found' };
             }
 
+            // Não processar webhook se o pedido já foi finalizado
+            if (order.status === 'DONE') {
+                console.log(`[ProcessMercadoPagoWebhookService] Order ${order.code} is already DONE. Ignoring webhook.`);
+                return { 
+                    success: true, 
+                    message: 'Order already finalized, webhook ignored',
+                    order_id: orderId,
+                    order_code: order.code 
+                };
+            }
+
             const { paymentReceived, orderStatus, paymentMethod } = this.mapPaymentStatus(
                 paymentInfo.status,
                 paymentInfo.payment_type_id,
