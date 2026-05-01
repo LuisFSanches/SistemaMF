@@ -28,9 +28,25 @@ export const ClientList = styled.ul`
             text-align: center;
             color: var(--text-secondary);
             cursor: default;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 30px 15px;
 
             &:hover {
                 background-color: transparent;
+            }
+
+            p {
+                margin: 0;
+            }
+
+            button {
+                margin-top: 10px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
             }
         }
 

@@ -36,8 +36,8 @@ export function ClientModal({
     const {
         register,
         handleSubmit,
-        setValue,
         watch,
+        reset,
         formState: { errors },
     } = useForm<IUsers>();
     const [showLoader, setShowLoader] = useState(false);
@@ -69,10 +69,15 @@ export function ClientModal({
     }
 
     useEffect(() => {
-        setValue("first_name", currentClient.first_name);
-        setValue("last_name", currentClient.last_name);
-        setValue("phone_number", currentClient.phone_number);
-    }, [currentClient, setValue]);
+        if (isOpen) {
+            reset({
+                first_name: currentClient.first_name || "",
+                last_name: currentClient.last_name || "",
+                phone_number: currentClient.phone_number || ""
+            });
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, reset]);
 
     const watchPhone = watch("phone_number");
 

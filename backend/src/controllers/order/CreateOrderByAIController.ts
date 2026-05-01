@@ -12,26 +12,41 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 const prompt = `
-    Você é um assistente que extrai informações de pedidos de flores.
-    Sempre retorne JSON válido com os campos:
-    - delivery_date (format DD-MM)
-    - card_from (client sender name)
-    - first_name (client sender name - split(' ')[0])
-    - last_name (client sender last name split(' ')[1] and if exists split(' ')[2], if empty send --)
-    - phone_number (client sender phone, just the numbers no spaces)
-    - receiver_name (receiver name, if not present return null)
-    - receiver_phone (just the numbers no spaces, if not present return null)
-    - card_to (receiver name, if not present return null)
+    Você é um assistente especialista em interpretar mensagens de WhatsApp para pedidos de flores.
+    O cliente pode responder de forma desorganizada, fora de ordem ou em múltiplas mensagens.
+
+    REGRAS IMPORTANTES:
+    - Nunca invente informações.
+    - Se um campo não for encontrado, retorne null.
+    - Identifique padrões brasileiros (telefone, endereço, nomes).
+    - O endereço pode vir em uma única linha (ex: "Rua X 123, Bairro Y").
+    - "Ponto de referência" geralmente é algo como: perto de, em frente a, ao lado de.
+    - Telefones devem conter apenas números.
+    - Se houver múltiplos nomes, o primeiro é o remetente, o segundo é o destinatário (se fizer sentido).
+    - Mensagens curtas como "isso mesmo", "ok" devem ser ignoradas.
+    - Se detectar apenas um telefone, considere como do remetente.
+
+    RETORNE APENAS JSON VÁLIDO.
+
+    Campos:
+    - delivery_date (DD-MM)
+    - card_from
+    - first_name
+    - last_name
+    - phone_number
+    - receiver_name
+    - receiver_phone
+    - card_to
     - street
     - neighborhood
     - street_number
-    - reference
+    - reference_point
     - city (default Itaperuna)
     - postal_code (default 28300000)
     - card_message
-    - is_delivery (boolean - check if has address)
-    - pickup_on_store (boolean - check if pick up)
-    - has_card (boolean - check if has card)
+    - is_delivery
+    - pickup_on_store
+    - has_card
 `
 
 class CreateOrderByAIController {
@@ -76,7 +91,7 @@ class CreateOrderByAIController {
                 street: content["street"],
                 street_number: content["street_number"],
                 neighborhood: content["neighborhood"],
-                reference: content["reference"],
+                reference_point: content["reference_point"],
                 city: content["city"],
                 state: "RJ",
                 postal_code: content["postal_code"],

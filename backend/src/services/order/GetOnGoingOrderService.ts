@@ -7,7 +7,7 @@ class GetOnGoingOrderService {
         try {
             const whereClause: any = {
                 status: {
-                    notIn: ['FINISHED', 'CANCELED', 'DONE']
+                    notIn: ['FINISHED', 'CANCELED', 'DONE', 'PENDING_PAYMENT']
                 }
             };
 

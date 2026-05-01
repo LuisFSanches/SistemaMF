@@ -81,7 +81,8 @@ export function OrderCard({
 		switch (order.status) {
 			case "OPENED":
 				message = `📋Pedido #${order.code}*\n\n`;
-				message += `✅ Olá ${clientName}, Pedido confirmado! Qualquer dúvida, estamos à disposição.🌸💝\n`;
+				message += `✅ Olá ${clientName}, Pedido confirmado! *(Pedido registrado em seu nome)*\n`;
+				message += `Qualquer dúvida, estamos à disposição.🌸💝\n`;
 				message += `📅 Data de Entrega:* ${deliveryDate}\n`;
 				message += `📍 Endereço:* ${address}\n`;
 				message += `💐 Produtos:*\n${products}\n`;

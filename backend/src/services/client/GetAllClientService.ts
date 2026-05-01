@@ -6,15 +6,31 @@ class GetAllClientService{
     async execute(page: number = 1, pageSize: number = 10, query?: string) {
         try {
             const skip = (page - 1) * pageSize;
-            const filters = query
-				? {
-                    OR: [
-                        { first_name: { contains: query, mode: 'insensitive' } },
-                        { last_name: { contains: query, mode: 'insensitive' } },
-                        { phone_number: { contains: query, mode: 'insensitive' } }
-                    ]
-				}
-				: {};
+            
+            let filters = {};
+            
+            if (query) {
+                const words = query.trim().split(/\s+/);
+                
+                if (words.length === 1) {
+                    filters = {
+                        OR: [
+                            { first_name: { contains: words[0], mode: 'insensitive' } },
+                            { last_name: { contains: words[0], mode: 'insensitive' } },
+                            { phone_number: { contains: words[0], mode: 'insensitive' } }
+                        ]
+                    };
+                } else {
+                    filters = {
+                        AND: words.map(word => ({
+                            OR: [
+                                { first_name: { contains: word, mode: 'insensitive' } },
+                                { last_name: { contains: word, mode: 'insensitive' } }
+                            ]
+                        }))
+                    };
+                }
+            }
 
             const [users, total] = await Promise.all([
                 prismaClient.client.findMany({
@@ -22,7 +38,7 @@ class GetAllClientService{
                     skip,
                     take: pageSize
                 }),
-                prismaClient.client.count()
+                prismaClient.client.count({ where: filters as any })
             ])
 
             return {

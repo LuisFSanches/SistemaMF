@@ -1,16 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 import Modal from 'react-modal';
 import { useClients } from "../../contexts/ClientsContext";
-import { ModalContainer, Form, Input, Label } from '../../styles/global';
+import { ModalContainer, Form, Input, Label, SecondaryButton } from '../../styles/global';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faXmark, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { ClientList } from "./style";
+import { ClientModal } from "../ClientModal";
 
 interface ChangeClientModalProps {
     isOpen: boolean;
     onRequestClose: () => void;
     onSelectClient: (client: any) => void;
 }
+
+const emptyClient = {
+    first_name: "",
+    last_name: "",
+    phone_number: ""
+};
 
 export function ChangeClientModal({
     isOpen,
@@ -19,6 +26,7 @@ export function ChangeClientModal({
 }: ChangeClientModalProps) {
     const { clients, loadAvailableClients } = useClients();
     const [searchQuery, setSearchQuery] = useState("");
+    const [isClientModalOpen, setIsClientModalOpen] = useState(false);
     const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
     const handleSearch = (text: string) => {
@@ -39,6 +47,21 @@ export function ChangeClientModal({
         setSearchQuery("");
     };
 
+    const handleOpenClientModal = () => {
+        setIsClientModalOpen(true);
+    };
+
+    const handleCloseClientModal = () => {
+        setIsClientModalOpen(false);
+        loadAvailableClients(1, 15, searchQuery);
+    };
+
+    const handleCloseChangeClientModal = () => {
+        onRequestClose();
+        setSearchQuery("");
+        setIsClientModalOpen(false);
+    };
+
     useEffect(() => {
         if (isOpen) {
             loadAvailableClients(1, 15, "");
@@ -49,11 +72,11 @@ export function ChangeClientModal({
     return (
         <Modal
             isOpen={isOpen}
-            onRequestClose={onRequestClose}
+            onRequestClose={handleCloseChangeClientModal}
             overlayClassName="react-modal-overlay"
             className="react-modal-content"
         >
-            <button type="button" onClick={onRequestClose} className="modal-close">
+            <button type="button" onClick={handleCloseChangeClientModal} className="modal-close">
                 <FontAwesomeIcon icon={faXmark} />
             </button>
 
@@ -83,11 +106,24 @@ export function ChangeClientModal({
                                 </li>
                             ))
                         ) : (
-                            <li className="no-results">Nenhum cliente encontrado</li>
+                            <li className="no-results">
+                                <p>Nenhum cliente encontrado</p>
+                                <SecondaryButton type="button" onClick={handleOpenClientModal}>
+                                    <FontAwesomeIcon icon={faUserPlus} /> Cadastrar novo cliente
+                                </SecondaryButton>
+                            </li>
                         )}
                     </ClientList>
                 </Form>
             </ModalContainer>
+
+            <ClientModal
+                isOpen={isClientModalOpen}
+                loadData={() => {}}
+                onRequestClose={handleCloseClientModal}
+                action="create"
+                currentClient={emptyClient}
+            />
         </Modal>
     );
 }

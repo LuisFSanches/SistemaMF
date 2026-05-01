@@ -101,16 +101,16 @@ export function OnlineOrder() {
     const [showToolTipModal, setShowToolTipModal] = useState(false);
     const [isPercentageDiscount, setIsPercentageDiscount] = useState(false);
     const tooltipMessage = `
-👉 Entregar dia:
-👉 Nome do Remetente:
-👉 telefone do remetente:
-👉🏼 Nome do destinatário:
-👉🏼 Telefone do destinatário: 
-👉🏼 Endereço:
-👉 Bairro:
-👉 Número:
-👉🏼 Ponto de referência:
-👉🏼 Dizer do cartão para ser impresso:`
+Me envie os dados do pedido 😊
+
+Pode ser tudo junto, por exemplo:
+
+Entrega: 10/05
+Remetente: João (22 99999-9999)
+Destinatário: Maria (22 98888-8888)
+Endereço: Rua X, 123 - Bairro Y
+Referência: perto da praça
+Cartão: Desejamos um feliz aniversário!`
 
     const {
         register,
