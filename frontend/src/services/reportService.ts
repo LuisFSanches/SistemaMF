@@ -117,6 +117,29 @@ export interface ISupplierReport {
     last_purchase_date: Date;
 }
 
+export interface IProductSalesReportItem {
+    id: string;
+    name: string;
+    image: string | null;
+    quantity_sold: number;
+}
+
+export interface IProductSalesReportResponse {
+    data: IProductSalesReportItem[];
+    total: number;
+    currentPage: number;
+    totalPages: number;
+}
+
+export interface IProductSalesReportFilters {
+    page?: number;
+    pageSize?: number;
+    start_date?: string;
+    end_date?: string;
+    product_name?: string;
+    category_id?: string;
+}
+
 export async function getSalesReport(filters?: IReportFilters) {
     const params = new URLSearchParams();
     
@@ -181,4 +204,17 @@ export async function getSupplierReport(filters?: IReportFilters) {
     if (filters?.supplier_id) params.append('supplier_id', filters.supplier_id);
 
     return api.get<ISupplierReport[]>(`/reports/supplier?${params.toString()}`);
+}
+
+export async function getProductSalesReport(filters?: IProductSalesReportFilters) {
+    const params = new URLSearchParams();
+    
+    if (filters?.page) params.append('page', String(filters.page));
+    if (filters?.pageSize) params.append('pageSize', String(filters.pageSize));
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.product_name) params.append('product_name', filters.product_name);
+    if (filters?.category_id) params.append('category_id', filters.category_id);
+
+    return api.get<IProductSalesReportResponse>(`/reports/products/sales?${params.toString()}`);
 }

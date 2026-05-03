@@ -21,15 +21,31 @@ import {
 
 interface DateRangePickerProps {
     onDateRangeChange: (startDate: string | null, endDate: string | null, filterType: string) => void;
+    defaultFilter?: "all-dates" | "today" | "yesterday" | "week";
 }
 
-export function DateRangePicker({ onDateRangeChange }: DateRangePickerProps) {
+export function DateRangePicker({ onDateRangeChange, defaultFilter = "all-dates" }: DateRangePickerProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedFilter, setSelectedFilter] = useState<string>("all-dates");
-    const [startDate, setStartDate] = useState<moment.Moment | null>(null);
-    const [endDate, setEndDate] = useState<moment.Moment | null>(null);
+    const [selectedFilter, setSelectedFilter] = useState<string>(defaultFilter);
+    const [startDate, setStartDate] = useState<moment.Moment | null>(
+        defaultFilter === "today" ? moment() : 
+        defaultFilter === "yesterday" ? moment().subtract(1, "days") :
+        defaultFilter === "week" ? moment().startOf("week") :
+        null
+    );
+    const [endDate, setEndDate] = useState<moment.Moment | null>(
+        defaultFilter === "today" ? moment() : 
+        defaultFilter === "yesterday" ? moment().subtract(1, "days") :
+        defaultFilter === "week" ? moment().endOf("week") :
+        null
+    );
     const [currentMonth, setCurrentMonth] = useState(moment());
-    const [displayText, setDisplayText] = useState("Selecionar Data");
+    const [displayText, setDisplayText] = useState(
+        defaultFilter === "today" ? moment().format("DD/MM/YYYY") :
+        defaultFilter === "yesterday" ? moment().subtract(1, "days").format("DD/MM/YYYY") :
+        defaultFilter === "week" ? `${moment().startOf("week").format("DD/MM")} - ${moment().endOf("week").format("DD/MM/YYYY")}` :
+        "Selecionar Data"
+    );
     const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {

@@ -110,6 +110,7 @@ import { DeleteOrderToReceiveController } from './controllers/orderToReceive/Del
 import { CheckOrderToReceiveExistsController } from './controllers/orderToReceive/CheckOrderToReceiveExistsController';
 
 import { GetSalesReportController } from './controllers/reports/GetSalesReportController';
+import { GetProductSalesReportController } from './controllers/reports/GetProductSalesReportController';
 import { GetTopProductsReportController } from './controllers/reports/GetTopProductsReportController';
 import { GetTopClientsReportController } from './controllers/reports/GetTopClientsReportController';
 import { GetStockReportController } from './controllers/reports/GetStockReportController';
@@ -370,6 +371,7 @@ router.delete('/orderToReceive/:id', adminAuthMiddleware, new DeleteOrderToRecei
 
 //-- ROTAS REPORTS --
 router.get('/reports/sales', adminAuthMiddleware, new GetSalesReportController().handle);
+router.get('/reports/products/sales', adminAuthMiddleware, new GetProductSalesReportController().handle);
 router.get('/reports/products/top', adminAuthMiddleware, new GetTopProductsReportController().handle);
 router.get('/reports/clients/top', adminAuthMiddleware, new GetTopClientsReportController().handle);
 router.get('/reports/stock', adminAuthMiddleware, new GetStockReportController().handle);

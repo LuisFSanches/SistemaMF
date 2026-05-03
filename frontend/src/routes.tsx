@@ -40,6 +40,7 @@ import { OrderDetail } from "./views/OrderDetail";
 import { ProductDetail } from "./views/ProductDetail";
 // import { StoreRegistration } from "./views/StoreRegistration";
 import { Reports } from "./views/Reports";
+import { ProductSalesReport } from "./views/ProductSalesReport";
 import { StoreRegistration } from "./views/StoreRegistration";
 import StoreSettings from "./views/StoreSettings";
 import { ForgotPasswordPage } from "./views/ForgotPasswordPage";
@@ -207,6 +208,11 @@ export default function routes(){
                         <Route path="/backoffice/relatorios" element={
                             <PrivateRoute>
                                 <Reports/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/relatorios/produtos" element={
+                            <PrivateRoute>
+                                <ProductSalesReport/>
                             </PrivateRoute>
                         }/>
                         <Route path="/backoffice/administradores" element={

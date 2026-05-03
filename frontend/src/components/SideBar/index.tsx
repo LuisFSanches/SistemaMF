@@ -9,7 +9,8 @@ import {
     faReceipt,
     faHome,
     faWarehouse,
-    faCreditCard
+    faCreditCard,
+    faChartLine
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { NavLink} from 'react-router-dom'
@@ -42,7 +43,10 @@ export function SideBar(){
         generalCatalog: false,
         produtosPais: false,
         motoboys: false,
-        planosAssinatura: false
+        planosAssinatura: false,
+        relatorios: false,
+        relatoriosMenu: false,
+        produtosVendidos: false
     })
     
     const handleActiveMenuButton = useCallback((name:string) => {
@@ -354,7 +358,37 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "entregas": false,
                     "motoboys": false,
-                    "planosAssinatura": true
+                    "planosAssinatura": true,
+                    "relatorios": false,
+                    "relatoriosMenu": false
+                })
+            break;
+
+            case 'relatorios':
+            case 'relatorios/produtos':
+            case 'produtosVendidos':
+                setActive({...isActive,
+                    'valoresAReceber':false,
+                    'estoque':false,
+                    'dashboard':false,
+                    'pedidoBalcao':false,
+                    'ordensDeServico':false,
+                    'produtos':false,
+                    'categorias':false,
+                    'pedidos':false,
+                    'pedidosMenu': false,
+                    'clientes':false,
+                    'statistics':false,
+                    "administradores": false,
+                    'pix': false,
+                    "pedidoOnline": false,
+                    "aguardandoCliente": false,
+                    "entregas": false,
+                    "motoboys": false,
+                    "planosAssinatura": false,
+                    "relatorios": true,
+                    "relatoriosMenu": true,
+                    "produtosVendidos": name === 'relatorios/produtos' || name === 'produtosVendidos'
                 })
             break;
         }
@@ -550,6 +584,24 @@ export function SideBar(){
                         </SideBarButton>
                     </SideBarItemContainer>
                 </NavLink>
+
+                <SideBarItemContainer className="produtos-menu-container">
+                    <SideBarButton
+                        isActive={isActive['relatoriosMenu']}
+                        isMinimizedActive
+                        title="Relatórios"
+                    >
+                        <FontAwesomeIcon icon={faChartLine} className="Side-Bar-Icon"/>
+                        <span>Relatórios</span>
+                    </SideBarButton>
+                    <div className="submenu">
+                        <NavLink to="/backoffice/relatorios/produtos">
+                            <button className="submenu-item" onClick={()=>handleActiveMenuButton('relatorios/produtos')}>
+                                Produtos Vendidos
+                            </button>
+                        </NavLink>
+                    </div>
+                </SideBarItemContainer>
 
                 {adminData.role === 'SYS_ADMIN' && (
                     <NavLink to="/backoffice/planos-assinatura">
