@@ -24,10 +24,16 @@ class GetProductSalesReportService {
             }
 
             if (filters.end_date) {
-                conditions.push(`o.created_at <= $${paramIndex}`);
-                params.push(new Date(filters.end_date));
+                // Adicionar 1 dia para incluir todo o dia final (até 23:59:59.999)
+                const endDate = new Date(filters.end_date);
+                endDate.setDate(endDate.getDate() + 1);
+                conditions.push(`o.created_at < $${paramIndex}`);
+                params.push(endDate);
                 paramIndex++;
             }
+
+            // Excluir pedidos cancelados e pendentes de pagamento
+            conditions.push(`o.status NOT IN ('CANCELED', 'PENDING_PAYMENT')`);
 
             // Filtro de nome do produto (case-insensitive)
             if (filters.product_name) {
