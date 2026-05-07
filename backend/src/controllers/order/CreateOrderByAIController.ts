@@ -16,8 +16,7 @@ const prompt = `
     O cliente pode responder de forma desorganizada, fora de ordem ou em múltiplas mensagens.
 
     REGRAS IMPORTANTES:
-    - Nunca invente informações.
-    - Se um campo não for encontrado, retorne null.
+    - Nunca invente informações que não estejam no texto.
     - Identifique padrões brasileiros (telefone, endereço, nomes).
     - O endereço pode vir em uma única linha (ex: "Rua X 123, Bairro Y").
     - "Ponto de referência" geralmente é algo como: perto de, em frente a, ao lado de.
@@ -26,27 +25,76 @@ const prompt = `
     - Mensagens curtas como "isso mesmo", "ok" devem ser ignoradas.
     - Se detectar apenas um telefone, considere como do remetente.
 
-    RETORNE APENAS JSON VÁLIDO.
+    ⚠️ CAMPOS QUE NUNCA PODEM SER NULL OU VAZIO:
+    
+    1. first_name (string): 
+        - Se encontrar nome completo, use só o primeiro nome
+        - Se não encontrar, pegue o primeiro nome de card_from
+        - Se ainda não tiver, use "Cliente"
+        - NUNCA retorne null!
+    
+    2. last_name (string):
+        - Se encontrar nome completo, use os sobrenomes
+        - Se só tiver primeiro nome, use "Não informado"
+        - Se não encontrar nenhum nome, use "Não informado"
+        - NUNCA retorne null ou string vazia!
+        - Exemplos válidos: "Silva", "Não informado", "Santos"
+    
+    3. phone_number (string): 
+        - OBRIGATÓRIO - deve ter pelo menos um telefone no texto
+        - Apenas números, sem espaços ou caracteres
+        - NUNCA retorne null!
+    
+    4. street (string): 
+        - Se não informado mas for entrega, use "Rua não informada"
+        - NUNCA retorne null!
+    
+    5. street_number (string): 
+        - Se não informado mas for entrega, use "S/N"
+        - NUNCA retorne null!
+    
+    6. neighborhood (string): 
+        - Se não informado mas for entrega, use "Centro"
+        - NUNCA retorne null!
+    
+    7. city (string): 
+        - Se não informado, use "Itaperuna"
+        - NUNCA retorne null!
+    
+    8. postal_code (string): 
+        - Se não informado, use "28300000"
+        - NUNCA retorne null!
 
-    Campos:
-    - delivery_date (DD-MM)
-    - card_from
-    - first_name
-    - last_name
-    - phone_number
-    - receiver_name
-    - receiver_phone
-    - card_to
-    - street
-    - neighborhood
-    - street_number
-    - reference_point
-    - city (default Itaperuna)
-    - postal_code (default 28300000)
-    - card_message
-    - is_delivery
-    - pickup_on_store
-    - has_card
+    CAMPOS OPCIONAIS (pode retornar null se não encontrar):
+    - delivery_date, card_from, receiver_name, receiver_phone, card_to, 
+      reference_point, card_message
+
+    CAMPOS BOOLEANOS (NUNCA null):
+    - is_delivery: true se mencionar entrega/endereço, false se mencionar retirada
+    - pickup_on_store: inverso de is_delivery
+    - has_card: true se houver mensagem de cartão
+
+    RETORNE APENAS JSON VÁLIDO com estes campos:
+    {
+        "delivery_date": "DD-MM" ou null,
+        "card_from": "string" ou null,
+        "first_name": "string NUNCA null",
+        "last_name": "string NUNCA null (use 'Não informado' se não souber)",
+        "phone_number": "string NUNCA null",
+        "receiver_name": "string" ou null,
+        "receiver_phone": "string" ou null,
+        "card_to": "string" ou null,
+        "street": "string NUNCA null (use 'Rua não informada' se não souber)",
+        "neighborhood": "string NUNCA null (use 'Centro' se não souber)",
+        "street_number": "string NUNCA null (use 'S/N' se não souber)",
+        "reference_point": "string" ou null,
+        "city": "string NUNCA null (use 'Itaperuna' se não souber)",
+        "postal_code": "string NUNCA null (use '28300000' se não souber)",
+        "card_message": "string" ou null,
+        "is_delivery": boolean NUNCA null,
+        "pickup_on_store": boolean NUNCA null,
+        "has_card": boolean NUNCA null
+    }
 `
 
 class CreateOrderByAIController {

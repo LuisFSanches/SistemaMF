@@ -11,7 +11,20 @@ class GetStoreProductByIdService {
         try {
             const storeProduct = await prismaClient.storeProduct.findUnique({
                 where: { id },
-                include: {
+                select: {
+                    id: true,
+                    store_id: true,
+                    product_id: true,
+                    price: true,
+                    stock: true,
+                    enabled: true,
+                    visible_for_online_store: true,
+                    description: true,
+                    image: true,
+                    image_2: true,
+                    image_3: true,
+                    created_at: true,
+                    updated_at: true,
                     store: {
                         select: {
                             id: true,
@@ -68,13 +81,12 @@ class GetStoreProductByIdService {
                     max_delivery_days_advance: storeProduct.store.max_delivery_days_advance,
                 },
                 product: {
-                    id: storeProduct.product.id,
                     name: storeProduct.product.name,
                     unity: storeProduct.product.unity,
-                    description: storeProduct.product.description,
-                    image: storeProduct.product.image,
-                    image_2: storeProduct.product.image_2,
-                    image_3: storeProduct.product.image_3,
+                    description: storeProduct.description || storeProduct.product.description,
+                    image: storeProduct.image || storeProduct.product.image,
+                    image_2: storeProduct.image_2 || storeProduct.product.image_2,
+                    image_3: storeProduct.image_3 || storeProduct.product.image_3,
                     categories: storeProduct.product.categories.map((pc) => ({
                         category: pc.category,
                     })),
