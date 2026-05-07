@@ -316,6 +316,21 @@ button{
     border-radius: 0.25rem;
     outline: none;
 
+    &.mothers-day-modal {
+        padding: 0px;
+
+        @media (min-width: 768px) {
+            min-height: 550px;
+        }
+
+        .modal-close {
+            font-size: 1.7rem;
+            svg {
+                color: white;
+            }
+        }
+    }
+
     @media (max-width: 768px){
         padding: 2rem;
     }

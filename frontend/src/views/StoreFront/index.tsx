@@ -18,6 +18,7 @@ import { DeliveryAvailability } from "../../components/DeliveryAvailability";
 import { GoogleRating } from "../../components/GoogleRating";
 import { StoreFrontFooter } from "../../components/StoreFrontFooter";
 import { CookieConsent } from "../../components/CookieConsent";
+import { MothersDayPopup } from "../../components/MothersDayPopup";
 import placeholder_products from "../../assets/images/placeholder_products.png";
 import whatsappButtonIcon from "../../assets/icons/whatsapp_button.png";
 import {
@@ -343,6 +344,7 @@ export function StoreFront() {
             
             <StoreFrontFooter />
             <CookieConsent />
+            <MothersDayPopup />
         </Container>
     );
 }
