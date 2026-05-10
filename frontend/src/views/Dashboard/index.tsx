@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { SummaryCard } from '../../components/SummaryCard'
 import { FilterToggle } from '../../components/FilterToggle'
+import { DateRangePicker } from '../../components/DateRangePicker'
 import { TopAdmins } from '../../components/TopAdmins'
 import { getDashboard } from '../../services/dashboard'
 import { Container, Header, Grid, SectionTitle } from './style'
@@ -17,15 +18,24 @@ import { faPix, faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 
 export function Dashboard() {
     const [period, setPeriod] = useState<'day' | 'week' | 'month' | 'year'>('day')
+    const [startDate, setStartDate] = useState<string | null>(null)
+    const [endDate, setEndDate] = useState<string | null>(null)
     const [data, setData] = useState<any>(null)
 
-    async function fetchDashboard(period: string) {
-        const response = await getDashboard(period);
+    async function fetchDashboard(period: string, start?: string | null, end?: string | null) {
+        const response = await getDashboard(period, start, end);
         setData(response.data);
     }
 
+    const handleDateRangeChange = (start: string | null, end: string | null, filterType: string) => {
+        setStartDate(start)
+        setEndDate(end)
+        fetchDashboard(period, start, end)
+    }
+
     useEffect(() => {
-        fetchDashboard(period);
+        fetchDashboard(period, startDate, endDate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [period])
 
     if (!data) return <p>Carregando...</p>
@@ -34,7 +44,13 @@ export function Dashboard() {
         <Container>
             <Header>
                 <h1>Dashboard</h1>
-                <FilterToggle value={period} onChange={setPeriod} />
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <DateRangePicker 
+                        onDateRangeChange={handleDateRangeChange}
+                        defaultFilter="all-dates"
+                    />
+                    <FilterToggle value={period} onChange={setPeriod} />
+                </div>
             </Header>
 
             <Grid>
