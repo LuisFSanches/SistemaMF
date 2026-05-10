@@ -1,34 +1,17 @@
 import prismaClient from '../../prisma';
-import { startOfDay, startOfWeek, startOfMonth, startOfYear, subHours } from 'date-fns'
-
-type Period = 'day' | 'week' | 'month' | 'year'
+import { startOfDay, endOfDay } from 'date-fns'
 
 export class DashboardService {
-    static async getDashboardData(period: Period, store_id?: string) {
-        const now = new Date()
-        let startDate: Date
-
-        switch (period) {
-            case 'day':
-                startDate = startOfDay(now)
-            break
-            case 'month':
-                startDate = startOfMonth(now)
-            break
-            case 'year':
-                startDate = startOfYear(now)
-            break
-            case 'week':
-            default:
-                startDate = startOfWeek(now, { weekStartsOn: 1 })
-            break
-        }
+    static async getDashboardData(startDate: Date, endDate: Date, store_id?: string) {
+        // Ajusta para o início do dia da startDate e fim do dia da endDate
+        const adjustedStartDate = startOfDay(startDate);
+        const adjustedEndDate = endOfDay(endDate);
 
         const orders = await prismaClient.order.findMany({
             where: {
                 created_at: {
-                    gte: startDate,
-                    lte: now,
+                    gte: adjustedStartDate,
+                    lte: adjustedEndDate,
                 },
                 store_id: store_id ? store_id : undefined,
             },
@@ -68,8 +51,8 @@ export class DashboardService {
             by: ['created_by'],
             where: {
                 created_at: {
-                    gte: startDate,
-                    lte: now,
+                    gte: adjustedStartDate,
+                    lte: adjustedEndDate,
                 },
                 created_by: {
                     not: null,

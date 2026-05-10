@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { SummaryCard } from '../../components/SummaryCard'
-import { FilterToggle } from '../../components/FilterToggle'
 import { DateRangePicker } from '../../components/DateRangePicker'
 import { TopAdmins } from '../../components/TopAdmins'
 import { getDashboard } from '../../services/dashboard'
 import { Container, Header, Grid, SectionTitle } from './style'
+import moment from 'moment'
 import { 
     faShoppingCart, 
     faMoneyBillWave, 
@@ -17,26 +17,27 @@ import {
 import { faPix, faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 
 export function Dashboard() {
-    const [period, setPeriod] = useState<'day' | 'week' | 'month' | 'year'>('day')
-    const [startDate, setStartDate] = useState<string | null>(null)
-    const [endDate, setEndDate] = useState<string | null>(null)
+    const [startDate, setStartDate] = useState<string>(moment().format('YYYY-MM-DD'))
+    const [endDate, setEndDate] = useState<string>(moment().format('YYYY-MM-DD'))
     const [data, setData] = useState<any>(null)
 
-    async function fetchDashboard(period: string, start?: string | null, end?: string | null) {
-        const response = await getDashboard(period, start, end);
+    async function fetchDashboard(start: string, end: string) {
+        const response = await getDashboard(start, end);
         setData(response.data);
     }
 
     const handleDateRangeChange = (start: string | null, end: string | null, filterType: string) => {
-        setStartDate(start)
-        setEndDate(end)
-        fetchDashboard(period, start, end)
+        if (start && end) {
+            setStartDate(start)
+            setEndDate(end)
+            fetchDashboard(start, end)
+        }
     }
 
     useEffect(() => {
-        fetchDashboard(period, startDate, endDate);
+        fetchDashboard(startDate, endDate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [period])
+    }, [])
 
     if (!data) return <p>Carregando...</p>
 
@@ -44,13 +45,13 @@ export function Dashboard() {
         <Container>
             <Header>
                 <h1>Dashboard</h1>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <DateRangePicker 
+                <div style={{ marginRight: '100px' }}>
+                    <DateRangePicker
                         onDateRangeChange={handleDateRangeChange}
-                        defaultFilter="all-dates"
+                        defaultFilter="today"
                     />
-                    <FilterToggle value={period} onChange={setPeriod} />
                 </div>
+                
             </Header>
 
             <Grid>

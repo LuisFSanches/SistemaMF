@@ -21,7 +21,7 @@ import {
 
 interface DateRangePickerProps {
     onDateRangeChange: (startDate: string | null, endDate: string | null, filterType: string) => void;
-    defaultFilter?: "all-dates" | "today" | "yesterday" | "week";
+    defaultFilter?: "all-dates" | "today" | "yesterday" | "week" | "year";
 }
 
 export function DateRangePicker({ onDateRangeChange, defaultFilter = "all-dates" }: DateRangePickerProps) {
@@ -31,12 +31,14 @@ export function DateRangePicker({ onDateRangeChange, defaultFilter = "all-dates"
         defaultFilter === "today" ? moment() : 
         defaultFilter === "yesterday" ? moment().subtract(1, "days") :
         defaultFilter === "week" ? moment().startOf("week") :
+        defaultFilter === "year" ? moment().startOf("year") :
         null
     );
     const [endDate, setEndDate] = useState<moment.Moment | null>(
         defaultFilter === "today" ? moment() : 
         defaultFilter === "yesterday" ? moment().subtract(1, "days") :
         defaultFilter === "week" ? moment().endOf("week") :
+        defaultFilter === "year" ? moment().endOf("year") :
         null
     );
     const [currentMonth, setCurrentMonth] = useState(moment());
@@ -44,6 +46,7 @@ export function DateRangePicker({ onDateRangeChange, defaultFilter = "all-dates"
         defaultFilter === "today" ? moment().format("DD/MM/YYYY") :
         defaultFilter === "yesterday" ? moment().subtract(1, "days").format("DD/MM/YYYY") :
         defaultFilter === "week" ? `${moment().startOf("week").format("DD/MM")} - ${moment().endOf("week").format("DD/MM/YYYY")}` :
+        defaultFilter === "year" ? `${moment().startOf("year").format("DD/MM")} - ${moment().endOf("year").format("DD/MM/YYYY")}` :
         "Selecionar Data"
     );
     const modalRef = useRef<HTMLDivElement>(null);
@@ -94,6 +97,14 @@ export function DateRangePicker({ onDateRangeChange, defaultFilter = "all-dates"
             setEndDate(endOfWeek);
             setDisplayText(`${startOfWeek.format("DD/MM")} - ${endOfWeek.format("DD/MM/YYYY")}`);
             onDateRangeChange(startOfWeek.format("YYYY-MM-DD"), endOfWeek.format("YYYY-MM-DD"), filterType);
+            setIsOpen(false);
+        } else if (filterType === "year") {
+            const startOfYear = moment().startOf("year");
+            const endOfYear = moment().endOf("year");
+            setStartDate(startOfYear);
+            setEndDate(endOfYear);
+            setDisplayText(`${startOfYear.format("DD/MM")} - ${endOfYear.format("DD/MM/YYYY")}`);
+            onDateRangeChange(startOfYear.format("YYYY-MM-DD"), endOfYear.format("YYYY-MM-DD"), filterType);
             setIsOpen(false);
         }
     };
@@ -191,6 +202,12 @@ export function DateRangePicker({ onDateRangeChange, defaultFilter = "all-dates"
                                 onClick={() => handleQuickFilter("week")}
                             >
                                 Essa semana
+                            </QuickFilterButton>
+                            <QuickFilterButton
+                                active={selectedFilter === "year"}
+                                onClick={() => handleQuickFilter("year")}
+                            >
+                                Esse ano
                             </QuickFilterButton>
                         </QuickFiltersSection>
 
