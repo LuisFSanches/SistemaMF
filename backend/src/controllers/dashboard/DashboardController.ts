@@ -16,8 +16,10 @@ export class DashboardController {
             });
         }
 
-        const start = new Date(startDate as string);
-        const end = new Date(endDate as string);
+        // Converter para UTC explicitamente (00:00:00 e 23:59:59.999)
+        // Isso evita problemas de timezone ao usar date-fns
+        const start = new Date(startDate as string + 'T00:00:00.000Z');
+        const end = new Date(endDate as string + 'T23:59:59.999Z');
 
         // Validação se as datas são válidas
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {

@@ -1,17 +1,16 @@
 import prismaClient from '../../prisma';
-import { startOfDay, endOfDay } from 'date-fns'
 
 export class DashboardService {
     static async getDashboardData(startDate: Date, endDate: Date, store_id?: string) {
-        // Ajusta para o início do dia da startDate e fim do dia da endDate
-        const adjustedStartDate = startOfDay(startDate);
-        const adjustedEndDate = endOfDay(endDate);
+        // Não ajustar as datas - já vêm corretas em UTC do controller
+        // startDate = 2026-05-04T00:00:00.000Z
+        // endDate = 2026-05-04T23:59:59.999Z
 
         const orders = await prismaClient.order.findMany({
             where: {
                 created_at: {
-                    gte: adjustedStartDate,
-                    lte: adjustedEndDate,
+                    gte: startDate,
+                    lte: endDate,
                 },
                 store_id: store_id ? store_id : undefined,
             },
@@ -33,7 +32,6 @@ export class DashboardService {
             .filter((o) => o.store_front_order && o.status !== 'PENDING_PAYMENT').length
 
         const totalOrders = inStoreOrders + whatsAppOrders + onlineOrders;
-
         // Contagem de métodos de pagamento
         const paymentMethods = {
             CASH: orders.filter((o) =>
@@ -51,8 +49,8 @@ export class DashboardService {
             by: ['created_by'],
             where: {
                 created_at: {
-                    gte: adjustedStartDate,
-                    lte: adjustedEndDate,
+                    gte: startDate,
+                    lte: endDate,
                 },
                 created_by: {
                     not: null,
