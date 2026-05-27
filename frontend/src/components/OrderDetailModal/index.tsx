@@ -30,7 +30,7 @@ export function OrderDetailModal({
 	}
 
 	const handleCopy = (orderLink: string) => {
-        const message = `Você poderia preencher esse link com o endereço completo prfv? E nele também tem um espacinho para você enviar um cartão. ✉️❤️\n${orderLink}`;
+        const message = `Você poderia preencher esse link com o endereço completo prfv? E nele também tem um espacinho para você enviar um cartão. ✉️❤️\nNº do pedido: #${order.code}\n${orderLink}`;
 
         navigator.clipboard.writeText(message).then(() => {
             setCopied(true);

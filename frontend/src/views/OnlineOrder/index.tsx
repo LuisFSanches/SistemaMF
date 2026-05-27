@@ -89,6 +89,7 @@ export function OnlineOrder() {
     const [showLoader, setShowLoader] = useState(false);
     const [showOrderDetail, setShowOrderDetail] = useState(false);
     const [orderLink, setOrderLink] = useState("");
+    const [orderCode, setOrderCode] = useState("");
     const mockedDeliveryDate = moment().add(2, "days").format("YYYY-MM-DD");
     const [mask, setMask] = useState("(99) 99999-9999");
     const [copied, setCopied] = useState(false);
@@ -140,7 +141,7 @@ Cartão: Desejamos um feliz aniversário!`
     const totalValue = Number(productsValue) - absoluteDiscount + Number(deliveryFee);
 
     const handleCopy = () => {
-        const message = `Você poderia preencher esse link com o endereço completo prfv? E nele também tem um espacinho para você enviar um cartão. ✉️❤️\n${orderLink}`;
+        const message = `Você poderia preencher esse link com o endereço completo prfv? E nele também tem um espacinho para você enviar um cartão. ✉️❤️\nNº do pedido: #${orderCode}\n${orderLink}`;
 
         navigator.clipboard.writeText(message).then(() => {
             setCopied(true);
@@ -218,6 +219,7 @@ Cartão: Desejamos um feliz aniversário!`
         if (response.id && !useAIToGenerate) {
             setShowOrderDetail(true);
             setOrderLink(`${baseUrl}completarPedido/${response.id}`);
+            setOrderCode(response.code);
         }
 
         addOrder(response);

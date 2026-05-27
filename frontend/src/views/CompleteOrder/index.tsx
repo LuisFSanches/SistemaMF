@@ -410,6 +410,7 @@ export function CompleteOrder() {
                         <h1>Resumo do pedido</h1>
                         <div className="order-info-container">
                             <div className="description-container">
+                                <p><strong>PEDIDO: </strong> #{currentOrder?.code}</p>
                                 <p><strong>DESCRIÇÃO: </strong>
                                     {formatDescription(currentOrder?.description).map((line, idx) => (
                                         <p key={idx}>{line}</p>
