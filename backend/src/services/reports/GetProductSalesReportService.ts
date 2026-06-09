@@ -18,7 +18,7 @@ class GetProductSalesReportService {
 
             // Filtro de data
             if (filters.start_date) {
-                conditions.push(`o.created_at >= $${paramIndex}`);
+                conditions.push(`o.delivery_date >= $${paramIndex}`);
                 params.push(new Date(filters.start_date));
                 paramIndex++;
             }
@@ -27,7 +27,7 @@ class GetProductSalesReportService {
                 // Adicionar 1 dia para incluir todo o dia final (até 23:59:59.999)
                 const endDate = new Date(filters.end_date);
                 endDate.setDate(endDate.getDate() + 1);
-                conditions.push(`o.created_at < $${paramIndex}`);
+                conditions.push(`o.delivery_date < $${paramIndex}`);
                 params.push(endDate);
                 paramIndex++;
             }
