@@ -86,6 +86,7 @@ class GetStoreFrontProductsService{
 						WHERE sp.store_id = $1
 						AND sp.enabled = true
 						AND sp.visible_for_online_store = true
+						AND sp.stock > 0
 						AND ${conditions}
 						${categoryCondition}
 						ORDER BY p.created_at DESC
@@ -107,6 +108,7 @@ class GetStoreFrontProductsService{
 						WHERE sp.store_id = $1
 						AND sp.enabled = true
 						AND sp.visible_for_online_store = true
+						AND sp.stock > 0
 						AND ${conditions}
 						${categoryCondition}
 					`,
@@ -143,7 +145,8 @@ class GetStoreFrontProductsService{
 			const whereCondition: any = { 
 				store_id: store.id,
 				enabled: true,
-				visible_for_online_store: true
+				visible_for_online_store: true,
+				stock: { gt: 0 }
 			};
 
 			// Adicionar filtro de categoria se fornecido

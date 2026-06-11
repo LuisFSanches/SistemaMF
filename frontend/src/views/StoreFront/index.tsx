@@ -288,18 +288,16 @@ export function StoreFront() {
                     <div ref={productsSectionRef}>
                         <h2 className="section-title">Nossos <strong>Produtos</strong></h2>
                         <ProductGrid>
-                            {products
-                                .filter((product) => product.enabled && product.stock > 0)
-                                .map((product) => (
-                                    <ProductCard
-                                        key={product.id}
-                                        product={product}
-                                        image={product.image || placeholder_products}
-                                        onAdd={handleAddProduct}
-                                        editablePrice={false}
-                                        enableDetailView={true}
-                                    />
-                                ))}
+                            {products.map((product) => (
+                                <ProductCard
+                                    key={product.id}
+                                    product={product}
+                                    image={product.image || placeholder_products}
+                                    onAdd={handleAddProduct}
+                                    editablePrice={false}
+                                    enableDetailView={true}
+                                />
+                            ))}
                         </ProductGrid>
 
                         <Pagination
