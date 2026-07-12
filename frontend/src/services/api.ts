@@ -23,6 +23,35 @@ api.interceptors.request.use(
   }
 );
 
+// Interceptor para capturar warnings de assinatura
+api.interceptors.response.use(
+  (response) => {
+    const warning = response.headers['x-subscription-warning'];
+    const status = response.headers['x-subscription-status'];
+    
+    if (warning && status) {
+      // Disparar evento customizado para o sistema mostrar notificação
+      window.dispatchEvent(new CustomEvent('subscription-warning', {
+        detail: { warning, status }
+      }));
+    }
+    
+    return response;
+  },
+  (error) => {
+    // Capturar erro 401 de trial expirado
+    if (error.response?.status === 401) {
+      const message = error.response?.data?.message;
+      if (message === "Trial period expired. Please subscribe to a plan to continue using the system.") {
+        // Disparar evento para abrir modal de seleção de planos
+        window.dispatchEvent(new CustomEvent('subscription-trial-expired'));
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 // Helper para obter store_id do admin logado
 export const getStoreId = (): string | null => {
   const adminData = localStorage.getItem("adminData");

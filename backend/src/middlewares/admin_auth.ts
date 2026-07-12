@@ -4,6 +4,7 @@ import { UnauthorizedRequestException } from "../exceptions/unauthorized";
 import { ErrorCodes } from "../exceptions/root";
 import prismaClient from "../prisma";
 import { IPayload } from "../interfaces/IPayload";
+import { validateSubscription, isSubscriptionManagementRoute } from "../utils/validateSubscription";
 
 const adminAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization as string;
@@ -25,6 +26,8 @@ const adminAuthMiddleware = async (req: Request, res: Response, next: NextFuncti
                         name: true,
                         slug: true,
                         is_active: true,
+                        created_at: true,
+                        trial_end_date: true,
                     }
                 }
             }
@@ -49,6 +52,19 @@ const adminAuthMiddleware = async (req: Request, res: Response, next: NextFuncti
         if (admin?.role !== 'ADMIN' && admin?.role !== 'SYS_ADMIN' && admin?.role !== 'SUPER_ADMIN') {
             next(new UnauthorizedRequestException('Unauthorized', ErrorCodes.UNAUTHORIZED))
             return;
+        }
+
+        // Verificar assinatura apenas para ADMIN (não para SYS_ADMIN ou SUPER_ADMIN)
+        if (
+            (admin.role === 'ADMIN' || admin.role === 'SUPER_ADMIN')
+            && admin.store
+            && isSubscriptionManagementRoute(req.path) === false) {
+            try {
+                await validateSubscription(admin.store, true);
+            } catch (error) {
+                next(error);
+                return;
+            }
         }
 
         // Se for SYS_ADMIN e o token tiver store_id, usar o store_id do token (após switch)
