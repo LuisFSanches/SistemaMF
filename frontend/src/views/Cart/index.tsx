@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart, faTrash, faPlus, faMinus, faArrowRight, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import { faShoppingCart, faTrash, faPlus, faMinus, faArrowRight, faExclamationCircle, faTag, faExclamationTriangle, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../../contexts/CartContext";
 import { useGTM } from "../../hooks/useGTM";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
 import { FreightCalculator } from "../../components/FreightCalculator";
 import { StockValidationModal } from "../../components/StockValidationModal";
 import { stockService, InvalidStockItem } from "../../services/stockService";
+import { validateCoupon, getCouponErrorMessage } from "../../services/couponService";
 import placeholder_products from "../../assets/images/placeholder_products.png";
 import { convertMoney } from "../../utils";
 import { PrimaryButton } from "../../styles/global";
@@ -43,6 +44,16 @@ import {
     CheckoutWarning,
     DesktopCheckoutActions,
     MobileCheckoutActions,
+    CouponSection,
+    CouponTitle,
+    CouponForm,
+    CouponInput,
+    CouponButton,
+    CouponErrorBox,
+    CouponErrorText,
+    AppliedCouponBox,
+    AppliedCouponInfo,
+    RemoveCouponButton,
 } from "./style";
 
 export function Cart() {
@@ -55,14 +66,22 @@ export function Cart() {
         observations,
         deliveryInfo,
         isDeliveryCalculated,
+        appliedCoupon,
         updateQuantity,
         removeFromCart,
-        setObservations
+        setObservations,
+        applyCoupon,
+        removeCoupon,
     } = useCart();
 
     const [isStockModalOpen, setIsStockModalOpen] = useState(false);
     const [invalidStockItems, setInvalidStockItems] = useState<InvalidStockItem[]>([]);
     const [isValidatingStock, setIsValidatingStock] = useState(false);
+    
+    // Coupon state
+    const [couponCode, setCouponCode] = useState("");
+    const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+    const [couponError, setCouponError] = useState("");
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -78,7 +97,98 @@ export function Cart() {
     }, [cartItems, cartTotal, trackViewCart]);
 
     const deliveryFee = deliveryInfo?.fee ?? 0;
-    const totalWithDelivery = cartTotal + deliveryFee;
+    const couponDiscount = appliedCoupon?.discount_amount ?? 0;
+    const totalWithDelivery = cartTotal + deliveryFee - couponDiscount;
+
+    // Re-valida o cupom aplicado sempre que o total do carrinho mudar,
+    // pois a remoção/redução de itens pode fazer o pedido deixar de atender
+    // as regras do cupom (valor mínimo, etc).
+    useEffect(() => {
+        if (!appliedCoupon) return;
+
+        const storeId = sessionStorage.getItem('storefront_store_id');
+        if (!storeId) return;
+
+        let isCurrent = true;
+
+        const revalidate = async () => {
+            try {
+                const response = await validateCoupon({
+                    code: appliedCoupon.code,
+                    store_id: storeId,
+                    orderTotal: cartTotal
+                });
+
+                if (!isCurrent) return;
+
+                if (response.data.valid) {
+                    if (response.data.discount_amount !== appliedCoupon.discount_amount) {
+                        applyCoupon({
+                            ...appliedCoupon,
+                            discount_amount: response.data.discount_amount!
+                        });
+                    }
+                } else {
+                    removeCoupon();
+                }
+            } catch {
+                if (isCurrent) removeCoupon();
+            }
+        };
+
+        revalidate();
+
+        return () => {
+            isCurrent = false;
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [cartTotal]);
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode.trim()) {
+            setCouponError("Digite um código de cupom");
+            return;
+        }
+
+        const storeId = sessionStorage.getItem('storefront_store_id');
+        if (!storeId) {
+            setCouponError("Não foi possível identificar a loja");
+            return;
+        }
+
+        setIsValidatingCoupon(true);
+        setCouponError("");
+
+        try {
+            const response = await validateCoupon({
+                code: couponCode.toUpperCase().trim(),
+                store_id: storeId,
+                orderTotal: cartTotal
+            });
+            
+            if (response.data.valid && response.data.coupon) {
+                applyCoupon({
+                    code: response.data.coupon.code,
+                    coupon_id: response.data.coupon.id,
+                    discount_amount: response.data.discount_amount!,
+                });
+                
+                setCouponCode("");
+            } else {
+                setCouponError(getCouponErrorMessage(response.data.error_code));
+            }
+        } catch (error: any) {
+            setCouponError(getCouponErrorMessage(error?.response?.data?.error_code || 'NETWORK_ERROR'));
+        } finally {
+            setIsValidatingCoupon(false);
+        }
+    };
+
+    const handleRemoveCoupon = () => {
+        removeCoupon();
+        setCouponCode("");
+        setCouponError("");
+    };
 
     const handleGoToCheckout = async () => {
         if (cartItems.length === 0) return;
@@ -240,6 +350,55 @@ export function Cart() {
                         </FreightSection>
                     )}
 
+                    {cartItems.length > 0 && (
+                        <CouponSection>
+                            <CouponTitle>
+                                <FontAwesomeIcon icon={faTag as any} />
+                                Cupom de Desconto
+                            </CouponTitle>
+
+                            {appliedCoupon ? (
+                                <AppliedCouponBox>
+                                    <AppliedCouponInfo>
+                                        🎁 {appliedCoupon.code}
+                                    </AppliedCouponInfo>
+                                    <RemoveCouponButton type="button" onClick={handleRemoveCoupon}>
+                                        <FontAwesomeIcon icon={faTimes as any} />
+                                        Remover
+                                    </RemoveCouponButton>
+                                </AppliedCouponBox>
+                            ) : (
+                                <>
+                                    <CouponForm>
+                                        <CouponInput
+                                            type="text"
+                                            placeholder="Digite o código do cupom"
+                                            value={couponCode}
+                                            hasError={!!couponError}
+                                            disabled={isValidatingCoupon}
+                                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
+                                        />
+                                        <CouponButton
+                                            type="button"
+                                            onClick={handleApplyCoupon}
+                                            disabled={isValidatingCoupon}
+                                        >
+                                            {isValidatingCoupon ? 'Aplicando...' : 'Aplicar'}
+                                        </CouponButton>
+                                    </CouponForm>
+
+                                    {couponError && (
+                                        <CouponErrorBox>
+                                            <FontAwesomeIcon icon={faExclamationTriangle as any} />
+                                            <CouponErrorText>{couponError}</CouponErrorText>
+                                        </CouponErrorBox>
+                                    )}
+                                </>
+                            )}
+                        </CouponSection>
+                    )}
+
                     <SummaryRow>
                         <span>Subtotal:</span>
                         <strong>{convertMoney(cartTotal)}</strong>
@@ -248,6 +407,12 @@ export function Cart() {
                         <SummaryRow>
                             <span>Taxa de Entrega:</span>
                             <strong>{convertMoney(deliveryFee)}</strong>
+                        </SummaryRow>
+                    )}
+                    {appliedCoupon && couponDiscount > 0 && (
+                        <SummaryRow>
+                            <span>Desconto ({appliedCoupon.code}):</span>
+                            <strong>-{convertMoney(couponDiscount)}</strong>
                         </SummaryRow>
                     )}
                     {isDeliveryCalculated && deliveryInfo && cartTotal > 0 && (

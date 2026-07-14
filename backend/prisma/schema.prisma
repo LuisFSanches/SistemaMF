@@ -43,6 +43,8 @@ model Client {
   addresses Address[]
   orders Order[]
   verificationCodes VerificationCode[]
+  coupons Coupon[] @relation("CouponRestriction")
+  couponUsages CouponUsageHistory[] @relation("CouponUsage")
   created_at DateTime? @default(now())
   updated_at DateTime? @default(now())
 
@@ -238,10 +240,17 @@ model Order {
   online_code       String?
   type_of_delivery  String?
   is_delivery       Boolean       @default(true)
+  
+  // Coupon fields
+  coupon_code       String?
+  coupon_id         String?
+
+  coupon             Coupon?       @relation(fields: [coupon_id], references: [id])
 
   orderItems OrderItem[]
   ordersToReceive OrderToReceive[]
   orderDeliveries OrderDelivery[]
+  couponUsage CouponUsageHistory?
 
   @@map("orders")
 }
@@ -391,6 +400,7 @@ model Store {
   deliveryRanges   DeliveryRange[]
   storeCarousels   StoreCarousel[]
   subscription     Subscription?
+  coupons          Coupon[]
 
   @@map("stores")
 }
@@ -539,5 +549,49 @@ model Subscription {
   subscriptionPlan      SubscriptionPlan @relation(fields: [subscription_plan_id], references: [id])
 
   @@map("subscriptions")
+}
+
+// Sistema de Cupons
+model Coupon {
+  id                      String   @id @default(uuid())
+  store_id                String
+  code                    String
+  is_active               Boolean  @default(true)
+  discount_type           String   // "FIXED" | "PERCENTAGE"
+  discount_value          Decimal  @db.Decimal(10, 2)
+  max_discount_amount     Decimal? @db.Decimal(10, 2)
+  start_date              DateTime
+  expiration_date         DateTime
+  total_usage_limit       Int?
+  usage_limit_per_customer Int?
+  current_usage_count     Int      @default(0)
+  specific_customer_id    String?
+  minimum_order_amount    Decimal? @db.Decimal(10, 2)
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  store                   Store    @relation(fields: [store_id], references: [id])
+  customer                Client?  @relation("CouponRestriction", fields: [specific_customer_id], references: [id])
+  usage_history           CouponUsageHistory[]
+  orders                  Order[]
+
+  @@unique([code, store_id])
+  @@map("coupons")
+}
+
+model CouponUsageHistory {
+  id              String   @id @default(uuid())
+  coupon_id       String
+  customer_id     String
+  order_id        String   @unique
+  discount_amount Decimal  @db.Decimal(10, 2)
+  used_at         DateTime @default(now())
+
+  coupon          Coupon   @relation(fields: [coupon_id], references: [id])
+  customer        Client   @relation("CouponUsage", fields: [customer_id], references: [id])
+  order           Order    @relation(fields: [order_id], references: [id])
+
+  @@index([coupon_id, customer_id])
+  @@map("coupon_usage_history")
 }
 

@@ -10,7 +10,7 @@ import { Loader } from '../../components/Loader';
 import { PAYMENT_METHODS } from "../../constants";
 import { FontAwesomeIcon, } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
-import { faXmark, faCircleQuestion } from "@fortawesome/free-solid-svg-icons";
+import { faXmark, faCircleQuestion, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { createOrder, createOrderByAi } from "../../services/orderService";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { useOrders } from "../../contexts/OrdersContext";
@@ -19,6 +19,8 @@ import { rawTelephone } from "../../utils";
 import { useProducts } from "../../contexts/ProductsContext";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { useAdminData } from "../../contexts/AuthContext";
+import { CouponSelector } from '../../components/CouponSelector';
+import { IAppliedCoupon, validateCoupon } from '../../services/couponService';
 import {
     FormField,
     Label,
@@ -47,8 +49,26 @@ import {
     PageHeaderActions,
     DiscountSwitch,
     DiscountSwitchLabel,
-    PriceSummary
+    PriceSummary,
 } from "./style";
+
+import {
+    DiscountSectionWrapper,
+    SubsectionTitle,
+    ManualDiscountContainer,
+    Divider,
+    DisabledNote,
+    DiscountAppliedText,
+    CouponContainer,
+    CouponSectionHeader,
+    ApplyCouponButton,
+    AppliedCouponRow,
+    CouponCode,
+    CouponDiscountValue,
+    CouponActions,
+    ChangeCouponButton,
+    RemoveCouponButton
+} from "../OnStoreOrder/style";
 
 import placeholder_products from '../../assets/images/placeholder_products.png';
 
@@ -101,6 +121,8 @@ export function OnlineOrder() {
     const [useAIToGenerate, setUseAIToGenerate] = useState(false);
     const [showToolTipModal, setShowToolTipModal] = useState(false);
     const [isPercentageDiscount, setIsPercentageDiscount] = useState(false);
+    const [appliedCoupon, setAppliedCoupon] = useState<IAppliedCoupon | null>(null);
+    const [showCouponModal, setShowCouponModal] = useState(false);
     const tooltipMessage = `
 Me envie os dados do pedido 😊
 
@@ -132,13 +154,80 @@ Cartão: Desejamos um feliz aniversário!`
         return discountValue;
     };
 
+    // Coupon handlers
+    const handleOpenCouponModal = () => {
+        setShowCouponModal(true);
+    };
+
+    const handleCloseCouponModal = () => {
+        setShowCouponModal(false);
+    };
+
+    const handleApplyCoupon = (coupon: IAppliedCoupon) => {
+        setAppliedCoupon(coupon);
+        // Limpa o desconto manual quando um cupom é aplicado
+        setValue('discount', 0);
+        setIsPercentageDiscount(false);
+        setShowCouponModal(false);
+    };
+
+    const handleRemoveCoupon = () => {
+        setAppliedCoupon(null);
+    };
+
     // Watch para recalcular o total quando mudar desconto ou produtos
     const productsValue = watch("products_value") || 0;
     const discountInput = watch("discount") || 0;
     const deliveryFee = watch("delivery_fee") || 0;
 
-    const absoluteDiscount = calculateAbsoluteDiscount(Number(discountInput), Number(productsValue));
-    const totalValue = Number(productsValue) - absoluteDiscount + Number(deliveryFee);
+    // O cupom tem prioridade sobre o desconto manual
+    const finalDiscount = appliedCoupon
+        ? appliedCoupon.discount_amount
+        : calculateAbsoluteDiscount(Number(discountInput), Number(productsValue));
+
+    const absoluteDiscount = finalDiscount;
+    const totalValue = Number(productsValue) - finalDiscount + Number(deliveryFee);
+
+    // Re-valida o cupom aplicado sempre que o valor dos produtos mudar,
+    // pois a remoção/redução de itens pode fazer o pedido deixar de atender
+    // as regras do cupom (valor mínimo, etc).
+    useEffect(() => {
+        if (!appliedCoupon) return;
+
+        let isCurrent = true;
+
+        const revalidate = async () => {
+            try {
+                const response = await validateCoupon({
+                    code: appliedCoupon.code,
+                    store_id: adminData.store_id!,
+                    orderTotal: Number(productsValue)
+                });
+
+                if (!isCurrent) return;
+
+                if (response.data.valid) {
+                    if (response.data.discount_amount !== appliedCoupon.discount_amount) {
+                        setAppliedCoupon({
+                            ...appliedCoupon,
+                            discount_amount: response.data.discount_amount!
+                        });
+                    }
+                } else {
+                    setAppliedCoupon(null);
+                }
+            } catch {
+                if (isCurrent) setAppliedCoupon(null);
+            }
+        };
+
+        revalidate();
+
+        return () => {
+            isCurrent = false;
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [productsValue]);
 
     const handleCopy = () => {
         const message = `Você poderia preencher esse link com o endereço completo prfv? E nele também tem um espacinho para você enviar um cartão. ✉️❤️\nNº do pedido: #${orderCode}\n${orderLink}`;
@@ -162,9 +251,12 @@ Cartão: Desejamos um feliz aniversário!`
 
         setShowLoader(true);
 
-        // Calcula o desconto absoluto para enviar ao backend
-        const absoluteDiscountValue = calculateAbsoluteDiscount(Number(data.discount) || 0, Number(data.products_value));
+        // Calcula o desconto absoluto para enviar ao backend (cupom tem prioridade)
+        const absoluteDiscountValue = appliedCoupon
+            ? appliedCoupon.discount_amount
+            : calculateAbsoluteDiscount(Number(data.discount) || 0, Number(data.products_value));
 
+        console.log(appliedCoupon, "appliedCoupon");
         const orderData = {
             client_id: null,
             receiver_phone: rawTelephone(receiver_phone),
@@ -198,6 +290,9 @@ Cartão: Desejamos um feliz aniversário!`
             online_code: generateOnlineCode(),
             products: products,
             order_ai_information: data.order_ai_information,
+            // Coupon data
+            coupon_code: appliedCoupon?.code || undefined,
+            coupon_id: appliedCoupon?.coupon_id || undefined,
         }
 
         let response;
@@ -323,6 +418,8 @@ Cartão: Desejamos um feliz aniversário!`
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [description]);
 
+    console.log('products', products.length)
+
     useEffect(() => {
         if (!adminData.store_id) return;
         setShowLoader(true);
@@ -357,6 +454,100 @@ Cartão: Desejamos um feliz aniversário!`
         handleResize();
     }, []);
 
+    // Bloco de Desconto Manual + Cupom, reutilizado nos dois modos (link/IA)
+    const renderDiscountAndCoupon = () => (
+        <DiscountSectionWrapper>
+            {/* Desconto Manual */}
+            <SubsectionTitle>Desconto Manual</SubsectionTitle>
+            <ManualDiscountContainer $active={!appliedCoupon}>
+                <Divider />
+
+                <DiscountSwitch>
+                    <span style={{ color: !isPercentageDiscount ? "#EC4899" : "#5B5B5B" }}>R$</span>
+                    <input
+                        id="discount-switch-online"
+                        type="checkbox"
+                        checked={isPercentageDiscount}
+                        onChange={() => setIsPercentageDiscount(!isPercentageDiscount)}
+                        disabled={!!appliedCoupon}
+                        style={{ display: 'none' }}
+                    />
+                    <DiscountSwitchLabel htmlFor="discount-switch-online" $checked={isPercentageDiscount} />
+                    <span style={{ color: isPercentageDiscount ? "#EC4899" : "#5B5B5B" }}>%</span>
+                </DiscountSwitch>
+
+                <Input
+                    type="number"
+                    step="0.01"
+                    placeholder={isPercentageDiscount ? "0.00%" : "0.00"}
+                    defaultValue={0}
+                    {...register("discount")}
+                    disabled={!!appliedCoupon}
+                />
+            </ManualDiscountContainer>
+
+            {appliedCoupon && (
+                <DisabledNote>
+                    Remova o cupom para aplicar desconto manual
+                </DisabledNote>
+            )}
+
+            {!appliedCoupon && absoluteDiscount > 0 && (
+                <DiscountAppliedText>
+                    💰 Desconto aplicado: R$ {absoluteDiscount.toFixed(2)}
+                </DiscountAppliedText>
+            )}
+
+            {/* Cupom */}
+            <CouponContainer $applied={!!appliedCoupon}>
+                <CouponSectionHeader>
+                    <SubsectionTitle>Cupom de Desconto</SubsectionTitle>
+
+                    {appliedCoupon && (
+                        <CouponActions>
+                            <ChangeCouponButton
+                                type="button"
+                                onClick={handleOpenCouponModal}
+                            >
+                                ✏️
+                            </ChangeCouponButton>
+                            <RemoveCouponButton
+                                type="button"
+                                className="del-button"
+                                onClick={handleRemoveCoupon}
+                            >
+                                <FontAwesomeIcon icon={faTrash as any} />
+                            </RemoveCouponButton>
+                        </CouponActions>
+                    )}
+                </CouponSectionHeader>
+
+                {!appliedCoupon ? (
+                    <>
+                        <ApplyCouponButton
+                            type="button"
+                            onClick={handleOpenCouponModal}
+                            disabled={discountInput > 0 || products.length === 0}
+                        >
+                            🎁 Aplicar Cupom
+                        </ApplyCouponButton>
+
+                        {discountInput > 0 && (
+                            <DisabledNote>
+                                Remova o desconto manual para aplicar cupom
+                            </DisabledNote>
+                        )}
+                    </>
+                ) : (
+                    <AppliedCouponRow>
+                        <CouponCode>🎁 {appliedCoupon.code}</CouponCode>
+                        <CouponDiscountValue>R$ -{appliedCoupon.discount_amount.toFixed(2)}</CouponDiscountValue>
+                    </AppliedCouponRow>
+                )}
+            </CouponContainer>
+        </DiscountSectionWrapper>
+    );
+
     return (
         <Container>
             <TooltipModal
@@ -382,6 +573,16 @@ Cartão: Desejamos um feliz aniversário!`
                     enabled: false
                 }}
             />
+
+            <CouponSelector
+                isOpen={showCouponModal}
+                onRequestClose={handleCloseCouponModal}
+                onSelectCoupon={handleApplyCoupon}
+                orderTotal={Number(productsValue) + Number(deliveryFee)}
+                storeId={adminData.store_id!}
+                customerId={undefined}
+            />
+
             {showOrderDetail &&
                 <OrderDetail>
                     <div className="order-detail-container">
@@ -560,20 +761,6 @@ Cartão: Desejamos um feliz aniversário!`
                                     </Select>
                                     {errors.created_by && <ErrorMessage>{errors.created_by.message}</ErrorMessage>}
                                 </FormField>
-                                <FormField>
-                                    <Label>Tipo de Desconto</Label>
-                                    <DiscountSwitch>
-                                        <span style={{ color: isPercentageDiscount ? "#5B5B5B" : "#EC4899" }}>Valor(R$)</span>
-                                        <Input 
-                                            id="discount-switch-store" 
-                                            type="checkbox" 
-                                            checked={isPercentageDiscount}
-                                            onChange={(e) => setIsPercentageDiscount(e.target.checked)}
-                                        />
-                                        <DiscountSwitchLabel htmlFor="discount-switch-store" $checked={isPercentageDiscount} />
-                                        <span style={{ color: isPercentageDiscount ? "#EC4899" : "#5B5B5B" }}>Percentual(%)</span>
-                                    </DiscountSwitch>
-                                </FormField>
                                 <InlineFormField>
                                     <FormField>
                                         <Label>Total dos Produtos</Label>
@@ -585,28 +772,21 @@ Cartão: Desejamos um feliz aniversário!`
                                         {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
                                     </FormField>
                                     <FormField>
-                                        <Label>Desconto</Label>
-                                        <Input 
-                                            type="number" 
-                                            step="0.01" 
-                                            placeholder={isPercentageDiscount ? "0.00%" : "0.00"} 
-                                            defaultValue={0}
-                                            {...register("discount")} 
-                                        />
-                                    </FormField>
-                                    <FormField>
                                         <Label>Taxa de entrega</Label>
                                         <Input type="number" step="0.01" placeholder="0.00" {...register("delivery_fee", {
                                         })} />
                                     </FormField>
                                 </InlineFormField>
+
+                                {renderDiscountAndCoupon()}
+
                                 <PriceSummary>
                                     <div className="summary-line">
                                         <span>Subtotal (Produtos):</span>
                                         <span>R$ {Number(productsValue).toFixed(2)}</span>
                                     </div>
                                     <div className="summary-line">
-                                        <span>Desconto {isPercentageDiscount ? `(${Number(discountInput).toFixed(2)}%)` : ''}:</span>
+                                        <span>Desconto {appliedCoupon ? `(🎁 ${appliedCoupon.code})` : (isPercentageDiscount ? `(${Number(discountInput).toFixed(2)}%)` : '')}:</span>
                                         <span>- R$ {absoluteDiscount.toFixed(2)}</span>
                                     </div>
                                     <div className="summary-line">
@@ -672,39 +852,21 @@ Cartão: Desejamos um feliz aniversário!`
                                         {errors.products_value && <ErrorMessage>{errors.products_value.message}</ErrorMessage>}
                                     </FormField>
                                     <FormField>
-                                        <Label>Desconto</Label>
-                                        <Input 
-                                            type="number" 
-                                            step="0.01" 
-                                            placeholder={isPercentageDiscount ? "0.00%" : "0.00"} 
-                                            defaultValue={0}
-                                            {...register("discount")} 
-                                        />
-                                    </FormField>
-                                    <FormField>
                                         <Label>Taxa de entrega</Label>
                                         <Input type="number" step="0.01" placeholder="0.00" {...register("delivery_fee", {
                                         })} />
                                     </FormField>
                                 </InlineFormField>
-                                <DiscountSwitch>
-                                    <span style={{ color: isPercentageDiscount ? "#5B5B5B" : "#EC4899" }}>R$</span>
-                                    <Input 
-                                        id="discount-switch-ai" 
-                                        type="checkbox" 
-                                        checked={isPercentageDiscount}
-                                        onChange={(e) => setIsPercentageDiscount(e.target.checked)}
-                                    />
-                                    <DiscountSwitchLabel htmlFor="discount-switch-ai" $checked={isPercentageDiscount} />
-                                    <span style={{ color: isPercentageDiscount ? "#EC4899" : "#5B5B5B" }}>%</span>
-                                </DiscountSwitch>
+
+                                {renderDiscountAndCoupon()}
+
                                 <PriceSummary>
                                     <div className="summary-line">
                                         <span>Subtotal (Produtos):</span>
                                         <span>R$ {Number(productsValue).toFixed(2)}</span>
                                     </div>
                                     <div className="summary-line">
-                                        <span>Desconto {isPercentageDiscount ? `(${Number(discountInput).toFixed(2)}%)` : ''}:</span>
+                                        <span>Desconto {appliedCoupon ? `(🎁 ${appliedCoupon.code})` : (isPercentageDiscount ? `(${Number(discountInput).toFixed(2)}%)` : '')}:</span>
                                         <span>- R$ {absoluteDiscount.toFixed(2)}</span>
                                     </div>
                                     <div className="summary-line">

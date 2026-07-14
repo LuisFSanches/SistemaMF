@@ -231,7 +231,7 @@ export const CartContainer = styled.div<{ expanded?: boolean }>`
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 120px;
-    max-height: calc(100vh - 140px);
+    max-height: calc(100vh - 105px);
     display: flex;
     flex-direction: column;
 
@@ -1053,3 +1053,191 @@ export const SummaryDivider = styled.div`
 export const BackButton = styled(PrimaryButton)`
     background: #6B7280;
 `;
+
+// Coupon Components
+export const DiscountSectionWrapper = styled.div`
+    width: 100%;
+    background: white;
+    border-radius: 0.5rem;
+    padding: 5px;
+
+    @media (max-width: 768px) {
+        padding: 1rem;
+    }
+`;
+
+export const DiscountSectionTitle = styled.h3`
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+`;
+
+export const SubsectionTitle = styled.h4`
+    font-size: 15px;
+    font-weight: 600;
+    color: #5b5b5b;
+    margin-bottom: 0.75rem;
+`;
+
+export const Divider = styled.div`
+    height: 1px;
+    background: #E5E7EB;
+    margin-bottom: 1rem;
+`;
+
+export const DividerText = styled.div`
+    text-align: center;
+    margin: 1.5rem 0;
+    position: relative;
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 40%;
+        height: 1px;
+        background: #E5E7EB;
+    }
+
+    &::before {
+        left: 0;
+    }
+
+    &::after {
+        right: 0;
+    }
+
+    span {
+        background: white;
+        padding: 0 1rem;
+        color: #9CA3AF;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+`;
+
+export const ManualDiscountContainer = styled.div<{ $active: boolean }>`
+    display: flex;
+    opacity: ${props => props.$active ? 1 : 0.5};
+    transition: opacity 0.3s ease;
+`;
+
+export const DisabledNote = styled.p`
+    font-size: 0.85rem;
+    color: #ff9800;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &::before {
+        content: '⚠️';
+    }
+`;
+
+export const CouponContainer = styled.div<{ $applied: boolean }>`
+    opacity: ${props => props.$applied ? 1 : 1};
+`;
+
+export const CouponSectionHeader = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+
+    h4 {
+        margin-bottom: 0;
+    }
+`;
+
+export const ApplyCouponButton = styled.button`
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    background: ${props => props.disabled ? '#f3f4f6' : '#EC4899'};
+    color: ${props => props.disabled ? '#9CA3AF' : 'white'};
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+        background: #DB2777;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+`;
+
+export const AppliedCouponRow = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.625rem 5px;
+    background: #fef3f7;
+    border-radius: 0.5rem;
+`;
+
+export const CouponCode = styled.span`
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #EC4899;
+`;
+
+export const CouponDiscountValue = styled.span`
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #4caf50;
+`;
+
+export const CouponActions = styled.div`
+    display: flex;
+    gap: 0.5rem;
+`;
+
+export const ChangeCouponButton = styled.button`
+    padding: 0.375rem 0.75rem;
+    background: white;
+    color: #EC4899;
+    border: 1px solid #EC4899;
+    border-radius: 0.375rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: #fef3f7;
+    }
+`;
+
+export const RemoveCouponButton = styled.button`
+    padding: 0.375rem 0.75rem;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: #d32f2f;
+    }
+`;
+

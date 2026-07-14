@@ -273,6 +273,12 @@ button{
     font-weight:600
 }
 
+.print-button{
+    background: #EC4899;
+    color:var(--text-white);
+    font-weight:600
+}
+
 .create-button{
     background: var(--sideBarBackground);
     color:var(--text-white);
@@ -355,6 +361,23 @@ button{
     @media (max-width: 768px){
         max-width: 95%;
         padding: 1rem;
+    }
+}
+
+.react-modal-content-medium {
+    width: 100%;
+    max-width: 700px;
+    max-height: 95vh;
+    overflow-y: auto;
+    background: var(--background);
+    padding: 2rem;
+    position: relative;
+    border-radius: 0.25rem;
+    outline: none;
+
+    @media (max-width: 768px){
+        max-width: 95%;
+        padding: 1.5rem;
     }
 }
 

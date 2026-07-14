@@ -461,3 +461,151 @@ export const CheckoutWarning = styled.div`
         font-size: 15px;
     }
 `;
+
+export const CouponSection = styled.div`
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+`;
+
+export const CouponTitle = styled.h3`
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    svg {
+        color: var(--primary-color);
+        font-size: 16px;
+    }
+`;
+
+export const CouponForm = styled.div`
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+`;
+
+export const CouponInput = styled.input<{ hasError?: boolean }>`
+    flex: 1;
+    padding: 10px 14px;
+    border: 1.5px solid ${({ hasError }) => (hasError ? '#EF4444' : '#D1D5DB')};
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #111827;
+    background: white;
+    text-transform: uppercase;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+    }
+
+    &::placeholder {
+        color: #9CA3AF;
+        text-transform: none;
+    }
+
+    &:disabled {
+        background: #F3F4F6;
+        cursor: not-allowed;
+    }
+`;
+
+export const CouponButton = styled.button`
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+        background: #d93f7c;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(236, 72, 153, 0.25);
+    }
+
+    &:disabled {
+        background: #9CA3AF;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+`;
+
+export const CouponErrorBox = styled.div`
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    border-radius: 8px;
+    padding: 10px 12px;
+
+    svg {
+        color: #EF4444;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+`;
+
+export const CouponErrorText = styled.span`
+    font-size: 13px;
+    color: #B91C1C;
+    line-height: 1.4;
+`;
+
+export const AppliedCouponBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border: 1.5px solid #D1FAE5;
+    border-radius: 10px;
+    padding: 12px 14px;
+`;
+
+export const AppliedCouponInfo = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+`;
+
+export const RemoveCouponButton = styled.button`
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: #6B7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: #EF4444;
+        color: #EF4444;
+    }
+`;

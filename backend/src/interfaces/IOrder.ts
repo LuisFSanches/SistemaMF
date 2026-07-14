@@ -29,4 +29,6 @@ export interface IOrder {
     store_id?: string,
     store_slug?: string,
     order_email?: string;
+    coupon_code?: string;
+    coupon_id?: string;
 }

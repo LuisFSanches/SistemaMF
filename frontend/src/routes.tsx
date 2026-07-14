@@ -46,6 +46,7 @@ import StoreSettings from "./views/StoreSettings";
 import { ForgotPasswordPage } from "./views/ForgotPasswordPage";
 import { ResetPasswordPage } from "./views/ResetPasswordPage";
 import { CategoriesPage } from "./views/Categories";
+import { Coupons } from "./views/Coupons";
 import { Home } from "./views/Home";
 // import { SubscriptionPlans } from "./views/SubscriptionPlans";
 import { TermsOfService } from "./views/TermsOfService";
@@ -163,6 +164,11 @@ export default function routes(){
                         <Route path="/backoffice/categorias" element={
                             <PrivateRoute>
                                 <CategoriesPage/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/cupons" element={
+                            <PrivateRoute>
+                                <Coupons/>
                             </PrivateRoute>
                         }/>
                         <Route path="/backoffice/motoboys" element={

@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faComputer } from "@fortawesome/free-solid-svg-icons";
+import { faComputer, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { ProductCard} from "../../components/ProductCard";
 import { Pagination } from "../../components/Pagination";
 import { QRCodeScanner } from "../../components/QRCodeScanner";
@@ -71,7 +71,21 @@ import {
     ProductSummaryPrice,
     SummaryInfoText,
     SummaryDivider,
-    BackButton
+    BackButton,
+    DiscountSectionWrapper,
+    SubsectionTitle,
+    Divider,
+    ManualDiscountContainer,
+    DisabledNote,
+    CouponContainer,
+    CouponSectionHeader,
+    ApplyCouponButton,
+    AppliedCouponRow,
+    CouponCode,
+    CouponDiscountValue,
+    CouponActions,
+    ChangeCouponButton,
+    RemoveCouponButton
 } from "./style";
 
 import {
@@ -99,6 +113,8 @@ import { useProducts } from "../../contexts/ProductsContext";
 import { useAdminData } from "../../contexts/AuthContext";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import placeholder_products from '../../assets/images/placeholder_products.png';
+import { CouponSelector } from '../../components/CouponSelector';
+import { IAppliedCoupon, validateCoupon } from '../../services/couponService';
 
 interface INewOrder {
     phone_number: string;
@@ -186,6 +202,8 @@ export function OnStoreOrder() {
     const [isPercentageDiscount, setIsPercentageDiscount] = useState(false);
     const [cartExpanded, setCartExpanded] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [appliedCoupon, setAppliedCoupon] = useState<IAppliedCoupon | null>(null);
+    const [showCouponModal, setShowCouponModal] = useState(false);
 
     const navigate = useNavigate();
 
@@ -258,13 +276,81 @@ export function OnStoreOrder() {
         return discountValue;
     };
 
+    // Coupon handlers
+    const handleOpenCouponModal = () => {
+        setShowCouponModal(true);
+    };
+
+    const handleCloseCouponModal = () => {
+        setShowCouponModal(false);
+    };
+
+    const handleApplyCoupon = (coupon: IAppliedCoupon) => {
+        setAppliedCoupon(coupon);
+        // Clear manual discount when coupon is applied
+        setValue('discount', 0);
+        setIsPercentageDiscount(false);
+        setShowCouponModal(false);
+    };
+
+    const handleRemoveCoupon = () => {
+        setAppliedCoupon(null);
+    };
+
     // Watch para recalcular o total quando mudar desconto ou produtos
     const productsValue = watch("products_value") || 0;
     const discountInput = watch("discount") || 0;
     const deliveryFee = watch("delivery_fee") || 0;
 
-    const absoluteDiscount = calculateAbsoluteDiscount(Number(discountInput), Number(productsValue));
-    const totalValue = Number(productsValue) - absoluteDiscount + Number(deliveryFee);
+    // Calculate final discount: coupon takes precedence over manual discount
+    const finalDiscount = appliedCoupon 
+        ? appliedCoupon.discount_amount 
+        : calculateAbsoluteDiscount(Number(discountInput), Number(productsValue));
+    
+    const absoluteDiscount = finalDiscount;
+    const totalValue = Number(productsValue) - finalDiscount + Number(deliveryFee);
+
+    // Re-valida o cupom aplicado sempre que o valor dos produtos mudar,
+    // pois a remoção/redução de itens pode fazer o pedido deixar de atender
+    // as regras do cupom (valor mínimo, etc).
+    useEffect(() => {
+        if (!appliedCoupon) return;
+
+        let isCurrent = true;
+
+        const revalidate = async () => {
+            try {
+                const response = await validateCoupon({
+                    code: appliedCoupon.code,
+                    store_id: adminData.store_id!,
+                    customerId: client_id || undefined,
+                    orderTotal: Number(productsValue)
+                });
+
+                if (!isCurrent) return;
+
+                if (response.data.valid) {
+                    if (response.data.discount_amount !== appliedCoupon.discount_amount) {
+                        setAppliedCoupon({
+                            ...appliedCoupon,
+                            discount_amount: response.data.discount_amount!
+                        });
+                    }
+                } else {
+                    setAppliedCoupon(null);
+                }
+            } catch {
+                if (isCurrent) setAppliedCoupon(null);
+            }
+        };
+
+        revalidate();
+
+        return () => {
+            isCurrent = false;
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [productsValue]);
 
     const onSubmitStep = async ({
         phone_number,
@@ -319,7 +405,9 @@ export function OnStoreOrder() {
         }
 
         // Calcula o desconto absoluto para enviar ao backend
-        const absoluteDiscountValue = calculateAbsoluteDiscount(Number(discount) || 0, Number(products_value));
+        const absoluteDiscountValue = appliedCoupon 
+            ? appliedCoupon.discount_amount 
+            : calculateAbsoluteDiscount(Number(discount) || 0, Number(products_value));
         const total = Number(products_value) - absoluteDiscountValue + Number(delivery_fee);
 
         const orderData = {
@@ -351,7 +439,11 @@ export function OnStoreOrder() {
             status: orderStatus,
             has_card,
             created_by,
-            products
+            products,
+            // Coupon data
+            coupon_code: appliedCoupon?.code || undefined,
+            coupon_id: appliedCoupon?.coupon_id || undefined,
+            coupon_discount_amount: appliedCoupon?.discount_amount || undefined
         }
 
         if (step === 1 || step === 2 || step === 3) {
@@ -682,6 +774,15 @@ export function OnStoreOrder() {
                 productImage={scannedProduct?.image || placeholder_products}
             />
 
+            <CouponSelector
+                isOpen={showCouponModal}
+                onRequestClose={handleCloseCouponModal}
+                onSelectCoupon={handleApplyCoupon}
+                orderTotal={Number(productsValue) + Number(deliveryFee)}
+                storeId={adminData.store_id!}
+                customerId={client_id || undefined}
+            />
+
             <Loader show={showLoader || clientSearchLoading} />
 
             {/* Stepper no topo */}
@@ -833,37 +934,99 @@ export function OnStoreOrder() {
                             </DiscountInputContainer>
                         </DiscountSection>
 
-                        {/* Tipo de Desconto */}
-                        <DiscountSection expanded={cartExpanded}>
-                            <DiscountLabel>
-                                Desconto
-                            </DiscountLabel>
-                            <DiscountInputContainer>
-                                <DiscountSwitch style={{ marginBottom: '12px', fontSize: '0.875rem' }}>
-                                    <span style={{ color: isPercentageDiscount ? "#5B5B5B" : "#EC4899" }}>R$</span>
-                                    <Input
-                                        id="discount-switch" 
-                                        type="checkbox" 
+                        {/* Discount and Coupon Section */}
+                        <DiscountSectionWrapper>
+                            {/* Manual Discount */}
+                            <SubsectionTitle>Desconto Manual</SubsectionTitle>
+                            <ManualDiscountContainer $active={!appliedCoupon}>
+                                <Divider />
+
+                                <DiscountSwitch>
+                                    <span style={{ color: !isPercentageDiscount ? "#EC4899" : "#5B5B5B" }}>R$</span>
+                                    <input
+                                        id="discount-switch"
+                                        type="checkbox"
                                         checked={isPercentageDiscount}
-                                        onChange={(e) => setIsPercentageDiscount(e.target.checked)}
+                                        onChange={() => setIsPercentageDiscount(!isPercentageDiscount)}
+                                        disabled={!!appliedCoupon}
+                                        style={{ display: 'none' }}
                                     />
                                     <DiscountSwitchLabel htmlFor="discount-switch" $checked={isPercentageDiscount} />
                                     <span style={{ color: isPercentageDiscount ? "#EC4899" : "#5B5B5B" }}>%</span>
                                 </DiscountSwitch>
-                                <DiscountInput
-                                    type="number" 
-                                    step="0.01" 
-                                    placeholder={isPercentageDiscount ? "0.00%" : "0.00"} 
-                                    defaultValue={0}
-                                    {...register("discount")} 
-                                />
-                            </DiscountInputContainer>
-                            {absoluteDiscount > 0 && (
+
+                                <DiscountInputContainer>
+                                    <DiscountInput
+                                        type="number"
+                                        step="0.01"
+                                        placeholder={isPercentageDiscount ? "0.00%" : "0.00"}
+                                        defaultValue={0}
+                                        {...register("discount")}
+                                        disabled={!!appliedCoupon}
+                                    />
+                                </DiscountInputContainer>
+                            </ManualDiscountContainer>
+
+                            {appliedCoupon && (
+                                <DisabledNote>
+                                    Remova o cupom para aplicar desconto manual
+                                </DisabledNote>
+                            )}
+                            
+                            {!appliedCoupon && absoluteDiscount > 0 && (
                                 <DiscountAppliedText>
-                                    Desconto aplicado: R$ {absoluteDiscount.toFixed(2)}
+                                    💰 Desconto aplicado: R$ {absoluteDiscount.toFixed(2)}
                                 </DiscountAppliedText>
                             )}
-                        </DiscountSection>
+
+                            {/* Coupon */}
+                            <CouponContainer $applied={!!appliedCoupon}>
+                                <CouponSectionHeader>
+                                    <SubsectionTitle>Cupom de Desconto</SubsectionTitle>
+
+                                    {appliedCoupon && (
+                                        <CouponActions>
+                                            <ChangeCouponButton
+                                                type="button"
+                                                onClick={handleOpenCouponModal}
+                                            >
+                                                ✏️
+                                            </ChangeCouponButton>
+                                            <RemoveCouponButton
+                                                type="button"
+                                                className="del-button"
+                                                onClick={handleRemoveCoupon}
+                                            >
+                                                <FontAwesomeIcon icon={faTrash as any} />
+                                            </RemoveCouponButton>
+                                        </CouponActions>
+                                    )}
+                                </CouponSectionHeader>
+
+                                {!appliedCoupon ? (
+                                    <>
+                                        <ApplyCouponButton
+                                            type="button"
+                                            onClick={handleOpenCouponModal}
+                                            disabled={discountInput > 0 || products.length === 0}
+                                        >
+                                            🎁 Aplicar Cupom
+                                        </ApplyCouponButton>
+
+                                        {discountInput > 0 && (
+                                            <DisabledNote>
+                                                Remova o desconto manual para aplicar cupom
+                                            </DisabledNote>
+                                        )}
+                                    </>
+                                ) : (
+                                    <AppliedCouponRow>
+                                        <CouponCode>🎁 {appliedCoupon.code}</CouponCode>
+                                        <CouponDiscountValue>R$ -{appliedCoupon.discount_amount.toFixed(2)}</CouponDiscountValue>
+                                    </AppliedCouponRow>
+                                )}
+                            </CouponContainer>
+                        </DiscountSectionWrapper>
 
                         {/* Total Final */}
                         <TotalSection expanded={cartExpanded}>
@@ -1342,7 +1505,7 @@ export function OnStoreOrder() {
                                         <span>R$ {Number(productsValue).toFixed(2)}</span>
                                     </div>
                                     <div className="summary-line">
-                                        <span>Desconto {isPercentageDiscount ? `(${Number(discountInput).toFixed(2)}%)` : ''}:</span>
+                                        <span>Desconto {appliedCoupon ? `(🎁 ${appliedCoupon.code})` : (isPercentageDiscount ? `(${Number(discountInput).toFixed(2)}%)` : '')}:</span>
                                         <span>- R$ {absoluteDiscount.toFixed(2)}</span>
                                     </div>
                                     <div className="summary-line">

@@ -17,18 +17,21 @@ import { faXmark, faReceipt, faBoxOpen, faUser, faWallet, faSave, faPlus, faMapM
 import { useOrders } from "../../contexts/OrdersContext";
 import { PAYMENT_METHODS, STATUS_LABEL } from "../../constants";
 import { updateOrder, updateStatus } from "../../services/orderService";
+import { getStoreId } from "../../services/api";
+import { IAppliedCoupon } from "../../services/couponService";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { searchStoreProducts } from "../../services/storeProductService";
 import { getPickupAddress } from "../../services/addressService";
 import { Loader } from "../Loader";
 import { ConfirmPopUp } from "../ConfirmPopUp";
 import { ChangeClientModal } from "../ChangeClientModal";
-import { 
+import { CouponSelector } from "../CouponSelector";
+import {
     ModernModalHeader,
     STATUS_COLORS,
-    Section, 
-    SectionHeader, 
-    ProductCard, 
+    Section,
+    SectionHeader,
+    ProductCard,
     AddProductButton,
     GridRow,
     ValueCard,
@@ -41,7 +44,10 @@ import {
     EditClientButton,
     TabsContainer,
     Tab,
-    TabContent
+    TabContent,
+    SectionHeaderRow,
+    CouponActionButton,
+    AppliedCouponInfo
 } from "./style";
 
 interface IEditOrderModal{
@@ -78,6 +84,9 @@ export function EditOrderModal({
 	const productRefs = useRef<Record<number, HTMLDivElement | null>>({});
 	const [showProductError, setShowProductError] = useState(false);
 	const [isConfirmCancelOpen, setIsConfirmCancelOpen] = useState(false);
+	const [isCouponSelectorOpen, setIsCouponSelectorOpen] = useState(false);
+	const [couponCode, setCouponCode] = useState<string | undefined>(undefined);
+	const [couponId, setCouponId] = useState<string | undefined>(undefined);
 
 	const handleOrder = async (formData: IOrder) => {
 		setShowLoader(true);
@@ -115,7 +124,9 @@ export function EditOrderModal({
 				country: formData.clientAddress.country
 			},
 			products,
-			is_delivery: order.is_delivery
+			is_delivery: order.is_delivery,
+			coupon_code: couponCode || null,
+			coupon_id: couponId || null
         }
 
 		const { data: orderData } = await updateOrder(data);
@@ -182,7 +193,21 @@ export function EditOrderModal({
 		setValue("pickup_on_store", order.pickup_on_store);
 		setPickupAddress(order.pickup_on_store);
 		setProducts(order.orderItems);
+		setCouponCode(order.coupon_code || undefined);
+		setCouponId(order.coupon_id || undefined);
     }, [order, setValue]);
+
+	const handleSelectCoupon = (coupon: IAppliedCoupon) => {
+		setCouponCode(coupon.code);
+		setCouponId(coupon.coupon_id);
+		setValue("discount", coupon.discount_amount);
+	};
+
+	const handleRemoveCoupon = () => {
+		setCouponCode(undefined);
+		setCouponId(undefined);
+		setValue("discount", 0);
+	};
 
 	useEffect(() => {
 		setValue("total", Number(watch("products_value")) - (Number(watch("discount")) || 0) + Number(watch("delivery_fee")));
@@ -668,10 +693,30 @@ export function EditOrderModal({
                     <TabContent active={activeTab === 2}>
                         <Section>
                             <SectionHeader>
-                                <div className="section-icon">
-                                    <FontAwesomeIcon icon={faWallet} />
-                                </div>
-                                <h3>Pagamento e Valores</h3>
+                                <SectionHeaderRow>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                        <div className="section-icon">
+                                            <FontAwesomeIcon icon={faWallet} />
+                                        </div>
+                                        <h3>Pagamento e Valores</h3>
+                                    </div>
+                                    {couponCode ? (
+                                        <CouponActionButton
+                                            type="button"
+                                            variant="remove"
+                                            onClick={handleRemoveCoupon}
+                                        >
+                                            Remover Cupom
+                                        </CouponActionButton>
+                                    ) : (
+                                        <CouponActionButton
+                                            type="button"
+                                            onClick={() => setIsCouponSelectorOpen(true)}
+                                        >
+                                            Aplicar Cupom
+                                        </CouponActionButton>
+                                    )}
+                                </SectionHeaderRow>
                             </SectionHeader>
 
                             <GridRow className="price-row">
@@ -703,6 +748,11 @@ export function EditOrderModal({
                                 <div>
                                     <Label>Desconto</Label>
                                     <Input type="number" step="0.01" {...register("discount")}/>
+                                    {couponCode && (
+                                        <AppliedCouponInfo>
+                                            🎁 {couponCode}
+                                        </AppliedCouponInfo>
+                                    )}
                                 </div>
                             </GridRow>
 
@@ -904,6 +954,15 @@ export function EditOrderModal({
 				isOpen={isChangeClientModalOpen}
 				onRequestClose={() => setIsChangeClientModalOpen(false)}
 				onSelectClient={handleSelectClient}
+			/>
+
+			<CouponSelector
+				isOpen={isCouponSelectorOpen}
+				onRequestClose={() => setIsCouponSelectorOpen(false)}
+				onSelectCoupon={handleSelectCoupon}
+				orderTotal={Number(watch("products_value") || 0) + Number(watch("delivery_fee") || 0)}
+				storeId={order.store_id || getStoreId() || ""}
+				customerId={order.client_id}
 			/>
         </Modal>
     )

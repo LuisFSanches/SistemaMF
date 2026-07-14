@@ -9,7 +9,7 @@ import {
     faReceipt,
     faHome,
     faWarehouse,
-    faCreditCard,
+    faTicket,
     faChartLine
 } from "@fortawesome/free-solid-svg-icons";
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
@@ -43,7 +43,7 @@ export function SideBar(){
         generalCatalog: false,
         produtosPais: false,
         motoboys: false,
-        planosAssinatura: false,
+        cupon: false,
         relatorios: false,
         relatoriosMenu: false,
         produtosVendidos: false
@@ -68,7 +68,8 @@ export function SideBar(){
                     "estoque": false,
                     "valoresAReceber": false,
                     "entregas": false,
-                    "motoboys": false
+                    "motoboys": false,
+                    'cupon': false,
                 })
             break;
             case 'pedidoBalcao':
@@ -88,7 +89,8 @@ export function SideBar(){
                     "estoque": false,
                     "valoresAReceber": false,
                     "entregas": false,
-                    "motoboys": false
+                    "motoboys": false,
+                    "cupon": false
                 })
             break;
             case 'ordensDeServico':
@@ -110,7 +112,8 @@ export function SideBar(){
                     "estoque": false,
                     "valoresAReceber": false,
                     "entregas": false,
-                    "motoboys": false
+                    "motoboys": false,
+                    "cupon": false
                 })
             break;
             case 'statistics':
@@ -130,7 +133,8 @@ export function SideBar(){
                     "estoque": false,
                     "valoresAReceber": false,
                     "entregas": false,
-                    "motoboys": false
+                    "motoboys": false,
+                    "cupon": false
                 })
             break;
 
@@ -151,7 +155,8 @@ export function SideBar(){
                     "estoque": false,
                     "valoresAReceber": false,
                     "entregas": false,
-                    "motoboys": false
+                    "motoboys": false,
+                    "cupon": false
                 })
             break;
 
@@ -172,7 +177,8 @@ export function SideBar(){
                     "estoque": false,
                     "valoresAReceber": false,
                     "entregas": false,
-                    "motoboys": false
+                    "motoboys": false,
+                    "cupon": false
                 })
             break;
 
@@ -194,7 +200,8 @@ export function SideBar(){
                     "estoque": false,
                     "valoresAReceber": false,
                     "entregas": false,
-                    "motoboys": false
+                    "motoboys": false,
+                    "cupon": false
                 })
             break;
 
@@ -216,7 +223,8 @@ export function SideBar(){
                     "estoque": false,
                     "valoresAReceber": false,
                     "entregas": false,
-                    "motoboys": false
+                    "motoboys": false,
+                    "cupon": false
                 })
             break;
 
@@ -245,7 +253,8 @@ export function SideBar(){
                     "meusProdutos": false,
                     "generalCatalog": false,
                     "produtosPais": false,
-                    "motoboys": false
+                    "motoboys": false,
+                    "cupon": false
                 })
             break;
 
@@ -267,7 +276,8 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "valoresAReceber": false,
                     "entregas": false,
-                    "motoboys": false
+                    "motoboys": false,
+                    "cupon": false
                 })
             break;
 
@@ -289,7 +299,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "entregas": false,
-                    "motoboys": false
+                    "motoboys": false,
+                    "cupon": false
                 })
             break;
 
@@ -311,7 +322,8 @@ export function SideBar(){
                     "pedidoOnline": false,
                     "aguardandoCliente": false,
                     "entregas": true,
-                    "motoboys": false
+                    "motoboys": false,
+                    "cupon": false
                 })
             break;
 
@@ -334,12 +346,11 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "entregas": false,
                     "motoboys": true,
-                    "planosAssinatura": false
+                    "cupon": false
                 })
             break;
 
-            case 'planos-assinatura':
-            case 'planosAssinatura':
+            case 'cupon':
                 setActive({...isActive,
                     'valoresAReceber':false,
                     'estoque':false,
@@ -358,7 +369,7 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "entregas": false,
                     "motoboys": false,
-                    "planosAssinatura": true,
+                    "cupon": true,
                     "relatorios": false,
                     "relatoriosMenu": false
                 })
@@ -385,7 +396,7 @@ export function SideBar(){
                     "aguardandoCliente": false,
                     "entregas": false,
                     "motoboys": false,
-                    "planosAssinatura": false,
+                    "cupon": false,
                     "relatorios": true,
                     "relatoriosMenu": true,
                     "produtosVendidos": name === 'relatorios/produtos' || name === 'produtosVendidos'
@@ -545,6 +556,18 @@ export function SideBar(){
                         </SideBarButton>
                     </SideBarItemContainer>
                 </NavLink>
+                <NavLink to="/backoffice/cupons">
+                    <SideBarItemContainer onClick={()=>handleActiveMenuButton('cupon')}>
+                        <SideBarButton
+                            isActive={isActive['cupon']}
+                            isMinimizedActive
+                            title="Cupons"
+                        >
+                            <FontAwesomeIcon icon={faTicket} className="Side-Bar-Icon"/>
+                            <span>Cupons</span>
+                        </SideBarButton>
+                    </SideBarItemContainer>
+                </NavLink>
                 <NavLink to="/backoffice/motoboys">
                     <SideBarItemContainer onClick={()=>handleActiveMenuButton('motoboys')}>
                         <SideBarButton
@@ -602,21 +625,6 @@ export function SideBar(){
                         </NavLink>
                     </div>
                 </SideBarItemContainer>
-
-                {adminData.role === 'SYS_ADMIN' && (
-                    <NavLink to="/backoffice/planos-assinatura">
-                        <SideBarItemContainer onClick={()=>handleActiveMenuButton('planosAssinatura')}>
-                            <SideBarButton
-                                isActive={isActive['planosAssinatura']}
-                                isMinimizedActive
-                                title="Planos de Assinatura"
-                            >
-                                <FontAwesomeIcon icon={faCreditCard} className="Side-Bar-Icon"/>
-                                <span>Planos</span>
-                            </SideBarButton>
-                        </SideBarItemContainer>
-                    </NavLink>
-                )}
 
                 <CompanyInfoContainer
                     isMinimizedActive

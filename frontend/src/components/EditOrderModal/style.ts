@@ -562,3 +562,48 @@ export const TabContent = styled.div<{ active: boolean }>`
         }
     }
 `;
+
+export const SectionHeaderRow = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+`;
+
+export const CouponActionButton = styled.button<{ variant?: 'apply' | 'remove' }>`
+    border: none;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: ${props => props.variant === 'remove'
+        ? '#dc3545'
+        : 'linear-gradient(135deg, var(--primary-color), #ec4899)'};
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px ${props => props.variant === 'remove'
+            ? 'rgba(220, 53, 69, 0.3)'
+            : 'rgba(233, 85, 120, 0.3)'};
+    }
+`;
+
+export const AppliedCouponInfo = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.625rem 1rem;
+    background: #fafafa;
+    border: 2px solid #f0f0f0;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-body);
+`;

@@ -102,7 +102,7 @@ interface INewOrder {
 export function Checkout() {
     const navigate = useNavigate();
     const { slug } = useParams<{ slug: string }>();
-    const { cartItems, cartTotal, deliveryInfo, isDeliveryCalculated } = useCart();
+    const { cartItems, cartTotal, deliveryInfo, isDeliveryCalculated, appliedCoupon } = useCart();
     const { trackPageView, trackBeginCheckout, trackAddShippingInfo } = useGTM();
     const [showLoader, setShowLoader] = useState(false);
     const [mask, setMask] = useState("(99) 99999-9999");
@@ -148,7 +148,8 @@ export function Checkout() {
     }, [cartItems, cartTotal, trackBeginCheckout]);
 
     const deliveryFee = pickupOnStore ? 0 : (deliveryInfo?.fee ?? 0);
-    const totalWithDelivery = cartTotal + deliveryFee;
+    const couponDiscount = appliedCoupon?.discount_amount ?? 0;
+    const totalWithDelivery = cartTotal + deliveryFee - couponDiscount;
 
     // GTM - Track Add Shipping Info quando endereço for selecionado/preenchido
     useEffect(() => {
@@ -318,7 +319,7 @@ export function Checkout() {
             payment_method: "MERCADO_PAGO",
             payment_received: false,
             products_value: cartTotal,
-            discount: 0,
+            discount: couponDiscount,
             delivery_fee: deliveryFee,
             total: totalWithDelivery,
             status: 'PENDING_PAYMENT',
@@ -326,6 +327,8 @@ export function Checkout() {
             is_delivery: !pickupOnStore,
             online_order: false,
             store_front_order: true,
+            coupon_code: appliedCoupon?.code,
+            coupon_id: appliedCoupon?.coupon_id,
         };
 
         try {
@@ -338,18 +341,41 @@ export function Checkout() {
             if (slug) {
                 try {
                     const baseUrl = window.location.origin;
-                    
+
+                    // Aplica o desconto do cupom proporcionalmente ao preço de cada item,
+                    // já que a preferência do Mercado Pago não possui campo de desconto.
+                    const discountRatio = cartTotal > 0 ? couponDiscount / cartTotal : 0;
+                    const discountedItems = cartItems.map(item => ({
+                        ...item,
+                        discountedUnitPrice: Math.round((item.price || 0) * (1 - discountRatio) * 100) / 100
+                    }));
+
+                    if (couponDiscount > 0 && discountedItems.length > 0) {
+                        const roundedTotal = discountedItems.reduce(
+                            (sum, item) => sum + item.discountedUnitPrice * item.quantity, 0
+                        );
+                        const expectedTotal = Math.round((cartTotal - couponDiscount) * 100) / 100;
+                        const roundingDiff = Math.round((expectedTotal - roundedTotal) * 100) / 100;
+
+                        if (roundingDiff !== 0) {
+                            const lastItem = discountedItems[discountedItems.length - 1];
+                            lastItem.discountedUnitPrice = Math.round(
+                                (lastItem.discountedUnitPrice + roundingDiff / lastItem.quantity) * 100
+                            ) / 100;
+                        }
+                    }
+
                     const preferenceData = {
                         order_id: response.id,
                         store_slug: slug,
                         order_email: data.email,
-                        items: cartItems.map(item => ({
+                        items: discountedItems.map(item => ({
                             id: item.id || '',
                             title: item.name,
                             description: item.name,
                             picture_url: item.image,
                             quantity: item.quantity,
-                            unit_price: item.price || 0,
+                            unit_price: item.discountedUnitPrice,
                             currency_id: 'BRL'
                         })),
                         shipments: {
@@ -1290,6 +1316,12 @@ export function Checkout() {
                                 <span>Taxa de Entrega:</span>
                                 <span>{convertMoney(deliveryFee)}</span>
                             </SummaryRow>
+                            {appliedCoupon && couponDiscount > 0 && (
+                                <SummaryRow>
+                                    <span>Desconto ({appliedCoupon.code}):</span>
+                                    <span>-{convertMoney(couponDiscount)}</span>
+                                </SummaryRow>
+                            )}
                             <SummaryRow className="total">
                                 <span>Total:</span>
                                 <span>{convertMoney(totalWithDelivery)}</span>

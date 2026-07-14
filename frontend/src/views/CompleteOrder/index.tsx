@@ -424,10 +424,20 @@ export function CompleteOrder() {
                                     convertMoney(currentOrder?.products_value as number)
                                 }</p>
                                 {(discount > 0) &&
-                                    <p className="discount-value"><strong>Desconto: </strong>
-                                        {
-                                            convertMoney(currentOrder?.discount as number)
-                                        }
+                                    <p className="discount-value">
+                                        <strong>Desconto
+                                            {currentOrder?.coupon_code && (
+                                                <span style={{ 
+                                                    marginLeft: '0.5rem',
+                                                    color: '#EC4899',
+                                                    fontWeight: 600,
+                                                    fontSize: '0.9em'
+                                                }}>
+                                                    (🎁 Cupom: {currentOrder.coupon_code})
+                                                </span>
+                                            )}
+                                        </strong>
+                                        {convertMoney(currentOrder?.discount as number)}
                                     </p>
                                 }
                                 <p><strong>Taxa de entrega: </strong> {
