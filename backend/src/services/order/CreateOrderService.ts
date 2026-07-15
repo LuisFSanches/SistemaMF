@@ -3,10 +3,13 @@ import { IOrder } from "../../interfaces/IOrder";
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
+import { ApplyCouponService } from "../coupon/ApplyCouponService";
 
 class CreateOrderService{
 	async execute(data: IOrder, products: any, store_id?: string, store_slug?: string) {
 		const { delivery_date } = data;
+
+		console.log('final data', data)
 
 		try {
 			let resolvedStoreId = store_id;
@@ -69,6 +72,19 @@ class CreateOrderService{
           			clientAddress: true
 				}
 		})
+
+		if (data.coupon_id) {
+			try {
+				await new ApplyCouponService().execute({
+					couponId: data.coupon_id,
+					customerId: order.client_id,
+					orderId: order.id,
+					discountAmount: Number(data.discount) || 0,
+				});
+			} catch (couponError: any) {
+				console.error("[CreateOrderService] Failed to apply coupon usage:", couponError);
+			}
+		}
 
 		return order;
 

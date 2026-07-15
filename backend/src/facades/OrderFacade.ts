@@ -88,6 +88,8 @@ class OrderFacade {
             address_id = addresses[0]?.id;
         }
 
+        console.log('coupon_code', data.coupon_code)
+
         const order = await this.createOrderService.execute(
             {
                 description: data.description,
@@ -116,7 +118,9 @@ class OrderFacade {
                 online_code: data.online_code,
                 is_delivery: data.is_delivery,
                 store_id,
-                order_email: data.order_email
+                order_email: data.order_email,
+                coupon_code: data.coupon_code || null,
+                coupon_id: data.coupon_id || null,
             },
             data.products,
             store_id,

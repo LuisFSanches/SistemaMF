@@ -15,6 +15,12 @@ export interface IDeliveryInfo {
     street: string;
 }
 
+export interface IAppliedCoupon {
+    code: string;
+    coupon_id: string;
+    discount_amount: number;
+}
+
 interface CartContextType {
     cartItems: ICartProduct[];
     cartCount: number;
@@ -22,12 +28,15 @@ interface CartContextType {
     observations: string;
     deliveryInfo: IDeliveryInfo | null;
     isDeliveryCalculated: boolean;
+    appliedCoupon: IAppliedCoupon | null;
     addToCart: (product: IProduct, quantity: number) => void;
     removeFromCart: (productId: string) => void;
     updateQuantity: (productId: string, quantity: number) => void;
     setObservations: (observations: string) => void;
     setDeliveryInfo: (info: IDeliveryInfo) => void;
     clearDeliveryInfo: () => void;
+    applyCoupon: (coupon: IAppliedCoupon) => void;
+    removeCoupon: () => void;
     clearCart: () => void;
 }
 
@@ -78,6 +87,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ slug, children }) =>
         return getWithExpiry<IDeliveryInfo>(key("cart_delivery_info")) ?? null;
     });
 
+    const [appliedCoupon, setAppliedCoupon] = useState<IAppliedCoupon | null>(() => {
+        return getWithExpiry<IAppliedCoupon>(key("cart_coupon")) ?? null;
+    });
+
     useEffect(() => {
         saveWithExpiry(key("cart"), cartItems);
     }, [cartItems]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -93,6 +106,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ slug, children }) =>
             localStorage.removeItem(key("cart_delivery_info"));
         }
     }, [deliveryInfo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        if (appliedCoupon) {
+            saveWithExpiry(key("cart_coupon"), appliedCoupon);
+        } else {
+            localStorage.removeItem(key("cart_coupon"));
+        }
+    }, [appliedCoupon]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const isDeliveryCalculated = deliveryInfo !== null;
 
@@ -147,13 +168,23 @@ export const CartProvider: React.FC<CartProviderProps> = ({ slug, children }) =>
         setDeliveryInfoState(null);
     };
 
+    const applyCoupon = (coupon: IAppliedCoupon) => {
+        setAppliedCoupon(coupon);
+    };
+
+    const removeCoupon = () => {
+        setAppliedCoupon(null);
+    };
+
     const clearCart = () => {
         setCartItems([]);
         setObservations("");
         setDeliveryInfoState(null);
+        setAppliedCoupon(null);
         localStorage.removeItem(key("cart"));
         localStorage.removeItem(key("cart_observations"));
         localStorage.removeItem(key("cart_delivery_info"));
+        localStorage.removeItem(key("cart_coupon"));
     };
 
     return (
@@ -165,12 +196,15 @@ export const CartProvider: React.FC<CartProviderProps> = ({ slug, children }) =>
                 observations,
                 deliveryInfo,
                 isDeliveryCalculated,
+                appliedCoupon,
                 addToCart,
                 removeFromCart,
                 updateQuantity,
                 setObservations,
                 setDeliveryInfo,
                 clearDeliveryInfo,
+                applyCoupon,
+                removeCoupon,
                 clearCart,
             }}
         >
