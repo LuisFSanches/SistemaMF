@@ -184,23 +184,32 @@ import { MercadoPagoWebhookController } from './controllers/mercadoPago/MercadoP
 import { TestMercadoPagoWebhookController } from './controllers/mercadoPago/TestMercadoPagoWebhookController';
 import { GetMercadoPagoPaymentStatusController } from './controllers/mercadoPago/GetMercadoPagoPaymentStatusController';
 
+// Coupon Controllers
+import { CreateCouponController } from './controllers/coupon/CreateCouponController';
+import { ListCouponsController } from './controllers/coupon/ListCouponsController';
+import { GetCouponDetailsController } from './controllers/coupon/GetCouponDetailsController';
+import { UpdateCouponController } from './controllers/coupon/UpdateCouponController';
+import { DeleteCouponController } from './controllers/coupon/DeleteCouponController';
+import { GetCouponUsageHistoryController } from './controllers/coupon/GetCouponUsageHistoryController';
+import { ValidateCouponController } from './controllers/coupon/ValidateCouponController';
+
 // Subscription Controllers
-import { CreateSubscriptionPlanController } from './controllers/subscription/CreateSubscriptionPlanController';
-import { GetAllSubscriptionPlansController } from './controllers/subscription/GetAllSubscriptionPlansController';
-import { GetSubscriptionPlanController } from './controllers/subscription/GetSubscriptionPlanController';
-import { UpdateSubscriptionPlanController } from './controllers/subscription/UpdateSubscriptionPlanController';
+// import { CreateSubscriptionPlanController } from './controllers/subscription/CreateSubscriptionPlanController';
+// import { GetAllSubscriptionPlansController } from './controllers/subscription/GetAllSubscriptionPlansController';
+// import { GetSubscriptionPlanController } from './controllers/subscription/GetSubscriptionPlanController';
+/*import { UpdateSubscriptionPlanController } from './controllers/subscription/UpdateSubscriptionPlanController';
 import { DeleteSubscriptionPlanController } from './controllers/subscription/DeleteSubscriptionPlanController';
 import { CreateSubscriptionController } from './controllers/subscription/CreateSubscriptionController';
 import { CheckSubscriptionStatusController } from './controllers/subscription/CheckSubscriptionStatusController';
 import { UpdateSubscriptionController } from './controllers/subscription/UpdateSubscriptionController';
 import { CancelSubscriptionController } from './controllers/subscription/CancelSubscriptionController';
 import { GetStoreSubscriptionBillingController } from './controllers/subscription/GetStoreSubscriptionBillingController';
-
+*/
 import adminAuthMiddleware from './middlewares/admin_auth';
 import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 import sysAdminAuthMiddleware from './middlewares/sys_admin_auth';
-import subscriptionAuthMiddleware from './middlewares/subscription_auth';
-import subscriptionWarningMiddleware from './middlewares/subscription_warning';
+// import subscriptionAuthMiddleware from './middlewares/subscription_auth';
+// import subscriptionWarningMiddleware from './middlewares/subscription_warning';
 import { upload, uploadStore, uploadCategory, uploadExcel } from './config/multer';
 import { processImage } from './middlewares/process_image';
 import { processBannerImage } from './middlewares/process_banner_image';
@@ -454,5 +463,16 @@ router.get('/mercadopago/payment/status', new GetMercadoPagoPaymentStatusControl
 
 //-- ROTAS PÚBLICAS PARA PLANOS (STOREFRONT) --
 //router.get('/subscription/public/plans', new GetAllSubscriptionPlansController().handle);
+
+//-- ROTAS COUPON (ADMIN) --
+router.post('/admin/coupons', adminAuthMiddleware, new CreateCouponController().handle);
+router.get('/admin/coupons', adminAuthMiddleware, new ListCouponsController().handle);
+router.get('/admin/coupons/:id', adminAuthMiddleware, new GetCouponDetailsController().handle);
+router.put('/admin/coupons/:id', adminAuthMiddleware, new UpdateCouponController().handle);
+router.delete('/admin/coupons/:id', adminAuthMiddleware, new DeleteCouponController().handle);
+router.get('/admin/coupons/:id/history', adminAuthMiddleware, new GetCouponUsageHistoryController().handle);
+
+//-- ROTAS COUPON (STORE) --
+router.post('/store/coupons/validate', new ValidateCouponController().handle);
 
 export { router };
