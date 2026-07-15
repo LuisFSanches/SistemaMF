@@ -144,7 +144,7 @@ class CreateMercadoPagoPreferenceService {
 
             // Definir PIX como método de pagamento padrão
             preferenceData.payment_methods = {
-                default_payment_method_id: 'visa',
+                default_payment_method_id: 'pix',
                 excluded_payment_methods: [],
                 excluded_payment_types: [],
             };
