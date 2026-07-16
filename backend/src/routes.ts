@@ -129,6 +129,9 @@ import { UploadStoreLogoController } from './controllers/store/UploadStoreLogoCo
 import { UploadStoreBannerController } from './controllers/store/UploadStoreBannerController';
 import { UploadStoreBanner2Controller } from './controllers/store/UploadStoreBanner2Controller';
 import { UploadStoreBanner3Controller } from './controllers/store/UploadStoreBanner3Controller';
+import { UploadStoreBannerMobileController } from './controllers/store/UploadStoreBannerMobileController';
+import { UploadStoreBannerMobile2Controller } from './controllers/store/UploadStoreBannerMobile2Controller';
+import { UploadStoreBannerMobile3Controller } from './controllers/store/UploadStoreBannerMobile3Controller';
 
 import { CreateStoreProductController } from './controllers/storeProduct/CreateStoreProductController';
 import { GetAllStoreProductsController } from './controllers/storeProduct/GetAllStoreProductsController';
@@ -401,6 +404,9 @@ router.post('/store/:id/logo', superAdminAuthMiddleware, uploadStore.single('log
 router.post('/store/:id/banner', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processBannerImage, new UploadStoreBannerController().handle);
 router.post('/store/:id/banner-2', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processBannerImage, new UploadStoreBanner2Controller().handle);
 router.post('/store/:id/banner-3', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processBannerImage, new UploadStoreBanner3Controller().handle);
+router.post('/store/:id/banner-mobile', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processBannerImage, new UploadStoreBannerMobileController().handle);
+router.post('/store/:id/banner-mobile-2', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processBannerImage, new UploadStoreBannerMobile2Controller().handle);
+router.post('/store/:id/banner-mobile-3', superAdminAuthMiddleware, uploadStore.single('banner'), handleMulterError, processBannerImage, new UploadStoreBannerMobile3Controller().handle);
 
 //-- ROTAS STORE ADDRESS --
 router.post('/storeAddress', adminAuthMiddleware, new CreateStoreAddressController().handle);

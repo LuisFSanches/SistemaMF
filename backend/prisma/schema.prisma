@@ -371,6 +371,9 @@ model Store {
   banner           String?
   banner_2         String?
   banner_3         String?
+  banner_mobile    String?
+  banner_mobile_2  String?
+  banner_mobile_3  String?
   
   // Configurações de entrega
   max_delivery_days_advance Int? @default(30) // Número máximo de dias de antecedência para escolher data de entrega
