@@ -32,9 +32,13 @@ export const ClickableArea = styled.div`
 
 export const ProductImage = styled.img`
     width: 100%;
-    height: 100px;
-    object-fit: contain;
-    margin-top: 12px;
+    height: 180px;
+    object-fit: fill;
+
+    @media (max-width: 768px) {
+        height: 130px;
+        object-fit: unset;
+    }
 `;
 
 export const Info = styled.div`
@@ -48,9 +52,9 @@ export const Info = styled.div`
 export const ProductName = styled.h3`
     min-height: 42px;
     font-size: 16px;
-    margin: 0 0 8px;
+    margin: 12px 0 8px;
     padding: 0 16px;
-    margin-top: 8px;
+    text-align: center;
 
     @media (max-width: 768px) {
         font-size: 14px;
@@ -75,11 +79,12 @@ export const PriceInput = styled.input`
 `;
 
 export const PriceDisplay = styled.div`
-    font-size: 1.2rem;
+    font-size: 1.6rem;
     font-weight: bold;
     color: #EC4899;
     margin-bottom: 12px;
     padding: 0 16px;
+    text-align: center;
 `;
 
 export const MoneySign = styled.span`
@@ -101,8 +106,8 @@ export const QuantityControl = styled.div`
 `;
 
 export const QuantityButton = styled.button`
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     background-color: #EC4899;
     color: #fff;
     border: none;
@@ -120,10 +125,14 @@ export const QuantityButton = styled.button`
     &:hover {
         background-color: #db277f;
     }
+
+    @media (max-width: 768px) {
+        width: 28px;
+        height: 28px;
+    }
 `;
 
 export const QuantityInput = styled.input`
-    width: 40px;
     padding: 6px 2px;
     font-size: 1rem;
     border-radius: 6px;
@@ -140,19 +149,26 @@ export const QuantityInput = styled.input`
 `;
 
 export const AddButton = styled.button`
+    width: 100%;
     padding: 8px 12px;
     background-color: #EC4899 !important;
     color: #fff;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    margin-top: 0px !important;
+    margin-top: 10px !important;
     font-weight: bold;
+    font-size: 1.1rem;
 
+    @media (max-width: 768px) {
+        width: 90%;
+        margin-top: 0px !important;
+    }
 `;
 
 export const BottomActions = styled.div`
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: space-between;
 
