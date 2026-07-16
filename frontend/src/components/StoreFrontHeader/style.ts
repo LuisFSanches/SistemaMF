@@ -13,8 +13,9 @@ export const Header = styled.header`
         border-bottom: 1px solid #e0e0e0;
 
     @media (max-width: 768px) {
-        padding: 15px 20px;
+        padding: 15px 15px;
         flex-wrap: wrap;
+        gap: 10px;
     }
 `;
 
@@ -25,10 +26,8 @@ export const SearchContainer = styled.div`
     position: relative;
 
     @media (max-width: 768px) {
-        order: 3;
-        flex-basis: 100%;
         max-width: 100%;
-        margin: 10px 0 0 0;
+        margin: 0;
     }
 `;
 
