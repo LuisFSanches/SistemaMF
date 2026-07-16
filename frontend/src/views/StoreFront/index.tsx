@@ -19,7 +19,7 @@ import { GoogleRating } from "../../components/GoogleRating";
 import { StoreFrontFooter } from "../../components/StoreFrontFooter";
 import { CookieConsent } from "../../components/CookieConsent";
 import placeholder_products from "../../assets/images/placeholder_products.png";
-import whatsappButtonIcon from "../../assets/icons/whatsapp_button.png";
+import supportAvatar from "../../assets/images/support_avatar.png";
 import {
     Container,
     Content,
@@ -29,7 +29,9 @@ import {
     SessionTitle,
     SessionContent,
     ReviewSession,
-    FloatingWhatsAppButton
+    FloatingWhatsAppButton,
+    WhatsAppBubble,
+    WhatsAppAvatarWrapper
 } from "./style";
 
 interface Schedule {
@@ -342,7 +344,20 @@ export function StoreFront() {
             
             {store?.phone_number && (
                 <FloatingWhatsAppButton onClick={handleWhatsAppClick} aria-label="Entrar em contato via WhatsApp">
-                    <img src={whatsappButtonIcon} alt="WhatsApp" />
+                    <WhatsAppBubble className="whatsapp-bubble">
+                        <strong>Precisa de ajuda?</strong>
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.148.198 2.095 3.2 5.076 4.487.71.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                                <path d="M12.004 2.003c-5.514 0-9.997 4.483-9.997 9.997 0 1.762.462 3.484 1.34 5.003l-1.425 5.201 5.325-1.397a9.958 9.958 0 004.757 1.211h.005c5.514 0 9.997-4.483 9.997-9.997 0-2.67-1.04-5.182-2.928-7.07a9.938 9.938 0 00-7.074-2.948zm0 18.187h-.004a8.194 8.194 0 01-4.176-1.14l-.3-.178-3.16.829.843-3.08-.195-.316a8.183 8.183 0 01-1.259-4.395c0-4.523 3.68-8.203 8.204-8.203a8.148 8.148 0 015.804 2.406 8.148 8.148 0 012.398 5.802c0 4.523-3.68 8.203-8.155 8.203z" />
+                            </svg>
+                            Fale com um atendente
+                        </span>
+                    </WhatsAppBubble>
+                    <WhatsAppAvatarWrapper className="whatsapp-avatar">
+                        <img src={supportAvatar} alt="Suporte via WhatsApp" />
+                        <span className="whatsapp-status-dot" />
+                    </WhatsAppAvatarWrapper>
                 </FloatingWhatsAppButton>
             )}
             

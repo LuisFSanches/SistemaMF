@@ -147,30 +147,97 @@ export const SessionContent = styled.div`
 export const FloatingWhatsAppButton = styled.button`
     position: fixed;
     bottom: 30px;
-    right: 30px;
-    width: 65px;
-    height: 65px;
+    right: 20px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 10px;
     background: transparent;
     border: none;
     cursor: pointer;
     z-index: 999;
-    transition: transform 0.3s ease;
     padding: 0;
 
-    &:hover {
-        transform: scale(1.1);
+    &:hover .whatsapp-bubble {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
     }
 
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
+    &:hover .whatsapp-avatar {
+        transform: scale(1.06);
     }
 
     @media (max-width: 768px) {
         bottom: 20px;
         right: 20px;
-        width: 55px;
-        height: 55px;
+        gap: 8px;
+    }
+`;
+
+export const WhatsAppBubble = styled.span`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: #25d366;
+    color: #fff;
+    padding: 8px 16px 8px 14px;
+    border-radius: 18px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    text-align: left;
+    line-height: 1.25;
+
+    strong {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        opacity: 0.95;
+    }
+
+    svg {
+        width: 13px;
+        height: 13px;
+        flex-shrink: 0;
+    }
+`;
+
+export const WhatsAppAvatarWrapper = styled.span`
+    position: relative;
+    width: 75px;
+    height: 75px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    transition: transform 0.25s ease;
+
+    .whatsapp-status-dot {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 16px;
+        height: 16px;
+        background: #25d366;
+        border: 2px solid #fff;
+        border-radius: 50%;
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    @media (max-width: 768px) {
+        width: 70px;
+        height: 70px;
     }
 `;
