@@ -8,6 +8,7 @@ import { OrderDeliveriesTable } from "../../components/OrderDeliveriesTable";
 import { Pagination } from "../../components/Pagination";
 import { DateRangePicker } from "../../components/DateRangePicker";
 import { ConfirmPopUp } from "../../components/ConfirmPopUp";
+import { DeliveryManSelect } from "../../components/DeliveryManSelect";
 import {
     Container,
     ButtonsContainer,
@@ -27,6 +28,7 @@ export function OrderDeliveriesPage() {
     const [query, setQuery] = useState('');
     const [startDate, setStartDate] = useState<string | null>(null);
     const [endDate, setEndDate] = useState<string | null>(null);
+    const [deliveryManId, setDeliveryManId] = useState<string>('');
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [confirmBulkPayModal, setConfirmBulkPayModal] = useState(false);
     const [confirmBulkArchiveModal, setConfirmBulkArchiveModal] = useState(false);
@@ -34,10 +36,10 @@ export function OrderDeliveriesPage() {
     const pageSize = 45;
 
     useEffect(() => {
-        loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate);
+        loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate, deliveryManId);
         setSelectedIds([]);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, query, filter, startDate, endDate]);
+    }, [page, query, filter, startDate, endDate, deliveryManId]);
 
 
 
@@ -68,7 +70,7 @@ export function OrderDeliveriesPage() {
     const handleBulkPay = async () => {
         try {
             await bulkUpdateOrderDeliveries(selectedIds, { is_paid: true });
-            await loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate);
+            await loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate, deliveryManId);
             setSelectedIds([]);
             setConfirmBulkPayModal(false);
             showSuccess(`${selectedIds.length} entrega(s) marcada(s) como paga(s)!`);
@@ -81,7 +83,7 @@ export function OrderDeliveriesPage() {
     const handleBulkArchive = async () => {
         try {
             await bulkUpdateOrderDeliveries(selectedIds, { is_archived: true });
-            await loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate);
+            await loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate, deliveryManId);
             setSelectedIds([]);
             setConfirmBulkArchiveModal(false);
             showSuccess(`${selectedIds.length} entrega(s) arquivada(s)!`);
@@ -94,7 +96,7 @@ export function OrderDeliveriesPage() {
     const handleBulkUnarchive = async () => {
         try {
             await bulkUpdateOrderDeliveries(selectedIds, { is_archived: false });
-            await loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate);
+            await loadOrderDeliveries(page, pageSize, query, filter, startDate, endDate, deliveryManId);
             setSelectedIds([]);
             setConfirmBulkUnarchiveModal(false);
             showSuccess(`${selectedIds.length} entrega(s) desarquivada(s)!`);
@@ -153,6 +155,14 @@ export function OrderDeliveriesPage() {
                     </FilterToggleContainer>
 
                     <DateRangePicker onDateRangeChange={handleDateRangeChange} />
+
+                    <DeliveryManSelect
+                        value={deliveryManId}
+                        onChange={(id) => {
+                            setDeliveryManId(id);
+                            setPage(1);
+                        }}
+                    />
                 </ButtonsContainer>
                 <div>
                     <Pagination

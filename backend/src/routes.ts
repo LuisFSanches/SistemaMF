@@ -90,6 +90,7 @@ import { GetAllSuppliersController } from './controllers/supplier/GetAllSupplier
 
 import { CreateDeliveryManController } from './controllers/deliveryMan/CreateDeliveryManController';
 import { GetAllDeliveryMenController } from './controllers/deliveryMan/GetAllDeliveryMenController';
+import { ListDeliveryMenController } from './controllers/deliveryMan/ListDeliveryMenController';
 import { GetDeliveryManController } from './controllers/deliveryMan/GetDeliveryManController';
 import { GetDeliveryManByPhoneController } from './controllers/deliveryMan/GetDeliveryManByPhoneController';
 import { UpdateDeliveryManController } from './controllers/deliveryMan/UpdateDeliveryManController';
@@ -360,6 +361,7 @@ router.get('/supplier/all', adminAuthMiddleware, new GetAllSuppliersController()
 //-- ROTAS DELIVERY MEN --
 router.post('/deliveryMan', adminAuthMiddleware, new CreateDeliveryManController().handle);
 router.get('/deliveryMan/all', adminAuthMiddleware, new GetAllDeliveryMenController().handle);
+router.get('/deliveryMan/list', adminAuthMiddleware, new ListDeliveryMenController().handle);
 router.get('/deliveryMan/phone_code', new GetDeliveryManByPhoneController().handle);
 router.get('/deliveryMan/:id', adminAuthMiddleware, new GetDeliveryManController().handle);
 router.put('/deliveryMan/:id', adminAuthMiddleware, new UpdateDeliveryManController().handle);

@@ -10,6 +10,7 @@ import { ProductsProvider } from './contexts/ProductsContext';
 import { SuccessMessageProvider } from './contexts/SuccessMessageContext';
 import { OrdersToReceiveProvider } from './contexts/OrdersToReceiveContext';
 import { OrderDeliveriesProvider } from './contexts/OrderDeliveriesContext';
+import { DeliveryMenProvider } from './contexts/DeliveryMenContext';
 import { CategoriesProvider } from './contexts/CategoriesContext';
 // import { SubscriptionProvider } from './contexts/SubscriptionContext';
 
@@ -21,15 +22,17 @@ ReactDOM.render(
 					<OrdersProvider>
 						<OrdersToReceiveProvider>
 							<OrderDeliveriesProvider>
-								<ProductsProvider>
-									<CategoriesProvider>
-										{/* <SubscriptionProvider> */}
-											<SuccessMessageProvider>
-												<Routes/>
-											</SuccessMessageProvider>
-										{/* </SubscriptionProvider> */}
-									</CategoriesProvider>
-								</ProductsProvider>
+								<DeliveryMenProvider>
+									<ProductsProvider>
+										<CategoriesProvider>
+											{/* <SubscriptionProvider> */}
+												<SuccessMessageProvider>
+													<Routes/>
+												</SuccessMessageProvider>
+											{/* </SubscriptionProvider> */}
+										</CategoriesProvider>
+									</ProductsProvider>
+								</DeliveryMenProvider>
 							</OrderDeliveriesProvider>
 						</OrdersToReceiveProvider>
 					</OrdersProvider>

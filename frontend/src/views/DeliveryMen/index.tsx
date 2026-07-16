@@ -7,11 +7,13 @@ import { faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
 import { DeliveryManModal } from "../../components/DeliveryManModal";
 import { Pagination } from "../../components/Pagination";
 import { listDeliveryMen } from "../../services/deliveryManService";
+import { useDeliveryMen } from "../../contexts/DeliveryMenContext";
 import { IDeliveryMan } from "../../interfaces/IDeliveryMan";
 import { Container } from "./style";
 
 export function DeliveryMenPage() {
     const navigate = useNavigate();
+    const { loadDeliveryMen: refreshDeliveryMenList } = useDeliveryMen();
     const [deliveryMen, setDeliveryMen] = useState<IDeliveryMan[]>([]);
     const [totalDeliveryMen, setTotalDeliveryMen] = useState(0);
     const [deliveryManModal, setDeliveryManModal] = useState(false);
@@ -48,6 +50,7 @@ export function DeliveryMenPage() {
         } catch (error) {
             console.error("Erro ao carregar motoboys:", error);
         }
+        refreshDeliveryMenList();
     }
 
     useEffect(() => {

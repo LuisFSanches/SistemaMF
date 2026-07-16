@@ -2,7 +2,13 @@ import { api, getStoreId } from "./api";
 
 export const listDeliveryMen = async (page: number, pageSize: number, query: string) => {
         const response = await api.get(`/deliveryMan/all?page=${page}&pageSize=${pageSize}&query=${query}`);
-        
+
+        return response;
+};
+
+export const listAllDeliveryMen = async () => {
+        const response = await api.get(`/deliveryMan/list`);
+
         return response;
 };
 

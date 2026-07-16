@@ -11,7 +11,7 @@ import { IOrderDelivery, ICreateOrderDelivery, IUpdateOrderDelivery } from "../i
 interface OrderDeliveriesContextType {
     orderDeliveries: IOrderDelivery[];
     totalDeliveries: number;
-    loadOrderDeliveries: (page: number, pageSize: number, query: string, filter?: string, startDate?: string | null, endDate?: string | null) => Promise<void>;
+    loadOrderDeliveries: (page: number, pageSize: number, query: string, filter?: string, startDate?: string | null, endDate?: string | null, deliveryManId?: string | null) => Promise<void>;
     createOrderDelivery: (data: ICreateOrderDelivery) => Promise<void>;
     updateOrderDelivery: (id: string, data: IUpdateOrderDelivery) => Promise<void>;
     deleteOrderDelivery: (id: string) => Promise<void>;
@@ -26,10 +26,10 @@ export const OrderDeliveriesProvider: React.FC = ({ children }) => {
     const [totalDeliveries, setTotalDeliveries] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
 
-    const loadOrderDeliveries = async (page: number, pageSize: number, query: string, filter?: string, startDate?: string | null, endDate?: string | null) => {
+    const loadOrderDeliveries = async (page: number, pageSize: number, query: string, filter?: string, startDate?: string | null, endDate?: string | null, deliveryManId?: string | null) => {
         setIsLoading(true);
         try {
-            const { orderDeliveries, total } = await getAllOrderDeliveries(page, pageSize, query, filter, startDate, endDate);
+            const { orderDeliveries, total } = await getAllOrderDeliveries(page, pageSize, query, filter, startDate, endDate, deliveryManId);
             setOrderDeliveries(orderDeliveries);
             setTotalDeliveries(total);
         } catch (error) {

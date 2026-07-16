@@ -3,7 +3,7 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 
 class GetAllOrderDeliveriesService {
-    async execute(page: number = 1, pageSize: number = 10, query?: string, filter?: string, startDate?: string, endDate?: string, store_id?: string) {
+    async execute(page: number = 1, pageSize: number = 10, query?: string, filter?: string, startDate?: string, endDate?: string, store_id?: string, delivery_man_id?: string) {
         try {
             const skip = (page - 1) * pageSize;
 
@@ -13,7 +13,11 @@ class GetAllOrderDeliveriesService {
             if (store_id) {
                 whereClause.store_id = store_id;
             }
-            
+
+            if (delivery_man_id) {
+                whereClause.delivery_man_id = delivery_man_id;
+            }
+
             if (filter === 'active') {
                 whereClause.is_archived = false;
             } else if (filter === 'archived') {

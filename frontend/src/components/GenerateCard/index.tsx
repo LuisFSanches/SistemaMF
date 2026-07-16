@@ -59,6 +59,7 @@ export function GenerateCard({
     const [cardFrom, setCardFrom] = useState(initialCardFrom);
     const [cardTo, setCardTo] = useState(initialCardTo);
     const [cardMessage, setCardMessage] = useState(initialCardMessage);
+    const [orderCode, setOrderCode] = useState(initialOrderCode || "");
     const [templateBackground, setTemplateBackground] = useState('card_background_1.png');
     const [fontSize, setFontSize] = useState(16);
     const [showLoader, setShowLoader] = useState(false);
@@ -78,8 +79,8 @@ export function GenerateCard({
         try {
             setShowLoader(true);
             
-            const filename = initialOrderCode 
-                ? `#${initialOrderCode}-${cardFrom}- Cartão de mensagem.pdf`
+            const filename = orderCode
+                ? `#${orderCode}-${cardFrom}- Cartão de mensagem.pdf`
                 : `Cartão de mensagem.pdf`;
             
             await generateCardPDF(elementId, filename);
@@ -148,6 +149,19 @@ export function GenerateCard({
                                     style={readOnly ? { backgroundColor: '#f5f5f5', cursor: 'text' } : {}}
                                 />
                             </FormGroup>
+
+                            {!initialOrderCode && (
+                                <FormGroup>
+                                    <label>Código do Pedido:</label>
+                                    <Input
+                                        value={orderCode}
+                                        onChange={(e) => setOrderCode(e.target.value)}
+                                        placeholder="Opcional"
+                                        readOnly={readOnly}
+                                        style={readOnly ? { backgroundColor: '#f5f5f5', cursor: 'text' } : {}}
+                                    />
+                                </FormGroup>
+                            )}
 
                             <FormGroup>
                                 <label>Tamanho da Fonte: {fontSize}px</label>
@@ -227,9 +241,9 @@ export function GenerateCard({
                                                     <span>{referencePoint}</span>
                                                 </div>
                                             )}
-                                            {initialOrderCode && (
+                                            {orderCode && (
                                                 <div className="store-info-item">
-                                                    <span>Pedido #{initialOrderCode}</span>
+                                                    <span>Pedido #{orderCode}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -250,7 +264,7 @@ export function GenerateCard({
                     logo={logoSrc}
                     backgroundImage={templateBackground}
                     elementId={elementId}
-                    orderCode={initialOrderCode}
+                    orderCode={orderCode}
                     instagram={instagram}
                     phoneNumber={phoneNumber}
                     referencePoint={referencePoint}
