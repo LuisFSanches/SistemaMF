@@ -9,7 +9,7 @@ export const BannerCarouselContainer = styled.div`
     overflow: hidden;
 
     @media (max-width: 768px) {
-        height: 150px;
+        height: 240px;
     }
 `;
 
@@ -28,7 +28,7 @@ export const Banner = styled.img`
     display: block;
 
     @media (max-width: 768px) {
-        height: 150px;
+        height: 240px;
         object-fit: fill;
     }
 `;

@@ -52,6 +52,9 @@ interface Store {
     banner: string | null;
     banner_2?: string | null;
     banner_3?: string | null;
+    banner_mobile?: string | null;
+    banner_mobile_2?: string | null;
+    banner_mobile_3?: string | null;
     schedules?: Schedule[];
     phone_number?: string;
     google_rating_value: number | null;
@@ -71,6 +74,7 @@ export function StoreFront() {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
     const [storeCarousels, setStoreCarousels] = useState<IStoreCarousel[]>([]);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 800);
     const productsSectionRef = useRef<HTMLDivElement>(null);
 
     const loadAvailableProducts = async (slug: string, page: number, pageSize: number, categorySlug?: string) => {
@@ -168,6 +172,7 @@ export function StoreFront() {
     useEffect(() => {
         function handleResize() {
             const width = window.innerWidth;
+            setIsMobile(width < 800);
             if (width < 800) {
                 setPageSize(4);
             } else if (width < 1300) {
@@ -258,16 +263,18 @@ export function StoreFront() {
                 storeSlug={slug || ''} 
                 selectedCategorySlug={categorySlug}
             />
-            {!categorySlug && store && (
-                <BannerCarousel 
-                    banners={[
-                        store.banner,
-                        store.banner_2,
-                        store.banner_3
-                    ].filter(Boolean) as string[]}
-                    storeName={store.name}
-                />
-            )}
+            {!categorySlug && store && (() => {
+                const desktopBanners = [store.banner, store.banner_2, store.banner_3].filter(Boolean) as string[];
+                const mobileBanners = [store.banner_mobile, store.banner_mobile_2, store.banner_mobile_3].filter(Boolean) as string[];
+                const banners = isMobile && mobileBanners.length > 0 ? mobileBanners : desktopBanners;
+
+                return (
+                    <BannerCarousel
+                        banners={banners}
+                        storeName={store.name}
+                    />
+                );
+            })()}
 
             <Content>
                 <Loader show={showLoader} />

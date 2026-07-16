@@ -42,6 +42,7 @@ import {
     ImagePreview,
     AvatarPreview,
     BannerPreview,
+    BannerPreviewMobile,
     FileInputLabel,
     ScheduleGrid,
     DayScheduleCard,
@@ -87,7 +88,7 @@ import {
     CarouselProductGrid,
     CarouselProductItem,
 } from './style';
-import { getStoreById, updateStore, uploadStoreLogo, uploadStoreBanner, uploadStoreBanner2, uploadStoreBanner3, updateStoreSchedules, updateStoreCredentials } from '../../services/storeService';
+import { getStoreById, updateStore, uploadStoreLogo, uploadStoreBanner, uploadStoreBanner2, uploadStoreBanner3, uploadStoreBannerMobile, uploadStoreBannerMobile2, uploadStoreBannerMobile3, updateStoreSchedules, updateStoreCredentials } from '../../services/storeService';
 import {
     getAttendedCities,
     createAttendedCity,
@@ -202,11 +203,18 @@ export default function StoreSettings() {
     const [bannerPreview, setBannerPreview] = useState<string | null>(null);
     const [banner2Preview, setBanner2Preview] = useState<string | null>(null);
     const [banner3Preview, setBanner3Preview] = useState<string | null>(null);
+    const [bannerMobilePreview, setBannerMobilePreview] = useState<string | null>(null);
+    const [bannerMobile2Preview, setBannerMobile2Preview] = useState<string | null>(null);
+    const [bannerMobile3Preview, setBannerMobile3Preview] = useState<string | null>(null);
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [bannerFile, setBannerFile] = useState<File | null>(null);
     const [banner2File, setBanner2File] = useState<File | null>(null);
     const [banner3File, setBanner3File] = useState<File | null>(null);
+    const [bannerMobileFile, setBannerMobileFile] = useState<File | null>(null);
+    const [bannerMobile2File, setBannerMobile2File] = useState<File | null>(null);
+    const [bannerMobile3File, setBannerMobile3File] = useState<File | null>(null);
     const [activeBannerSlide, setActiveBannerSlide] = useState(0);
+    const [activeBannerMobileSlide, setActiveBannerMobileSlide] = useState(0);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [showEmailModal, setShowEmailModal] = useState(false);
@@ -303,6 +311,15 @@ export default function StoreSettings() {
             }
             if (storeData.banner_3) {
                 setBanner3Preview(storeData.banner_3);
+            }
+            if (storeData.banner_mobile) {
+                setBannerMobilePreview(storeData.banner_mobile);
+            }
+            if (storeData.banner_mobile_2) {
+                setBannerMobile2Preview(storeData.banner_mobile_2);
+            }
+            if (storeData.banner_mobile_3) {
+                setBannerMobile3Preview(storeData.banner_mobile_3);
             }
 
             const addresses = await getStoreAddresses(storeId);
@@ -707,6 +724,42 @@ export default function StoreSettings() {
         }
     };
 
+    const handleBannerMobileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setBannerMobileFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setBannerMobilePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleBannerMobile2Change = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setBannerMobile2File(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setBannerMobile2Preview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleBannerMobile3Change = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setBannerMobile3File(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setBannerMobile3Preview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleGeneralSubmit = async (data: GeneralFormData) => {
         if (!store) return;
 
@@ -740,6 +793,15 @@ export default function StoreSettings() {
             }
             if (banner3File) {
                 await uploadStoreBanner3(store.id, banner3File);
+            }
+            if (bannerMobileFile) {
+                await uploadStoreBannerMobile(store.id, bannerMobileFile);
+            }
+            if (bannerMobile2File) {
+                await uploadStoreBannerMobile2(store.id, bannerMobile2File);
+            }
+            if (bannerMobile3File) {
+                await uploadStoreBannerMobile3(store.id, bannerMobile3File);
             }
             alert('Imagens atualizadas com sucesso!');
             loadStoreData();
@@ -986,7 +1048,7 @@ export default function StoreSettings() {
             </ImageUploadArea>
 
             <BannerCarouselWrapper>
-                <h2><FontAwesomeIcon icon={faImage} /> Banners da Loja</h2>
+                <h2><FontAwesomeIcon icon={faImage} /> Banners da Loja (Desktop)</h2>
                 <BannerCarouselSlide $visible={activeBannerSlide === 0}>
                     <h3>Banner Principal</h3>
                     <ImagePreview>
@@ -1058,6 +1120,89 @@ export default function StoreSettings() {
                     <BannerCarouselNavBtn
                         type="button"
                         onClick={() => setActiveBannerSlide((prev) => (prev === 2 ? 0 : prev + 1))}
+                    >
+                        <FontAwesomeIcon icon={faChevronRight} />
+                    </BannerCarouselNavBtn>
+                </BannerCarouselControls>
+            </BannerCarouselWrapper>
+
+            <BannerCarouselWrapper>
+                <h2><FontAwesomeIcon icon={faImage} /> Banners da Loja (Mobile)</h2>
+                <p style={{ color: 'var(--text-light)', fontSize: '0.85rem', margin: '0.7rem 0' }}>
+                    Imagens exibidas para clientes acessando pelo celular. Se nenhuma imagem for
+                    definida aqui, os banners de desktop serão usados como padrão.
+                </p>
+                <BannerCarouselSlide $visible={activeBannerMobileSlide === 0}>
+                    <h3>Banner Principal (Mobile)</h3>
+                    <ImagePreview>
+                        <BannerPreviewMobile>
+                            {bannerMobilePreview ? (
+                                <img src={bannerMobilePreview} alt="Banner mobile 1 da loja" />
+                            ) : (
+                                <FontAwesomeIcon icon={faImage} />
+                            )}
+                        </BannerPreviewMobile>
+                        <FileInputLabel>
+                            Escolher Imagem
+                            <input type="file" accept="image/*" onChange={handleBannerMobileChange} />
+                        </FileInputLabel>
+                    </ImagePreview>
+                </BannerCarouselSlide>
+
+                <BannerCarouselSlide $visible={activeBannerMobileSlide === 1}>
+                    <h3><FontAwesomeIcon icon={faImage} /> Banner 2 (Mobile)</h3>
+                    <ImagePreview>
+                        <BannerPreviewMobile>
+                            {bannerMobile2Preview ? (
+                                <img src={bannerMobile2Preview} alt="Banner mobile 2 da loja" />
+                            ) : (
+                                <FontAwesomeIcon icon={faImage} />
+                            )}
+                        </BannerPreviewMobile>
+                        <FileInputLabel>
+                            Escolher Imagem
+                            <input type="file" accept="image/*" onChange={handleBannerMobile2Change} />
+                        </FileInputLabel>
+                    </ImagePreview>
+                </BannerCarouselSlide>
+
+                <BannerCarouselSlide $visible={activeBannerMobileSlide === 2}>
+                    <h3><FontAwesomeIcon icon={faImage} /> Banner 3 (Mobile)</h3>
+                    <ImagePreview>
+                        <BannerPreviewMobile>
+                            {bannerMobile3Preview ? (
+                                <img src={bannerMobile3Preview} alt="Banner mobile 3 da loja" />
+                            ) : (
+                                <FontAwesomeIcon icon={faImage} />
+                            )}
+                        </BannerPreviewMobile>
+                        <FileInputLabel>
+                            Escolher Imagem
+                            <input type="file" accept="image/*" onChange={handleBannerMobile3Change} />
+                        </FileInputLabel>
+                    </ImagePreview>
+                </BannerCarouselSlide>
+
+                <BannerCarouselControls>
+                    <BannerCarouselNavBtn
+                        type="button"
+                        onClick={() => setActiveBannerMobileSlide((prev) => (prev === 0 ? 2 : prev - 1))}
+                    >
+                        <FontAwesomeIcon icon={faChevronLeft} />
+                    </BannerCarouselNavBtn>
+                    <BannerCarouselDots>
+                        {[0, 1, 2].map((i) => (
+                            <BannerCarouselDot
+                                key={i}
+                                type="button"
+                                $active={activeBannerMobileSlide === i}
+                                onClick={() => setActiveBannerMobileSlide(i)}
+                            />
+                        ))}
+                    </BannerCarouselDots>
+                    <BannerCarouselNavBtn
+                        type="button"
+                        onClick={() => setActiveBannerMobileSlide((prev) => (prev === 2 ? 0 : prev + 1))}
                     >
                         <FontAwesomeIcon icon={faChevronRight} />
                     </BannerCarouselNavBtn>

@@ -44,7 +44,7 @@ export const TabsLayout = styled.div`
 `;
 
 export const TabsContainer = styled.div`
-    height: 70vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
@@ -53,6 +53,8 @@ export const TabsContainer = styled.div`
     flex-shrink: 0;
     border-right: 2px solid #e7b7c2;
     padding-right: 1rem;
+    position: sticky;
+    top: 1.5rem;
 
     @media (max-width: 768px) {
         height: auto;
@@ -65,6 +67,8 @@ export const TabsContainer = styled.div`
         padding-right: 0;
         padding-bottom: 0.5rem;
         margin-bottom: 1rem;
+        position: static;
+        top: auto;
     }
 `;
 
@@ -208,6 +212,38 @@ export const BannerPreview = styled.div`
     @media (max-width: 768px) {
         height: 150px;
         
+        svg {
+            font-size: 60px;
+        }
+    }
+`;
+
+export const BannerPreviewMobile = styled.div`
+    width: 390px;
+    max-width: 100%;
+    height: 240px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 3px solid #EC4899;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--light-background);
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+    }
+
+    svg {
+        font-size: 80px;
+        color: #ccc;
+    }
+
+    @media (max-width: 768px) {
+        height: 200px;
+
         svg {
             font-size: 60px;
         }

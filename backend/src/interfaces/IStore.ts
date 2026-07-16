@@ -27,6 +27,9 @@ export interface IStore {
     banner?: string;
     banner_2?: string;
     banner_3?: string;
+    banner_mobile?: string;
+    banner_mobile_2?: string;
+    banner_mobile_3?: string;
 
     google_rating_value?: number;
     google_rating_count?: number;
