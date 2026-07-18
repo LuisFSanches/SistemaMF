@@ -6,11 +6,13 @@ import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { getDeliveryManByPhoneCode } from "../../services/deliveryManService";
-import { getCompletedOrder, updateStatus } from "../../services/orderService";
+import { getCompletedOrder, updateStatus, updateOrderPaymentStatus } from "../../services/orderService";
+import { createOrderToReceive } from "../../services/orderToReceiveService";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
 import { convertMoney, formatTelephone } from "../../utils";
 import { Loader } from "../../components/Loader";
 import { ErrorAlert } from "../../components/ErrorAlert";
+import { DeliveryPaymentStatusModal } from "../../components/DeliveryPaymentStatusModal";
 import { IOrder } from "../../interfaces/IOrder";
 import { IDeliveryMan } from "../../interfaces/IDeliveryMan";
 import {
@@ -45,6 +47,8 @@ export function CompleteDelivery() {
     const [order, setOrder] = useState<IOrder | null>(null);
     const [isCompleted, setIsCompleted] = useState(false);
     const [showNoDeliveryManModal, setShowNoDeliveryManModal] = useState(false);
+    const [showPaymentStatusModal, setShowPaymentStatusModal] = useState(false);
+    const [pendingDelivery, setPendingDelivery] = useState<{ delivery_man_id: string; delivery_date: string } | null>(null);
 
     const {
         register,
@@ -118,6 +122,76 @@ export function CompleteDelivery() {
         return () => clearTimeout(timeout);
     }, [phone_code]);
 
+    const completeDelivery = async (delivery: { delivery_man_id: string; delivery_date: string }) => {
+        setShowLoader(true);
+
+        try {
+            await createOrderDelivery({
+                order_id: orderId!,
+                delivery_man_id: delivery.delivery_man_id,
+                delivery_date: delivery.delivery_date,
+                store_id: order!.store_id
+            });
+
+            await updateStatus({
+                id: orderId!,
+                status: 'DONE'
+            });
+
+            setIsCompleted(true);
+            setErrorMessage("");
+
+        } catch (error: any) {
+            console.error("Error creating delivery:", error);
+            setErrorMessage("Erro ao registrar entrega. Tente novamente.");
+            setTimeout(() => setErrorMessage(""), 3000);
+        } finally {
+            setShowLoader(false);
+        }
+    };
+
+    const handleConfirmPayment = async () => {
+        if (!orderId || !pendingDelivery) return;
+
+        setShowPaymentStatusModal(false);
+        setShowLoader(true);
+
+        try {
+            await updateOrderPaymentStatus(orderId, true);
+            await completeDelivery(pendingDelivery);
+        } catch (error) {
+            console.error("Error confirming payment:", error);
+            setErrorMessage("Erro ao confirmar pagamento. Tente novamente.");
+            setTimeout(() => setErrorMessage(""), 3000);
+            setShowLoader(false);
+        } finally {
+            setPendingDelivery(null);
+        }
+    };
+
+    const handleCreateOrderToReceive = async () => {
+        if (!orderId || !pendingDelivery) return;
+
+        setShowPaymentStatusModal(false);
+        setShowLoader(true);
+
+        try {
+            await createOrderToReceive({
+                order_id: orderId,
+                type: "BOLETO",
+                payment_due_date: moment().add(1, "month").toISOString()
+            });
+            await completeDelivery(pendingDelivery);
+        } catch (error) {
+            console.error("Error creating order to receive:", error);
+            setErrorMessage("Erro ao registrar valor a receber. Tente novamente.");
+            setTimeout(() => setErrorMessage(""), 3000);
+            setShowLoader(false);
+        } finally {
+            setPendingDelivery(null);
+        }
+    };
+
     const onSubmit = async (data: IDeliveryForm) => {
         if (!deliveryMan) {
             setErrorMessage("Motoboy não encontrado");
@@ -131,31 +205,18 @@ export function CompleteDelivery() {
             return;
         }
 
-        setShowLoader(true);
+        const delivery = {
+            delivery_man_id: deliveryMan.id!,
+            delivery_date: moment(data.delivery_date).toISOString()
+        };
 
-        try {
-            await createOrderDelivery({
-                order_id: orderId,
-                delivery_man_id: deliveryMan.id!,
-                delivery_date: moment(data.delivery_date).toISOString(),
-                store_id: order!.store_id
-            });
-
-            await updateStatus({
-                id: orderId,
-                status: 'DONE'
-            });
-
-            setIsCompleted(true);
-            setErrorMessage("");
-            
-        } catch (error: any) {
-            console.error("Error creating delivery:", error);
-            setErrorMessage("Erro ao registrar entrega. Tente novamente.");
-            setTimeout(() => setErrorMessage(""), 3000);
-        } finally {
-            setShowLoader(false);
+        if (!order?.payment_received) {
+            setPendingDelivery(delivery);
+            setShowPaymentStatusModal(true);
+            return;
         }
+
+        await completeDelivery(delivery);
     };
 
     return (
@@ -186,6 +247,19 @@ export function CompleteDelivery() {
                     </p>
                 </div>
             </Modal>
+
+            {order && (
+                <DeliveryPaymentStatusModal
+                    isOpen={showPaymentStatusModal}
+                    onRequestClose={() => {
+                        setShowPaymentStatusModal(false);
+                        setPendingDelivery(null);
+                    }}
+                    order={order}
+                    onConfirmPayment={handleConfirmPayment}
+                    onCreateOrderToReceive={handleCreateOrderToReceive}
+                />
+            )}
 
             {(isCompleted || order?.status === 'DONE') ? (
                 <CompletedDelivery>

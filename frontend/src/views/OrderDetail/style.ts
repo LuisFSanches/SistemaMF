@@ -182,6 +182,34 @@ export const Header = styled.div`
                 background-color: #059669;
             }
         }
+
+        .print-button {
+            position: absolute;
+            top: 50%;
+            right: 22.5rem;
+            transform: translateY(-50%);
+            padding: 0.75rem 1.5rem;
+            background-color: #EC4899;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+
+            span {
+                font-size: 1rem;
+                margin: 0;
+            }
+
+            &:hover {
+                transform: translateY(-52%);
+            }
+        }
     }
 
     @media (max-width: 768px) {
