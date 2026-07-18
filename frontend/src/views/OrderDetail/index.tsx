@@ -18,7 +18,6 @@ import {
     faShoppingBag,
     faGifts,
     faPen,
-    faPrint
 } from "@fortawesome/free-solid-svg-icons";
 import { getOrderById, updateStatus } from "../../services/orderService";
 import { convertMoney, formatTitleCase, formatTelephone, formatDescriptionWithPrice } from "../../utils";
