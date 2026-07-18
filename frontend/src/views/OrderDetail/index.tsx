@@ -17,14 +17,17 @@ import {
     faEnvelope,
     faShoppingBag,
     faGifts,
-    faPen
+    faPen,
+    faPrint
 } from "@fortawesome/free-solid-svg-icons";
 import { getOrderById, updateStatus } from "../../services/orderService";
 import { convertMoney, formatTitleCase, formatTelephone, formatDescriptionWithPrice } from "../../utils";
 import { Loader } from "../../components/Loader";
 import { PrintCardMessage } from "../../components/PrintCardMessage";
+import { PrintOrder } from "../../components/PrintOrder";
 import { EditOrderModal } from "../../components/EditOrderModal";
 import { ConfirmPopUp } from "../../components/ConfirmPopUp";
+import { useAdmins } from "../../contexts/AdminsContext";
 import { STATUS_LABEL, PAYMENT_METHODS } from "../../constants";
 import {
     Container,
@@ -94,6 +97,7 @@ interface IOrderDetail {
 export function OrderDetail() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { admins } = useAdmins();
     const [loading, setLoading] = useState(true);
     const [orderData, setOrderData] = useState<IOrderDetail | null>(null);
     const [isCardModalOpen, setIsCardModalOpen] = useState(false);
@@ -240,8 +244,18 @@ export function OrderDetail() {
                             </p>
                         </div>
                     </div>
+                    <PrintOrder
+                        order={orderForEdit}
+                        orderCode={String(orderInfo.code)}
+                        clientName={`${clientInfo.first_name} ${clientInfo.last_name}`}
+                        clientTelephone={clientInfo.phone_number}
+                        admins={admins}
+                        buttonLabel="Imprimir"
+                        style={{ flexDirection: 'row-reverse' }}
+                        className="print-button"
+                    />
                     {orderInfo.status !== 'DONE' && (
-                        <button 
+                        <button
                             className="finish-button"
                             onClick={() => setIsConfirmFinishOpen(true)}
                         >

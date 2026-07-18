@@ -17,7 +17,8 @@ interface IReceiptPrintProps {
     clientName: string;
     clientTelephone: string;
     buttonLabel?: string;
-    style?: React.CSSProperties
+    style?: React.CSSProperties;
+    className?: string;
 }
 
 export const PrintOrder = ({
@@ -27,7 +28,8 @@ export const PrintOrder = ({
     clientName,
     clientTelephone,
     buttonLabel = "Imprimir",
-    style
+    style,
+    className
 }: IReceiptPrintProps) => {
     const date = moment();
     const baseUrl = process.env.REACT_APP_URL || "https://sistema-mf.vercel.app";
@@ -226,7 +228,7 @@ export const PrintOrder = ({
     return (
         <>
             <Loader show={isLoading} />
-            <PrintButton onClick={handlePrint} style={style}>
+            <PrintButton onClick={handlePrint} style={style} className={className}>
                 {buttonLabel && <span>{buttonLabel}</span>}
                 <FontAwesomeIcon icon={faPrint} />
             </PrintButton>
