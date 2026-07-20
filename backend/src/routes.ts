@@ -97,6 +97,8 @@ import { UpdateDeliveryManController } from './controllers/deliveryMan/UpdateDel
 import { DeleteDeliveryManController } from './controllers/deliveryMan/DeleteDeliveryManController';
 
 import { CreateOrderDeliveryController } from './controllers/orderDelivery/CreateOrderDeliveryController';
+import { ConfirmDeliveryPaymentController } from './controllers/orderDelivery/ConfirmDeliveryPaymentController';
+import { CreateDeliveryOrderToReceiveController } from './controllers/orderDelivery/CreateDeliveryOrderToReceiveController';
 import { GetAllOrderDeliveriesController } from './controllers/orderDelivery/GetAllOrderDeliveriesController';
 import { GetOrderDeliveryController } from './controllers/orderDelivery/GetOrderDeliveryController';
 import { UpdateOrderDeliveryController } from './controllers/orderDelivery/UpdateOrderDeliveryController';
@@ -369,6 +371,8 @@ router.delete('/deliveryMan/:id', adminAuthMiddleware, new DeleteDeliveryManCont
 
 //-- ROTAS ORDER DELIVERIES --
 router.post('/orderDelivery', new CreateOrderDeliveryController().handle);
+router.patch('/orderDelivery/:id/confirm-payment', new ConfirmDeliveryPaymentController().handle);
+router.post('/orderDelivery/:id/order-to-receive', new CreateDeliveryOrderToReceiveController().handle);
 router.get('/orderDelivery/all', adminAuthMiddleware, new GetAllOrderDeliveriesController().handle);
 router.get('/orderDelivery/:id', adminAuthMiddleware, new GetOrderDeliveryController().handle);
 router.put('/orderDelivery/:id', adminAuthMiddleware, new UpdateOrderDeliveryController().handle);
