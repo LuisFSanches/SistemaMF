@@ -6,8 +6,8 @@ import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { getDeliveryManByPhoneCode } from "../../services/deliveryManService";
-import { getCompletedOrder, updateStatus, updateOrderPaymentStatus } from "../../services/orderService";
-import { createOrderToReceive } from "../../services/orderToReceiveService";
+import { getCompletedOrder, updateStatus, confirmDeliveryPayment } from "../../services/orderService";
+import { createDeliveryOrderToReceive } from "../../services/orderToReceiveService";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
 import { convertMoney, formatTelephone } from "../../utils";
 import { Loader } from "../../components/Loader";
@@ -157,7 +157,7 @@ export function CompleteDelivery() {
         setShowLoader(true);
 
         try {
-            await updateOrderPaymentStatus(orderId, true);
+            await confirmDeliveryPayment(orderId);
             await completeDelivery(pendingDelivery);
         } catch (error) {
             console.error("Error confirming payment:", error);
@@ -176,11 +176,7 @@ export function CompleteDelivery() {
         setShowLoader(true);
 
         try {
-            await createOrderToReceive({
-                order_id: orderId,
-                type: "BOLETO",
-                payment_due_date: moment().add(1, "month").toISOString()
-            });
+            await createDeliveryOrderToReceive(orderId);
             await completeDelivery(pendingDelivery);
         } catch (error) {
             console.error("Error creating order to receive:", error);

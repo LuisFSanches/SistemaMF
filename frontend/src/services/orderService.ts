@@ -172,6 +172,12 @@ export const updateOrderPaymentStatus = async(id: string, payment_received: bool
 	return response.data;
 };
 
+export const confirmDeliveryPayment = async(orderId: string) => {
+	const response = await api.patch(`/orderDelivery/${orderId}/confirm-payment`);
+
+	return response.data;
+};
+
 export const finishOnlineOrder = async(order: any) => {
 	const response = await api.put(`/order/finish/${order.id}`, {
 		order,
