@@ -674,19 +674,17 @@ export function EditOrderModal({
                                 </div>
                             </GridRow>
 
-                            {(order?.receiver_phone || order?.receiver_name) && (
-                                <GridRow style={{ marginTop: '1rem' }}>
-                                    <div>
-                                        <Label>Nome do Recebedor</Label>
-                                        <Input {...register("receiver_name")}/>
-                                    </div>
-                                    <div>
-                                        <Label>Telefone do Recebedor</Label>
-                                        <Input {...register("receiver_phone")}/>
-                                    </div>
-                                </GridRow>
-                            )}
-                        </Section>
+                            <GridRow style={{ marginTop: '1rem' }}>
+                                <div>
+                                    <Label>Nome do Recebedor</Label>
+                                    <Input {...register("receiver_name")}/>
+                                </div>
+                                <div>
+                                    <Label>Telefone do Recebedor</Label>
+                                    <Input {...register("receiver_phone")}/>
+                                </div>
+                            </GridRow>
+                    </Section>
                     </TabContent>
 
                     {/* Aba 3: Pagamento e Valores */}

@@ -24,9 +24,15 @@ export const createStockTransaction = async ({
         return response;
 };
 
-export const getStockTransactions = async (page: number, pageSize: number, query: string) => {
-        const response = await api.get(`/stockTransaction/all?page=${page}&pageSize=${pageSize}&query=${query}`);
-        
+export const getStockTransactions = async (page: number, pageSize: number, query: string, supplierId?: string) => {
+        let url = `/stockTransaction/all?page=${page}&pageSize=${pageSize}&query=${encodeURIComponent(query)}`;
+
+        if (supplierId) {
+                url += `&supplier_id=${supplierId}`;
+        }
+
+        const response = await api.get(url);
+
         return response;
 };
 

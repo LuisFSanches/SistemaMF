@@ -9,6 +9,7 @@ import { Container } from "./style";
 import { AddButton, PageHeader } from "../../styles/global";
 import { StockTransactionModal } from "../../components/StockTransactionModal";
 import { Pagination } from "../../components/Pagination";
+import { SupplierSelect } from "../../components/SupplierSelect";
 import { getStockTransactions, deleteStockTransaction } from "../../services/stockTransactionService";
 import { IStockTransaction } from "../../interfaces/IStockTransaction";
 
@@ -19,6 +20,7 @@ export function StockPage(){
     const [stockTransactions, setStockTransactions] = useState<IStockTransaction[]>([]);
     const [page, setPage] = useState(1);
     const [query, setQuery] = useState('');
+    const [supplierId, setSupplierId] = useState('');
     const [total, setTotal] = useState(0);
     const [deleteTransactionModal, setDeleteTransactionModal] = useState(false);
     const [currentTransaction, setCurrentTransaction] = useState<IStockTransaction | null>(null);
@@ -32,8 +34,8 @@ export function StockPage(){
         setClientModal(false)
     }
 
-    async function handleStockTransactions(page: number, pageSize: number, query: string){
-        const transactions = await getStockTransactions(page, pageSize, query);
+    async function handleStockTransactions(page: number, pageSize: number, query: string, supplierId: string){
+        const transactions = await getStockTransactions(page, pageSize, query, supplierId);
         setStockTransactions(transactions.data.stockTransactions);
         setTotal(transactions.data.total);
     }
@@ -41,15 +43,21 @@ export function StockPage(){
     const searchTransactions = (query: string) => {
         setQuery(query);
         setPage(1);
-        handleStockTransactions(page, pageSize, query);
+        handleStockTransactions(page, pageSize, query, supplierId);
     }
 
     const resetSearch = (query: string) => {
         if (query === '') {
             setQuery('');
             setPage(1);
-            handleStockTransactions(page, pageSize, '');
+            handleStockTransactions(page, pageSize, '', supplierId);
         }
+    }
+
+    const handleSupplierChange = (supplierId: string) => {
+        setSupplierId(supplierId);
+        setPage(1);
+        handleStockTransactions(1, pageSize, query, supplierId);
     }
 
     const handleOpenConfirmPopUp = (transaction: IStockTransaction) => {
@@ -60,12 +68,12 @@ export function StockPage(){
     const handleDeleteStockTransaction = async () => {
         const id = currentTransaction?.id as string;
         await deleteStockTransaction(id);
-        handleStockTransactions(page, pageSize, query);
+        handleStockTransactions(page, pageSize, query, supplierId);
         setDeleteTransactionModal(false);
     }
 
     useEffect(() => {
-        handleStockTransactions(page, pageSize, query);
+        handleStockTransactions(page, pageSize, query, supplierId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
 
@@ -77,7 +85,7 @@ export function StockPage(){
                     <input
                         style={{width: '250px'}}
                         type="text"
-                        placeholder="Buscar por Produto/Fornecedor"
+                        placeholder="Buscar por Produto"
                         onKeyDown={(e: any) => {
                             if (e.key === 'Enter') {
                                 searchTransactions(e.target.value);
@@ -86,6 +94,10 @@ export function StockPage(){
                         onChange={(e) => resetSearch(e.target.value)}
                     />
                 </div>
+                <SupplierSelect
+                    value={supplierId}
+                    onChange={handleSupplierChange}
+                />
                 <Pagination
                     currentPage={page}
                     total={total as number}
@@ -148,7 +160,7 @@ export function StockPage(){
             <StockTransactionModal
                 isOpen={clientModalModal}
                 onRequestClose={handleCloseClientModal}
-                loadData={() => handleStockTransactions(page, pageSize, '')}
+                loadData={() => handleStockTransactions(page, pageSize, query, supplierId)}
                 action={action}
             />
             <ConfirmPopUp isOpen={deleteTransactionModal}
