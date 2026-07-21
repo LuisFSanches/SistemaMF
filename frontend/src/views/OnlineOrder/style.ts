@@ -8,6 +8,9 @@ export const Container = styled.div`
     overflow-y: hidden;
     overflow-x: hidden;
     margin-top: 10px;
+    padding-top: 10px;
+    background: var(--tbody-background);
+    border-radius: 12px;
 
     @media (max-width:1450px){
         overflow-y: scroll;
