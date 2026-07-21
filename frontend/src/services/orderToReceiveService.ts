@@ -6,6 +6,11 @@ export const createOrderToReceive = async (data: ICreateOrderToReceive) => {
     return response.data;
 };
 
+export const createDeliveryOrderToReceive = async (orderId: string) => {
+    const response = await api.post(`/orderDelivery/${orderId}/order-to-receive`);
+    return response.data;
+};
+
 export const getAllOrdersToReceive = async (page: number, pageSize: number, query: string, filter?: string) => {
     let url = `/orderToReceive/all?page=${page}&pageSize=${pageSize}&query=${query}`;
     
