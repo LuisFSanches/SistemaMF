@@ -7,7 +7,7 @@ import { faPrint, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Loader } from "../../components/Loader";
 import { ErrorAlert } from '../ErrorAlert';
 import { CouponTemplate } from './CouponTemplate';
-import { generateCouponPDF } from './pdfGenerator';
+import { generateCouponPDF, generateCouponImage } from './pdfGenerator';
 import { ICoupon } from '../../interfaces/coupon';
 import { convertMoney } from '../../utils';
 import {
@@ -20,9 +20,13 @@ import {
     PreviewCoupon,
     PreviewContent,
     PrintButton,
+    FormatSelector,
+    FormatOption,
     TemplateSelector,
     TemplateOption
 } from "./style";
+
+type PrintFormat = 'pdf' | 'image';
 
 interface GenerateCouponProps {
     isOpen: boolean;
@@ -75,6 +79,7 @@ export function GenerateCoupon({
     const { showSuccess } = useSuccessMessage();
 
     const [templateBackground, setTemplateBackground] = useState('coupon_background_1.png');
+    const [printFormat, setPrintFormat] = useState<PrintFormat>('image');
     const [showLoader, setShowLoader] = useState(false);
     const [showError, setShowError] = useState(false);
 
@@ -84,13 +89,15 @@ export function GenerateCoupon({
     const validityText = formatValidityText(coupon);
     const conditionsText = formatConditionsText(coupon);
 
-    const generatePDF = async () => {
+    const generateCoupon = async () => {
         try {
             setShowLoader(true);
 
-            const filename = `Cupom-${coupon.code}.pdf`;
-
-            await generateCouponPDF(elementId, filename);
+            if (printFormat === 'pdf') {
+                await generateCouponPDF(elementId, `Cupom-${coupon.code}.pdf`);
+            } else {
+                await generateCouponImage(elementId, `Cupom-${coupon.code}.png`);
+            }
 
             showSuccess("Cupom gerado com sucesso!");
             setShowLoader(false);
@@ -98,14 +105,14 @@ export function GenerateCoupon({
         } catch (error) {
             setShowLoader(false);
             setShowError(true);
-            console.error('Erro ao gerar o PDF:', error);
+            console.error('Erro ao gerar o cupom:', error);
         }
     };
 
     return (
         <Container>
             {showError &&
-                <ErrorAlert message='Não foi possível gerar o PDF'/>
+                <ErrorAlert message='Não foi possível gerar o cupom'/>
             }
             <Modal
                 isOpen={isOpen}
@@ -132,14 +139,33 @@ export function GenerateCoupon({
                                 </FormGroup>
                             )}
 
-                            <FormGroup>
-                                <label>Código do Cupom:</label>
-                                <InfoField>{coupon.code}</InfoField>
-                            </FormGroup>
+                            <div style={{ display: 'flex', gap: '15px' }}>
+                                <FormGroup style={{ flex: 1 }}>
+                                    <label>Código do Cupom:</label>
+                                    <InfoField>{coupon.code}</InfoField>
+                                </FormGroup>
+                                <FormGroup style={{ flex: 1 }}>
+                                    <label>Válido até:</label>
+                                    <InfoField>{validityText}</InfoField>
+                                </FormGroup>
+                            </div>
 
                             <FormGroup>
-                                <label>Válido até:</label>
-                                <InfoField>{validityText}</InfoField>
+                                <label>Formato de Impressão:</label>
+                                <FormatSelector>
+                                    <FormatOption
+                                        onClick={() => setPrintFormat('pdf')}
+                                        $isSelected={printFormat === 'pdf'}
+                                    >
+                                        PDF
+                                    </FormatOption>
+                                    <FormatOption
+                                        onClick={() => setPrintFormat('image')}
+                                        $isSelected={printFormat === 'image'}
+                                    >
+                                        Imagem
+                                    </FormatOption>
+                                </FormatSelector>
                             </FormGroup>
 
                             <FormGroup>
@@ -169,7 +195,7 @@ export function GenerateCoupon({
                                 </TemplateSelector>
                             </FormGroup>
 
-                            <PrintButton onClick={generatePDF}>
+                            <PrintButton onClick={generateCoupon}>
                                 <FontAwesomeIcon icon={faPrint}/>
                                 Imprimir
                             </PrintButton>
