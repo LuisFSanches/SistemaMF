@@ -108,6 +108,35 @@ export const PrintButton = styled(Button)`
     }
 `;
 
+export const FormatSelector = styled.div`
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+`;
+
+export const FormatOption = styled.div<{ $isSelected: boolean }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border: 2px solid ${props => props.$isSelected ? '#66c1df' : '#e7b7c2'};
+    border-radius: 8px;
+    cursor: pointer;
+    background: ${props => props.$isSelected ? '#f0f9ff' : 'white'};
+    transition: all 0.2s;
+    font-size: 14px;
+    font-weight: ${props => props.$isSelected ? '600' : '400'};
+    color: ${props => props.$isSelected ? '#66c1df' : '#666'};
+
+    &:hover {
+        border-color: #66c1df;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+`;
+
 export const TemplateSelector = styled.div`
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -253,5 +282,5 @@ export const CodeField = styled(CouponField)`
 `;
 
 export const ValidityField = styled(CouponField)`
-    top: 1250px;
+    top: 1240px;
 `;

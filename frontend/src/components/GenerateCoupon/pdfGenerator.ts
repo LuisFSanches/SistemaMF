@@ -1,14 +1,14 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-export const generateCouponPDF = async (elementId: string, filename: string): Promise<void> => {
+const renderCouponCanvas = async (elementId: string): Promise<HTMLCanvasElement> => {
     // Aguarda um pequeno delay para garantir que o React atualizou o DOM
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const element = document.getElementById(elementId);
 
     if (!element) {
-        throw new Error('Elemento não encontrado para gerar PDF');
+        throw new Error('Elemento não encontrado para gerar o cupom');
     }
 
     // Aguardar o carregamento de todas as imagens dentro do elemento
@@ -24,7 +24,7 @@ export const generateCouponPDF = async (elementId: string, filename: string): Pr
     );
 
     // Renderiza o elemento HTML como imagem com alta qualidade
-    const canvas = await html2canvas(element, {
+    return html2canvas(element, {
         scale: 1,
         useCORS: true,
         allowTaint: true,
@@ -33,7 +33,10 @@ export const generateCouponPDF = async (elementId: string, filename: string): Pr
         width: 1024,
         height: 1536
     });
+};
 
+export const generateCouponPDF = async (elementId: string, filename: string): Promise<void> => {
+    const canvas = await renderCouponCanvas(elementId);
     const imgData = canvas.toDataURL('image/png');
 
     // Cria PDF com dimensões exatas do cupom
@@ -48,4 +51,27 @@ export const generateCouponPDF = async (elementId: string, filename: string): Pr
 
     // Faz o download do PDF
     pdf.save(filename);
+};
+
+export const generateCouponImage = async (elementId: string, filename: string): Promise<void> => {
+    const canvas = await renderCouponCanvas(elementId);
+
+    await new Promise<void>((resolve, reject) => {
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                reject(new Error('Não foi possível gerar a imagem do cupom'));
+                return;
+            }
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            resolve();
+        }, 'image/png');
+    });
 };
