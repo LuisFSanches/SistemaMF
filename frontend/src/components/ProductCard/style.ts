@@ -9,6 +9,7 @@ export const Card = styled.div<{ clickable?: boolean }>`
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     background: #fff;
     cursor: ${props => props.clickable ? 'pointer' : 'default'};
     transition: all 0.3s ease;

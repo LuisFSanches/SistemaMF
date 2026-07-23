@@ -20,7 +20,7 @@ export const CouponTemplate = ({
     conditionsText,
     code,
     validityText,
-    backgroundImage = 'coupon_background_1.png',
+    backgroundImage = 'coupon_background_1.jpeg',
     elementId = 'coupon-to-print'
 }: CouponTemplateProps) => {
     return (
