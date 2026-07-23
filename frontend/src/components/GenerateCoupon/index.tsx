@@ -78,7 +78,7 @@ export function GenerateCoupon({
 }: GenerateCouponProps) {
     const { showSuccess } = useSuccessMessage();
 
-    const [templateBackground, setTemplateBackground] = useState('coupon_background_1.png');
+    const [templateBackground, setTemplateBackground] = useState('coupon_background_1.jpeg');
     const [printFormat, setPrintFormat] = useState<PrintFormat>('image');
     const [showLoader, setShowLoader] = useState(false);
     const [showError, setShowError] = useState(false);
@@ -96,7 +96,7 @@ export function GenerateCoupon({
             if (printFormat === 'pdf') {
                 await generateCouponPDF(elementId, `Cupom-${coupon.code}.pdf`);
             } else {
-                await generateCouponImage(elementId, `Cupom-${coupon.code}.png`);
+                await generateCouponImage(elementId, `Cupom-${coupon.code}.jpeg`);
             }
 
             showSuccess("Cupom gerado com sucesso!");
@@ -172,24 +172,24 @@ export function GenerateCoupon({
                                 <label>Selecione o Template:</label>
                                 <TemplateSelector>
                                     <TemplateOption
-                                        onClick={() => setTemplateBackground('coupon_background_1.png')}
-                                        $isSelected={templateBackground === 'coupon_background_1.png'}
+                                        onClick={() => setTemplateBackground('coupon_background_1.jpeg')}
+                                        $isSelected={templateBackground === 'coupon_background_1.jpeg'}
                                     >
-                                        <img src="/coupon_background_1.png" alt="Template 1" />
+                                        <img src="/coupon_background_1.jpeg" alt="Template 1" />
                                         <span>Template 1</span>
                                     </TemplateOption>
                                     <TemplateOption
-                                        onClick={() => setTemplateBackground('coupon_background_2.png')}
-                                        $isSelected={templateBackground === 'coupon_background_2.png'}
+                                        onClick={() => setTemplateBackground('coupon_background_2.jpeg')}
+                                        $isSelected={templateBackground === 'coupon_background_2.jpeg'}
                                     >
-                                        <img src="/coupon_background_2.png" alt="Template 2" />
+                                        <img src="/coupon_background_2.jpeg" alt="Template 2" />
                                         <span>Template 2</span>
                                     </TemplateOption>
                                     <TemplateOption
-                                        onClick={() => setTemplateBackground('coupon_background_3.png')}
-                                        $isSelected={templateBackground === 'coupon_background_3.png'}
+                                        onClick={() => setTemplateBackground('coupon_background_3.jpeg')}
+                                        $isSelected={templateBackground === 'coupon_background_3.jpeg'}
                                     >
-                                        <img src="/coupon_background_3.png" alt="Template 3" />
+                                        <img src="/coupon_background_3.jpeg" alt="Template 3" />
                                         <span>Template 3</span>
                                     </TemplateOption>
                                 </TemplateSelector>
