@@ -3,8 +3,9 @@ import { listCoupons, deleteCoupon } from '../../services/couponService';
 import { ICoupon, CouponStatus } from '../../interfaces/coupon';
 import { CouponModal } from '../../components/CouponModal';
 import { GenerateCoupon } from '../../components/GenerateCoupon';
+import { CouponOrdersModal } from '../../components/CouponOrdersModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faPen, faTrash, faPrint } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faPen, faTrash, faPrint, faReceipt } from '@fortawesome/free-solid-svg-icons';
 import {
     Container,
     ButtonsContainer,
@@ -31,6 +32,8 @@ export function Coupons() {
     const [currentCoupon, setCurrentCoupon] = useState<ICoupon | null>(null);
     const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
     const [couponToPrint, setCouponToPrint] = useState<ICoupon | null>(null);
+    const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
+    const [couponForOrders, setCouponForOrders] = useState<ICoupon | null>(null);
 
     const loadCoupons = async () => {
         setLoading(true);
@@ -80,6 +83,16 @@ export function Coupons() {
     const handleClosePrintModal = () => {
         setIsPrintModalOpen(false);
         setCouponToPrint(null);
+    };
+
+    const handleOpenOrdersModal = (coupon: ICoupon) => {
+        setCouponForOrders(coupon);
+        setIsOrdersModalOpen(true);
+    };
+
+    const handleCloseOrdersModal = () => {
+        setIsOrdersModalOpen(false);
+        setCouponForOrders(null);
     };
 
     const handleSave = () => {
@@ -295,6 +308,13 @@ export function Coupons() {
                                             <FontAwesomeIcon icon={faPrint} />
                                         </button>
                                         <button
+                                            className="view-button"
+                                            title="Ver pedidos que usaram este cupom"
+                                            onClick={() => handleOpenOrdersModal(coupon)}
+                                        >
+                                            <FontAwesomeIcon icon={faReceipt} />
+                                        </button>
+                                        <button
                                             className="del-button"
                                             onClick={() => handleDelete(coupon.id, coupon.code)}
                                         >
@@ -320,6 +340,12 @@ export function Coupons() {
                 isOpen={isPrintModalOpen}
                 onRequestClose={handleClosePrintModal}
                 coupon={couponToPrint}
+            />
+
+            <CouponOrdersModal
+                isOpen={isOrdersModalOpen}
+                onRequestClose={handleCloseOrdersModal}
+                coupon={couponForOrders}
             />
         </Container>
     );
