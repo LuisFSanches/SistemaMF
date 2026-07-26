@@ -24,6 +24,27 @@ export const createStockTransaction = async ({
         return response;
 };
 
+export const updateStockTransaction = async (id: string, {
+        store_product_id,
+        supplier,
+        unity,
+        quantity,
+        unity_price,
+        total_price,
+        purchased_date
+}: IStockTransaction) => {
+        const response = await api.put(`/stockTransaction/${id}`, {
+                store_product_id,
+                supplier,
+                unity,
+                quantity: Number(quantity),
+                unity_price: Number(unity_price),
+                total_price: Number(total_price),
+                purchased_date
+        });
+        return response;
+};
+
 export const getStockTransactions = async (page: number, pageSize: number, query: string, supplierId?: string) => {
         let url = `/stockTransaction/all?page=${page}&pageSize=${pageSize}&query=${encodeURIComponent(query)}`;
 

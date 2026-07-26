@@ -22,6 +22,7 @@ import { WaitingClientOrders } from "./views/WaitingClientOrders";
 import { ProductsPage } from "./views/Products";
 import { StockPage } from "./views/Stock";
 import { ProductStockDetail } from "./views/ProductStockDetail";
+import { SupplierStockDetail } from "./views/SupplierStockDetail";
 import { GeneralCatalog } from "./views/GeneralCatalog";
 import { ParentProducts } from "./views/ParentProducts";
 import { OnlineStoreProducts } from "./views/OnlineStoreProducts";
@@ -149,6 +150,11 @@ export default function routes(){
                         <Route path="/backoffice/estoque/produto/:id" element={
                             <PrivateRoute>
                                 <ProductStockDetail/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/estoque/fornecedor/:id" element={
+                            <PrivateRoute>
+                                <SupplierStockDetail/>
                             </PrivateRoute>
                         }/>
                         <Route path="/backoffice/clientes" element={

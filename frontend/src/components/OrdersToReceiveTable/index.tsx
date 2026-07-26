@@ -11,13 +11,9 @@ import { useOrdersToReceive } from "../../contexts/OrdersToReceiveContext";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { updateOrderPaymentStatus } from "../../services/orderService";
 import { ORDERS_TO_RECEIVE_TYPES } from "../../constants";
-import {
-    Container,
-    StatusBadge,
-    TypeBadge,
-    ActionsContainer,
-    EmptyState
-} from "./style";
+import { DataTable, ColumnDef } from "../DataTable";
+import { RowActions, IconButton } from "../DataTable/style";
+import { Badge, BadgeTone } from "../Badge";
 
 interface OrdersToReceiveTableProps {
     orders: IOrderToReceive[];
@@ -25,11 +21,14 @@ interface OrdersToReceiveTableProps {
     page: number;
     pageSize: number;
     query: string;
+    onQueryChange?: (query: string) => void;
+    toolbarExtra?: React.ReactNode;
+    footer?: React.ReactNode;
 }
 
 const ORDERS_TO_RECEIVE_TYPES_FORMATTED: Record<string, string> = ORDERS_TO_RECEIVE_TYPES;
 
-export function OrdersToReceiveTable({ orders, filter, page, pageSize, query }: OrdersToReceiveTableProps) {
+export function OrdersToReceiveTable({ orders, filter, page, pageSize, query, onQueryChange, toolbarExtra, footer }: OrdersToReceiveTableProps) {
     const { updateOrderToReceive, deleteOrderToReceive, loadOrdersToReceive } = useOrdersToReceive();
     const { showSuccess } = useSuccessMessage();
     const [confirmReceiveModal, setConfirmReceiveModal] = useState(false);
@@ -44,11 +43,6 @@ export function OrdersToReceiveTable({ orders, filter, page, pageSize, query }: 
         if (order.received_date || order.order?.payment_received) return "Pago";
         const isOverdue = moment().isAfter(moment(order.payment_due_date));
         return isOverdue ? "Vencido" : "Pendente";
-    };
-
-    const isOverdue = (order: IOrderToReceive) => {
-        if (order.received_date) return false;
-        return moment().isAfter(moment(order.payment_due_date));
     };
 
     const handleReceive = async () => {
@@ -119,121 +113,143 @@ export function OrdersToReceiveTable({ orders, filter, page, pageSize, query }: 
 
     const filteredOrders = orders || [];
 
+    const getStatusTone = (order: IOrderToReceive): BadgeTone => {
+        const label = getStatusLabel(order);
+        if (label === 'Pago') return 'good';
+        if (label === 'Vencido') return 'bad';
+        return 'warn';
+    };
 
-    if (filteredOrders.length === 0) {
-        return (
-        <Container>
-            <EmptyState>
-            <h3>Nenhum registro encontrado</h3>
-            <p>Não há valores a receber para exibir.</p>
-            </EmptyState>
-        </Container>
-        );
-    }
+    const columns: ColumnDef<IOrderToReceive>[] = [
+        {
+            key: 'order_code',
+            header: 'Nº Pedido',
+            render: (orderToReceive) => (
+                <Link to={`/backoffice/pedido/${orderToReceive.order_id}`} style={{ color: 'var(--dt-accent)', fontWeight: 700, textDecoration: 'none' }}>
+                    #{orderToReceive.order?.code}
+                </Link>
+            ),
+        },
+        {
+            key: 'client',
+            header: 'Cliente',
+            render: (orderToReceive) => `${orderToReceive.order?.client?.first_name || ''} ${orderToReceive.order?.client?.last_name || ''}`,
+        },
+        {
+            key: 'created_at',
+            header: 'Data',
+            render: (orderToReceive) => moment(orderToReceive.order?.created_at).format('DD/MM/YYYY'),
+        },
+        {
+            key: 'due_date',
+            header: 'Vencimento',
+            render: (orderToReceive) => moment(orderToReceive.payment_due_date).format('DD/MM/YYYY'),
+        },
+        {
+            key: 'value',
+            header: 'Valor',
+            render: (orderToReceive) => convertMoney(orderToReceive.order?.total || 0),
+        },
+        {
+            key: 'type',
+            header: 'Tipo',
+            render: (orderToReceive) => (
+                <Badge tone="info">
+                    {ORDERS_TO_RECEIVE_TYPES_FORMATTED[orderToReceive.type] || orderToReceive.type}
+                </Badge>
+            ),
+        },
+        {
+            key: 'status',
+            header: 'Status',
+            render: (orderToReceive) => (
+                <Badge tone={getStatusTone(orderToReceive)}>
+                    {getStatusLabel(orderToReceive)}
+                </Badge>
+            ),
+        },
+        {
+            key: 'actions',
+            header: 'Ações',
+            render: (orderToReceive) => (
+                <RowActions>
+                    <IconButton
+                        $tone="edit"
+                        title="Editar"
+                        onClick={() => {
+                            setSelectedOrderToReceive(orderToReceive);
+                            setEditModal(true);
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faPen}/>
+                    </IconButton>
+
+                    {!orderToReceive.is_archived ? (
+                        <IconButton
+                            $tone="default"
+                            title="Arquivar"
+                            onClick={() => {
+                                setSelectedOrderId(orderToReceive.id!);
+                                setConfirmArchiveModal(true);
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faEnvelopeCircleCheck}/>
+                        </IconButton>
+                    ) : (
+                        <IconButton
+                            $tone="default"
+                            title="Desarquivar"
+                            onClick={() => {
+                                setSelectedOrderId(orderToReceive.id!);
+                                setConfirmUnarchiveModal(true);
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faBoxOpen}/>
+                        </IconButton>
+                    )}
+
+                    {!orderToReceive.received_date && (
+                        <IconButton
+                            $tone="view"
+                            title="Confirmar Recebimento"
+                            onClick={() => {
+                                setSelectedOrderId(orderToReceive.id!);
+                                setConfirmReceiveModal(true);
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faCheck}/>
+                        </IconButton>
+                    )}
+
+                    <IconButton
+                        $tone="delete"
+                        title="Deletar"
+                        onClick={() => {
+                            setSelectedOrderId(orderToReceive.id!);
+                            setConfirmDeleteModal(true);
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faTrash}/>
+                    </IconButton>
+                </RowActions>
+            ),
+        },
+    ];
 
     return (
-        <Container>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nº Pedido</th>
-                        <th>Cliente</th>
-                        <th>Data</th>
-                        <th>Vencimento</th>
-                        <th>Valor</th>
-                        <th>Tipo</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredOrders.map((orderToReceive, index) => (
-                        <tr 
-                        key={orderToReceive.id} 
-                        className={isOverdue(orderToReceive) ? 'overdue' : ''}
-                        >
-                        <td>
-                            <Link to={`/backoffice/pedido/${orderToReceive.order_id}`} className="order-code-link">
-                                #{orderToReceive.order?.code}
-                            </Link>
-                        </td>
-                        <td>
-                            {orderToReceive.order?.client?.first_name} {orderToReceive.order?.client?.last_name}
-                        </td>
-                        <td>{moment(orderToReceive.order?.created_at).format('DD/MM/YYYY')}</td>
-                        <td>{moment(orderToReceive.payment_due_date).format('DD/MM/YYYY')}</td>
-                        <td>{convertMoney(orderToReceive.order?.total || 0)}</td>
-                        <td>
-                            <TypeBadge type={orderToReceive.type}>
-                            {ORDERS_TO_RECEIVE_TYPES_FORMATTED[orderToReceive.type] || orderToReceive.type}
-                            </TypeBadge>
-                        </td>
-                        <td>
-                            <StatusBadge status={getStatusLabel(orderToReceive)}>
-                                {getStatusLabel(orderToReceive)}
-                            </StatusBadge>
-                        </td>
-                        <td>
-                            <ActionsContainer>
-                                <button className="edit-button"
-                                    onClick={() => {
-                                        setSelectedOrderToReceive(orderToReceive);
-                                        setEditModal(true);
-                                    }}
-                                    title="Editar"
-                                >
-                                    <FontAwesomeIcon icon={faPen}/>
-                                </button>
-
-                                {!orderToReceive.is_archived ? (
-                                    <button className="view-button"
-                                        onClick={() => {
-                                            setSelectedOrderId(orderToReceive.id!);
-                                            setConfirmArchiveModal(true);
-                                        }}
-                                        title="Arquivar"
-                                    >
-                                        <FontAwesomeIcon icon={faEnvelopeCircleCheck}/>
-                                    </button>
-                                ) : (
-                                    <button className="view-button"
-                                        onClick={() => {
-                                            setSelectedOrderId(orderToReceive.id!);
-                                            setConfirmUnarchiveModal(true);
-                                        }}
-                                        title="Desarquivar"
-                                    >
-                                        <FontAwesomeIcon icon={faBoxOpen}/>
-                                    </button>
-                                )}
-
-                                {!orderToReceive.received_date && (
-                                    <button className="done-button"
-                                        onClick={() => {
-                                            setSelectedOrderId(orderToReceive.id!);
-                                            setConfirmReceiveModal(true);
-                                        }}
-                                        title="Confirmar Recebimento"
-                                    >
-                                        <FontAwesomeIcon icon={faCheck}/>
-                                    </button>
-                                )}
-
-                                <button className="del-button"
-                                    onClick={() => {
-                                        setSelectedOrderId(orderToReceive.id!);
-                                        setConfirmDeleteModal(true);
-                                    }}
-                                    title="Deletar"
-                                >
-                                    <FontAwesomeIcon icon={faTrash}/>
-                                </button>
-                            </ActionsContainer>
-                        </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+        <>
+            <DataTable
+                columns={columns}
+                data={filteredOrders}
+                rowKey={(orderToReceive) => orderToReceive.id as string}
+                emptyTitle="Nenhum registro encontrado"
+                emptyDescription="Não há valores a receber para exibir."
+                searchPlaceholder="Buscar por cliente ou pedido"
+                searchValue={query}
+                onSearchChange={onQueryChange}
+                toolbarExtra={toolbarExtra}
+                footer={footer}
+            />
 
             <ConfirmPopUp
                 isOpen={confirmReceiveModal}
@@ -288,6 +304,6 @@ export function OrdersToReceiveTable({ orders, filter, page, pageSize, query }: 
                 action="edit"
                 currentOrderToReceive={selectedOrderToReceive}
             />
-        </Container>
+        </>
     );
 }

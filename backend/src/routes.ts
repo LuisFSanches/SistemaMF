@@ -82,6 +82,8 @@ import { CreateStockTransactionController } from './controllers/stockTransaction
 import { GetAllStockTransactionsController } from './controllers/stockTransaction/GetAllStockTransactionsController';
 import { GetProductStockDetailsController } from './controllers/stockTransaction/GetProductStockDetailsController';
 import { DeleteStockTransactionController } from './controllers/stockTransaction/DeleteStockTransactionController';
+import { UpdateStockTransactionController } from './controllers/stockTransaction/UpdateStockTransactionController';
+import { GetSupplierStockDetailsController } from './controllers/stockTransaction/GetSupplierStockDetailsController';
 
 import { ValidateStockController } from './controllers/stock-validation/ValidateStockController';
 
@@ -351,6 +353,7 @@ router.post('/webhook/pix', superAdminAuthMiddleware,  new WebhookPixController(
 router.get('/stockTransaction/all', adminAuthMiddleware, new GetAllStockTransactionsController().handle);
 router.get('/stockTransaction/product/:id', adminAuthMiddleware, new GetProductStockDetailsController().handle);
 router.post('/stockTransaction', adminAuthMiddleware, new CreateStockTransactionController().handle);
+router.put('/stockTransaction/:id', adminAuthMiddleware, new UpdateStockTransactionController().handle);
 router.delete('/stockTransaction/:id', adminAuthMiddleware, new DeleteStockTransactionController().handle);
 
 //-- ROTAS STOCK VALIDATION --
@@ -359,6 +362,7 @@ router.post('/stock/validate', new ValidateStockController().handle);
 //-- ROTAS SUPPLIER --
 router.post('/supplier', adminAuthMiddleware, new CreateSupplierController().handle);
 router.get('/supplier/all', adminAuthMiddleware, new GetAllSuppliersController().handle);
+router.get('/supplier/:id/stock', adminAuthMiddleware, new GetSupplierStockDetailsController().handle);
 
 //-- ROTAS DELIVERY MEN --
 router.post('/deliveryMan', adminAuthMiddleware, new CreateDeliveryManController().handle);

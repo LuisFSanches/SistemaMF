@@ -4,6 +4,10 @@ import { ICoupon, CouponStatus } from '../../interfaces/coupon';
 import { CouponModal } from '../../components/CouponModal';
 import { GenerateCoupon } from '../../components/GenerateCoupon';
 import { CouponOrdersModal } from '../../components/CouponOrdersModal';
+import { DataTable, ColumnDef } from '../../components/DataTable';
+import { RowActions, IconButton } from '../../components/DataTable/style';
+import { Badge, BadgeTone } from '../../components/Badge';
+import { ProgressBar } from '../../components/ProgressBar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faPen, faTrash, faPrint, faReceipt } from '@fortawesome/free-solid-svg-icons';
 import {
@@ -12,12 +16,6 @@ import {
     AddButton,
     FilterToggleContainer,
     FilterButton,
-    StatusBadge,
-    EmptyState,
-    UsageContainer,
-    UsageText,
-    UsageBar,
-    UsageFill
 } from './styles';
 import { PageHeader } from '../../styles/global';
 import moment from 'moment';
@@ -143,51 +141,113 @@ export function Coupons() {
         return `${start} - ${end}`;
     };
 
-    const getUsagePercentage = (current: number, limit: number | null): number => {
-        if (!limit) return 0;
-        return (current / limit) * 100;
+    const getStatusTone = (status: CouponStatus): BadgeTone => {
+        const tones: Record<CouponStatus, BadgeTone> = {
+            ACTIVE: 'good',
+            DISABLED: 'neutral',
+            EXPIRED: 'bad',
+            NOT_STARTED: 'warn',
+            USAGE_LIMIT_REACHED: 'info',
+        };
+        return tones[status] || 'neutral';
     };
 
-    const getUsageColor = (percentage: number): string => {
-        if (percentage >= 80) return '#f44336'; // Red
-        if (percentage >= 50) return '#ff9800'; // Orange
-        return '#4caf50'; // Green
-    };
+    const columns: ColumnDef<ICoupon>[] = [
+        {
+            key: 'code',
+            header: 'Código',
+            render: (coupon) => (
+                <strong style={{ color: 'var(--dt-accent)', fontSize: '14px' }}>
+                    {coupon.code}
+                </strong>
+            ),
+        },
+        {
+            key: 'discount',
+            header: 'Desconto',
+            render: (coupon) => {
+                const discount = formatDiscount(coupon);
+                return (
+                    <span>{discount.emoji} {discount.value}</span>
+                );
+            },
+        },
+        {
+            key: 'validity',
+            header: 'Validade',
+            render: (coupon) => (
+                isNeverExpires(coupon)
+                    ? <Badge tone="info">Nunca expira</Badge>
+                    : <span>{formatDateRange(coupon)}</span>
+            ),
+        },
+        {
+            key: 'usage',
+            header: 'Uso',
+            render: (coupon) => (
+                coupon.total_usage_limit
+                    ? <ProgressBar value={coupon.current_usage_count} max={coupon.total_usage_limit} />
+                    : <span>{coupon.current_usage_count} / ∞</span>
+            ),
+        },
+        {
+            key: 'status',
+            header: 'Status',
+            render: (coupon) => (
+                <Badge tone={getStatusTone(coupon.computedStatus || CouponStatus.DISABLED)}>
+                    {getStatusLabel(coupon.computedStatus as CouponStatus)}
+                </Badge>
+            ),
+        },
+        {
+            key: 'actions',
+            header: 'Ações',
+            render: (coupon) => (
+                <RowActions>
+                    <IconButton $tone="edit" title="Editar cupom" onClick={() => handleOpenEditModal(coupon)}>
+                        <FontAwesomeIcon icon={faPen} />
+                    </IconButton>
+                    <IconButton $tone="default" title="Imprimir cartão" onClick={() => handleOpenPrintModal(coupon)}>
+                        <FontAwesomeIcon icon={faPrint} />
+                    </IconButton>
+                    <IconButton $tone="view" title="Ver pedidos que usaram este cupom" onClick={() => handleOpenOrdersModal(coupon)}>
+                        <FontAwesomeIcon icon={faReceipt} />
+                    </IconButton>
+                    <IconButton $tone="delete" title="Desativar cupom" onClick={() => handleDelete(coupon.id, coupon.code)}>
+                        <FontAwesomeIcon icon={faTrash} />
+                    </IconButton>
+                </RowActions>
+            ),
+        },
+    ];
 
     return (
         <Container>
             <PageHeader>
                 <div>
                     <h1>🎁 Cupons de Desconto</h1>
-                    <input 
-                        type="text"
-                        placeholder="Buscar por código do cupom..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ width: '310px' }}
-                    />
                 </div>
                 <ButtonsContainer>
                     <FilterToggleContainer>
-                        <FilterButton 
+                        <FilterButton
                             active={filter === 'all'}
                             onClick={() => setFilter('all')}
                         >
                             Todos
                         </FilterButton>
-                        <FilterButton 
+                        <FilterButton
                             active={filter === CouponStatus.ACTIVE}
                             onClick={() => setFilter(CouponStatus.ACTIVE)}
                         >
                             Ativos
                         </FilterButton>
-                        <FilterButton 
+                        <FilterButton
                             active={filter === CouponStatus.EXPIRED}
                             onClick={() => setFilter(CouponStatus.EXPIRED)}
                         >
                             Expirados
                         </FilterButton>
-                        <FilterButton 
+                        <FilterButton
                             active={filter === CouponStatus.DISABLED}
                             onClick={() => setFilter(CouponStatus.DISABLED)}
                         >
@@ -201,132 +261,17 @@ export function Coupons() {
                 </ButtonsContainer>
             </PageHeader>
 
-            {loading ? (
-                <EmptyState>
-                    <div style={{ fontSize: '3rem' }}>⏳</div>
-                    <h3>Carregando...</h3>
-                </EmptyState>
-            ) : coupons.length === 0 ? (
-                <EmptyState>
-                    <div style={{ fontSize: '4rem' }}>🎁</div>
-                    <h3>Nenhum cupom encontrado</h3>
-                    <p>Crie seu primeiro cupom de desconto para começar!</p>
-                    <AddButton onClick={handleOpenCreateModal}>
-                        <FontAwesomeIcon icon={faPlus} />
-                        Criar Primeiro Cupom
-                    </AddButton>
-                </EmptyState>
-            ) : (
-                <table className="responsive-table">
-                    <thead className="head">
-                        <tr>
-                            <th>Código</th>
-                            <th>Desconto</th>
-                            <th>Validade</th>
-                            <th>Uso</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {coupons.map((coupon) => {
-                            const discount = formatDiscount(coupon);
-                            const usagePercentage = getUsagePercentage(
-                                coupon.current_usage_count, 
-                                coupon.total_usage_limit ?? null
-                            );
-                            
-                            return (
-                                <tr key={coupon.id}>
-                                    <td data-label="Código">
-                                        <strong style={{ 
-                                            color: '#EC4899', 
-                                            fontSize: '1.1rem',
-                                            fontWeight: 'bold'
-                                        }}>
-                                            {coupon.code}
-                                        </strong>
-                                    </td>
-                                    <td data-label="Desconto">
-                                        <div style={{ 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            gap: '0.5rem',
-                                            justifyContent: 'center'
-                                        }}>
-                                            <span>{discount.emoji}</span>
-                                            <span>{discount.value}</span>
-                                        </div>
-                                    </td>
-                                    <td data-label="Validade">
-                                        {isNeverExpires(coupon) ? (
-                                            <span style={{ 
-                                                background: '#4caf50', 
-                                                padding: '0.25rem 0.5rem',
-                                                borderRadius: '4px',
-                                                color: 'white',
-                                                fontSize: '0.85rem',
-                                                fontWeight: '500'
-                                            }}>
-                                                ♾️ Nunca expira
-                                            </span>
-                                        ) : (
-                                            <span>{formatDateRange(coupon)}</span>
-                                        )}
-                                    </td>
-                                    <td data-label="Uso">
-                                        <UsageContainer>
-                                            <UsageText>
-                                                {coupon.current_usage_count} / {coupon.total_usage_limit || '∞'}
-                                            </UsageText>
-                                            {coupon.total_usage_limit && (
-                                                <UsageBar>
-                                                    <UsageFill 
-                                                        percentage={usagePercentage}
-                                                        color={getUsageColor(usagePercentage)}
-                                                    />
-                                                </UsageBar>
-                                            )}
-                                        </UsageContainer>
-                                    </td>
-                                    <td data-label="Status">
-                                        <StatusBadge status={coupon.computedStatus || 'DISABLED'}>
-                                            {getStatusLabel(coupon.computedStatus as CouponStatus)}
-                                        </StatusBadge>
-                                    </td>
-                                    <td data-label="Ações" className="table-icon">
-                                        <button
-                                            className="edit-button"
-                                            onClick={() => handleOpenEditModal(coupon)}
-                                        >
-                                            <FontAwesomeIcon icon={faPen} />
-                                        </button>
-                                        <button
-                                            className="print-button"
-                                            onClick={() => handleOpenPrintModal(coupon)}
-                                        >
-                                            <FontAwesomeIcon icon={faPrint} />
-                                        </button>
-                                        <button
-                                            className="view-button"
-                                            title="Ver pedidos que usaram este cupom"
-                                            onClick={() => handleOpenOrdersModal(coupon)}
-                                        >
-                                            <FontAwesomeIcon icon={faReceipt} />
-                                        </button>
-                                        <button
-                                            className="del-button"
-                                            onClick={() => handleDelete(coupon.id, coupon.code)}
-                                        >
-                                            <FontAwesomeIcon icon={faTrash} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            )}
+            <DataTable
+                columns={columns}
+                data={coupons}
+                rowKey={(coupon) => coupon.id}
+                loading={loading}
+                searchPlaceholder="Buscar por código do cupom..."
+                searchValue={searchTerm}
+                onSearchChange={setSearchTerm}
+                emptyTitle="Nenhum cupom encontrado"
+                emptyDescription="Crie seu primeiro cupom de desconto para começar."
+            />
 
             <CouponModal
                 isOpen={isModalOpen}

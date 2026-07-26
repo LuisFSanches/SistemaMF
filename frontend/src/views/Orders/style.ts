@@ -21,14 +21,6 @@ export const Container = styled.div`
         margin-right: 5px;
     }
 
-    .canceled-order {
-        background-color: rgba(220, 53, 69, 0.15);
-    }
-
-    .canceled-order:hover {
-        background-color: rgba(220, 53, 69, 0.25);
-    }
-
     .order-code-link {
         color: #EC4899;
         font-weight: 700;

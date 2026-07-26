@@ -5,7 +5,8 @@ import { ModalContainer, Form, Input, InlineFormField, Label, EditFormField, Err
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { searchStoreProducts } from "../../services/storeProductService";
-import { createStockTransaction } from "../../services/stockTransactionService";
+import { createStockTransaction, updateStockTransaction } from "../../services/stockTransactionService";
+import { updateStoreProduct } from "../../services/storeProductService";
 import { getAllSuppliers } from "../../services/supplierService";
 import { Loader } from "../../components/Loader";
 import { UNITIES } from "../../constants";
@@ -13,12 +14,14 @@ import { StoreProductModal } from "../../components/StoreProductModal";
 import { SupplierModal } from "../../components/SupplierModal";
 import { ISupplier } from "../../interfaces/ISupplier";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
+import { IStockTransaction as IStockTransactionData } from "../../interfaces/IStockTransaction";
 
 interface StockTransactionModalProps{
     isOpen: boolean;
     onRequestClose: ()=> void;
     loadData: () => void;
     action: string;
+    currentTransaction?: IStockTransactionData | null;
 }
 
 interface IStockTransaction {
@@ -28,15 +31,21 @@ interface IStockTransaction {
     quantity: number;
     unity_price: number;
     total_price: number;
+    selling_price: number;
     purchased_date: string;
     box_value: number;
     box_unities: number;
+}
+
+function getTodayDate() {
+    return new Date().toLocaleDateString('en-CA');
 }
 export function StockTransactionModal({
     isOpen,
     onRequestClose,
     loadData,
     action,
+    currentTransaction,
 }:StockTransactionModalProps){
     const {
         register,
@@ -85,12 +94,14 @@ export function StockTransactionModal({
         setSelectedProduct(product);
         setQuery(product.name);
         setShowSuggestions(false);
+        setValue("selling_price", product.price || 0);
     };
 
     const loadSuppliers = async () => {
         try {
             const response = await getAllSuppliers();
             setSuppliers(response.data);
+            return response.data as ISupplier[];
         } catch (error) {
             console.error("Erro ao carregar fornecedores:", error);
         }
@@ -155,9 +166,23 @@ export function StockTransactionModal({
                 purchased_date: formData.purchased_date,
             }
 
-            await createStockTransaction(data);
+            if (action === "edit") {
+                await updateStockTransaction(currentTransaction?.id as string, data);
+                showSuccess("Compra atualizada com sucesso!");
+            } else {
+                await createStockTransaction(data);
+                showSuccess("Compra registrada com sucesso!");
+            }
+
+            const sellingPrice = Number(formData.selling_price);
+            if (sellingPrice !== (selectedProduct.price || 0)) {
+                await updateStoreProduct({
+                    id: selectedProduct.id,
+                    price: sellingPrice,
+                });
+            }
+
             setShowLoader(false);
-            showSuccess("Compra registrada com sucesso!");
             onRequestClose();
             loadData();
         } catch(error) {
@@ -168,25 +193,55 @@ export function StockTransactionModal({
     useEffect(() => {
         async function loadSuppliersOnOpen() {
             if (isOpen) {
-                await loadSuppliers();
+                const loadedSuppliers = await loadSuppliers();
+
+                if (currentTransaction) {
+                    const supplier = loadedSuppliers?.find((s: ISupplier) => s.id === currentTransaction.supplier_id);
+                    if (supplier) {
+                        setSelectedSupplier(supplier);
+                    }
+                }
             }
         }
-        
+
         loadSuppliersOnOpen();
-        setValue("supplier_id", "");
-        setValue("supplier", "");
-        setValue("unity", "");
-        setValue("quantity", 0);
-        setValue("unity_price", 0);
-        setValue("total_price", 0);
-        setValue("purchased_date", "");
-        setSelectedProduct(null);
-        setSelectedSupplier(null);
+
+        if (currentTransaction) {
+            setValue("supplier_id", currentTransaction.supplier_id);
+            setValue("supplier", currentTransaction.supplier);
+            setValue("unity", currentTransaction.unity);
+            setValue("quantity", currentTransaction.quantity);
+            setValue("unity_price", currentTransaction.unity_price);
+            setValue("total_price", currentTransaction.total_price);
+            setValue("purchased_date", action === "edit" ? currentTransaction.purchased_date?.slice(0, 10) : getTodayDate());
+            setValue("box_value", 0);
+            setValue("box_unities", 0);
+
+            const storeProduct = currentTransaction.storeProduct;
+            setSelectedProduct(storeProduct ? {
+                id: currentTransaction.store_product_id,
+                name: storeProduct.product?.name,
+                price: storeProduct.price,
+            } : null);
+            setQuery(storeProduct?.product?.name || "");
+            setValue("selling_price", storeProduct?.price || 0);
+            setSelectedSupplier(null);
+        } else {
+            setValue("supplier_id", "");
+            setValue("supplier", "");
+            setValue("unity", "");
+            setValue("quantity", 0);
+            setValue("unity_price", 0);
+            setValue("total_price", 0);
+            setValue("selling_price", 0);
+            setValue("purchased_date", getTodayDate());
+            setSelectedProduct(null);
+            setSelectedSupplier(null);
+            setValue("box_value", 0);
+            setValue("box_unities", 0);
+        }
         setShowSupplierDropdown(false);
         setSupplierSearchQuery('');
-        setQuery('');
-        setValue("box_value", 0);
-        setValue("box_unities", 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen])
 
@@ -373,6 +428,15 @@ export function StockTransactionModal({
                             {errors.total_price && <ErrorMessage>{errors.total_price.message}</ErrorMessage>}
                         </EditFormField>
                     </InlineFormField>
+                    <EditFormField>
+                        <Label>Preço de Venda<span>*</span></Label>
+                        <input type="number" step={0.01}
+                            {...register("selling_price", { required: "Preço de venda é obrigatório" })}/>
+                        {errors.selling_price && <ErrorMessage>{errors.selling_price.message}</ErrorMessage>}
+                        <small style={{ color: '#666', display: 'block', marginTop: '0.3rem' }}>
+                            Ao alterar este valor, o preço de venda do produto nesta loja também será atualizado.
+                        </small>
+                    </EditFormField>
                     <button type="submit" className="create-button">
                         {action === "create" ? "Criar" : "Editar"}
                     </button>

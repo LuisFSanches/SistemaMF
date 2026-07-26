@@ -6,6 +6,7 @@ import { getPix } from"../../services/pixService";
 import { IPix } from "../../interfaces/IPix";
 import { Loader } from "../../components/Loader";
 import { convertMoney } from "../../utils";
+import { DataTable, ColumnDef } from "../../components/DataTable";
 
 export function PixPage(){
     const [pixList, setPixList] = useState<IPix[]>([]);
@@ -45,6 +46,31 @@ export function PixPage(){
         }
     }, [initialDate, finalDate, selectedLimit]);
 
+    const columns: ColumnDef<IPix>[] = [
+        {
+            key: 'received_at',
+            header: 'Recebimento',
+            sortable: true,
+            sortValue: (pix) => new Date(pix.dataInclusao).getTime(),
+            render: (pix) => moment(pix.dataInclusao).format("DD/MM/YYYY HH:mm"),
+        },
+        {
+            key: 'description',
+            header: 'Descrição',
+            render: (pix) => pix.titulo,
+        },
+        {
+            key: 'client',
+            header: 'Cliente',
+            render: (pix) => pix.descricao,
+        },
+        {
+            key: 'value',
+            header: 'Valor',
+            render: (pix) => convertMoney(pix.valor),
+        },
+    ];
+
     return(
         <Container>
             <Loader show={showLoader} />
@@ -76,29 +102,15 @@ export function PixPage(){
                     </a>
                 </ConfigErrorContainer>
             )}
-            {pixList && pixList.length > 0 && (
-                <table>
-                    <thead className="head">
-                        <tr>
-                            <th>Recebimento</th>
-                            <th>Descrição</th>
-                            <th>Cliente</th>
-                            <th>Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {pixList?.map(pix => (
-                            <tr key={pix.descricao}>
-                                <td>{moment(pix.dataInclusao).format("DD/MM/YYYY HH:mm")}</td>
-                                <td>{pix.titulo}</td>
-                                <td>
-                                    {pix.descricao}
-                                </td>
-                                <td>{convertMoney(pix.valor)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            {!configError && (
+                <DataTable
+                    columns={columns}
+                    data={pixList}
+                    rowKey={(pix) => `${pix.descricao}-${pix.dataInclusao}`}
+                    loading={showLoader}
+                    emptyTitle="Nenhum recebimento encontrado"
+                    emptyDescription="Não há registros de Pix para o período selecionado."
+                />
             )}
         </Container>
     )

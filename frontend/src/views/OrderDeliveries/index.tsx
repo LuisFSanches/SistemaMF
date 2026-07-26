@@ -11,7 +11,6 @@ import { ConfirmPopUp } from "../../components/ConfirmPopUp";
 import { DeliveryManSelect } from "../../components/DeliveryManSelect";
 import {
     Container,
-    ButtonsContainer,
     AddButton,
     FilterToggleContainer,
     FilterButton,
@@ -48,7 +47,7 @@ export function OrderDeliveriesPage() {
         setEndDate(end);
     };
 
-    const searchDeliveries = (text: string) => {
+    const handleQueryChange = (text: string) => {
         setQuery(text);
         setPage(1);
     }
@@ -111,71 +110,12 @@ export function OrderDeliveriesPage() {
             <PageHeader>
                 <div>
                     <h1>Entregas de Pedidos</h1>
-                    <input
-                        style={{width: '330px'}}
-                        type="text"
-                        placeholder="Buscar por Motoboy, Pedido ou Cliente..."
-                        onKeyDown={(e: any) => {
-                            if (e.key === 'Enter') {
-                                searchDeliveries(e.target.value);
-                            }
-                        }}
-                    />
                 </div>
 
-                <ButtonsContainer>
-                    <FilterToggleContainer>
-                        <FilterButton
-                            active={filter === 'active'}
-                            onClick={() => {
-                                setFilter('active');
-                                setPage(1);
-                            }}
-                        >
-                            Ativos
-                        </FilterButton>
-                        <FilterButton
-                            active={filter === 'archived'}
-                            onClick={() => {
-                                setFilter('archived');
-                                setPage(1);
-                            }}
-                        >
-                            Arquivados
-                        </FilterButton>
-                        <FilterButton
-                            active={filter === 'all'}
-                            onClick={() => {
-                                setFilter('all');
-                                setPage(1);
-                            }}
-                        >
-                            Todos
-                        </FilterButton>
-                    </FilterToggleContainer>
-
-                    <DateRangePicker onDateRangeChange={handleDateRangeChange} />
-
-                    <DeliveryManSelect
-                        value={deliveryManId}
-                        onChange={(id) => {
-                            setDeliveryManId(id);
-                            setPage(1);
-                        }}
-                    />
-                </ButtonsContainer>
-                <div>
-                    <Pagination
-                        currentPage={page}
-                        total={totalDeliveries}
-                        pageSize={pageSize as number}
-                        onPageChange={setPage}
-                    />
-                    <AddButton onClick={() => setIsModalOpen(true)}>
-                        <FontAwesomeIcon icon={faPlus} />
-                        <span>Nova Entrega</span>
-                    </AddButton>
-                </div>
+                <AddButton onClick={() => setIsModalOpen(true)}>
+                    <FontAwesomeIcon icon={faPlus} />
+                    <span>Nova Entrega</span>
+                </AddButton>
             </PageHeader>
             <MassActionsContainer>
                 {selectedIds.length > 0 && (
@@ -207,15 +147,72 @@ export function OrderDeliveriesPage() {
                     </>
                 )}
             </MassActionsContainer>
-            <OrderDeliveriesTable 
-                deliveries={orderDeliveries} 
-                filter={filter} 
+            <OrderDeliveriesTable
+                deliveries={orderDeliveries}
+                filter={filter}
                 page={page}
                 pageSize={pageSize}
                 query={query}
                 selectedIds={selectedIds}
                 onSelectDelivery={handleSelectDelivery}
                 onSelectAll={handleSelectAll}
+                onQueryChange={handleQueryChange}
+                toolbarExtra={
+                    <>
+                        <FilterToggleContainer>
+                            <FilterButton
+                                active={filter === 'active'}
+                                onClick={() => {
+                                    setFilter('active');
+                                    setPage(1);
+                                }}
+                            >
+                                Ativos
+                            </FilterButton>
+                            <FilterButton
+                                active={filter === 'archived'}
+                                onClick={() => {
+                                    setFilter('archived');
+                                    setPage(1);
+                                }}
+                            >
+                                Arquivados
+                            </FilterButton>
+                            <FilterButton
+                                active={filter === 'all'}
+                                onClick={() => {
+                                    setFilter('all');
+                                    setPage(1);
+                                }}
+                            >
+                                Todos
+                            </FilterButton>
+                        </FilterToggleContainer>
+
+                        <DateRangePicker onDateRangeChange={handleDateRangeChange} />
+
+                        <DeliveryManSelect
+                            value={deliveryManId}
+                            onChange={(id) => {
+                                setDeliveryManId(id);
+                                setPage(1);
+                            }}
+                        />
+                    </>
+                }
+                footer={
+                    <>
+                        <span className="dt-count">
+                            Mostrando <strong>{orderDeliveries.length}</strong> de <strong>{totalDeliveries}</strong>
+                        </span>
+                        <Pagination
+                            currentPage={page}
+                            total={totalDeliveries}
+                            pageSize={pageSize as number}
+                            onPageChange={setPage}
+                        />
+                    </>
+                }
             />
 
             <NewOrderDeliveryModal
