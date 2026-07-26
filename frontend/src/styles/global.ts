@@ -454,6 +454,7 @@ export const PageContainer = styled.div`
 export const BodyContainer = styled.div`
     max-width: 100vw;
     display: flex;
+    margin-bottom: 20px;
 `;
 
 export const ModalContainer = styled.div`

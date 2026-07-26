@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { searchStoreProducts } from "../../services/storeProductService";
 import { createStockTransaction, updateStockTransaction } from "../../services/stockTransactionService";
+import { updateStoreProduct } from "../../services/storeProductService";
 import { getAllSuppliers } from "../../services/supplierService";
 import { Loader } from "../../components/Loader";
 import { UNITIES } from "../../constants";
@@ -30,6 +31,7 @@ interface IStockTransaction {
     quantity: number;
     unity_price: number;
     total_price: number;
+    selling_price: number;
     purchased_date: string;
     box_value: number;
     box_unities: number;
@@ -92,6 +94,7 @@ export function StockTransactionModal({
         setSelectedProduct(product);
         setQuery(product.name);
         setShowSuggestions(false);
+        setValue("selling_price", product.price || 0);
     };
 
     const loadSuppliers = async () => {
@@ -170,6 +173,15 @@ export function StockTransactionModal({
                 await createStockTransaction(data);
                 showSuccess("Compra registrada com sucesso!");
             }
+
+            const sellingPrice = Number(formData.selling_price);
+            if (sellingPrice !== (selectedProduct.price || 0)) {
+                await updateStoreProduct({
+                    id: selectedProduct.id,
+                    price: sellingPrice,
+                });
+            }
+
             setShowLoader(false);
             onRequestClose();
             loadData();
@@ -212,6 +224,7 @@ export function StockTransactionModal({
                 price: storeProduct.price,
             } : null);
             setQuery(storeProduct?.product?.name || "");
+            setValue("selling_price", storeProduct?.price || 0);
             setSelectedSupplier(null);
         } else {
             setValue("supplier_id", "");
@@ -220,6 +233,7 @@ export function StockTransactionModal({
             setValue("quantity", 0);
             setValue("unity_price", 0);
             setValue("total_price", 0);
+            setValue("selling_price", 0);
             setValue("purchased_date", getTodayDate());
             setSelectedProduct(null);
             setSelectedSupplier(null);
@@ -414,6 +428,15 @@ export function StockTransactionModal({
                             {errors.total_price && <ErrorMessage>{errors.total_price.message}</ErrorMessage>}
                         </EditFormField>
                     </InlineFormField>
+                    <EditFormField>
+                        <Label>Preço de Venda<span>*</span></Label>
+                        <input type="number" step={0.01}
+                            {...register("selling_price", { required: "Preço de venda é obrigatório" })}/>
+                        {errors.selling_price && <ErrorMessage>{errors.selling_price.message}</ErrorMessage>}
+                        <small style={{ color: '#666', display: 'block', marginTop: '0.3rem' }}>
+                            Ao alterar este valor, o preço de venda do produto nesta loja também será atualizado.
+                        </small>
+                    </EditFormField>
                     <button type="submit" className="create-button">
                         {action === "create" ? "Criar" : "Editar"}
                     </button>
