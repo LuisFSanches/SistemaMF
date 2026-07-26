@@ -8,6 +8,9 @@ import { faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
 import { ClientModal } from "../../components/ClientModal";
 import { Pagination } from "../../components/Pagination";
 import { useClients } from "../../contexts/ClientsContext";
+import { IClient } from "../../interfaces/IClient";
+import { DataTable, ColumnDef } from "../../components/DataTable";
+import { RowActions, IconButton } from "../../components/DataTable/style";
 
 export function UsersPage(){
     const { clients, loadAvailableClients, totalClients } = useClients();
@@ -34,7 +37,7 @@ export function UsersPage(){
         setClientModal(false)
     }
 
-    const searchClients = (text: string) => {
+    const handleQueryChange = (text: string) => {
         setQuery(text);
         setPage(1);
     }
@@ -44,28 +47,46 @@ export function UsersPage(){
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, pageSize, query]);
 
+    const columns: ColumnDef<IClient>[] = [
+        {
+            key: 'first_name',
+            header: 'Nome',
+            render: (client) => (
+                <span
+                    style={{ cursor: 'pointer', color: 'var(--dt-accent)', fontWeight: 700, textDecoration: 'underline' }}
+                    onClick={() => navigate(`/backoffice/clientes/${client.id}`)}
+                >
+                    {client.first_name}
+                </span>
+            ),
+        },
+        {
+            key: 'last_name',
+            header: 'Sobrenome',
+            render: (client) => client.last_name,
+        },
+        {
+            key: 'phone',
+            header: 'Telefone',
+            render: (client) => client.phone_number,
+        },
+        {
+            key: 'actions',
+            header: 'Editar',
+            render: (client) => (
+                <RowActions>
+                    <IconButton $tone="edit" title="Editar" onClick={() => handleOpenClientModal("edit", client)}>
+                        <FontAwesomeIcon icon={faPen}/>
+                    </IconButton>
+                </RowActions>
+            ),
+        },
+    ];
+
     return(
         <Container>
             <PageHeader>
                 <h1>Clientes</h1>
-                <div>
-                    <input
-                        style={{width: '250px'}}
-                        type="text"
-                        placeholder="Buscar por Cliente"
-                        onKeyDown={(e: any) => {
-                            if (e.key === 'Enter') {
-                                searchClients(e.target.value);
-                            }
-                        }}
-                    />
-                </div>
-                <Pagination
-                    currentPage={page}
-                    total={totalClients}
-                    pageSize={pageSize as number}
-                    onPageChange={setPage}
-                />
 
                 <AddButton onClick={() =>handleOpenClientModal("create", {
                     id: "",
@@ -77,41 +98,31 @@ export function UsersPage(){
                     <p>Novo Cliente</p>
                 </AddButton>
             </PageHeader>
-            
-            <table>
-                <thead className="head">
-                    <tr>
-                        <th>Nome</th>
-                        <th>Sobrenome</th>
-                        <th>Telefone</th>
-                        <th>Editar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {clients?.map(client => (
-                        <tr key={client.id}>
-                            <td 
-                                style={{ 
-                                    cursor: 'pointer', 
-                                    color: '#EC4899', 
-                                    fontWeight: '600',
-                                    textDecoration: 'underline'
-                                }}
-                                onClick={() => navigate(`/backoffice/clientes/${client.id}`)}
-                            >
-                                {client.first_name}
-                            </td>
-                            <td>{client.last_name}</td>
-                            <td>{client.phone_number}</td>
-                            <td className="table-icon">
-                                <button className="edit-button" onClick={() => handleOpenClientModal("edit", client)}>
-                                    <span>Editar</span> <FontAwesomeIcon icon={faPen}/>
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+
+            <DataTable
+                columns={columns}
+                data={clients}
+                rowKey={(client) => client.id as string}
+                searchPlaceholder="Buscar por cliente"
+                searchValue={query}
+                onSearchChange={handleQueryChange}
+                emptyTitle="Nenhum cliente encontrado"
+                emptyDescription="Tente buscar por outro nome."
+                footer={
+                    <>
+                        <span className="dt-count">
+                            Mostrando <strong>{clients.length}</strong> de <strong>{totalClients}</strong>
+                        </span>
+                        <Pagination
+                            currentPage={page}
+                            total={totalClients}
+                            pageSize={pageSize as number}
+                            onPageChange={setPage}
+                        />
+                    </>
+                }
+            />
+
             <ClientModal
                 isOpen={clientModalModal}
                 onRequestClose={handleCloseClientModal}

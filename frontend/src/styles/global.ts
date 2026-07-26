@@ -28,7 +28,28 @@ export const GlobalStyle = createGlobalStyle`
     --order-yellow: #f4d47c;
     --order-green:#6aa84f;
 
-    --shadow-color: #abb5bc
+    --shadow-color: #abb5bc;
+
+    --dt-accent: #e95578;
+    --dt-accent-wash: #fbeef1;
+    --dt-accent-wash-strong: #f7dce3;
+    --dt-paper: #fffdfd;
+    --dt-paper-sunk: #fbf6f7;
+    --dt-line: #f0dde2;
+    --dt-line-strong: #e3c7cf;
+    --dt-ink: #2a2226;
+    --dt-ink-soft: #6b5a60;
+    --dt-ink-faint: #a4939a;
+    --dt-good-bg: #e3f6ec;
+    --dt-good-fg: #1c7a4f;
+    --dt-warn-bg: #fdf1dc;
+    --dt-warn-fg: #96650b;
+    --dt-bad-bg: #fbe6e8;
+    --dt-bad-fg: #b4283f;
+    --dt-neutral-bg: #eee9ea;
+    --dt-neutral-fg: #766870;
+    --dt-info-bg: #e4eefb;
+    --dt-info-fg: #1f5f9e;
 }
 
 *{
@@ -123,7 +144,7 @@ table{
         }
         
         td {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             text-align: center;
 
             a {
@@ -932,7 +953,7 @@ export const AddButton = styled.button`
 export const PageHeader = styled.div`
     display: flex;
     justify-content: space-between;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     align-items: center;
 
     .title {

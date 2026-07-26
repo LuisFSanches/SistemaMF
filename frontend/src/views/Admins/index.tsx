@@ -1,11 +1,15 @@
 import { useState } from "react";
 
-import { Container, RoleBadge } from "./style";
+import { Container } from "./style";
 import { AddButton, PageHeader } from "../../styles/global";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faPen } from "@fortawesome/free-solid-svg-icons";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { AdminModal } from "../../components/AdminModal";
+import { IAdmin } from "../../interfaces/IAdmin";
+import { DataTable, ColumnDef } from "../../components/DataTable";
+import { RowActions, IconButton } from "../../components/DataTable/style";
+import { Badge } from "../../components/Badge";
 
 export function AdminsPage(){
     const { admins } = useAdmins();
@@ -29,6 +33,39 @@ export function AdminsPage(){
         setAdminModal(false)
     }
 
+    const columns: ColumnDef<IAdmin>[] = [
+        {
+            key: 'name',
+            header: 'Nome',
+            render: (admin) => admin.name,
+        },
+        {
+            key: 'username',
+            header: 'Usuário',
+            render: (admin) => admin.username,
+        },
+        {
+            key: 'role',
+            header: 'Tipo',
+            render: (admin) => (
+                <Badge tone={admin.role === "SUPER_ADMIN" ? "info" : "neutral"}>
+                    {admin.role === "SUPER_ADMIN" ? "Administrador" : "Vendedor"}
+                </Badge>
+            ),
+        },
+        {
+            key: 'actions',
+            header: 'Editar',
+            render: (admin) => (
+                <RowActions>
+                    <IconButton $tone="edit" title="Editar" onClick={() => handleOpenAdminModal("edit", admin)}>
+                        <FontAwesomeIcon icon={faPen}/>
+                    </IconButton>
+                </RowActions>
+            ),
+        },
+    ];
+
     return(
         <Container>
             <PageHeader>
@@ -44,41 +81,15 @@ export function AdminsPage(){
                     <p>Novo Vendedor/Admin</p>
                 </AddButton>
             </PageHeader>
-            
-            <table>
-                <thead className="head">
-                    <tr>
-                        <th>Nome</th>
-                        <th>Usuário</th>
-                        <th>Tipo</th>
-                        <th>Editar</th>
-                        <th>Deletar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {admins?.map(admin => (
-                        <tr key={admin.id}>
-                            <td>{admin.name}</td>
-                            <td>{admin.username}</td>
-                            <td>
-                                <RoleBadge role={admin.role}>
-                                    {admin.role === "SUPER_ADMIN" ? "Administrador" : "Vendedor"}
-                                </RoleBadge>
-                            </td>
-                            <td className="table-icon">
-                                <button className="edit-button" onClick={() => handleOpenAdminModal("edit", admin)}>
-                                    <span>Editar</span> <FontAwesomeIcon icon={faPen}/>
-                                </button>
-                            </td>
-                            <td className="table-icon">
-                                <button className="del-button">
-                                    <span>Excluir</span> <FontAwesomeIcon icon={faTrash}/>
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+
+            <DataTable
+                columns={columns}
+                data={admins}
+                rowKey={(admin) => admin.id as string}
+                emptyTitle="Nenhum administrador encontrado"
+                emptyDescription="Cadastre o primeiro administrador ou vendedor."
+            />
+
             <AdminModal
                 isOpen={adminModal}
                 onRequestClose={handleCloseClientModal}

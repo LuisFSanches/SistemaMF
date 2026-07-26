@@ -9,7 +9,6 @@ import { convertMoney } from "../../utils";
 import {
     Container,
     TotalCard,
-    ButtonsContainer,
     AddButton,
     FilterToggleContainer,
     FilterButton
@@ -29,7 +28,7 @@ export function OrdersToReceivePage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, query, filter]);
 
-    const searchOrders = (text: string) => {
+    const handleQueryChange = (text: string) => {
         setQuery(text);
         setPage(1);
     }
@@ -45,25 +44,20 @@ export function OrdersToReceivePage() {
                     </TotalCard>
                 </div>
 
-                <input
-                    style={{width: '250px'}}
-                    type="text"
-                    placeholder="Buscar por Cliente ou Pedido"
-                    onKeyDown={(e: any) => {
-                        if (e.key === 'Enter') {
-                            searchOrders(e.target.value);
-                        }
-                    }}
-                />
+                <AddButton onClick={() => setIsModalOpen(true)}>
+                    <FontAwesomeIcon icon={faPlus} />
+                    <span>Contas a receber</span>
+                </AddButton>
+            </PageHeader>
 
-                <Pagination
-                    currentPage={page}
-                    total={totalOrders}
-                    pageSize={pageSize as number}
-                    onPageChange={setPage}
-                />
-
-                <ButtonsContainer>
+            <OrdersToReceiveTable
+                orders={ordersToReceive}
+                filter={filter}
+                page={page}
+                pageSize={pageSize}
+                query={query}
+                onQueryChange={handleQueryChange}
+                toolbarExtra={
                     <FilterToggleContainer>
                         <FilterButton
                             active={filter === 'active'}
@@ -93,20 +87,20 @@ export function OrdersToReceivePage() {
                             Todos
                         </FilterButton>
                     </FilterToggleContainer>
-
-                    <AddButton onClick={() => setIsModalOpen(true)}>
-                        <FontAwesomeIcon icon={faPlus} />
-                        <span>Contas a receber</span>
-                    </AddButton>
-                </ButtonsContainer>
-            </PageHeader>
-
-            <OrdersToReceiveTable 
-                orders={ordersToReceive} 
-                filter={filter} 
-                page={page}
-                pageSize={pageSize}
-                query={query}
+                }
+                footer={
+                    <>
+                        <span className="dt-count">
+                            Mostrando <strong>{ordersToReceive.length}</strong> de <strong>{totalOrders}</strong>
+                        </span>
+                        <Pagination
+                            currentPage={page}
+                            total={totalOrders}
+                            pageSize={pageSize as number}
+                            onPageChange={setPage}
+                        />
+                    </>
+                }
             />
 
             <NewOrderToReceiveModal

@@ -10,6 +10,8 @@ import { AddButton, PageHeader } from "../../styles/global";
 import { StockTransactionModal } from "../../components/StockTransactionModal";
 import { Pagination } from "../../components/Pagination";
 import { SupplierSelect } from "../../components/SupplierSelect";
+import { DataTable, ColumnDef } from "../../components/DataTable";
+import { RowActions, IconButton } from "../../components/DataTable/style";
 import { getStockTransactions, deleteStockTransaction } from "../../services/stockTransactionService";
 import { IStockTransaction } from "../../interfaces/IStockTransaction";
 
@@ -25,7 +27,7 @@ export function StockPage(){
     const [deleteTransactionModal, setDeleteTransactionModal] = useState(false);
     const [currentTransaction, setCurrentTransaction] = useState<IStockTransaction | null>(null);
     const [selectedTransaction, setSelectedTransaction] = useState<IStockTransaction | null>(null);
-    const pageSize = 15;
+    const pageSize = 10;
 
     function handleOpenClientModal(action:string, client: any){
         setClientModal(true)
@@ -56,20 +58,6 @@ export function StockPage(){
         setTotal(transactions.data.total);
     }
 
-    const searchTransactions = (query: string) => {
-        setQuery(query);
-        setPage(1);
-        handleStockTransactions(page, pageSize, query, supplierId);
-    }
-
-    const resetSearch = (query: string) => {
-        if (query === '') {
-            setQuery('');
-            setPage(1);
-            handleStockTransactions(page, pageSize, '', supplierId);
-        }
-    }
-
     const handleSupplierChange = (supplierId: string) => {
         setSupplierId(supplierId);
         setPage(1);
@@ -93,33 +81,110 @@ export function StockPage(){
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page]);
 
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setPage(1);
+            handleStockTransactions(1, pageSize, query, supplierId);
+        }, 350);
+        return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [query]);
+
+    const columns: ColumnDef<IStockTransaction>[] = [
+        {
+            key: 'product',
+            header: 'Produto',
+            width: '15%',
+            render: (transaction) => (
+                <span
+                    onClick={() => navigate(`/backoffice/estoque/produto/${transaction.storeProduct?.id}`)}
+                    style={{ color: 'var(--dt-accent)', fontWeight: 700, cursor: 'pointer' }}
+                >
+                    {transaction.storeProduct?.product?.name}
+                </span>
+            ),
+        },
+        {
+            key: 'quantity',
+            header: 'Qtd',
+            sortable: true,
+            sortValue: (transaction) => transaction.quantity,
+            render: (transaction) => transaction.quantity,
+        },
+        {
+            key: 'unity',
+            header: 'Unidade',
+            render: (transaction) => transaction.unity,
+        },
+        {
+            key: 'unity_price',
+            header: 'Preço Unit',
+            sortable: true,
+            sortValue: (transaction) => transaction.unity_price,
+            render: (transaction) => convertMoney(transaction.unity_price),
+        },
+        {
+            key: 'total_price',
+            header: 'Preço Total',
+            sortable: true,
+            sortValue: (transaction) => transaction.total_price,
+            render: (transaction) => convertMoney(transaction.total_price),
+        },
+        {
+            key: 'sale_price',
+            header: 'Preço Venda',
+            render: (transaction) => (
+                transaction.storeProduct?.price
+                    ? <span style={{ color: 'var(--dt-good-fg)', fontWeight: 600 }}>{convertMoney(transaction.storeProduct.price)}</span>
+                    : <span style={{ color: 'var(--dt-ink-faint)' }}>—</span>
+            ),
+        },
+        {
+            key: 'supplier',
+            header: 'Fornecedor',
+            render: (transaction) => (
+                transaction.supplierRelation?.id ? (
+                    <span
+                        onClick={() => window.open(`/backoffice/estoque/fornecedor/${transaction.supplierRelation?.id}`, '_blank')}
+                        style={{ color: 'var(--dt-accent)', fontWeight: 700, cursor: 'pointer' }}
+                    >
+                        {transaction.supplier}
+                    </span>
+                ) : (
+                    transaction.supplier
+                )
+            ),
+        },
+        {
+            key: 'purchased_date',
+            header: 'Data compra',
+            sortable: true,
+            sortValue: (transaction) => new Date(transaction.purchased_date).getTime(),
+            render: (transaction) => moment(transaction.purchased_date).format("DD/MM/YYYY"),
+        },
+        {
+            key: 'actions',
+            header: 'Ações',
+            render: (transaction) => (
+                <RowActions>
+                    <IconButton $tone="edit" title="Editar registro" onClick={() => handleOpenEditModal(transaction)}>
+                        <FontAwesomeIcon icon={faPen}/>
+                    </IconButton>
+                    <IconButton $tone="duplicate" title="Duplicar registro" onClick={() => handleOpenDuplicateModal(transaction)}>
+                        <FontAwesomeIcon icon={faCopy}/>
+                    </IconButton>
+                    <IconButton $tone="delete" title="Deletar registro" onClick={() => handleOpenConfirmPopUp(transaction)}>
+                        <FontAwesomeIcon icon={faTrash}/>
+                    </IconButton>
+                </RowActions>
+            ),
+        },
+    ];
+
     return(
         <Container>
             <PageHeader>
                 <h1>Estoque</h1>
-                <div>
-                    <input
-                        style={{width: '250px'}}
-                        type="text"
-                        placeholder="Buscar por Produto"
-                        onKeyDown={(e: any) => {
-                            if (e.key === 'Enter') {
-                                searchTransactions(e.target.value);
-                            }
-                        }}
-                        onChange={(e) => resetSearch(e.target.value)}
-                    />
-                </div>
-                <SupplierSelect
-                    value={supplierId}
-                    onChange={handleSupplierChange}
-                />
-                <Pagination
-                    currentPage={page}
-                    total={total as number}
-                    pageSize={pageSize as number}
-                    onPageChange={setPage}
-                />
 
                 <AddButton onClick={() => {
                     setSelectedTransaction(null);
@@ -134,77 +199,38 @@ export function StockPage(){
                     <p>Novo Registro</p>
                 </AddButton>
             </PageHeader>
-            
-            <table>
-                <thead className="head">
-                    <tr>
-                        <th>Produto</th>
-                        <th className="smallColumn">Qtd</th>
-                        <th className="smallColumn">Unidade</th>
-                        <th>Preço Unit</th>
-                        <th>Preço Total</th>
-                        <th>Preço Venda</th>
-                        <th>Fornecedor</th>
-                        <th>Data compra</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {stockTransactions?.map(transaction => (
-                        <tr key={transaction.id}>
-                            <td>
-                                <span
-                                    onClick={() => navigate(`/backoffice/estoque/produto/${transaction.storeProduct?.id}`)}
-                                    style={{ color: 'rgb(236, 72, 153)', fontWeight: 'bold', cursor: 'pointer' }}
-                                >
-                                    {transaction.storeProduct?.product?.name}
-                                </span>
-                            </td>
-                            <td className="smallColumn">{transaction.quantity}</td>
-                            <td className="smallColumn">{transaction.unity}</td>
-                            <td>{convertMoney(transaction.unity_price)}</td>
-                            <td>{convertMoney(transaction.total_price)}</td>
-                            <td>{convertMoney(transaction.storeProduct?.price as number)}</td>
-                            <td>
-                                {transaction.supplierRelation?.id ? (
-                                    <span
-                                        onClick={() => window.open(`/backoffice/estoque/fornecedor/${transaction.supplierRelation?.id}`, '_blank')}
-                                        style={{ color: 'rgb(236, 72, 153)', fontWeight: 'bold', cursor: 'pointer' }}
-                                    >
-                                        {transaction.supplier}
-                                    </span>
-                                ) : (
-                                    transaction.supplier
-                                )}
-                            </td>
-                            <td>{moment(transaction.purchased_date).format("DD/MM/YYYY")}</td>
-                            <td className="table-icon">
-                                <button
-                                    className="edit-button"
-                                    title="Editar registro"
-                                    onClick={() => handleOpenEditModal(transaction)}
-                                >
-                                    <FontAwesomeIcon icon={faPen}/>
-                                </button>
-                                <button
-                                    className="duplicate-button"
-                                    title="Duplicar registro"
-                                    onClick={() => handleOpenDuplicateModal(transaction)}
-                                >
-                                    <FontAwesomeIcon icon={faCopy}/>
-                                </button>
-                                <button
-                                    className="del-button"
-                                    title="Deletar registro"
-                                    onClick={() => handleOpenConfirmPopUp(transaction)}
-                                >
-                                    <FontAwesomeIcon icon={faTrash}/>
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+
+            <DataTable
+                columns={columns}
+                data={stockTransactions}
+                rowKey={(transaction) => transaction.id as string}
+                searchPlaceholder="Buscar por produto"
+                searchValue={query}
+                onSearchChange={setQuery}
+                toolbarExtra={
+                    <SupplierSelect
+                        value={supplierId}
+                        onChange={handleSupplierChange}
+                        style={{ maxWidth: '250px' }}
+                    />
+                }
+                emptyTitle="Nenhum produto encontrado"
+                emptyDescription="Tente buscar por outro nome ou remova o filtro de fornecedor."
+                footer={
+                    <>
+                        <span className="dt-count">
+                            Mostrando <strong>{stockTransactions.length}</strong> de <strong>{total}</strong>
+                        </span>
+                        <Pagination
+                            currentPage={page}
+                            total={total as number}
+                            pageSize={pageSize as number}
+                            onPageChange={setPage}
+                        />
+                    </>
+                }
+            />
+
             <StockTransactionModal
                 isOpen={clientModalModal}
                 onRequestClose={handleCloseClientModal}

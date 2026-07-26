@@ -14,6 +14,9 @@ import { useOrders } from "../../contexts/OrdersContext";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { STATUS_LABEL } from "../../constants";
 import { formatTitleCase } from "../../utils";
+import { DataTable, ColumnDef } from "../../components/DataTable";
+import { RowActions, IconButton, IconLinkButton } from "../../components/DataTable/style";
+import { Badge, BadgeTone } from "../../components/Badge";
 
 export function OrdersPage(){
     const { orders, loadAvailableOrders, totalOrders } = useOrders();
@@ -26,7 +29,7 @@ export function OrdersPage(){
     const [query, setQuery] = useState('');
     const [startDate, setStartDate] = useState<string | null>(null);
     const [endDate, setEndDate] = useState<string | null>(null);
-    const pageSize = 15;
+    const pageSize = 8;
 
     function handleCloseOrderDetailModal(){
         setOrderDetailModal(false);
@@ -37,18 +40,9 @@ export function OrdersPage(){
         setCurrentOrder(order);
     }
 
-    const searchOrders = (query: string) => {
-        setQuery(query);
+    const handleQueryChange = (value: string) => {
+        setQuery(value);
         setPage(1);
-        loadAvailableOrders(page, pageSize, query, startDate, endDate);
-    }
-
-    const resetSearch = (query: string) => {
-        if (query === '') {
-            setQuery('');
-            setPage(1);
-            loadAvailableOrders(page, pageSize, '', startDate, endDate);
-        }
     }
 
     const handleDateRangeChange = (start: string | null, end: string | null, filterType: string) => {
@@ -65,84 +59,131 @@ export function OrdersPage(){
         return `${first_name} ${last_name}`
     }
 
+    const getStatusTone = (status: IOrder['status']): BadgeTone => {
+        const tones: Record<string, BadgeTone> = {
+            DONE: 'good',
+            CANCELED: 'bad',
+            PENDING_PAYMENT: 'warn',
+            WAITING_FOR_CLIENT: 'warn',
+            OPENED: 'info',
+            IN_PROGRESS: 'info',
+            IN_DELIVERY: 'info',
+        };
+        return tones[status] || 'neutral';
+    };
+
     useEffect(() => {
         loadAvailableOrders(page, pageSize, query, startDate, endDate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, startDate, endDate]);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setPage(1);
+            loadAvailableOrders(1, pageSize, query, startDate, endDate);
+        }, 350);
+        return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [query]);
+
+    const columns: ColumnDef<IOrder>[] = [
+        {
+            key: 'code',
+            header: 'Pedido',
+            render: (order) => (
+                <Link to={`/backoffice/pedido/${order.id}`} style={{ color: 'var(--dt-accent)', fontWeight: 700, textDecoration: 'none' }}>
+                    #{order.code}
+                </Link>
+            ),
+        },
+        {
+            key: 'description',
+            header: 'Descrição',
+            width: '40%',
+            render: (order) => formatTitleCase(order.description),
+        },
+        {
+            key: 'client',
+            header: 'Cliente',
+            width: '15%',
+            render: (order) => (
+                order.status !== "WAITING_FOR_CLIENT"
+                    ? `${formatTitleCase(order.client.first_name)} ${formatTitleCase(order.client.last_name)}`
+                    : "Pendente"
+            ),
+        },
+        {
+            key: 'status',
+            header: 'Status',
+            width: '13%',
+            render: (order) => (
+                <Badge tone={getStatusTone(order.status)}>
+                    {STATUS_LABEL[order.status]}
+                </Badge>
+            ),
+        },
+        {
+            key: 'total',
+            header: 'Total',
+            width: '9%',
+            render: (order) => `R$ ${order.total}`,
+        },
+        {
+            key: 'actions',
+            header: 'Ações',
+            render: (order) => (
+                <RowActions>
+                    <IconButton $tone="edit" title="Editar" onClick={() => handleOpenEditOrderModal(order)}>
+                        <FontAwesomeIcon icon={faPen}/>
+                    </IconButton>
+                    <IconLinkButton $tone="view" title="Visualizar" to={`/backoffice/pedido/${order.id}`}>
+                        <FontAwesomeIcon icon={faEye}/>
+                    </IconLinkButton>
+                    <PrintOrder
+                        order={order}
+                        orderCode={order.code}
+                        clientName={getName(order.client.first_name, order.client.last_name)}
+                        clientTelephone={order.client.phone_number !== '33333333333' ? order.client.phone_number : ''}
+                        admins={admins}
+                        buttonLabel="" />
+                </RowActions>
+            ),
+        },
+    ];
 
     return(
         <Container>
             <PageHeader>
             	<h1>Todos os Pedidos</h1>
                 <div>
-                    <input
-                        style={{width: '310px'}}
-                        type="text"
-                        placeholder="Buscar por Nome, Telefone ou Código"
-                        onKeyDown={(e: any) => {
-                            if (e.key === 'Enter') {
-                                searchOrders(e.target.value);
-                            }
-                        }}
-                        onChange={(e) => resetSearch(e.target.value)}
-                    />
                     <DateRangePicker onDateRangeChange={handleDateRangeChange} />
                 </div>
-                <Pagination 
-                    currentPage={page}
-                    total={totalOrders}
-                    pageSize={pageSize as number}
-                    onPageChange={setPage}
-                />
             </PageHeader>
-            <table className="responsive-table">
-                <thead className="head">
-                    <tr>
-                        <th>Pedido</th>
-                        <th className="description">Descrição</th>
-                        <th>Cliente</th>
-                        <th>Status</th>
-                        <th>Total</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {orders?.map(order => (
-                        <>
-                            <tr key={order.id} className={order.status === 'CANCELED' ? 'canceled-order' : ''}>
-                                <td data-label="Pedido">
-                                    <Link to={`/backoffice/pedido/${order.id}`} className="order-code-link">
-                                        #{order.code}
-                                    </Link>
-                                </td>
-                                <td  className="description" data-label="Descrição">{formatTitleCase(order.description)}</td>
-                                <td data-label="Cliente">
-                                    {order.status !== "WAITING_FOR_CLIENT"
-                                        ? `${formatTitleCase(order.client.first_name)} ${formatTitleCase(order.client.last_name)}`
-                                        : "Pendente"}
-                                </td>
-                                <td data-label="Status">{STATUS_LABEL[order.status]}</td>
-                                <td data-label="Total">R$ {order.total}</td>
-                                <td className="table-icon">
-                                    <button className="edit-button" onClick={() => handleOpenEditOrderModal(order)}>
-                                        <FontAwesomeIcon icon={faPen}/>
-                                    </button>
-                                    <Link to={`/backoffice/pedido/${order.id}`} className="view-order">
-                                        <FontAwesomeIcon icon={faEye}/>
-                                    </Link>
-                                    <PrintOrder
-                                        order={order}
-                                        orderCode={order.code}
-                                        clientName={getName(order.client.first_name, order.client.last_name)}
-                                        clientTelephone={order.client.phone_number !== '33333333333' ? order.client.phone_number : ''}
-                                        admins={admins}
-                                        buttonLabel="" />
-                                </td>
-                            </tr>
-                        </>
-                    ))}
-                </tbody>
-            </table>
+
+            <DataTable
+                columns={columns}
+                data={orders}
+                rowKey={(order) => order.id as string}
+                rowClassName={(order) => order.status === 'CANCELED' ? 'canceled-order' : undefined}
+                searchPlaceholder="Buscar por Nome, Telefone ou Código"
+                searchValue={query}
+                onSearchChange={handleQueryChange}
+                emptyTitle="Nenhum pedido encontrado"
+                emptyDescription="Tente ajustar a busca ou o período selecionado."
+                footer={
+                    <>
+                        <span className="dt-count">
+                            Mostrando <strong>{orders.length}</strong> de <strong>{totalOrders}</strong>
+                        </span>
+                        <Pagination
+                            currentPage={page}
+                            total={totalOrders}
+                            pageSize={pageSize as number}
+                            onPageChange={setPage}
+                        />
+                    </>
+                }
+            />
 
             <OrderDetailModal
                 isOpen={orderDetailModal}

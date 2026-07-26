@@ -9,6 +9,8 @@ import { PageHeader } from "../../styles/global";
 import { useOrders } from "../../contexts/OrdersContext";
 import { formatTitleCase } from "../../utils";
 import { deleteOrder } from '../../services/orderService';
+import { DataTable, ColumnDef } from "../../components/DataTable";
+import { RowActions, IconButton } from "../../components/DataTable/style";
 
 export function WaitingClientOrders(){
     const { waitingOrders, loadWaitingOrders } = useOrders();
@@ -41,45 +43,57 @@ export function WaitingClientOrders(){
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const columns: ColumnDef<IOrder>[] = [
+        {
+            key: 'code',
+            header: 'Pedido',
+            render: (order) => `#${order.code}`,
+        },
+        {
+            key: 'description',
+            header: 'Descrição',
+            width: '40%',
+            render: (order) => formatTitleCase(order.description),
+        },
+        {
+            key: 'phone',
+            header: 'Telefone',
+            render: (order) => order.receiver_phone,
+        },
+        {
+            key: 'total',
+            header: 'Total',
+            render: (order) => `R$ ${order.total}`,
+        },
+        {
+            key: 'actions',
+            header: 'Ações',
+            render: (order) => (
+                <RowActions>
+                    <IconButton $tone="view" title="Visualizar" onClick={() => handleOpenOrderDetailModal(order)}>
+                        <FontAwesomeIcon icon={faEye}/>
+                    </IconButton>
+                    <IconButton $tone="delete" title="Deletar" onClick={() => handleOpenConfirmPopUp(order)}>
+                        <FontAwesomeIcon icon={faTrash}/>
+                    </IconButton>
+                </RowActions>
+            ),
+        },
+    ];
+
     return(
         <Container>
             <PageHeader>
                 <h1>Pedidos Aguardando Preenchimento do Cliente</h1>
             </PageHeader>
-            <table>
-                <thead className="head">
-                    <tr>
-                        <th>Pedido</th>
-                        <th>Descrição</th>
-                        <th>Telefone</th>
-                        <th>Total</th>
-                        <th>Visualizar</th>
-                        <th>Deletar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {waitingOrders.length > 0 && waitingOrders?.map(order => (
-                        <>
-                            <tr key={order.id}>
-                                <td>#{order.code}</td>
-                                <td>{formatTitleCase(order.description)}</td>
-                                <td>{order.receiver_phone}</td>
-                                <td>R$ {order.total}</td>
-                                <td className="table-icon">
-                                    <button className="view-button" onClick={() => handleOpenOrderDetailModal(order)}>
-                                        <FontAwesomeIcon icon={faEye}/>
-                                    </button>
-                                </td>
-                                <td className="table-icon">
-                                    <button className="del-button" onClick={() => handleOpenConfirmPopUp(order)}>
-                                        <FontAwesomeIcon icon={faTrash}/>
-                                    </button>
-                                </td>
-                            </tr>
-                        </>
-                    ))}
-                </tbody>
-            </table>
+
+            <DataTable
+                columns={columns}
+                data={waitingOrders}
+                rowKey={(order) => order.id as string}
+                emptyTitle="Nenhum pedido aguardando"
+                emptyDescription="Não há pedidos aguardando preenchimento do cliente."
+            />
 
             <OrderDetailModal
                 isOpen={orderDetailModal}

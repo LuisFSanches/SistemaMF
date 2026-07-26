@@ -10,12 +10,9 @@ import { ConfirmPopUp } from "../ConfirmPopUp";
 import { NewOrderDeliveryModal } from "../NewOrderDeliveryModal";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
-import {
-    Container,
-    StatusBadge,
-    ActionsContainer,
-    EmptyState
-} from "./style";
+import { DataTable, ColumnDef } from "../DataTable";
+import { RowActions, IconButton } from "../DataTable/style";
+import { Badge } from "../Badge";
 
 interface OrderDeliveriesTableProps {
     deliveries: IOrderDelivery[];
@@ -26,9 +23,12 @@ interface OrderDeliveriesTableProps {
     selectedIds: string[];
     onSelectDelivery: (id: string) => void;
     onSelectAll: (checked: boolean) => void;
+    onQueryChange?: (query: string) => void;
+    toolbarExtra?: React.ReactNode;
+    footer?: React.ReactNode;
 }
 
-export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query, selectedIds, onSelectDelivery, onSelectAll }: OrderDeliveriesTableProps) {
+export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query, selectedIds, onSelectDelivery, onSelectAll, onQueryChange, toolbarExtra, footer }: OrderDeliveriesTableProps) {
     const { updateOrderDelivery, deleteOrderDelivery, loadOrderDeliveries } = useOrderDeliveries();
     const { showSuccess } = useSuccessMessage();
     const [confirmPayModal, setConfirmPayModal] = useState(false);
@@ -103,139 +103,157 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
 
     const filteredDeliveries = deliveries || [];
 
-    if (filteredDeliveries.length === 0) {
-        return (
-            <Container>
-                <EmptyState>
-                    <h3>Nenhum registro encontrado</h3>
-                    <p>Não há entregas para exibir.</p>
-                </EmptyState>
-            </Container>
-        );
-    }
+    const columns: ColumnDef<IOrderDelivery>[] = [
+        {
+            key: 'select',
+            header: '',
+            width: '5%',
+            headerRender: () => (
+                <input
+                    type="checkbox"
+                    checked={filteredDeliveries.length > 0 && selectedIds.length === filteredDeliveries.length}
+                    onChange={(e) => onSelectAll(e.target.checked)}
+                    style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                />
+            ),
+            render: (delivery) => (
+                <input
+                    type="checkbox"
+                    checked={selectedIds.includes(delivery.id!)}
+                    onChange={() => onSelectDelivery(delivery.id!)}
+                    style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                />
+            ),
+        },
+        {
+            key: 'delivery_man',
+            header: 'Motoboy',
+            width: '15%',
+            render: (delivery) => (
+                <span
+                    style={{ cursor: 'pointer', color: 'var(--dt-accent)', fontWeight: 700 }}
+                    onClick={() => navigate(`/backoffice/motoboy/${delivery.deliveryMan?.id}`)}
+                >
+                    {delivery.deliveryMan?.name || 'N/A'}
+                </span>
+            ),
+        },
+        {
+            key: 'order_code',
+            header: 'Nº Pedido',
+            width: '7%',
+            render: (delivery) => (
+                <Link to={`/backoffice/pedido/${delivery.order_id}`} style={{ color: 'var(--dt-accent)', fontWeight: 700, textDecoration: 'none' }}>
+                    #{delivery.order?.code || 'N/A'}
+                </Link>
+            ),
+        },
+        {
+            key: 'client',
+            header: 'Cliente',
+            width: '15%',
+            render: (delivery) => delivery.order?.client ? `${delivery.order.client.first_name} ${delivery.order.client.last_name}` : 'N/A',
+        },
+        {
+            key: 'phone',
+            header: 'Telefone',
+            width: '11%',
+            render: (delivery) => formatTelephone(delivery.order?.client.phone_number as string) || 'N/A',
+        },
+        {
+            key: 'delivery_fee',
+            header: 'Taxa de Entrega',
+            width: '9%',
+            render: (delivery) => convertMoney(delivery.order?.delivery_fee || 0),
+        },
+        {
+            key: 'delivery_date',
+            header: 'Data de Entrega',
+            sortable: true,
+            width: '13%',
+            sortValue: (delivery) => new Date(delivery.delivery_date).getTime(),
+            render: (delivery) => moment(delivery.delivery_date).format('DD/MM/YYYY HH:mm'),
+        },
+        {
+            key: 'payment',
+            header: 'Pagamento',
+            render: (delivery) => (
+                <Badge tone={delivery.is_paid ? 'good' : 'warn'}>
+                    {delivery.is_paid ? 'Pago' : 'Pendente'}
+                </Badge>
+            ),
+        },
+        {
+            key: 'actions',
+            header: 'Ações',
+            render: (delivery) => (
+                <RowActions>
+                    {!delivery.is_archived ? (
+                        <IconButton
+                            $tone="default"
+                            title="Arquivar"
+                            onClick={() => {
+                                setSelectedDeliveryId(delivery.id!);
+                                setConfirmArchiveModal(true);
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faEnvelopeCircleCheck}/>
+                        </IconButton>
+                    ) : (
+                        <IconButton
+                            $tone="default"
+                            title="Desarquivar"
+                            onClick={() => {
+                                setSelectedDeliveryId(delivery.id!);
+                                setConfirmUnarchiveModal(true);
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faBoxOpen}/>
+                        </IconButton>
+                    )}
+
+                    {!delivery.is_paid && (
+                        <IconButton
+                            $tone="view"
+                            title="Confirmar Pagamento"
+                            onClick={() => {
+                                setSelectedDeliveryId(delivery.id!);
+                                setConfirmPayModal(true);
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faCheck}/>
+                        </IconButton>
+                    )}
+
+                    <IconButton
+                        $tone="delete"
+                        title="Deletar"
+                        onClick={() => {
+                            setSelectedDeliveryId(delivery.id!);
+                            setConfirmDeleteModal(true);
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faTrash}/>
+                    </IconButton>
+                </RowActions>
+            ),
+        },
+    ];
 
     return (
-        <Container>
-            <table className="responsive-table">
-                <thead>
-                    <tr>
-                        <th className="smallColumn">
-                            <input
-                                type="checkbox"
-                                checked={filteredDeliveries.length > 0 && selectedIds.length === filteredDeliveries.length}
-                                onChange={(e) => onSelectAll(e.target.checked)}
-                                style={{ cursor: 'pointer', width: '18px', height: '18px' }}
-                            />
-                        </th>
-                        <th>Motoboy</th>
-                        <th>Nº Pedido</th>
-                        <th>Cliente</th>
-                        <th>Telefone</th>
-                        <th>Taxa de Entrega</th>
-                        <th>Data de Entrega</th>
-                        <th>Pagamento</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredDeliveries.map((delivery) => (
-                        <tr key={delivery.id}>
-                            <td className="smallColumn">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedIds.includes(delivery.id!)}
-                                    onChange={() => onSelectDelivery(delivery.id!)}
-                                    style={{ cursor: 'pointer', width: '18px', height: '18px' }}
-                                />
-                            </td>
-                            <td
-                                data-label="Motoboy"
-                                style={{ cursor: 'pointer', color: '#EC4899', fontWeight: '600' }}
-                                onClick={() => navigate(`/backoffice/motoboy/${delivery.deliveryMan?.id}`)}
-                            >
-                                {delivery.deliveryMan?.name || 'N/A'}
-                            </td>
-                            <td
-                                data-label="Nº Pedido"
-                            >
-                                <Link to={`/backoffice/pedido/${delivery.order_id}`} className="order-code-link">
-                                    #{delivery.order?.code || 'N/A'}
-                                </Link>
-                            </td>
-                            <td
-                                data-label="Cliente"
-                            >{delivery.order?.client ? `${delivery.order.client.first_name} ${delivery.order.client.last_name}` : 'N/A'}</td>
-                            <td
-                                data-label="Telefone"
-                            >
-                                {formatTelephone(delivery.order?.client.phone_number as string) || 'N/A'}
-                            </td>
-                            <td
-                                data-label="Taxa de Entrega"
-                            >
-                                {convertMoney(delivery.order?.delivery_fee || 0)}
-                            </td>
-                            <td
-                                data-label="Data de Entrega"
-                            >
-                                {moment(delivery.delivery_date).format('DD/MM/YYYY HH:mm')}
-                            </td>
-                            <td>
-                                <StatusBadge status={delivery.is_paid ? 'Pago' : 'Pendente'}>
-                                    {delivery.is_paid ? 'Pago' : 'Pendente'}
-                                </StatusBadge>
-                            </td>
-                            <td>
-                                <ActionsContainer>
-                                    {!delivery.is_archived ? (
-                                        <button className="view-button"
-                                            onClick={() => {
-                                                setSelectedDeliveryId(delivery.id!);
-                                                setConfirmArchiveModal(true);
-                                            }}
-                                            title="Arquivar"
-                                        >
-                                            <FontAwesomeIcon icon={faEnvelopeCircleCheck}/>
-                                        </button>
-                                    ) : (
-                                        <button className="view-button"
-                                            onClick={() => {
-                                                setSelectedDeliveryId(delivery.id!);
-                                                setConfirmUnarchiveModal(true);
-                                            }}
-                                            title="Desarquivar"
-                                        >
-                                            <FontAwesomeIcon icon={faBoxOpen}/>
-                                        </button>
-                                    )}
-
-                                    {!delivery.is_paid && (
-                                        <button className="done-button"
-                                            onClick={() => {
-                                                setSelectedDeliveryId(delivery.id!);
-                                                setConfirmPayModal(true);
-                                            }}
-                                            title="Confirmar Pagamento"
-                                        >
-                                            <FontAwesomeIcon icon={faCheck}/>
-                                        </button>
-                                    )}
-
-                                    <button className="del-button"
-                                        onClick={() => {
-                                            setSelectedDeliveryId(delivery.id!);
-                                            setConfirmDeleteModal(true);
-                                        }}
-                                        title="Deletar"
-                                    >
-                                        <FontAwesomeIcon icon={faTrash}/>
-                                    </button>
-                                </ActionsContainer>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+        <>
+            <DataTable
+                columns={columns}
+                data={filteredDeliveries}
+                rowKey={(delivery) => delivery.id as string}
+                emptyTitle="Nenhum registro encontrado"
+                emptyDescription="Não há entregas para exibir."
+                searchPlaceholder="Buscar por Motoboy, Pedido ou Cliente..."
+                searchValue={query}
+                onSearchChange={onQueryChange}
+                toolbarExtra={toolbarExtra}
+                footer={footer}
+            />
 
             <ConfirmPopUp
                 isOpen={confirmPayModal}
@@ -290,6 +308,6 @@ export function OrderDeliveriesTable({ deliveries, filter, page, pageSize, query
                 action="edit"
                 currentOrderDelivery={selectedOrderDelivery}
             />
-        </Container>
+        </>
     );
 }

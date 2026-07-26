@@ -10,6 +10,8 @@ import { listDeliveryMen } from "../../services/deliveryManService";
 import { useDeliveryMen } from "../../contexts/DeliveryMenContext";
 import { IDeliveryMan } from "../../interfaces/IDeliveryMan";
 import { Container } from "./style";
+import { DataTable, ColumnDef } from "../../components/DataTable";
+import { RowActions, IconButton } from "../../components/DataTable/style";
 
 export function DeliveryMenPage() {
     const navigate = useNavigate();
@@ -37,7 +39,7 @@ export function DeliveryMenPage() {
         setDeliveryManModal(false)
     }
 
-    const searchDeliveryMen = (text: string) => {
+    const handleQueryChange = (text: string) => {
         setQuery(text);
         setPage(1);
     }
@@ -58,28 +60,41 @@ export function DeliveryMenPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, pageSize, query]);
 
+    const columns: ColumnDef<IDeliveryMan>[] = [
+        {
+            key: 'name',
+            header: 'Nome',
+            render: (deliveryMan) => (
+                <span
+                    style={{ cursor: 'pointer', color: 'var(--dt-accent)', fontWeight: 700 }}
+                    onClick={() => navigate(`/backoffice/motoboy/${deliveryMan.id}`)}
+                >
+                    {deliveryMan.name}
+                </span>
+            ),
+        },
+        {
+            key: 'phone',
+            header: 'Telefone',
+            render: (deliveryMan) => deliveryMan.phone_number,
+        },
+        {
+            key: 'actions',
+            header: 'Editar',
+            render: (deliveryMan) => (
+                <RowActions style={{ justifyContent: 'center' }}>
+                    <IconButton $tone="edit" title="Editar" onClick={() => handleOpenDeliveryManModal("edit", deliveryMan)}>
+                        <FontAwesomeIcon icon={faPen}/>
+                    </IconButton>
+                </RowActions>
+            ),
+        },
+    ];
+
     return (
         <Container>
             <PageHeader>
                 <h1>Motoboys</h1>
-                <div>
-                    <input
-                        style={{width: '250px'}}
-                        type="text"
-                        placeholder="Buscar por Motoboy"
-                        onKeyDown={(e: any) => {
-                            if (e.key === 'Enter') {
-                                searchDeliveryMen(e.target.value);
-                            }
-                        }}
-                    />
-                </div>
-                <Pagination
-                    currentPage={page}
-                    total={totalDeliveryMen}
-                    pageSize={pageSize as number}
-                    onPageChange={setPage}
-                />
 
                 <AddButton onClick={() => handleOpenDeliveryManModal("create", {
                     id: "",
@@ -90,34 +105,31 @@ export function DeliveryMenPage() {
                     <p>Novo Motoboy</p>
                 </AddButton>
             </PageHeader>
-            
-            <table>
-                <thead className="head">
-                    <tr>
-                        <th>Nome</th>
-                        <th>Telefone</th>
-                        <th>Editar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {deliveryMen?.map(deliveryMan => (
-                        <tr key={deliveryMan.id}>
-                            <td 
-                                style={{ cursor: 'pointer', color: '#EC4899', fontWeight: '600' }}
-                                onClick={() => navigate(`/backoffice/motoboy/${deliveryMan.id}`)}
-                            >
-                                {deliveryMan.name}
-                            </td>
-                            <td>{deliveryMan.phone_number}</td>
-                            <td className="table-icon">
-                                <button className="edit-button" onClick={() => handleOpenDeliveryManModal("edit", deliveryMan)}>
-                                    <FontAwesomeIcon icon={faPen}/>
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+
+            <DataTable
+                columns={columns}
+                data={deliveryMen}
+                rowKey={(deliveryMan) => deliveryMan.id as string}
+                searchPlaceholder="Buscar por motoboy"
+                searchValue={query}
+                onSearchChange={handleQueryChange}
+                emptyTitle="Nenhum motoboy encontrado"
+                emptyDescription="Tente buscar por outro nome."
+                footer={
+                    <>
+                        <span className="dt-count">
+                            Mostrando <strong>{deliveryMen.length}</strong> de <strong>{totalDeliveryMen}</strong>
+                        </span>
+                        <Pagination
+                            currentPage={page}
+                            total={totalDeliveryMen}
+                            pageSize={pageSize as number}
+                            onPageChange={setPage}
+                        />
+                    </>
+                }
+            />
+
             <DeliveryManModal
                 isOpen={deliveryManModal}
                 onRequestClose={handleCloseDeliveryManModal}
