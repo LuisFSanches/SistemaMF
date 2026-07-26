@@ -48,6 +48,7 @@ class GetSupplierStockDetailsService {
             const formattedTransactions: ISupplierStockTransactionDetails[] = transactions.map(transaction => ({
                 id: transaction.id,
                 purchased_date: transaction.purchased_date,
+                store_product_id: transaction.store_product_id,
                 product_name: transaction.storeProduct?.product?.name || '',
                 unity: transaction.unity,
                 quantity: transaction.quantity,

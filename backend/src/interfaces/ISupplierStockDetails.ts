@@ -6,6 +6,7 @@ export interface ISupplierInfo {
 export interface ISupplierStockTransactionDetails {
     id: string;
     purchased_date: Date;
+    store_product_id: string | null;
     product_name: string;
     unity: string;
     quantity: number;

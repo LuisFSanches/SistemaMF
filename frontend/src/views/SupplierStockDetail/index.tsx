@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -30,6 +30,7 @@ interface ISupplierStockData {
     transactions: Array<{
         id: string;
         purchased_date: string;
+        store_product_id: string | null;
         product_name: string;
         unity: string;
         quantity: number;
@@ -47,6 +48,7 @@ interface ISupplierStockData {
 
 export function SupplierStockDetail() {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [stockData, setStockData] = useState<ISupplierStockData | null>(null);
 
@@ -177,7 +179,18 @@ export function SupplierStockDetail() {
                             {transactions.map(transaction => (
                                 <tr key={transaction.id}>
                                     <td>{moment(transaction.purchased_date).format('DD/MM/YYYY')}</td>
-                                    <td className="product-name">{transaction.product_name}</td>
+                                    <td className="product-name">
+                                        {transaction.store_product_id ? (
+                                            <span
+                                                onClick={() => navigate(`/backoffice/estoque/produto/${transaction.store_product_id}`)}
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                {transaction.product_name}
+                                            </span>
+                                        ) : (
+                                            transaction.product_name
+                                        )}
+                                    </td>
                                     <td>{transaction.quantity} {transaction.unity}</td>
                                     <td>{convertMoney(transaction.unity_price)}</td>
                                     <td className="total-price">{convertMoney(transaction.total_price)}</td>
