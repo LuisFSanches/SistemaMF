@@ -267,6 +267,12 @@ button{
     font-weight:600
 }
 
+.duplicate-button{
+    background: orange;
+    color:var(--text-white);
+    font-weight:600
+}
+
 .del-button{
     background: var(--red);
     color:var(--text-white);

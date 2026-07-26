@@ -11,5 +11,9 @@ export interface IStockTransaction {
         unity_price: number,
         total_price: number,
         purchased_date: string,
-        storeProduct?: IStoreProduct
+        storeProduct?: IStoreProduct,
+        supplierRelation?: {
+                id: string,
+                name: string
+        }
 }

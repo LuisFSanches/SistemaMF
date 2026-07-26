@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import moment from 'moment';
 import { ConfirmPopUp } from "../../components/ConfirmPopUp";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faPlus, faCopy, faPen } from "@fortawesome/free-solid-svg-icons";
 import { convertMoney } from "../../utils";
 import { Container } from "./style";
 import { AddButton, PageHeader } from "../../styles/global";
@@ -24,11 +24,27 @@ export function StockPage(){
     const [total, setTotal] = useState(0);
     const [deleteTransactionModal, setDeleteTransactionModal] = useState(false);
     const [currentTransaction, setCurrentTransaction] = useState<IStockTransaction | null>(null);
+    const [selectedTransaction, setSelectedTransaction] = useState<IStockTransaction | null>(null);
     const pageSize = 15;
 
     function handleOpenClientModal(action:string, client: any){
         setClientModal(true)
         setAction(action)
+    }
+
+    function handleOpenDuplicateModal(transaction: IStockTransaction){
+        setSelectedTransaction({
+            ...transaction,
+            purchased_date: ""
+        });
+        setClientModal(true);
+        setAction("create");
+    }
+
+    function handleOpenEditModal(transaction: IStockTransaction){
+        setSelectedTransaction(transaction);
+        setClientModal(true);
+        setAction("edit");
     }
     function handleCloseClientModal(){
         setClientModal(false)
@@ -105,12 +121,15 @@ export function StockPage(){
                     onPageChange={setPage}
                 />
 
-                <AddButton onClick={() =>handleOpenClientModal("create", {
-                    id: "",
-                    first_name: "",
-                    last_name: "",
-                    phone_number: ""
-                })}>
+                <AddButton onClick={() => {
+                    setSelectedTransaction(null);
+                    handleOpenClientModal("create", {
+                        id: "",
+                        first_name: "",
+                        last_name: "",
+                        phone_number: ""
+                    });
+                }}>
                     <FontAwesomeIcon icon={faPlus}/>
                     <p>Novo Registro</p>
                 </AddButton>
@@ -127,14 +146,14 @@ export function StockPage(){
                         <th>Preço Venda</th>
                         <th>Fornecedor</th>
                         <th>Data compra</th>
-                        <th>Excluir</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {stockTransactions?.map(transaction => (
                         <tr key={transaction.id}>
                             <td>
-                                <span 
+                                <span
                                     onClick={() => navigate(`/backoffice/estoque/produto/${transaction.storeProduct?.id}`)}
                                     style={{ color: 'rgb(236, 72, 153)', fontWeight: 'bold', cursor: 'pointer' }}
                                 >
@@ -146,10 +165,39 @@ export function StockPage(){
                             <td>{convertMoney(transaction.unity_price)}</td>
                             <td>{convertMoney(transaction.total_price)}</td>
                             <td>{convertMoney(transaction.storeProduct?.price as number)}</td>
-                            <td>{transaction.supplier}</td>
+                            <td>
+                                {transaction.supplierRelation?.id ? (
+                                    <span
+                                        onClick={() => window.open(`/backoffice/estoque/fornecedor/${transaction.supplierRelation?.id}`, '_blank')}
+                                        style={{ color: 'rgb(236, 72, 153)', fontWeight: 'bold', cursor: 'pointer' }}
+                                    >
+                                        {transaction.supplier}
+                                    </span>
+                                ) : (
+                                    transaction.supplier
+                                )}
+                            </td>
                             <td>{moment(transaction.purchased_date).format("DD/MM/YYYY")}</td>
-                            <td className="delete-icon">
-                                <button onClick={() => handleOpenConfirmPopUp(transaction)}>
+                            <td className="table-icon">
+                                <button
+                                    className="edit-button"
+                                    title="Editar registro"
+                                    onClick={() => handleOpenEditModal(transaction)}
+                                >
+                                    <FontAwesomeIcon icon={faPen}/>
+                                </button>
+                                <button
+                                    className="duplicate-button"
+                                    title="Duplicar registro"
+                                    onClick={() => handleOpenDuplicateModal(transaction)}
+                                >
+                                    <FontAwesomeIcon icon={faCopy}/>
+                                </button>
+                                <button
+                                    className="del-button"
+                                    title="Deletar registro"
+                                    onClick={() => handleOpenConfirmPopUp(transaction)}
+                                >
                                     <FontAwesomeIcon icon={faTrash}/>
                                 </button>
                             </td>
@@ -162,6 +210,7 @@ export function StockPage(){
                 onRequestClose={handleCloseClientModal}
                 loadData={() => handleStockTransactions(page, pageSize, query, supplierId)}
                 action={action}
+                currentTransaction={selectedTransaction}
             />
             <ConfirmPopUp isOpen={deleteTransactionModal}
                 onRequestClose={() => setDeleteTransactionModal(false)}

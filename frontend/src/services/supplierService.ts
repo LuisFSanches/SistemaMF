@@ -10,3 +10,8 @@ export const getAllSuppliers = async () => {
         const response = await api.get("/supplier/all");
         return response;
 };
+
+export const getSupplierStockDetails = async (id: string) => {
+        const response = await api.get(`/supplier/${id}/stock`);
+        return response;
+};
