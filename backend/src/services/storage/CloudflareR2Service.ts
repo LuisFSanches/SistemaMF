@@ -158,6 +158,7 @@ class CloudflareR2Service {
             '.gif': 'image/gif',
             '.webp': 'image/webp',
             '.svg': 'image/svg+xml',
+            '.glb': 'model/gltf-binary',
         };
 
         return contentTypes[ext] || 'application/octet-stream';

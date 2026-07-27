@@ -26,6 +26,9 @@ import { SupplierStockDetail } from "./views/SupplierStockDetail";
 import { GeneralCatalog } from "./views/GeneralCatalog";
 import { ParentProducts } from "./views/ParentProducts";
 import { OnlineStoreProducts } from "./views/OnlineStoreProducts";
+import { ProductModels3D } from "./views/ProductModels3D";
+import { SimulateEnvironment } from "./views/SimulateEnvironment";
+import { ViewInYourSpace } from "./views/ViewInYourSpace";
 import { OrdersToReceivePage } from "./views/OrdersToReceive";
 import { OrderDeliveriesPage } from "./views/OrderDeliveries";
 import { CompleteDelivery } from "./views/CompleteDelivery";
@@ -142,6 +145,11 @@ export default function routes(){
                                 <OnlineStoreProducts/>
                             </PrivateRoute>
                         }/>
+                        <Route path="/backoffice/produtos/modelos-3d" element={
+                            <PrivateRoute>
+                                <ProductModels3D/>
+                            </PrivateRoute>
+                        }/>
                         <Route path="/backoffice/estoque" element={
                             <PrivateRoute>
                                 <StockPage/>
@@ -252,6 +260,8 @@ export default function routes(){
                         <Route path="checkout/:status" element={<CheckoutResult />} />
                         <Route path="pedido/:orderId" element={<OrderStatusPage />} />
                     </Route>
+                    <Route path="/simule-seu-ambiente" element={<SimulateEnvironment />} />
+                    <Route path="/view-in-your-space/:productId" element={<ViewInYourSpace />} />
                     <Route path="/cadastro" element={<StoreRegistration />} />
                     <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />

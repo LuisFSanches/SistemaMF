@@ -15,6 +15,7 @@ import {
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { NavLink} from 'react-router-dom'
 import helmet from '../../assets/icons/helmet.svg';
+import { display } from "html2canvas/dist/types/css/property-descriptors/display";
 
 export function SideBar(){
     const { handleSignOut } = useContext(AuthContext);
@@ -233,6 +234,7 @@ export function SideBar(){
             case 'catalogo-geral':
             case 'produtos-online':
             case 'produtos-pais':
+            case 'modelos-3d':
                 setActive({...isActive, 
                     'dashboard':false,
                     'pedidoBalcao':false,
@@ -504,6 +506,11 @@ export function SideBar(){
                         <NavLink to="/backoffice/produtos-online">
                             <button className="submenu-item" onClick={()=>handleActiveMenuButton('produtos-online')}>
                                 Produtos Online
+                            </button>
+                        </NavLink>
+                        <NavLink to="/backoffice/produtos/modelos-3d" style={{ display: 'none' }}>
+                            <button className="submenu-item" onClick={()=>handleActiveMenuButton('modelos-3d')}>
+                                Modelos 3D
                             </button>
                         </NavLink>
                         {adminData.role === 'SYS_ADMIN' && (

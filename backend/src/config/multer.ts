@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import { BadRequestException } from '../exceptions/bad-request';
 import { ErrorCodes } from '../exceptions/root';
-import { productsUploadDir, storesUploadDir, categoriesUploadDir } from './paths';
+import { productsUploadDir, storesUploadDir, categoriesUploadDir, models3dUploadDir } from './paths';
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -73,6 +73,39 @@ export const uploadCategory = multer({
     fileFilter,
     limits: {
         fileSize: 500 * 1024, // 500KB para imagem de categoria
+    }
+});
+
+const models3dStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, models3dUploadDir);
+    },
+    filename: (req, file, cb) => {
+        const hash = crypto.randomBytes(16).toString('hex');
+        const filename = `${hash}-${Date.now()}${path.extname(file.originalname)}`;
+        cb(null, filename);
+    }
+});
+
+// GLB MIME types are unreliable across browsers/OSes, so validation relies on the file extension
+const glbFileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    const isGlb = path.extname(file.originalname).toLowerCase() === '.glb';
+
+    if (isGlb) {
+        cb(null, true);
+    } else {
+        cb(new BadRequestException(
+            'Invalid file type. Only GLB files are allowed',
+            ErrorCodes.VALIDATION_ERROR
+        ));
+    }
+};
+
+export const uploadModel3D = multer({
+    storage: models3dStorage,
+    fileFilter: glbFileFilter,
+    limits: {
+        fileSize: 20 * 1024 * 1024, // 20MB para modelos 3D
     }
 });
 

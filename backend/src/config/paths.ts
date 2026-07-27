@@ -29,6 +29,7 @@ export const uploadsDir = path.join(rootDir, 'uploads');
 export const productsUploadDir = path.join(uploadsDir, 'products');
 export const storesUploadDir = path.join(uploadsDir, 'stores');
 export const categoriesUploadDir = path.join(uploadsDir, 'categories');
+export const models3dUploadDir = path.join(uploadsDir, 'models3d');
 
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
@@ -48,6 +49,11 @@ if (!fs.existsSync(storesUploadDir)) {
 if (!fs.existsSync(categoriesUploadDir)) {
     fs.mkdirSync(categoriesUploadDir, { recursive: true });
     console.log('[Paths] Created categories upload directory:', categoriesUploadDir);
+}
+
+if (!fs.existsSync(models3dUploadDir)) {
+    fs.mkdirSync(models3dUploadDir, { recursive: true });
+    console.log('[Paths] Created models3d upload directory:', models3dUploadDir);
 }
 
 // console.log('[Paths] Root directory:', rootDir);

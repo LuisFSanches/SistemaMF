@@ -38,6 +38,13 @@ import { DeleteProductImageController } from './controllers/product/DeleteProduc
 import { GenerateProductQRCodeController } from './controllers/product/GenerateProductQRCodeController';
 import { GetStoreFrontProductsController } from './controllers/product/GetStoreFrontProductsController';
 import { ExportProductsToExcelController } from './controllers/product/ExportProductsToExcelController';
+
+import { GetProduct3DModelController } from './controllers/product3dModel/GetProduct3DModelController';
+import { CreateProduct3DModelController } from './controllers/product3dModel/CreateProduct3DModelController';
+import { ReplaceProduct3DModelController } from './controllers/product3dModel/ReplaceProduct3DModelController';
+import { DeleteProduct3DModelController } from './controllers/product3dModel/DeleteProduct3DModelController';
+import { ListProducts3DModelsController } from './controllers/product3dModel/ListProducts3DModelsController';
+import { ListPublicProducts3DModelsController } from './controllers/product3dModel/ListPublicProducts3DModelsController';
 import { ImportProductsFromExcelController } from './controllers/product/ImportProductsFromExcelController';
 import { ExportStoreProductsToExcelController } from './controllers/product/ExportStoreProductsToExcelController';
 import { UpdateStoreProductsFromExcelController } from './controllers/product/UpdateStoreProductsFromExcelController';
@@ -218,7 +225,7 @@ import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 import sysAdminAuthMiddleware from './middlewares/sys_admin_auth';
 // import subscriptionAuthMiddleware from './middlewares/subscription_auth';
 // import subscriptionWarningMiddleware from './middlewares/subscription_warning';
-import { upload, uploadStore, uploadCategory, uploadExcel } from './config/multer';
+import { upload, uploadStore, uploadCategory, uploadExcel, uploadModel3D } from './config/multer';
 import { processImage } from './middlewares/process_image';
 import { processBannerImage } from './middlewares/process_banner_image';
 import { handleMulterError } from './middlewares/multer_error';
@@ -281,6 +288,7 @@ router.post('/product', adminAuthMiddleware, new CreateProductController().handl
 router.get('/product/all', adminAuthMiddleware, new GetAllProductController().handle)
 router.get('/product/available-for-store', adminAuthMiddleware, new GetAvailableProductsForStoreController().handle)
 router.get('/product/search', adminAuthMiddleware, new SearchProductsController().handle)
+router.get('/product/3d-models', adminAuthMiddleware, new ListProducts3DModelsController().handle)
 router.get('/product/:id', adminAuthMiddleware, new GetProductByIdController().handle)
 router.put('/product/:id', adminAuthMiddleware, new UpdateProductController().handle)
 router.post('/product/:id/image', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadProductImageController().handle)
@@ -288,8 +296,15 @@ router.post('/product/:id/image-2', adminAuthMiddleware, upload.single('image'),
 router.post('/product/:id/image-3', adminAuthMiddleware, upload.single('image'), handleMulterError, processImage, new UploadProductImage3Controller().handle)
 router.delete('/product/:id/image', adminAuthMiddleware, new DeleteProductImageController().handle)
 router.post('/product/:id/qrcode', adminAuthMiddleware, new GenerateProductQRCodeController().handle)
+router.get('/product/:id/3d-model', adminAuthMiddleware, new GetProduct3DModelController().handle)
+router.post('/product/:id/3d-model', adminAuthMiddleware, uploadModel3D.single('model'), handleMulterError, new CreateProduct3DModelController().handle)
+router.put('/product/:id/3d-model', adminAuthMiddleware, uploadModel3D.single('model'), handleMulterError, new ReplaceProduct3DModelController().handle)
+router.delete('/product/:id/3d-model', adminAuthMiddleware, new DeleteProduct3DModelController().handle)
 router.get('/product/export/excel', adminAuthMiddleware, new ExportProductsToExcelController().handle)
 router.post('/product/import/excel', adminAuthMiddleware, uploadExcel.single('file'), handleMulterError, new ImportProductsFromExcelController().handle)
+
+//-- ROTAS PRODUCT 3D MODEL (PÚBLICAS) --
+router.get('/public/3d-models', new ListPublicProducts3DModelsController().handle) // público para "Simule seu Ambiente"
 
 //-- ROTAS STORE PRODUCTS EXCEL --
 router.get('/store-product/export/excel', adminAuthMiddleware, new ExportStoreProductsToExcelController().handle)
