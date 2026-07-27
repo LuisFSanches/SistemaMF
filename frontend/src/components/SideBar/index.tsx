@@ -15,7 +15,6 @@ import {
 import { faPix, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { NavLink} from 'react-router-dom'
 import helmet from '../../assets/icons/helmet.svg';
-import { display } from "html2canvas/dist/types/css/property-descriptors/display";
 
 export function SideBar(){
     const { handleSignOut } = useContext(AuthContext);
