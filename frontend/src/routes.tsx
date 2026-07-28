@@ -261,7 +261,7 @@ export default function routes(){
                         <Route path="pedido/:orderId" element={<OrderStatusPage />} />
                     </Route>
                     <Route path="/simule-seu-ambiente" element={<SimulateEnvironment />} />
-                    <Route path="/view-in-your-space/:productId" element={<ViewInYourSpace />} />
+                    <Route path="/view-in-your-space" element={<ViewInYourSpace />} />
                     <Route path="/cadastro" element={<StoreRegistration />} />
                     <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />

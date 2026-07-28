@@ -61,7 +61,7 @@ src/
 
 #### 5. Real-Time Order Notifications
 - **Socket.IO** connection in `src/hooks/useOrderSocket.ts`
-- Listens to `'onlineOrderReceived'` event
+- Listens to `'whatsappOrderReceived'` event
 - Dispatches custom `'new-order'` event on `window` for notifications
 - `OrderNotification` component in `SideBarLayout` displays toast-style alerts
 
@@ -74,7 +74,7 @@ src/
 #### 7. Routing & Auth
 - **PrivateRoute wrapper** checks `isAuthenticated` from `AuthContext`
 - Routes wrapped in `SideBarLayout` for authenticated pages
-- Login redirects to `/pedidoBalcao` on success, stores token + adminData in localStorage
+- Login redirects to `/backoffice/pedidoBalcao` on success, stores token + adminData in localStorage
 
 ### Key Files to Reference
 

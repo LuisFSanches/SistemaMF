@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { listPublic3DModelProducts } from '../../services/product3dModelService';
 import { IPublicProductWith3DModel } from '../../interfaces/IProduct3DModel';
-import { PageContainer, BackButton, ProductName, ViewerBox, EmptyState } from './style';
+import { PageContainer, BackButton, TilesGrid, Tile, TileName, ViewerBox, EmptyState } from './style';
 
 export function ViewInYourSpace() {
     const navigate = useNavigate();
-    const { productId } = useParams<{ productId: string }>();
-    const [product, setProduct] = useState<IPublicProductWith3DModel | null>(null);
+    const [searchParams] = useSearchParams();
+    const requestedIds = (searchParams.get('ids') || '').split(',').filter(Boolean);
+
+    const [products, setProducts] = useState<IPublicProductWith3DModel[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -17,21 +19,25 @@ export function ViewInYourSpace() {
     }, []);
 
     useEffect(() => {
-        const loadProduct = async () => {
+        const loadProducts = async () => {
             setLoading(true);
             try {
                 const response = await listPublic3DModelProducts('');
-                const found = (response.data || []).find((p: IPublicProductWith3DModel) => p.id === productId);
-                setProduct(found || null);
+                const all: IPublicProductWith3DModel[] = response.data || [];
+                const found = requestedIds
+                    .map((id) => all.find((p) => p.id === id))
+                    .filter((p): p is IPublicProductWith3DModel => !!p);
+                setProducts(found);
             } catch (error) {
-                console.error('Failed to load product:', error);
+                console.error('Failed to load products:', error);
             } finally {
                 setLoading(false);
             }
         };
 
-        loadProduct();
-    }, [productId]);
+        loadProducts();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]);
 
     return (
         <PageContainer>
@@ -40,24 +46,28 @@ export function ViewInYourSpace() {
                 Voltar
             </BackButton>
 
-            {!loading && !product && (
-                <EmptyState>Produto não encontrado ou sem modelo 3D disponível.</EmptyState>
+            {!loading && products.length === 0 && (
+                <EmptyState>Nenhum produto encontrado ou sem modelo 3D disponível.</EmptyState>
             )}
 
-            {product && (
-                <>
-                    <ProductName>{product.name}</ProductName>
-                    <ViewerBox>
-                        <model-viewer
-                            src={product.model3d.model_url}
-                            camera-controls
-                            auto-rotate
-                            ar
-                            ar-modes="webxr scene-viewer quick-look"
-                            reveal="auto"
-                        />
-                    </ViewerBox>
-                </>
+            {products.length > 0 && (
+                <TilesGrid>
+                    {products.map((product) => (
+                        <Tile key={product.id}>
+                            <TileName>{product.name}</TileName>
+                            <ViewerBox>
+                                <model-viewer
+                                    src={product.model3d.model_url}
+                                    camera-controls
+                                    auto-rotate
+                                    ar
+                                    ar-modes="webxr scene-viewer quick-look"
+                                    reveal="auto"
+                                />
+                            </ViewerBox>
+                        </Tile>
+                    ))}
+                </TilesGrid>
             )}
         </PageContainer>
     );

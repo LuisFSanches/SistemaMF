@@ -105,7 +105,7 @@ export const uploadModel3D = multer({
     storage: models3dStorage,
     fileFilter: glbFileFilter,
     limits: {
-        fileSize: 20 * 1024 * 1024, // 20MB para modelos 3D
+        fileSize: 30 * 1024 * 1024, // 20MB para modelos 3D
     }
 });
 

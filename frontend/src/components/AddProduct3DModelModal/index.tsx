@@ -11,7 +11,7 @@ import { listProducts } from '../../services/productService';
 import { IProduct } from '../../interfaces/IProduct';
 import placeholder_products from '../../assets/images/placeholder_products.png';
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024;
+const MAX_FILE_SIZE = 30 * 1024 * 1024;
 
 interface AddProduct3DModelModalProps {
     isOpen: boolean;
@@ -96,7 +96,7 @@ export function AddProduct3DModelModal({ isOpen, onRequestClose, onSave }: AddPr
         }
 
         if (selected.size > MAX_FILE_SIZE) {
-            setError('O arquivo deve ter no máximo 20MB.');
+            setError('O arquivo deve ter no máximo 30MB.');
             return;
         }
 
@@ -197,7 +197,7 @@ export function AddProduct3DModelModal({ isOpen, onRequestClose, onSave }: AddPr
                                     <UploadLabel>
                                         <FontAwesomeIcon icon={faCloudArrowUp} />
                                         <span>Clique para selecionar um arquivo .glb</span>
-                                        <span style={{ fontSize: '0.65rem' }}>Máx. 20MB</span>
+                                        <span style={{ fontSize: '0.65rem' }}>Máx. 30MB</span>
                                     </UploadLabel>
                                 )}
                             </PreviewBox>

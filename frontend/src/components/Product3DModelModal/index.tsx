@@ -52,7 +52,7 @@ export function Product3DModelModal({ isOpen, onRequestClose, onSave, product }:
         }
 
         if (selected.size > MAX_FILE_SIZE) {
-            setError('O arquivo deve ter no máximo 20MB.');
+            setError('O arquivo deve ter no máximo 30MB.');
             return;
         }
 
@@ -127,7 +127,7 @@ export function Product3DModelModal({ isOpen, onRequestClose, onSave, product }:
                         <UploadLabel>
                             <FontAwesomeIcon icon={faCloudArrowUp} />
                             <span>Clique para selecionar um arquivo .glb</span>
-                            <span style={{ fontSize: '0.65rem' }}>Máx. 20MB</span>
+                            <span style={{ fontSize: '0.65rem' }}>Máx. 30MB</span>
                         </UploadLabel>
                     )}
                 </PreviewBox>

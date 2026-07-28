@@ -30,17 +30,16 @@ export const BackButton = styled.button`
     }
 `;
 
-export const ProductName = styled.h1`
-    font-size: 1.5rem;
+export const TileName = styled.h2`
+    font-size: 1.1rem;
     color: var(--text-title);
-    margin-bottom: 1rem;
+    margin: 0 0 0.75rem;
     text-align: center;
 `;
 
 export const ViewerBox = styled.div`
     width: 100%;
-    max-width: 800px;
-    height: 500px;
+    height: 400px;
     background: var(--white-background);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -52,7 +51,7 @@ export const ViewerBox = styled.div`
     }
 
     @media (max-width: 750px) {
-        height: 360px;
+        height: 320px;
     }
 `;
 
@@ -60,4 +59,21 @@ export const EmptyState = styled.div`
     text-align: center;
     color: var(--text-light);
     padding: 3rem 1rem;
+`;
+
+export const TilesGrid = styled.div`
+    width: 100%;
+    max-width: 1200px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+    }
+`;
+
+export const Tile = styled.div`
+    display: flex;
+    flex-direction: column;
 `;

@@ -14,6 +14,9 @@ import {
     ProductInfo,
     ViewButton,
     EmptyState,
+    SelectCheckbox,
+    SelectionBar,
+    SelectionBarButton,
 } from './style';
 import placeholder_products from '../../assets/images/placeholder_products.png';
 
@@ -22,6 +25,19 @@ export function SimulateEnvironment() {
     const [products, setProducts] = useState<IPublicProductWith3DModel[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+    const toggleSelected = (productId: string) => {
+        setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(productId)) {
+                next.delete(productId);
+            } else {
+                next.add(productId);
+            }
+            return next;
+        });
+    };
 
     const loadProducts = async () => {
         setLoading(true);
@@ -64,6 +80,11 @@ export function SimulateEnvironment() {
             <ProductGrid>
                 {products.map((product) => (
                     <ProductCard key={product.id}>
+                        <SelectCheckbox
+                            checked={selectedIds.has(product.id)}
+                            onChange={() => toggleSelected(product.id)}
+                            title="Selecionar para comparar no seu espaço"
+                        />
                         <ProductImage>
                             <img src={product.image || placeholder_products} alt={product.name} />
                         </ProductImage>
@@ -71,12 +92,21 @@ export function SimulateEnvironment() {
                             <h3>{product.name}</h3>
                             <span>{product.categories?.map((c) => c.category.name).join(', ') || 'Sem categoria'}</span>
                         </ProductInfo>
-                        <ViewButton onClick={() => navigate(`/view-in-your-space/${product.id}`)}>
+                        <ViewButton onClick={() => navigate(`/view-in-your-space?ids=${product.id}`)}>
                             Ver no Seu Espaço
                         </ViewButton>
                     </ProductCard>
                 ))}
             </ProductGrid>
+
+            {selectedIds.size > 0 && (
+                <SelectionBar>
+                    <span>{selectedIds.size} produto{selectedIds.size > 1 ? 's' : ''} selecionado{selectedIds.size > 1 ? 's' : ''}</span>
+                    <SelectionBarButton onClick={() => navigate(`/view-in-your-space?ids=${[...selectedIds].join(',')}`)}>
+                        Ver Selecionados
+                    </SelectionBarButton>
+                </SelectionBar>
+            )}
         </PageContainer>
     );
 }
