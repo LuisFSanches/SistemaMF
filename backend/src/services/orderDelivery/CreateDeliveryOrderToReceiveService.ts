@@ -6,7 +6,7 @@ import { BadRequestException } from "../../exceptions/bad-request";
 class CreateDeliveryOrderToReceiveService {
     async execute(order_id: string) {
         const order = await prismaClient.order.findFirst({
-            where: { id: order_id, status: 'IN_DELIVERY' }
+            where: { id: order_id }
         });
 
         if (!order) {
