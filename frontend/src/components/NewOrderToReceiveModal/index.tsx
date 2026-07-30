@@ -84,7 +84,7 @@ export function NewOrderToReceiveModal({ isOpen, onRequestClose, action, current
 
         debounceTimeout.current = setTimeout(async () => {
             if (text.length >= 2) {
-                const availableOrders = await loadAvailableOrders(1, 50, text);
+                const availableOrders = await loadAvailableOrders(1, 50, { query: text });
                 setOrderSuggestions(availableOrders);
                 setShowSuggestions(true);
             } else {

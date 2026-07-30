@@ -17,6 +17,7 @@ import { formatTitleCase } from "../../utils";
 import { DataTable, ColumnDef } from "../../components/DataTable";
 import { RowActions, IconButton, IconLinkButton } from "../../components/DataTable/style";
 import { Badge, BadgeTone } from "../../components/Badge";
+import { OrderFilterPopover, IOrderFilters, EMPTY_ORDER_FILTERS } from "../../components/OrderFilterPopover";
 
 export function OrdersPage(){
     const { orders, loadAvailableOrders, totalOrders } = useOrders();
@@ -26,7 +27,7 @@ export function OrdersPage(){
     const [editOrderModal, setEditOrderModal] = useState(false);
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
     const [page, setPage] = useState(1);
-    const [query, setQuery] = useState('');
+    const [filters, setFilters] = useState<IOrderFilters>(EMPTY_ORDER_FILTERS);
     const [startDate, setStartDate] = useState<string | null>(null);
     const [endDate, setEndDate] = useState<string | null>(null);
     const pageSize = 8;
@@ -40,8 +41,8 @@ export function OrdersPage(){
         setCurrentOrder(order);
     }
 
-    const handleQueryChange = (value: string) => {
-        setQuery(value);
+    const handleFiltersApply = (value: IOrderFilters) => {
+        setFilters(value);
         setPage(1);
     }
 
@@ -73,18 +74,9 @@ export function OrdersPage(){
     };
 
     useEffect(() => {
-        loadAvailableOrders(page, pageSize, query, startDate, endDate);
+        loadAvailableOrders(page, pageSize, filters, startDate, endDate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, startDate, endDate]);
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            setPage(1);
-            loadAvailableOrders(1, pageSize, query, startDate, endDate);
-        }, 350);
-        return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [query]);
+    }, [page, startDate, endDate, filters]);
 
     const columns: ColumnDef<IOrder>[] = [
         {
@@ -165,9 +157,7 @@ export function OrdersPage(){
                 data={orders}
                 rowKey={(order) => order.id as string}
                 rowClassName={(order) => order.status === 'CANCELED' ? 'canceled-order' : undefined}
-                searchPlaceholder="Buscar por Nome, Telefone ou Código"
-                searchValue={query}
-                onSearchChange={handleQueryChange}
+                toolbarExtra={<OrderFilterPopover filters={filters} onApply={handleFiltersApply} right='auto' />}
                 emptyTitle="Nenhum pedido encontrado"
                 emptyDescription="Tente ajustar a busca ou o período selecionado."
                 footer={

@@ -1,14 +1,27 @@
 import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
+import { orderSearchFiltersSchema } from "../../schemas/order/orderSearchFilters";
 
 class GetAllOrderService {
-    async execute(page: number = 1, pageSize: number = 10, query?: string, startDate?: string, endDate?: string, store_id?: string) {
+    async execute(page: number = 1, pageSize: number = 10, search?: unknown, startDate?: string, endDate?: string, store_id?: string) {
+        const parsed = orderSearchFiltersSchema.safeParse(search ?? {});
+
+        if (!parsed.success) {
+            throw new BadRequestException(
+                parsed.error.errors[0].message,
+                ErrorCodes.VALIDATION_ERROR
+            );
+        }
+
+        const { query, clientName, orderCode, phoneNumber, productName } = parsed.data;
+
         try {
-            
+
             const skip = (page - 1) * pageSize;
 
             let filters: any = {};
+            const andConditions: any[] = [];
 
             // Filtro por loja (multi-tenancy)
             if (store_id) {
@@ -19,43 +32,100 @@ class GetAllOrderService {
             if (startDate && endDate) {
                 const start = new Date(startDate + 'T00:00:00-03:00');
                 const end = new Date(endDate + 'T23:59:59-03:00');
-                
+
                 filters.delivery_date = {
                     gte: start,
                     lte: end
                 };
             } else if (startDate) {
                 const start = new Date(startDate + 'T00:00:00-03:00');
-                
+
                 filters.delivery_date = {
                     gte: start
                 };
             } else if (endDate) {
                 const end = new Date(endDate + 'T23:59:59-03:00');
-                
+
                 filters.delivery_date = {
                     lte: end
                 };
             }
 
-            // Filtro por query (busca de texto)
+            // Filtro genérico (busca rápida por nome, telefone ou código)
             if (query) {
-                filters.OR = [
-                    {
-                        client: {
-                            OR: [
-                                { first_name: { contains: query, mode: 'insensitive' } },
-                                { last_name: { contains: query, mode: 'insensitive' } },
-                                { phone_number: { contains: query, mode: 'insensitive' } }
-                            ]
+                andConditions.push({
+                    OR: [
+                        {
+                            client: {
+                                OR: [
+                                    { first_name: { contains: query, mode: 'insensitive' } },
+                                    { last_name: { contains: query, mode: 'insensitive' } },
+                                    { phone_number: { contains: query, mode: 'insensitive' } }
+                                ]
+                            }
+                        },
+                        {
+                            code: {
+                                equals: isNaN(Number(query)) ? undefined : Number(query)
+                            }
                         }
-                    },
-                    {
-                        code: {
-                            equals: isNaN(Number(query)) ? undefined : Number(query)
-                        }
+                    ]
+                });
+            }
+
+            // Filtro por nome do cliente
+            if (clientName) {
+                andConditions.push({
+                    client: {
+                        OR: [
+                            { first_name: { contains: clientName, mode: 'insensitive' } },
+                            { last_name: { contains: clientName, mode: 'insensitive' } }
+                        ]
                     }
-                ];
+                });
+            }
+
+            // Filtro por telefone do cliente
+            if (phoneNumber) {
+                andConditions.push({
+                    client: {
+                        phone_number: { contains: phoneNumber, mode: 'insensitive' }
+                    }
+                });
+            }
+
+            // Filtro por código do pedido
+            if (orderCode) {
+                andConditions.push({
+                    code: {
+                        equals: isNaN(Number(orderCode)) ? undefined : Number(orderCode)
+                    }
+                });
+            }
+
+            // Filtro por produto (nome/descrição do produto ou descrição do pedido)
+            if (productName) {
+                andConditions.push({
+                    OR: [
+                        { description: { contains: productName, mode: 'insensitive' } },
+                        {
+                            orderItems: {
+                                some: {
+                                    OR: [
+                                        { product: { name: { contains: productName, mode: 'insensitive' } } },
+                                        { product: { description: { contains: productName, mode: 'insensitive' } } },
+                                        { storeProduct: { description: { contains: productName, mode: 'insensitive' } } },
+                                        { storeProduct: { product: { name: { contains: productName, mode: 'insensitive' } } } }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                });
+            }
+
+            if (andConditions.length > 0) {
+                filters.AND = andConditions;
             }
 
             const [orders, total] = await Promise.all([

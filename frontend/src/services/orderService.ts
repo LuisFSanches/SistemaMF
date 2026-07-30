@@ -122,18 +122,29 @@ export const getOnGoingOrders = async () => {
 	return response;
 };
 
-export const getAllOrders = async (page: number, pageSize: number, query: string, startDate?: string | null, endDate?: string | null) => {
-	let url = `/order/all?page=${page}&pageSize=${pageSize}&query=${query}`;
-	
-	if (startDate) {
-		url += `&startDate=${startDate}`;
-	}
-	
-	if (endDate) {
-		url += `&endDate=${endDate}`;
-	}
-	
-	const response = await api.get(url);
+export interface IOrderSearchFilters {
+	query?: string;
+	clientName?: string;
+	orderCode?: string;
+	phoneNumber?: string;
+	productName?: string;
+}
+
+export const getAllOrders = async (page: number, pageSize: number, filters?: IOrderSearchFilters, startDate?: string | null, endDate?: string | null) => {
+	const params = new URLSearchParams({
+		page: String(page),
+		pageSize: String(pageSize)
+	});
+
+	if (filters?.query) params.set('query', filters.query);
+	if (filters?.clientName) params.set('clientName', filters.clientName);
+	if (filters?.orderCode) params.set('orderCode', filters.orderCode);
+	if (filters?.phoneNumber) params.set('phoneNumber', filters.phoneNumber);
+	if (filters?.productName) params.set('productName', filters.productName);
+	if (startDate) params.set('startDate', startDate);
+	if (endDate) params.set('endDate', endDate);
+
+	const response = await api.get(`/order/all?${params.toString()}`);
 
 	return response;
 }
