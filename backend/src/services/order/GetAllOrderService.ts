@@ -3,6 +3,9 @@ import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 import { orderSearchFiltersSchema } from "../../schemas/order/orderSearchFilters";
 
+// Remove tudo que não for dígito, para comparar telefones digitados com ou sem formatação
+const onlyDigits = (value: string) => value.replace(/\D/g, '');
+
 class GetAllOrderService {
     async execute(page: number = 1, pageSize: number = 10, search?: unknown, startDate?: string, endDate?: string, store_id?: string) {
         const parsed = orderSearchFiltersSchema.safeParse(search ?? {});
@@ -22,6 +25,59 @@ class GetAllOrderService {
 
             let filters: any = {};
             const andConditions: any[] = [];
+
+            // Busca por nome de cliente/produto ignora acentos (usa unaccent do Postgres)
+            if (clientName) {
+                const clientOrderIds = await prismaClient.$queryRaw<{ id: string }[]>`
+                    SELECT o.id
+                    FROM orders o
+                    INNER JOIN clients c ON c.id = o.client_id
+                    WHERE unaccent(c.first_name) ILIKE unaccent(${'%' + clientName + '%'})
+                       OR unaccent(c.last_name) ILIKE unaccent(${'%' + clientName + '%'})
+                `;
+                andConditions.push({ id: { in: clientOrderIds.map(o => o.id) } });
+            }
+
+            if (productName) {
+                const productOrderIds = await prismaClient.$queryRaw<{ id: string }[]>`
+                    SELECT DISTINCT o.id
+                    FROM orders o
+                    LEFT JOIN order_items oi ON oi.order_id = o.id
+                    LEFT JOIN products p ON p.id = oi.product_id
+                    LEFT JOIN store_products sp ON sp.id = oi.store_product_id
+                    LEFT JOIN products sp_p ON sp_p.id = sp.product_id
+                    WHERE unaccent(o.description) ILIKE unaccent(${'%' + productName + '%'})
+                       OR unaccent(p.name) ILIKE unaccent(${'%' + productName + '%'})
+                       OR unaccent(p.description) ILIKE unaccent(${'%' + productName + '%'})
+                       OR unaccent(sp.description) ILIKE unaccent(${'%' + productName + '%'})
+                       OR unaccent(sp_p.name) ILIKE unaccent(${'%' + productName + '%'})
+                `;
+                andConditions.push({ id: { in: productOrderIds.map(o => o.id) } });
+            }
+
+            if (query) {
+                const queryOrderIds = await prismaClient.$queryRaw<{ id: string }[]>`
+                    SELECT o.id
+                    FROM orders o
+                    INNER JOIN clients c ON c.id = o.client_id
+                    WHERE unaccent(c.first_name) ILIKE unaccent(${'%' + query + '%'})
+                       OR unaccent(c.last_name) ILIKE unaccent(${'%' + query + '%'})
+                       OR regexp_replace(c.phone_number, '\\D', '', 'g') LIKE ${'%' + onlyDigits(query) + '%'}
+                       OR o.code::text = ${query}
+                `;
+                andConditions.push({ id: { in: queryOrderIds.map(o => o.id) } });
+            }
+
+            // Telefone comparado ignorando formatação (espaços, traços, parênteses)
+            if (phoneNumber) {
+                const phoneOrderIds = await prismaClient.$queryRaw<{ id: string }[]>`
+                    SELECT o.id
+                    FROM orders o
+                    INNER JOIN clients c ON c.id = o.client_id
+                    WHERE regexp_replace(c.phone_number, '\\D', '', 'g') LIKE ${'%' + onlyDigits(phoneNumber) + '%'}
+                `;
+                andConditions.push({ id: { in: phoneOrderIds.map(o => o.id) } });
+            }
 
             // Filtro por loja (multi-tenancy)
             if (store_id) {
@@ -51,76 +107,12 @@ class GetAllOrderService {
                 };
             }
 
-            // Filtro genérico (busca rápida por nome, telefone ou código)
-            if (query) {
-                andConditions.push({
-                    OR: [
-                        {
-                            client: {
-                                OR: [
-                                    { first_name: { contains: query, mode: 'insensitive' } },
-                                    { last_name: { contains: query, mode: 'insensitive' } },
-                                    { phone_number: { contains: query, mode: 'insensitive' } }
-                                ]
-                            }
-                        },
-                        {
-                            code: {
-                                equals: isNaN(Number(query)) ? undefined : Number(query)
-                            }
-                        }
-                    ]
-                });
-            }
-
-            // Filtro por nome do cliente
-            if (clientName) {
-                andConditions.push({
-                    client: {
-                        OR: [
-                            { first_name: { contains: clientName, mode: 'insensitive' } },
-                            { last_name: { contains: clientName, mode: 'insensitive' } }
-                        ]
-                    }
-                });
-            }
-
-            // Filtro por telefone do cliente
-            if (phoneNumber) {
-                andConditions.push({
-                    client: {
-                        phone_number: { contains: phoneNumber, mode: 'insensitive' }
-                    }
-                });
-            }
-
             // Filtro por código do pedido
             if (orderCode) {
                 andConditions.push({
                     code: {
                         equals: isNaN(Number(orderCode)) ? undefined : Number(orderCode)
                     }
-                });
-            }
-
-            // Filtro por produto (nome/descrição do produto ou descrição do pedido)
-            if (productName) {
-                andConditions.push({
-                    OR: [
-                        { description: { contains: productName, mode: 'insensitive' } },
-                        {
-                            orderItems: {
-                                some: {
-                                    OR: [
-                                        { product: { name: { contains: productName, mode: 'insensitive' } } },
-                                        { product: { description: { contains: productName, mode: 'insensitive' } } },
-                                        { storeProduct: { description: { contains: productName, mode: 'insensitive' } } },
-                                        { storeProduct: { product: { name: { contains: productName, mode: 'insensitive' } } } }
-                                    ]
-                                }
-                            }
-                        }
-                    ]
                 });
             }
 
