@@ -8,6 +8,7 @@ import { updateStatus, updateOrderPaymentStatus } from "../../services/orderServ
 import { checkOrderToReceiveExists } from "../../services/orderToReceiveService";
 import { OrderCard } from "../../components/OrderCard";
 import { OrderFilterCard } from "../../components/OrderFilterCard";
+import { OrderFilterPopover, IOrderFilters, EMPTY_ORDER_FILTERS } from "../../components/OrderFilterPopover";
 import { useOrders } from "../../contexts/OrdersContext";
 import { useOrdersToReceive } from "../../contexts/OrdersToReceiveContext";
 import { useOrderDeliveries } from "../../contexts/OrderDeliveriesContext";
@@ -38,6 +39,7 @@ export function ServiceOrdersPage(){
 	const [endDate, setEndDate] = useState<string | null>(null);
 	const [dateFilterType, setDateFilterType] = useState<string>("all-dates");
 	const [activeCardFilter, setActiveCardFilter] = useState<string | null>(null);
+	const [orderFilters, setOrderFilters] = useState<IOrderFilters>(EMPTY_ORDER_FILTERS);
 
     function handleOpenEditOrderModal(order: IOrder){
 		console.log('edit order', order);
@@ -65,7 +67,7 @@ export function ServiceOrdersPage(){
 	useEffect(() => {
 		applyDateAndTypeFilters();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [onGoingOrders, startDate, endDate, dateFilterType, selectedOrderType]);
+	}, [onGoingOrders, startDate, endDate, dateFilterType, selectedOrderType, orderFilters]);
 
 	const handleOrderStatus = async (id: string, status: string) => {
 		setShowLoader(true);
@@ -163,11 +165,44 @@ export function ServiceOrdersPage(){
 		}
 	};
 
+	const matchesOrderFilters = (order: IOrder) => {
+		const { clientName, orderCode, phoneNumber, productName } = orderFilters;
+
+		if (clientName) {
+			const lowerName = clientName.toLowerCase();
+			const fullName = `${order.client.first_name} ${order.client.last_name}`.toLowerCase();
+			if (!fullName.includes(lowerName)) return false;
+		}
+
+		if (orderCode) {
+			// eslint-disable-next-line eqeqeq
+			if (order.code != orderCode) return false;
+		}
+
+		if (phoneNumber) {
+			if (!order.client.phone_number.toLowerCase().includes(phoneNumber.toLowerCase())) return false;
+		}
+
+		if (productName) {
+			const lowerProduct = productName.toLowerCase();
+			const matchesDescription = order.description?.toLowerCase().includes(lowerProduct);
+			const matchesItem = (order.orderItems || []).some((item: any) =>
+				item?.storeProduct?.product?.name?.toLowerCase().includes(lowerProduct) ||
+				item?.storeProduct?.description?.toLowerCase().includes(lowerProduct) ||
+				item?.product?.name?.toLowerCase().includes(lowerProduct) ||
+				item?.product?.description?.toLowerCase().includes(lowerProduct)
+			);
+			if (!matchesDescription && !matchesItem) return false;
+		}
+
+		return true;
+	};
+
 	const applyDateAndTypeFilters = () => {
 		const filterByDate = (order: IOrder) => {
 			if (!startDate && !endDate) return true;
 			const orderDate = moment(order.delivery_date);
-			
+
 			if (dateFilterType === "today" || dateFilterType === "yesterday") {
 				return orderDate.isSame(moment(startDate), "day");
 			} else if (dateFilterType === "week") {
@@ -181,7 +216,7 @@ export function ServiceOrdersPage(){
 		let filteredOrders = onGoingOrders;
 
 		if (selectedOrderType === "counter-orders") {
-			filteredOrders = onGoingOrders.filter((order: IOrder) => 
+			filteredOrders = onGoingOrders.filter((order: IOrder) =>
 				!order.online_order && order.is_delivery && !order.store_front_order
 			);
 		} else if (selectedOrderType === "store-front-orders") {
@@ -189,10 +224,12 @@ export function ServiceOrdersPage(){
 		} else if (selectedOrderType === "online-orders") {
 			filteredOrders = onGoingOrders.filter((order: IOrder) => order.online_order);
 		} else if (selectedOrderType === "store-orders") {
-			filteredOrders = onGoingOrders.filter((order: IOrder) => 
+			filteredOrders = onGoingOrders.filter((order: IOrder) =>
 				!order.is_delivery && !order.store_front_order
 			);
 		}
+
+		filteredOrders = filteredOrders.filter(matchesOrderFilters);
 
 		setOpenedOrders(filteredOrders.filter(order => order.status === "OPENED" && filterByDate(order)));
 		setInProgressOrders(filteredOrders.filter(order => order.status === "IN_PROGRESS" && filterByDate(order)));
@@ -201,24 +238,6 @@ export function ServiceOrdersPage(){
 
 	const filterOrdersByType = (orderType: string) => {
 		setSelectedOrderType(orderType);
-	};
-
-	const filterOrdersByNameOrPhone = (text: string) => {
-		const lowerText = text.toLowerCase();
-	
-		const matches = (order: IOrder) => {
-			return (
-				order.client.first_name.toLowerCase().includes(lowerText) ||
-				order.client.last_name.toLowerCase().includes(lowerText) ||
-				order.client.phone_number.toLowerCase().includes(lowerText) ||
-				// eslint-disable-next-line eqeqeq
-				order.code == lowerText
-			);
-		};
-	
-		setOpenedOrders(onGoingOrders.filter((order: IOrder) => order.status === "OPENED" && matches(order)));
-		setInProgressOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_PROGRESS" && matches(order)));
-		setInDeliveryOrders(onGoingOrders.filter((order: IOrder) => order.status === "IN_DELIVERY" && matches(order)));
 	};
 
 	const handleDateRangeChange = (start: string | null, end: string | null, filterType: string) => {
@@ -360,10 +379,7 @@ export function ServiceOrdersPage(){
 				</div>
 				<div className="date-filters">
 					<DateRangePicker onDateRangeChange={handleDateRangeChange} />
-					<input
-						type="text"
-						placeholder="Buscar por Nome, Telefone ou Código"
-						onChange={(e) => filterOrdersByNameOrPhone(e.target.value)} />
+					<OrderFilterPopover filters={orderFilters} onApply={setOrderFilters} right="0" />
 				</div>
  			</Header>
 			<Orders>

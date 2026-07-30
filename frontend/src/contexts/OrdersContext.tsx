@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getAllOrders, getOnGoingOrders, getWaitingOrders } from "../services/orderService";
+import { getAllOrders, getOnGoingOrders, getWaitingOrders, IOrderSearchFilters } from "../services/orderService";
 import { useOrderSocket } from '../hooks/useOrderSocket';
 import { IOrder } from "../interfaces/IOrder";
 import { PUBLIC_ROUTES } from "../constants";
@@ -9,7 +9,7 @@ import { AuthContext } from "./AuthContext";
 interface OrdersContextType {
   orders: IOrder[];
   totalOrders: number;
-  loadAvailableOrders: (page: number, pageSize: number, query: string, startDate?: string | null, endDate?: string | null) => Promise<IOrder[]>;
+  loadAvailableOrders: (page: number, pageSize: number, filters?: IOrderSearchFilters, startDate?: string | null, endDate?: string | null) => Promise<IOrder[]>;
   addOrder: (client: IOrder) => void;
   editOrder: (client: IOrder) => void;
   onGoingOrders: IOrder[];
@@ -28,8 +28,8 @@ export const OrdersProvider: React.FC = ({ children }) => {
   const token = localStorage.getItem("token");
   const { adminData } = useContext(AuthContext);
 
-  const loadAvailableOrders = async (page: number, pageSize: number, query: string, startDate?: string | null, endDate?: string | null) => {
-    const { data: { orders, total } } = await getAllOrders(page, pageSize, query, startDate, endDate);
+  const loadAvailableOrders = async (page: number, pageSize: number, filters?: IOrderSearchFilters, startDate?: string | null, endDate?: string | null) => {
+    const { data: { orders, total } } = await getAllOrders(page, pageSize, filters, startDate, endDate);
     setOrders(orders);
     setTotalOrders(total);
     return orders;

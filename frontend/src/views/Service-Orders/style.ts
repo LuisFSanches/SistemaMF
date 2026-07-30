@@ -168,6 +168,8 @@ export const Header = styled.div`
     .date-filters {
         display: flex;
         align-items: center;
+        margin-right: 15px;
+        gap: 10px;
 
         input {
             width: 300px;
