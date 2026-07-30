@@ -19,6 +19,11 @@ import { PaymentStatusModal } from "../../components/PaymentStatusModal";
 import { SelectDeliveryManModal } from "../../components/SelectDeliveryManModal";
 import { faStore, faTruck, faClockRotateLeft, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 
+const normalizeText = (value: string) =>
+	value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+
+const onlyDigits = (value: string) => value.replace(/\D/g, '');
+
 export function ServiceOrdersPage(){
 	const { onGoingOrders, editOrder, loadOnGoingOrders } = useOrders();
 	const { createOrderToReceive } = useOrdersToReceive();
@@ -169,8 +174,8 @@ export function ServiceOrdersPage(){
 		const { clientName, orderCode, phoneNumber, productName } = orderFilters;
 
 		if (clientName) {
-			const lowerName = clientName.toLowerCase();
-			const fullName = `${order.client.first_name} ${order.client.last_name}`.toLowerCase();
+			const lowerName = normalizeText(clientName);
+			const fullName = normalizeText(`${order.client.first_name} ${order.client.last_name}`);
 			if (!fullName.includes(lowerName)) return false;
 		}
 
@@ -180,17 +185,17 @@ export function ServiceOrdersPage(){
 		}
 
 		if (phoneNumber) {
-			if (!order.client.phone_number.toLowerCase().includes(phoneNumber.toLowerCase())) return false;
+			if (!onlyDigits(order.client.phone_number).includes(onlyDigits(phoneNumber))) return false;
 		}
 
 		if (productName) {
-			const lowerProduct = productName.toLowerCase();
-			const matchesDescription = order.description?.toLowerCase().includes(lowerProduct);
+			const lowerProduct = normalizeText(productName);
+			const matchesDescription = order.description && normalizeText(order.description).includes(lowerProduct);
 			const matchesItem = (order.orderItems || []).some((item: any) =>
-				item?.storeProduct?.product?.name?.toLowerCase().includes(lowerProduct) ||
-				item?.storeProduct?.description?.toLowerCase().includes(lowerProduct) ||
-				item?.product?.name?.toLowerCase().includes(lowerProduct) ||
-				item?.product?.description?.toLowerCase().includes(lowerProduct)
+				(item?.storeProduct?.product?.name && normalizeText(item.storeProduct.product.name).includes(lowerProduct)) ||
+				(item?.storeProduct?.description && normalizeText(item.storeProduct.description).includes(lowerProduct)) ||
+				(item?.product?.name && normalizeText(item.product.name).includes(lowerProduct)) ||
+				(item?.product?.description && normalizeText(item.product.description).includes(lowerProduct))
 			);
 			if (!matchesDescription && !matchesItem) return false;
 		}
