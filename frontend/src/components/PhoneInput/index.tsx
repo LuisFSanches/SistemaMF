@@ -1,7 +1,7 @@
 import { Controller, Control, FieldValues, Path, UseFormSetValue, useWatch } from "react-hook-form";
 import PhoneInputBase, { Country } from "react-phone-number-input";
 import ptBRLabels from "react-phone-number-input/locale/pt-BR.json";
-import { parsePhoneNumber } from "libphonenumber-js";
+import { parsePhoneNumberWithError } from "libphonenumber-js";
 import "react-phone-number-input/style.css";
 import { PhoneInputWrapper } from "./style";
 import { DEFAULT_COUNTRY } from "./utils";
@@ -36,7 +36,7 @@ export function PhoneInput<T extends FieldValues>({
                 const e164Value = field.value
                     ? (() => {
                         try {
-                            const parsed = parsePhoneNumber(field.value, countryValue);
+                            const parsed = parsePhoneNumberWithError(field.value, countryValue);
                             return parsed?.number;
                         } catch {
                             return undefined;
@@ -63,7 +63,7 @@ export function PhoneInput<T extends FieldValues>({
                                 }
 
                                 try {
-                                    const parsed = parsePhoneNumber(value, countryValue);
+                                    const parsed = parsePhoneNumberWithError(value, countryValue);
                                     field.onChange(parsed?.nationalNumber || "");
                                 } catch {
                                     field.onChange(value);
