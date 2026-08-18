@@ -46,6 +46,7 @@ class FinishOnlineOrderController{
             id: order.id,
             receiver_name: order.receiver_name,
             receiver_phone: order.receiver_phone,
+            receiver_country_code: order.receiver_country_code,
             client_id: client_id,
             client_address_id,
             status: order.status,
@@ -66,7 +67,8 @@ class FinishOnlineOrderController{
             id: client_id,
             first_name: order.first_name,
             last_name: order.last_name,
-            phone_number: order.phone_number
+            phone_number: order.phone_number,
+            country_code: order.country_code
         });
 
         orderEmitter.emit(OrderEvents.WhatsappOrderReceived, data);

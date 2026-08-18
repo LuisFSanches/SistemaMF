@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getCountryCallingCode, CountryCode } from 'libphonenumber-js';
 import { IWhatsAppMessage, IWhatsAppResponse } from "../../interfaces/IWhatsAppMessage";
 import { sendWhatsAppMessageSchema } from "../../schemas/whatsapp/sendWhatsAppMessage";
 import { BadRequestException } from "../../exceptions/bad-request";
@@ -30,7 +31,11 @@ class SendWhatsAppMessageService {
 
         try {
             const cleanPhone = data.phone_number.replace(/\D/g, '');
-            const phoneWithCountryCode = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+            const countryCode = (data.country_code || 'BR') as CountryCode;
+            const callingCode = getCountryCallingCode(countryCode);
+            const phoneWithCountryCode = cleanPhone.startsWith(callingCode)
+                ? cleanPhone
+                : `${callingCode}${cleanPhone}`;
 
             const payload: any = {
                 messaging_product: 'whatsapp',

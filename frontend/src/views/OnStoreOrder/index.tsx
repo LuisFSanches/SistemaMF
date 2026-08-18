@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import InputMask from "react-input-mask";
 import { useNavigate } from "react-router-dom";
+import { PhoneInput } from "../../components/PhoneInput";
+import { formatNationalPhone } from "../../components/PhoneInput/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComputer, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { ProductCard} from "../../components/ProductCard";
@@ -118,10 +119,12 @@ import { IAppliedCoupon, validateCoupon } from '../../services/couponService';
 
 interface INewOrder {
     phone_number: string;
+    country_code: string;
     first_name: string;
     last_name: string;
     receiver_name: string;
     receiver_phone: string;
+    receiver_country_code: string;
     addressId: string;
     pickup_on_store: boolean;
     street: string;
@@ -169,8 +172,6 @@ export function OnStoreOrder() {
     const [pickupOnStore, setPickupOnStore] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState<any>({});
     const [differentReceiver, setDiferentReceiver] = useState(false);
-    const [mask, setMask] = useState("(99) 99999-9999");
-    const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
     const [showLoader, setShowLoader] = useState(false);
     const [clientSearchLoading, setClientSearchLoading] = useState(false);
     const [clientNotFound, setClientNotFound] = useState(false);
@@ -209,10 +210,12 @@ export function OnStoreOrder() {
 
     const [order, setOrder] = useState<INewOrder>({
         phone_number: "",
+        country_code: "BR",
         first_name: "",
         last_name: "",
         receiver_name: "",
         receiver_phone: "",
+        receiver_country_code: "BR",
         addressId: addressId,
         pickup_on_store: pickupOnStore,
         street: "",
@@ -256,13 +259,16 @@ export function OnStoreOrder() {
         setValue,
         setError,
         formState: { errors },
-        reset
+        reset,
+        control
     } = useForm<INewOrder>({
         defaultValues: {
             postal_code: "28300000",
             city: "Itaperuna",
             state: "RJ",
-            country: "Brasil"
+            country: "Brasil",
+            country_code: "BR",
+            receiver_country_code: "BR"
         },
         shouldFocusError: false
     });
@@ -354,10 +360,12 @@ export function OnStoreOrder() {
 
     const onSubmitStep = async ({
         phone_number,
+        country_code,
         first_name,
         last_name,
         receiver_name,
         receiver_phone,
+        receiver_country_code,
         addressId,
         pickup_on_store,
         street,
@@ -409,13 +417,14 @@ export function OnStoreOrder() {
             ? appliedCoupon.discount_amount 
             : calculateAbsoluteDiscount(Number(discount) || 0, Number(products_value));
         const total = Number(products_value) - absoluteDiscountValue + Number(delivery_fee);
-
         const orderData = {
             phone_number: phone_number ? rawTelephone(phone_number) : "",
+            country_code,
             first_name,
             last_name,
             receiver_name,
             receiver_phone: receiver_phone ? rawTelephone(receiver_phone) : "",
+            receiver_country_code,
             addressId,
             pickup_on_store,
             street,
@@ -446,6 +455,8 @@ export function OnStoreOrder() {
             coupon_discount_amount: appliedCoupon?.discount_amount || undefined
         }
 
+        console.log('country_code', country_code)
+        console.log('order data', orderData)
         if (step === 1 || step === 2 || step === 3) {
             setOrder(orderData);
         }
@@ -511,6 +522,7 @@ export function OnStoreOrder() {
                     if (client) {
                         setValue("first_name", client.first_name);
                         setValue("last_name", client.last_name);
+                        setValue("country_code", client.country_code || "BR");
                         setClientId(client.id);
                         setClientNotFound(false);
                         
@@ -542,39 +554,6 @@ export function OnStoreOrder() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [phone_number, setValue, setError]);
 
-    const watchPhoneNumber = watch("phone_number");
-
-    useEffect(() => {
-        const phoneNumber = watch("phone_number") || "";
-        const numericValue = rawTelephone(phoneNumber);
-    
-        const timeout = setTimeout(() => {
-            if (numericValue.length === 10) {
-                setMask("(99) 9999-9999");
-            } else {
-                setMask("(99) 99999-9999");
-            }
-        }, 800);
-
-        return () => clearTimeout(timeout);
-    }, [watchPhoneNumber, watch, setMask]);
-
-    const watchReceiverPhone = watch("receiver_phone");
-
-    useEffect(() => {
-        const phoneNumber = watch("receiver_phone") || "";
-        const numericValue = rawTelephone(phoneNumber);
-
-        const timeout = setTimeout(() => {
-            if (numericValue.length === 10) {
-                setReceiverMask("(99) 9999-9999");
-            } else {
-                setReceiverMask("(99) 99999-9999");
-            }
-        }, 800);
-
-        return () => clearTimeout(timeout);
-    }, [watchReceiverPhone, watch, setReceiverMask]);
 
     const handleSearchProducts = (text: string) => {
         setQuery(text);
@@ -1133,21 +1112,12 @@ export function OnStoreOrder() {
 
                                     <FormField>
                                         <Label>Telefone</Label>
-                                        <InputMask
-                                            autoComplete="off"
-                                            mask={mask}
-                                            alwaysShowMask={false}
-                                            placeholder='(00) 00000-0000'
-                                            value={watch("phone_number") || ""}
-                                            {...register("phone_number", { 
-                                                required: is_delivery ? "Telefone é obrigatório" : false,
-                                                validate: (value) => {
-                                                    if (is_delivery && value && value.replace(/[^0-9]/g, "").length < 10) {
-                                                        return "Telefone inválido";
-                                                    }
-                                                    return true;
-                                                }
-                                            })}
+                                        <PhoneInput
+                                            control={control}
+                                            setValue={setValue}
+                                            phoneFieldName="phone_number"
+                                            countryFieldName="country_code"
+                                            required={is_delivery}
                                         />
                                         {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
                                     </FormField>
@@ -1210,13 +1180,11 @@ export function OnStoreOrder() {
                                             </FormField>
                                             <FormField>
                                                 <Label>Telefone do Destinatário</Label>
-                                                <InputMask
-                                                    autoComplete="off"
-                                                    mask={receiverMask}
-                                                    alwaysShowMask={false}
-                                                    placeholder='(00) 00000-0000'
-                                                    value={watch("receiver_phone") || ""}
-                                                    {...register("receiver_phone")}
+                                                <PhoneInput
+                                                    control={control}
+                                                    setValue={setValue}
+                                                    phoneFieldName="receiver_phone"
+                                                    countryFieldName="receiver_country_code"
                                                 />
                                             </FormField>
                                         </>
@@ -1445,14 +1413,14 @@ export function OnStoreOrder() {
                                         </SummarySectionTitle>
                                         <SummaryInfoText>
                                             <div><strong>Nome:</strong> {watch('first_name')} {watch('last_name')}</div>
-                                            <div><strong>Telefone:</strong> {watch('phone_number')}</div>
+                                            <div><strong>Telefone:</strong> {formatNationalPhone(watch('phone_number'), watch('country_code'))}</div>
                                             {differentReceiver && (
                                                 <>
                                                     <SummaryDivider>
                                                         <strong>Destinatário:</strong> {watch('receiver_name')}
                                                     </SummaryDivider>
                                                     {watch('receiver_phone') && (
-                                                        <div><strong>Tel. Destinatário:</strong> {watch('receiver_phone')}</div>
+                                                        <div><strong>Tel. Destinatário:</strong> {formatNationalPhone(watch('receiver_phone'), watch('receiver_country_code'))}</div>
                                                     )}
                                                 </>
                                             )}

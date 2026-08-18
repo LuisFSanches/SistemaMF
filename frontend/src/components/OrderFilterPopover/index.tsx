@@ -117,7 +117,7 @@ export function OrderFilterPopover({ filters, onApply, right }: OrderFilterPopov
                                 type="text"
                                 placeholder="Telefone do cliente"
                                 value={draft.phoneNumber}
-                                onChange={(e) => handleFieldChange('phoneNumber', e.target.value)}
+                                onChange={(e) => handleFieldChange('phoneNumber', e.target.value.replace(/\D/g, ''))}
                             />
                         </FieldGroup>
 

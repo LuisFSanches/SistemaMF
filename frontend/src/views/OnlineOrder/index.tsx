@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import InputMask from "react-input-mask";
 import { useForm } from "react-hook-form";
+import { PhoneInput } from "../../components/PhoneInput";
 import { ProductCard} from "../../components/ProductCard";
 import { Pagination } from "../../components/Pagination";
 import { TooltipModal } from "../../components/Tooltip";
@@ -15,7 +15,6 @@ import { createOrder, createOrderByAi } from "../../services/orderService";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { useOrders } from "../../contexts/OrdersContext";
 import { StoreProductModal } from "../../components/StoreProductModal";
-import { rawTelephone } from "../../utils";
 import { useProducts } from "../../contexts/ProductsContext";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { useAdminData } from "../../contexts/AuthContext";
@@ -87,6 +86,7 @@ interface INewOrder {
     created_by: string;
     online_code: string;
     receiver_phone: string;
+    receiver_country_code: string;
     order_ai_information: string;
 }
 
@@ -111,7 +111,6 @@ export function OnlineOrder() {
     const [orderLink, setOrderLink] = useState("");
     const [orderCode, setOrderCode] = useState("");
     const mockedDeliveryDate = moment().add(2, "days").format("YYYY-MM-DD");
-    const [mask, setMask] = useState("(99) 99999-9999");
     const [copied, setCopied] = useState(false);
     const [query, setQuery] = useState('');
     const [products, setProducts] = useState<IProduct[]>([]);
@@ -140,10 +139,13 @@ Cartão: Desejamos um feliz aniversário!`
         handleSubmit,
         formState: { errors },
         watch,
-        setValue
-    } = useForm<INewOrder>();
-
-    const receiver_phone = watch("receiver_phone");
+        setValue,
+        control
+    } = useForm<INewOrder>({
+        defaultValues: {
+            receiver_country_code: "BR"
+        }
+    });
 
     // Calcula o desconto absoluto baseado no tipo (% ou valor)
     const calculateAbsoluteDiscount = (discountValue: number, productsValue: number) => {
@@ -259,7 +261,8 @@ Cartão: Desejamos um feliz aniversário!`
         console.log(appliedCoupon, "appliedCoupon");
         const orderData = {
             client_id: null,
-            receiver_phone: rawTelephone(receiver_phone),
+            receiver_phone: data.receiver_phone,
+            receiver_country_code: data.receiver_country_code,
             first_name: "",
             last_name: "",
             receiver_name: "",
@@ -322,21 +325,6 @@ Cartão: Desejamos um feliz aniversário!`
 
         setShowLoader(false);
     }
-
-    useEffect(() => {
-        const receiver_phone = watch("receiver_phone") || "";
-        const numericValue = rawTelephone(receiver_phone);
-    
-        const timeout = setTimeout(() => {
-            if (numericValue.length === 10) {
-                setMask("(99) 9999-9999");
-            } else {
-                setMask("(99) 99999-9999");
-            }
-        }, 800);
-
-        return () => clearTimeout(timeout);
-    }, [receiver_phone, watch, setMask]);
 
     const handleSearchProducts = (text: string) => {
         setQuery(text);
@@ -712,21 +700,12 @@ Cartão: Desejamos um feliz aniversário!`
                                         Telefone do cliente
                                         <span>*</span>
                                     </Label>
-                                    <InputMask
-                                        autoComplete="off"
-                                        mask={mask}
-                                        alwaysShowMask={false}
-                                        placeholder='Telefone'
-                                        value={watch("receiver_phone") || ""}
-                                        {...register("receiver_phone", { 
-                                            required: "Telefone inválido",
-                                            validate: (value) => {
-                                                if (value.replace(/[^0-9]/g, "").length < 10) {
-                                                    return "Telefone inválido";
-                                                }
-                                                return true;
-                                            }
-                                        })}
+                                    <PhoneInput
+                                        control={control}
+                                        setValue={setValue}
+                                        phoneFieldName="receiver_phone"
+                                        countryFieldName="receiver_country_code"
+                                        required
                                     />
                                     {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
                                 </FormField>

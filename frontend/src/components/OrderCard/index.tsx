@@ -15,6 +15,7 @@ import { PrintPickupReceipt } from "../PrintPickupReceipt";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
+import { formatNationalPhone } from "../PhoneInput/utils";
 
 moment.locale('pt-br');
 
@@ -167,7 +168,7 @@ export function OrderCard({
 							order={order}
 							orderCode={order.code}
 							clientName={`${order.client.first_name} ${order.client.last_name}`}
-							clientTelephone={order.client.phone_number}
+							clientTelephone={formatNationalPhone(order.client.phone_number, order.client.country_code)}
 						/>
 					)}
 					<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
@@ -184,7 +185,9 @@ export function OrderCard({
 						</span>
 					</p>
 					{order.is_delivery &&
-						<p><strong>Telefone do Cliente: </strong>{order.client.phone_number}</p>
+						<p><strong>Telefone do Cliente: </strong>
+							{formatNationalPhone(order.client.phone_number, order.client.country_code)}
+						</p>
 					}
 				</div>
 				<p className="delivery-date"><strong>📅 Data de entrega: </strong> 
@@ -242,7 +245,10 @@ export function OrderCard({
 							: formatTitleCase(order.client.first_name)}
 					</p>
 					<p><strong>Telefone recebedor: </strong>
-						{order.receiver_name ? order.receiver_phone : order.client.phone_number}</p>
+						{order.receiver_name
+							? formatNationalPhone(order.receiver_phone, order.receiver_country_code)
+							: formatNationalPhone(order.client.phone_number, order.client.country_code)}
+					</p>
 				</div>
 			}
 
@@ -302,7 +308,7 @@ export function OrderCard({
 						orderCode={order.code}
 						admins={admins}
 						clientName={`${order.client.first_name} ${order.client.last_name}`}
-						clientTelephone={order.client.phone_number}
+						clientTelephone={formatNationalPhone(order.client.phone_number, order.client.country_code)}
 						buttonLabel={'Imprimir'}
 						style={{
 							background: 'white',

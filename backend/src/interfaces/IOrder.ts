@@ -7,6 +7,7 @@ export interface IOrder {
     pickup_on_store: boolean;
     receiver_name?: string;
     receiver_phone?: string;
+    receiver_country_code?: string;
     products_value: number;
     delivery_fee: number;
     discount?: number;

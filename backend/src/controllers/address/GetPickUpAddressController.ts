@@ -32,7 +32,8 @@ class GetPickUpAddressController{
 			const client = await createClientService.execute({
 				first_name: "Mirai Flores",
 				last_name: "Floricultura",
-				phone_number: storePhoneNumber
+				phone_number: storePhoneNumber,
+				country_code: "BR"
 			}) as IClient;
 
 			client_id = client.id as string;

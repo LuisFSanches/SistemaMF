@@ -59,6 +59,7 @@ class GetCompleteOrderService {
                         first_name: true,
                         last_name: true,
                         phone_number: true,
+                        country_code: true,
                         email: true,
                         addresses: {
                             select: {

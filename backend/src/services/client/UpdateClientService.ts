@@ -3,7 +3,7 @@ import { IClient } from "../../interfaces/IClient";
 import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 class UpdateClientService{
-	async execute({ id, first_name, last_name, phone_number }: IClient) {
+	async execute({ id, first_name, last_name, phone_number, country_code }: IClient) {
 		try {
 			const updateUser = await prismaClient.client.update({
 				where: {
@@ -12,7 +12,8 @@ class UpdateClientService{
 				data: {
 					first_name,
 					last_name,
-					phone_number
+					phone_number,
+					country_code
 				}
 			})
 

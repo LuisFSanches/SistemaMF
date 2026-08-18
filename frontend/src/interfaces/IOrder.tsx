@@ -15,6 +15,7 @@ export interface IOrder {
     receiver_name?: string;
     phone_number?: string;
     receiver_phone?: string;
+    receiver_country_code?: string;
     delivery_fee: number;
     products_value: number;
     discount: number;

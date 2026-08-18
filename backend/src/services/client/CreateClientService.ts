@@ -29,7 +29,7 @@ class CreateClientService {
         }
 
         try {
-            const newClient = await prismaClient.client.create({ data });
+            const newClient = await prismaClient.client.create({ data: parsed.data });
             return newClient;
         } catch (error: any) {
             console.error("[CreateClientService] Failed:", error);

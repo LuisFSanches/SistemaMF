@@ -37,15 +37,17 @@ export const createClientOnline = async ({
     first_name,
     last_name,
     phone_number,
+    country_code,
     email,
 }: any) => {
     const response = await api.post("/client/new/online", {
         first_name,
         last_name,
         phone_number,
+        country_code,
         email,
     });
-    
+
     return response;
 }
 

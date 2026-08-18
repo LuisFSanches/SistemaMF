@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import Modal from 'react-modal';
 import { useForm } from "react-hook-form";
-import InputMask from "react-input-mask";
 import { ModalContainer, Form, Input, ErrorMessage } from '../../styles/global';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { createClient, updateClient } from "../../services/clientService";
 import { useClients } from "../../contexts/ClientsContext";
 import { Loader } from "../../components/Loader";
+import { PhoneInput } from "../PhoneInput";
 
 interface ClientModalProps{
     isOpen: boolean;
@@ -22,6 +22,7 @@ interface IUsers {
     first_name: string;
     last_name: string;
     phone_number: string;
+    country_code: string;
 }
 
 export function ClientModal({
@@ -32,14 +33,19 @@ export function ClientModal({
     currentClient
 }:ClientModalProps){
     const { loadAvailableClients, editClient, addClient } = useClients();
-    const [mask, setMask] = useState("(99) 99999-9999");
     const {
         register,
         handleSubmit,
         watch,
         reset,
+        setValue,
+        control,
         formState: { errors },
-    } = useForm<IUsers>();
+    } = useForm<IUsers>({
+        defaultValues: {
+            country_code: "BR"
+        }
+    });
     const [showLoader, setShowLoader] = useState(false);
 
     const handleUser = async (formData: IUsers) => {
@@ -73,28 +79,12 @@ export function ClientModal({
             reset({
                 first_name: currentClient.first_name || "",
                 last_name: currentClient.last_name || "",
-                phone_number: currentClient.phone_number || ""
+                phone_number: currentClient.phone_number || "",
+                country_code: currentClient.country_code || "BR"
             });
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, reset]);
-
-    const watchPhone = watch("phone_number");
-
-    useEffect(() => {
-        const phoneNumber = watch("phone_number") || "";
-        const numericValue = phoneNumber.replace(/[^0-9]/g, "");
-    
-        const timeout = setTimeout(() => {
-            if (numericValue.length === 10) {
-                setMask("(99) 9999-9999");
-            } else {
-                setMask("(99) 99999-9999");
-            }
-        }, 1000);
-
-        return () => clearTimeout(timeout);
-    }, [watchPhone, watch, setMask]);
 
     if (!currentClient) {
 		return null;
@@ -120,19 +110,12 @@ export function ClientModal({
                     {errors.last_name && <ErrorMessage>{errors.last_name.message}</ErrorMessage>}
                     <Input placeholder='Sobrenome' {...register("last_name", { required: "Sobrenome inválido" })}/>
                     {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
-                    <InputMask
-                        mask={mask}
-                        placeholder='Telefone'
-                        value={watch("phone_number") || ""}
-                        {...register("phone_number", { 
-                            required: "Telefone inválido",
-                            validate: (value) => {
-                                if (value.replace(/[^0-9]/g, "").length < 10) {
-                                    return "Telefone inválido";
-                                }
-                                return true;
-                            }
-                        })}
+                    <PhoneInput
+                        control={control}
+                        setValue={setValue}
+                        phoneFieldName="phone_number"
+                        countryFieldName="country_code"
+                        required
                     />
                     <button type="submit" className="create-button">
                         {action === "create" ? "Criar" : "Editar"}

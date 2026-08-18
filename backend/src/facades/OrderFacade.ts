@@ -45,6 +45,7 @@ class OrderFacade {
                     first_name: data.first_name,
                     last_name: data.last_name,
                     phone_number: data.phone_number,
+                    country_code: data.country_code || "BR",
                 });
                 client_id = client.id;
             }
@@ -99,6 +100,7 @@ class OrderFacade {
                 pickup_on_store: data.pickup_on_store,
                 receiver_name: data.receiver_name,
                 receiver_phone: data.receiver_phone,
+                receiver_country_code: data.receiver_phone ? (data.receiver_country_code || "BR") : undefined,
                 products_value: data.products_value,
                 delivery_fee: data.delivery_fee,
                 discount: data.discount || 0,
