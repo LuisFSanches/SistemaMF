@@ -36,7 +36,6 @@ export function ClientModal({
     const {
         register,
         handleSubmit,
-        watch,
         reset,
         setValue,
         control,
