@@ -16,7 +16,8 @@ interface ChangeClientModalProps {
 const emptyClient = {
     first_name: "",
     last_name: "",
-    phone_number: ""
+    phone_number: "",
+    country_code: "BR"
 };
 
 export function ChangeClientModal({

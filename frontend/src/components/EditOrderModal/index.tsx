@@ -15,6 +15,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark, faReceipt, faBoxOpen, faUser, faWallet, faSave, faPlus, faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { useOrders } from "../../contexts/OrdersContext";
+import { PhoneInput } from "../PhoneInput";
 import { PAYMENT_METHODS, STATUS_LABEL } from "../../constants";
 import { updateOrder, updateStatus } from "../../services/orderService";
 import { getStoreId } from "../../services/api";
@@ -73,6 +74,7 @@ export function EditOrderModal({
         handleSubmit,
         setValue,
 		watch,
+        control,
         formState: { errors },
     } = useForm<IOrder>();
 	const [showLoader, setShowLoader] = useState(false);
@@ -100,6 +102,7 @@ export function EditOrderModal({
 			client_address_id: order.client_address_id,
 			receiver_name: formData.receiver_name,
 			receiver_phone: formData.receiver_phone,
+			receiver_country_code: formData.receiver_country_code,
 			products_value: Number(formData.products_value),
 			discount: Number(formData.discount) || 0,
 			delivery_fee: Number(formData.delivery_fee),
@@ -169,8 +172,10 @@ export function EditOrderModal({
 		setValue("client.first_name", order.client.first_name);
 		setValue("client.last_name", order.client.last_name);
 		setValue("client.phone_number", order.client.phone_number);
+		setValue("client.country_code", order.client.country_code || "BR");
 		setValue("receiver_name", order.receiver_name);
 		setValue("receiver_phone", order.receiver_phone);
+		setValue("receiver_country_code", order.receiver_country_code || "BR");
 		setValue("products_value", order.products_value);
 		setValue("discount", order.discount || 0);
 		setValue("delivery_fee", order.delivery_fee);
@@ -233,6 +238,7 @@ export function EditOrderModal({
 		setValue("client.first_name", client.first_name);
 		setValue("client.last_name", client.last_name);
 		setValue("client.phone_number", client.phone_number);
+		setValue("client.country_code", client.country_code || "BR");
 		order.client_id = client.id;
 	};
 
@@ -670,7 +676,13 @@ export function EditOrderModal({
                                 </div>
                                 <div>
                                     <Label>Telefone do Cliente</Label>
-                                    <Input {...register("client.phone_number", {required: "Telefone inválido"})} disabled/>
+                                    <PhoneInput
+                                        control={control}
+                                        setValue={setValue}
+                                        phoneFieldName="client.phone_number"
+                                        countryFieldName="client.country_code"
+                                        disabled
+                                    />
                                 </div>
                             </GridRow>
 
@@ -681,7 +693,12 @@ export function EditOrderModal({
                                 </div>
                                 <div>
                                     <Label>Telefone do Recebedor</Label>
-                                    <Input {...register("receiver_phone")}/>
+                                    <PhoneInput
+                                        control={control}
+                                        setValue={setValue}
+                                        phoneFieldName="receiver_phone"
+                                        countryFieldName="receiver_country_code"
+                                    />
                                 </div>
                             </GridRow>
                     </Section>

@@ -3,12 +3,13 @@ import { SendWhatsAppMessageService } from '../../services/whatsapp/SendWhatsApp
 
 class SendWhatsAppMessageController {
     async handle(req: Request, res: Response, next: NextFunction) {
-        const { phone_number, customer_name, order_number, store_name } = req.body;
+        const { phone_number, country_code, customer_name, order_number, store_name } = req.body;
 
         const sendWhatsAppMessageService = new SendWhatsAppMessageService();
 
         const result = await sendWhatsAppMessageService.execute({
             phone_number,
+            country_code,
             customer_name,
             order_number,
             store_name

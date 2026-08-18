@@ -220,6 +220,7 @@ class ProcessMercadoPagoWebhookService {
 
             await sendWhatsAppService.execute({
                 phone_number: updatedOrder.client.phone_number,
+                country_code: updatedOrder.client.country_code,
                 customer_name: customerName,
                 order_number: updatedOrder.code.toString(),
                 store_name: storeName,

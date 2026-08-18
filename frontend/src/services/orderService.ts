@@ -3,10 +3,12 @@ import { api, getStoreId } from "./api";
 export const createOrder = async ({
 	clientId,
 	phone_number,
+	country_code,
 	first_name,
 	last_name,
 	receiver_name,
 	receiver_phone,
+	receiver_country_code,
 	addressId,
 	pickup_on_store,
 	street,
@@ -46,8 +48,7 @@ export const createOrder = async ({
 }: any) => {
 	// Usar store_id recebido (do storefront) ou obter do admin logado
 	const store_id = receivedStoreId || getStoreId();
-	console.log('[orderService] Store ID usado:', store_id, '(recebido:', receivedStoreId, ', admin:', getStoreId(), ')');
-	
+	console.log('country_code service', country_code)	
 	const response = await api.post("/order", {
 		store_id,  // Adicionar store_id automaticamente
 		store_slug,  // Slug da loja extraído da URL (fallback se store_id for null)
@@ -55,8 +56,10 @@ export const createOrder = async ({
 		first_name,
 		last_name,
 		phone_number,
+		country_code,
 		receiver_name,
 		receiver_phone,
+		receiver_country_code,
 		addressId,
 		pickup_on_store,
 		street,

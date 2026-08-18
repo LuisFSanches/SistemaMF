@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import InputMask from "react-input-mask";
 import moment from "moment";
+import { PhoneInput } from "../../components/PhoneInput";
 import { useCart } from "../../contexts/CartContext";
 import { useGTM } from "../../hooks/useGTM";
 import { createClientOnline, requestVerificationCode, validateVerificationCode } from "../../services/clientService";
@@ -75,6 +75,7 @@ interface INewOrder {
     first_name: string;
     last_name: string;
     phone_number: string;
+    country_code: string;
     email: string;
     verification_code: string;
     addressId: string;
@@ -91,6 +92,7 @@ interface INewOrder {
     country: string;
     receiver_name: string;
     receiver_phone: string;
+    receiver_country_code: string;
     delivery_date: string;
     has_card: boolean;
     card_message: string;
@@ -105,8 +107,6 @@ export function Checkout() {
     const { cartItems, cartTotal, deliveryInfo, isDeliveryCalculated, appliedCoupon } = useCart();
     const { trackPageView, trackBeginCheckout, trackAddShippingInfo } = useGTM();
     const [showLoader, setShowLoader] = useState(false);
-    const [mask, setMask] = useState("(99) 99999-9999");
-    const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
     const [countdown, setCountdown] = useState(30);
     const [addresses, setAddresses] = useState([]);
     const [client_id, setClientId] = useState("");
@@ -231,6 +231,7 @@ export function Checkout() {
         setValue,
         setError,
         clearErrors,
+        control,
         formState: { errors, submitCount },
     } = useForm<INewOrder>({
         defaultValues: {
@@ -241,6 +242,8 @@ export function Checkout() {
             street: deliveryInfo?.street || "",
             neighborhood: deliveryInfo?.neighborhood || "",
             payment_method: "MERCADO_PAGO",
+            country_code: "BR",
+            receiver_country_code: "BR",
         }
     });
 
@@ -292,6 +295,7 @@ export function Checkout() {
             store_slug: slug,
             client_id: client_id,
             phone_number: rawTelephone(data.phone_number),
+            country_code: data.country_code,
             first_name: data.first_name,
             last_name: data.last_name,
             order_email: data.email,
@@ -309,6 +313,7 @@ export function Checkout() {
             country: data.country,
             receiver_name: data.receiver_name,
             receiver_phone: data.receiver_phone ? rawTelephone(data.receiver_phone) : "",
+            receiver_country_code: data.receiver_country_code,
             delivery_date: data.delivery_date,
             has_card: data.has_card,
             card_message: data.card_message,
@@ -385,10 +390,12 @@ export function Checkout() {
                         payer: {
                             name: data.first_name,
                             surname: data.last_name,
-                            phone: {
-                                area_code: rawTelephone(data.phone_number).substring(0, 2),
-                                number: rawTelephone(data.phone_number).substring(2)
-                            }
+                            ...(data.country_code === "BR" ? {
+                                phone: {
+                                    area_code: rawTelephone(data.phone_number).substring(0, 2),
+                                    number: rawTelephone(data.phone_number).substring(2)
+                                }
+                            } : {})
                         },
                         back_urls: {
                             success: `${baseUrl}/${slug}/checkout/success`,
@@ -426,7 +433,6 @@ export function Checkout() {
 
     const typeOfDelivery = watch("type_of_delivery");
     const hasCard = watch("has_card");
-    const watchReceiverPhone = watch("receiver_phone");
     const watchPhoneNumber = watch("phone_number");
 
     // Busca automática desativada por questões de LGPD
@@ -495,36 +501,6 @@ export function Checkout() {
             setMaxDeliveryDaysAdvance(Number(savedMaxDeliveryDays) || 30);
         }
     }, []);
-
-    useEffect(() => {
-        const phoneNumber = watch("receiver_phone") || "";
-        const numericValue = rawTelephone(phoneNumber);
-
-        const timeout = setTimeout(() => {
-            if (numericValue.length === 10) {
-                setReceiverMask("(99) 9999-9999");
-            } else {
-                setReceiverMask("(99) 99999-9999");
-            }
-        }, 900);
-
-        return () => clearTimeout(timeout);
-    }, [watchReceiverPhone, watch]);
-
-    useEffect(() => {
-        const phoneNumber = watch("phone_number") || "";
-        const numericValue = rawTelephone(phoneNumber);
-
-        const timeout = setTimeout(() => {
-            if (numericValue.length === 10) {
-                setMask("(99) 9999-9999");
-            } else {
-                setMask("(99) 99999-9999");
-            }
-        }, 900);
-
-        return () => clearTimeout(timeout);
-    }, [watchPhoneNumber, watch]);
 
     useEffect(() => {
         if (cartItems.length === 0 && !currentOrder) {
@@ -692,6 +668,7 @@ export function Checkout() {
                     first_name: firstName,
                     last_name: lastName,
                     phone_number: rawTelephone(phoneNumber),
+                    country_code: watch("country_code") || "BR",
                     email: email,
                 });
 
@@ -732,6 +709,7 @@ export function Checkout() {
                 // Preencher dados do cliente
                 setValue("first_name", data.client.first_name);
                 setValue("last_name", data.client.last_name);
+                setValue("country_code", data.client.country_code || "BR");
                 // Email já está preenchido pelo usuário, não precisa setValue
                 
                 // Limpar erros de validação dos campos preenchidos
@@ -835,22 +813,13 @@ export function Checkout() {
                                         Seu telefone
                                         <span>*</span>
                                     </Label>
-                                    <InputMask
-                                        autoComplete="off"
-                                        mask={mask}
-                                        alwaysShowMask={false}
-                                        placeholder='Telefone'
-                                        value={watch("phone_number") || ""}
+                                    <PhoneInput
+                                        control={control}
+                                        setValue={setValue}
+                                        phoneFieldName="phone_number"
+                                        countryFieldName="country_code"
                                         disabled={awaitingVerification}
-                                        {...register("phone_number", {
-                                            required: "Telefone inválido",
-                                            validate: (value) => {
-                                                if (value.replace(/[^0-9]/g, "").length < 10) {
-                                                    return "Telefone inválido";
-                                                }
-                                                return true;
-                                            }
-                                        })}
+                                        required
                                     />
                                     {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
                                 </FormField>
@@ -993,15 +962,12 @@ export function Checkout() {
                                                         Telefone do recebedor
                                                         <span>*</span>
                                                     </Label>
-                                                    <InputMask
-                                                        autoComplete="off"
-                                                        mask={receiverMask}
-                                                        alwaysShowMask={false}
-                                                        placeholder='Telefone'
-                                                        value={watch("receiver_phone") || ""}
-                                                        {...register("receiver_phone", {
-                                                            required: "Telefone inválido"
-                                                        })}
+                                                    <PhoneInput
+                                                        control={control}
+                                                        setValue={setValue}
+                                                        phoneFieldName="receiver_phone"
+                                                        countryFieldName="receiver_country_code"
+                                                        required
                                                     />
                                                     {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
                                                 </FormField>

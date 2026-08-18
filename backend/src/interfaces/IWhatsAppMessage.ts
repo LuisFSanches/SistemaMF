@@ -1,5 +1,6 @@
 export interface IWhatsAppMessage {
     phone_number: string
+    country_code?: string
     customer_name?: string
     order_number?: string
     store_name?: string

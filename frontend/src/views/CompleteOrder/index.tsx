@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
-import InputMask from "react-input-mask";
 import moment from "moment";
+import { PhoneInput } from "../../components/PhoneInput";
 import { IOrder } from "../../interfaces/IOrder";
 import { getPickupAddress } from "../../services/addressService";
 import { finishOnlineOrder } from "../../services/orderService";
@@ -40,6 +40,7 @@ interface INewOrder {
     first_name: string;
     last_name: string;
     phone_number: string;
+    country_code: string;
     addressId: string;
     pickup_on_store: boolean;
     type_of_delivery: string;
@@ -54,6 +55,7 @@ interface INewOrder {
     country: string;
     receiver_name: string;
     receiver_phone: string;
+    receiver_country_code: string;
     delivery_date: string;
     has_card: boolean;
     card_message: string;
@@ -68,8 +70,6 @@ export function CompleteOrder() {
     const [storeCNPJ, setStoreCNPJ] = useState("");
     const [storePhone, setStorePhone] = useState("");
     const [showLoader, setShowLoader] = useState(true);
-    const [mask, setMask] = useState("(99) 99999-9999");
-    const [receiverMask, setReceiverMask] = useState("(99) 99999-9999");
     const [addresses, setAddresses] = useState([]);
     const [client_id, setClientId] = useState("");
     const [addressId, setAddressId] = useState("");
@@ -101,6 +101,7 @@ export function CompleteOrder() {
         watch,
         setValue,
         setError,
+        control,
         formState: { errors, submitCount },
     } = useForm<INewOrder>({
         defaultValues: {
@@ -108,6 +109,8 @@ export function CompleteOrder() {
             state: "RJ",
             city: "Itaperuna",
             postal_code: "28300-000",
+            country_code: "BR",
+            receiver_country_code: "BR",
         }
     });
 
@@ -122,6 +125,7 @@ export function CompleteOrder() {
             id: orderId,
             client_id: client_id,
             phone_number: rawTelephone(phone_number),
+            country_code: data.country_code,
             first_name: data.first_name,
             last_name: data.last_name,
             pickup_on_store: data.pickup_on_store,
@@ -143,6 +147,7 @@ export function CompleteOrder() {
             },
             receiver_name: data.receiver_name,
             receiver_phone: data.receiver_phone ? rawTelephone(data.receiver_phone) : data.receiver_phone,
+            receiver_country_code: data.receiver_country_code,
             delivery_date: data.delivery_date,
             has_card: data.has_card,
             card_message: data.card_message,
@@ -176,8 +181,6 @@ export function CompleteOrder() {
     const phone_number = watch("phone_number");
     const typeOfDelivery = watch("type_of_delivery");
     const hasCard = watch("has_card");
-    const watchReceiverPhone = watch("receiver_phone");
-    const watchPhoneNumber = watch("phone_number");
 
     useEffect(() => {
         const fetchOrderData = async () => {
@@ -194,20 +197,22 @@ export function CompleteOrder() {
                 
                 if (order.client) {
                     setValue("phone_number", order.client.phone_number);
+                    setValue("country_code", order.client.country_code || "BR");
                     setValue("first_name", order.client.first_name);
                     setValue("last_name", order.client.last_name);
                     setClientId(order.client.id);
-                    
+
                     // Preencher endereços se existirem
                     if (order.client.addresses && order.client.addresses.length > 0) {
                         setAddresses(order.client.addresses);
                     }
-                    
+
                     // Exibir modal de boas-vindas
                     setShowWelcomeModal(true);
                     hasShownWelcomeModal.current = true;
                 } else {
                     setValue('phone_number', order.receiver_phone);
+                    setValue('country_code', order.receiver_country_code || "BR");
                 }
             }
             setShowLoader(false);
@@ -218,36 +223,6 @@ export function CompleteOrder() {
 
     // useEffect de busca por telefone removido por questões de LGPD
     // Os dados do cliente agora vêm diretamente da API getCompletedOrder
-
-    useEffect(() => {
-        const phoneNumber = watch("receiver_phone") || "";
-        const numericValue = rawTelephone(phoneNumber);
-    
-        const timeout = setTimeout(() => {
-            if (numericValue.length === 10) {
-                setReceiverMask("(99) 9999-9999");
-            } else {
-                setReceiverMask("(99) 99999-9999");
-            }
-        }, 900);
-
-        return () => clearTimeout(timeout);
-    }, [watchReceiverPhone, watch, setReceiverMask]);
-
-    useEffect(() => {
-        const phoneNumber = watch("phone_number") || "";
-        const numericValue = rawTelephone(phoneNumber);
-    
-        const timeout = setTimeout(() => {
-            if (numericValue.length === 10) {
-                setMask("(99) 9999-9999");
-            } else {
-                setMask("(99) 99999-9999");
-            }
-        }, 1000);
-
-        return () => clearTimeout(timeout);
-    }, [watchPhoneNumber, watch, setMask]);
 
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
@@ -332,6 +307,7 @@ export function CompleteOrder() {
                 first_name: firstName,
                 last_name: lastName,
                 phone_number: rawTelephone(phoneNumber),
+                country_code: watch("country_code") || "BR",
             });
 
             const result = await Promise.race([clientPromise, timeoutPromise]) as any;
@@ -460,22 +436,12 @@ export function CompleteOrder() {
                                 Seu telefone
                                 <span>*</span>
                             </Label>
-                            <InputMask
-                                autoComplete="off"
-                                mask={mask}
-                                alwaysShowMask={false}
-                                placeholder='Telefone'
-                                value={watch("phone_number") || ""}
-                                disabled={true}
-                                {...register("phone_number", { 
-                                    required: "Telefone inválido",
-                                    validate: (value) => {
-                                        if (value.replace(/[^0-9]/g, "").length < 10) {
-                                            return "Telefone inválido";
-                                        }
-                                        return true;
-                                    }
-                                })}
+                            <PhoneInput
+                                control={control}
+                                setValue={setValue}
+                                phoneFieldName="phone_number"
+                                countryFieldName="country_code"
+                                disabled
                             />
                             {errors.phone_number && <ErrorMessage>{errors.phone_number.message}</ErrorMessage>}
                         </FormField>
@@ -550,15 +516,12 @@ export function CompleteOrder() {
                                             Telefone recebedor
                                             <span>*</span>
                                         </Label>
-                                        <InputMask
-                                            autoComplete="off"
-                                            mask={receiverMask}
-                                            alwaysShowMask={false}
-                                            placeholder='Telefone'
-                                            value={watch("receiver_phone") || ""}
-                                            {...register("receiver_phone", {
-                                                required: "Telefone inválido"
-                                            })}
+                                        <PhoneInput
+                                            control={control}
+                                            setValue={setValue}
+                                            phoneFieldName="receiver_phone"
+                                            countryFieldName="receiver_country_code"
+                                            required
                                         />
                                         {errors.receiver_phone && <ErrorMessage>{errors.receiver_phone.message}</ErrorMessage>}
                                     </FormField>

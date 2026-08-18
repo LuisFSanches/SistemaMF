@@ -6,6 +6,7 @@ export interface IOnlineOrder {
     pickup_on_store: boolean;
     receiver_name?: string;
     receiver_phone?: string;
+    receiver_country_code?: string;
     delivery_date: Date;
     status: string;
     has_card: boolean;

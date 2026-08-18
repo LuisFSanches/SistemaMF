@@ -39,6 +39,7 @@ model Client {
   first_name String
   last_name String
   phone_number String
+  country_code String @default("BR")
   email String? @unique
   addresses Address[]
   orders Order[]
@@ -211,6 +212,7 @@ model Order {
   pickup_on_store Boolean    @default(false)
   receiver_name     String?
   receiver_phone    String?
+  receiver_country_code String?
   order_email       String?
   products_value    Float
   delivery_fee      Float
