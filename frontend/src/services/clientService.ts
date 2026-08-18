@@ -23,13 +23,15 @@ export const createClient = async ({
     first_name,
     last_name,
     phone_number,
+    country_code,
 }: any) => {
     const response = await api.post("/client", {
         first_name,
         last_name,
         phone_number,
+        country_code,
     });
-    
+
     return response;
 };
 
@@ -80,12 +82,14 @@ export const updateClient = async({
     first_name,
     last_name,
     phone_number,
+    country_code,
 }: any) => {
     const response = await api.put(`/client/${id}`, {
         id,
         first_name,
         last_name,
         phone_number,
+        country_code,
     });
     
     return response;

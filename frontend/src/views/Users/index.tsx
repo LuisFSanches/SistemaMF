@@ -22,7 +22,8 @@ export function UsersPage(){
         id: "",
         first_name: "",
         last_name: "",
-        phone_number: ""
+        phone_number: "",
+        country_code: "BR"
     });
     const [page, setPage] = useState(1);
     const [query, setQuery] = useState('');
@@ -92,7 +93,8 @@ export function UsersPage(){
                     id: "",
                     first_name: "",
                     last_name: "",
-                    phone_number: ""
+                    phone_number: "",
+                    country_code: "BR"
                 })}>
                     <FontAwesomeIcon icon={faPlus}/>
                     <p>Novo Cliente</p>
