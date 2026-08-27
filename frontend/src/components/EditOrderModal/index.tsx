@@ -350,8 +350,18 @@ export function EditOrderModal({
 	};
 
 	const removeProduct = (index: number) => {
-		setProducts((prev: any[]) => prev.filter((_, i) => i !== index));
-		
+        setProducts((prev: any[]) => {
+			const updated = prev.filter((_, i) => i !== index);
+
+			const total = updated.reduce((sum, p) => {
+				return sum + Number(p.quantity) * Number(p.price);
+			}, 0);
+
+			setValue("products_value", total);
+
+			return updated;
+		});		
+
 		setQueries((prev) => {
 			const updated = { ...prev };
 			delete updated[index];
