@@ -7,6 +7,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Container, OrderInfo } from "./style";
 import { HAS_CARD, PAYMENT_METHODS, PAYMENT_RECEIVED, TYPES_OF_DELIVERY } from "../../constants";
 import { formatTitleCase } from "../../utils";
+import { RichText } from "../RichText";
 
 const baseUrl = process.env.REACT_APP_URL;
 
@@ -112,7 +113,9 @@ export function OrderDetailModal({
 					<OrderInfo>
 						<h2>Informações do Pedido</h2>
 						<p><strong>Descrição: </strong>{formatTitleCase(order.description)}</p>
-						<p><strong>Observação: </strong>{formatTitleCase(order.additional_information)}</p>
+						<p><strong>Observação: </strong>
+							<RichText content={order.additional_information} inline fallback={"-"} />
+						</p>
 						<p><strong>Cartão: </strong>
 							{HAS_CARD[order.has_card.toString() as keyof typeof HAS_CARD]}
 						</p>

@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma";
 import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
+import { stripHtml } from "../../utils/sanitizeRichText";
 
 interface IGetOrderStatus {
     order_id: string;
@@ -167,7 +168,7 @@ class GetOrderStatusService {
 
                 // 6. Observações e informações adicionais
                 additional_info: {
-                    notes: orderDetails.additional_information,
+                    notes: stripHtml(orderDetails.additional_information),
                     description: orderDetails.description,
                     card_message: orderDetails.has_card ? {
                         has_card: true,

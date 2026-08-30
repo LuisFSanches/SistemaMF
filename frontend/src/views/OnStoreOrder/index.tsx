@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { PhoneInput } from "../../components/PhoneInput";
 import { formatNationalPhone } from "../../components/PhoneInput/utils";
@@ -94,7 +94,6 @@ import {
     Label,
     Input,
     Select,
-    Textarea,
     InlineFormField,
     PrimaryButton
 } from "../../styles/global";
@@ -116,6 +115,8 @@ import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import placeholder_products from '../../assets/images/placeholder_products.png';
 import { CouponSelector } from '../../components/CouponSelector';
 import { IAppliedCoupon, validateCoupon } from '../../services/couponService';
+import { RichTextEditor } from "../../components/RichTextEditor";
+import { RichText } from "../../components/RichText";
 
 interface INewOrder {
     phone_number: string;
@@ -1041,10 +1042,16 @@ export function OnStoreOrder() {
 
                                 <FormField>
                                     <Label>Observações</Label>
-                                    <Textarea
-                                        style={{ minHeight: '110px' }}
-                                        placeholder="Informações adicionais sobre o pedido..."
-                                        {...register("additional_information")}
+                                    <Controller
+                                        name="additional_information"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <RichTextEditor
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                placeholder="Informações adicionais sobre o pedido..."
+                                            />
+                                        )}
                                     />
                                 </FormField>
 
@@ -1460,7 +1467,7 @@ export function OnStoreOrder() {
                                         {watch('additional_information') && (
                                             <SummaryDivider>
                                                 <strong>Observações:</strong><br />
-                                                {watch('additional_information')}
+                                                <RichText content={watch('additional_information')} />
                                             </SummaryDivider>
                                         )}
                                     </SummaryInfoText>

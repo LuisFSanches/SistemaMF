@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Modal from 'react-modal';
 import moment from "moment";
 import { IOrder } from "../../interfaces/IOrder";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import {
 	ModalContainer,
 	Form,
@@ -12,6 +12,8 @@ import {
 	Label,
 	DescriptionArea,
 } from '../../styles/global';
+import { RichTextEditor } from "../RichTextEditor";
+import { isRichTextEmpty } from "../../utils/sanitizeRichText";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark, faReceipt, faBoxOpen, faUser, faWallet, faSave, faPlus, faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { useOrders } from "../../contexts/OrdersContext";
@@ -168,7 +170,7 @@ export function EditOrderModal({
 
         setValue("description", order.description);
 		setValue("additional_information",
-			order.additional_information === "" ? "-" : order.additional_information);
+			isRichTextEmpty(order.additional_information) ? "" : order.additional_information);
 		setValue("client.first_name", order.client.first_name);
 		setValue("client.last_name", order.client.last_name);
 		setValue("client.phone_number", order.client.phone_number);
@@ -486,7 +488,16 @@ export function EditOrderModal({
                                     </div>
                                     <div className="grid-container">
                                         <Label>Informações Adicionais</Label>
-                                        <Textarea {...register("additional_information")}/>
+                                        <Controller
+                                            name="additional_information"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <RichTextEditor
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                />
+                                            )}
+                                        />
                                     </div>
                                 </GridRow>
                                 
@@ -504,7 +515,16 @@ export function EditOrderModal({
                                     </div>
                                     <div className="grid-container">
                                         <Label>Informações Adicionais</Label>
-                                        <Textarea {...register("additional_information")}/>
+                                        <Controller
+                                            name="additional_information"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <RichTextEditor
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                />
+                                            )}
+                                        />
                                     </div>
                                 </GridRow>
                                 

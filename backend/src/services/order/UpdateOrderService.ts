@@ -3,6 +3,7 @@ import prismaClient from '../../prisma';
 import { IOrder } from "../../interfaces/IOrder";
 import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
+import { sanitizeRichText } from "../../utils/sanitizeRichText";
 
 class UpdateOrderService{
 	async execute(data: IOrder, store_id?: string) {
@@ -11,6 +12,8 @@ class UpdateOrderService{
 		}
 
 		delete order.products;
+
+		order.additional_information = sanitizeRichText(order.additional_information) ?? undefined;
 
 		try {
 			// Verificar se a ordem existe e pertence à loja

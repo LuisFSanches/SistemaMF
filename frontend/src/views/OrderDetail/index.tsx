@@ -25,6 +25,7 @@ import { Loader } from "../../components/Loader";
 import { PrintCardMessage } from "../../components/PrintCardMessage";
 import { PrintOrder } from "../../components/PrintOrder";
 import { EditOrderModal } from "../../components/EditOrderModal";
+import { RichText } from "../../components/RichText";
 import { ConfirmPopUp } from "../../components/ConfirmPopUp";
 import { useAdmins } from "../../contexts/AdminsContext";
 import { STATUS_LABEL, PAYMENT_METHODS } from "../../constants";
@@ -391,7 +392,9 @@ export function OrderDetail() {
                                 Observações do Pedido
                             </h2>
                             <div className="info-item">
-                                <div className="value">{orderInfo.additional_information}</div>
+                                <div className="value">
+                                    <RichText content={orderInfo.additional_information} />
+                                </div>
                             </div>
                         </InfoSectionDetail>
                     )}

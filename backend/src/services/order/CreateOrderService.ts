@@ -4,6 +4,7 @@ import prismaClient from '../../prisma';
 import { ErrorCodes } from "../../exceptions/root";
 import { BadRequestException } from "../../exceptions/bad-request";
 import { ApplyCouponService } from "../coupon/ApplyCouponService";
+import { sanitizeRichText } from "../../utils/sanitizeRichText";
 
 class CreateOrderService{
 	async execute(data: IOrder, products: any, store_id?: string, store_slug?: string) {
@@ -50,6 +51,8 @@ class CreateOrderService{
 			});
 
 			const nextCode = lastOrder ? lastOrder.code + 1 : 1;
+
+			data.additional_information = sanitizeRichText(data.additional_information) ?? undefined;
 
 			const order = await prismaClient.order.create({
 				data: {

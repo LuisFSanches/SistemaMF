@@ -5,6 +5,7 @@ import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { IAdmin } from "../../interfaces/IAdmin";
 import { PAYMENT_METHODS } from "../../constants";
 import { formatTitleCase, formatDescriptionWithPrice, convertMoney } from "../../utils";
+import { sanitizeRichText, isRichTextEmpty } from "../../utils/sanitizeRichText";
 import { Loader } from "../Loader";
 import { PrintButton } from "./style";
 
@@ -86,6 +87,8 @@ export const PrintOrder = ({
                         .center-text p { line-height: 12px }
                         .footer { text-align:center; margin: 25px 0;}
                         div { font-size: 15px;}
+                        .observation p { margin: 2px 0; }
+                        .observation ul, .observation ol { margin: 2px 0; padding-left: 18px; }
                     </style>
                 </head>
                 <body>
@@ -111,8 +114,8 @@ export const PrintOrder = ({
                     ${formatDescriptionWithPrice(order.description).map((item, index) => `
                         <div class="row">${item}</div>
                     `).join('')}
-                    ${order.additional_information ? 
-                        `<p style="font-size: 14px;"><strong>Observação: </strong>${order.additional_information}</p>`
+                    ${!isRichTextEmpty(order.additional_information) ?
+                        `<div class="observation" style="font-size: 14px;"><strong>Observação: </strong>${sanitizeRichText(order.additional_information)}</div>`
                         : ''
                     }
                     <br />
