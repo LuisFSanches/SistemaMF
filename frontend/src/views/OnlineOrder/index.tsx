@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { PhoneInput } from "../../components/PhoneInput";
 import { ProductCard} from "../../components/ProductCard";
 import { Pagination } from "../../components/Pagination";
@@ -70,6 +70,7 @@ import {
 } from "../OnStoreOrder/style";
 
 import placeholder_products from '../../assets/images/placeholder_products.png';
+import { RichTextEditor } from "../../components/RichTextEditor";
 
 interface INewOrder {
     id: string;
@@ -690,9 +691,15 @@ Cartão: Desejamos um feliz aniversário!`
                             <>
                                 <FormField>
                                     <Label>Observações</Label>
-                                    <Textarea
-                                        style={{ minHeight: "50px" }}
-                                        placeholder="Observações" {...register("additional_information")}
+                                    <Controller
+                                        name="additional_information"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <RichTextEditor
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                            />
+                                        )}
                                     />
                                 </FormField>
                                 <FormField>
@@ -784,9 +791,15 @@ Cartão: Desejamos um feliz aniversário!`
                             <>
                                 <FormField>
                                     <Label>Observações</Label>
-                                    <Textarea
-                                        style={{ minHeight: "70px" }}
-                                        placeholder="Observações" {...register("additional_information")}
+                                    <Controller
+                                        name="additional_information"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <RichTextEditor
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                            />
+                                        )}
                                     />
                                 </FormField>
                                 <InlineFormField style={{ alignItems: "center" }}>

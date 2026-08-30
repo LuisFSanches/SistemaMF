@@ -15,6 +15,7 @@ import { formatDescription } from "../../utils";
 import { ErrorAlert } from "../../components/ErrorAlert";
 import { convertMoney } from "../../utils";
 import { CookieConsent } from "../../components/CookieConsent";
+import { RichText } from "../../components/RichText";
 import {
     FormField,
     Label,
@@ -392,7 +393,9 @@ export function CompleteOrder() {
                                         <p key={idx}>{line}</p>
                                     ))}
                                 </p>
-                                <p className="observation"><strong>OBSERVAÇÃO:</strong> {currentOrder?.additional_information}</p>
+                                <p className="observation"><strong>OBSERVAÇÃO:</strong>{" "}
+                                    <RichText content={currentOrder?.additional_information} inline />
+                                </p>
                             </div>
                             <div className="price-container">
                                 <p><strong>Valor dos Produtos: </strong> {

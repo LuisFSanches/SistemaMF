@@ -16,6 +16,7 @@ import { useAdmins } from "../../contexts/AdminsContext";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { formatNationalPhone } from "../PhoneInput/utils";
+import { RichText } from "../RichText";
 
 moment.locale('pt-br');
 
@@ -208,7 +209,8 @@ export function OrderCard({
 			</div>
 			<div className="order-card-container observation">
 				<h3>Observação: </h3>
-				<p>{formatTitleCase(order.additional_information)}</p>
+				<RichText content={order.additional_information} fallback={<p>-</p>} />
+
 			</div>
 			<div className="order-card-container address">
 				<h3><strong>📍Endereço de entrega:</strong></h3>

@@ -1,7 +1,7 @@
 export interface IOrder {
     id?: string;
     description: string;
-    additional_information: string;
+    additional_information?: string;
     client_id: string;
     client_address_id: string;
     pickup_on_store: boolean;
