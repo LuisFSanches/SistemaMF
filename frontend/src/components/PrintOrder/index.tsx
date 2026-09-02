@@ -1,5 +1,6 @@
 import moment from "moment";
 import { useState } from "react";
+import QRCode from "qrcode";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { IAdmin } from "../../interfaces/IAdmin";
@@ -36,13 +37,17 @@ export const PrintOrder = ({
     const baseUrl = process.env.REACT_APP_URL || "https://sistema-mf.vercel.app";
     const [isLoading, setIsLoading] = useState(false);
 
-    const preloadImage = (url: string): Promise<void> => {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => resolve();
-            img.onerror = () => reject();
-            img.src = url;
-        });
+    // Gera o QR Code localmente como data URI (sem dependência de rede)
+    const generateQrCode = async (data: string): Promise<string> => {
+        try {
+            return await QRCode.toDataURL(data, {
+                width: 150,
+                margin: 1
+            });
+        } catch (error) {
+            console.error("Erro ao gerar QR Code:", error);
+            return "";
+        }
     };
 
     const handlePrint = async () => {
@@ -56,19 +61,17 @@ export const PrintOrder = ({
 
             // URL para concluir entrega
             const deliveryUrl = `${baseUrl}concluirEntrega/${order.id}`;
-            // URL do QR Code de entrega usando API pública
-            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(deliveryUrl)}`;
-
             // URL para página do pedido (retirada)
             const pickupUrl = `${baseUrl}backoffice/pedido/${order.id}`;
-            // URL do QR Code de retirada usando API pública
-            const pickupQrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pickupUrl)}`;
 
-            // Aguardar o carregamento do QR Code apropriado
+            // Gera o QR Code apropriado localmente
+            let qrCodeUrl = "";
+            let pickupQrCodeUrl = "";
+
             if (order.is_delivery) {
-                await preloadImage(qrCodeUrl);
+                qrCodeUrl = await generateQrCode(deliveryUrl);
             } else if (order.pickup_on_store || order.is_delivery === false) {
-                await preloadImage(pickupQrCodeUrl);
+                pickupQrCodeUrl = await generateQrCode(pickupUrl);
             }
 
             const receiptHTML = `
@@ -168,12 +171,12 @@ export const PrintOrder = ({
                     }
 
                     <p><strong>Cartão:</strong> ${order.has_card ? 'Contém cartão' : 'Não contém cartão'}</p>
-                    ${order.is_delivery === true
+                    ${(order.is_delivery === true && qrCodeUrl)
                         ? `<div class="center" style="margin-top: 15px;">
                             <img src="${qrCodeUrl}" alt="QR Code Entrega" style="width: 150px; height: 150px;" />
                             <div style="font-size: 12px; margin-top: 5px;">Escaneie para concluir entrega</div>
                             </div>`
-                        : (order.pickup_on_store || order.is_delivery === false)
+                        : ((order.pickup_on_store || order.is_delivery === false) && pickupQrCodeUrl)
                             ? `<div class="center" style="margin-top: 15px;">
                                 <img src="${pickupQrCodeUrl}" alt="QR Code Pedido" style="width: 150px; height: 150px;" />
                                 <div style="font-size: 12px; margin-top: 5px;">Escaneie para acessar o pedido</div>
@@ -222,8 +225,8 @@ export const PrintOrder = ({
                 setIsLoading(false);
             }
         } catch (error) {
-            console.error("Erro ao carregar QR Code:", error);
-            alert("Não foi possível carregar o QR Code. Tente novamente.");
+            console.error("Erro ao gerar o comprovante de impressão:", error);
+            alert("Não foi possível gerar o comprovante. Tente novamente.");
             setIsLoading(false);
         }
     };
