@@ -743,7 +743,8 @@ export function Checkout() {
                 isOpen={showWelcomeModal}
                 onRequestClose={() => setShowWelcomeModal(false)}
                 name={welcomeClientName}
-                textBody="Digite o código enviado para o seu e-mail para confirmar sua identidade"
+                textBody="Digite o código enviado para o seu e-mail para confirmar sua identidade."
+                spamNotice="Não recebeu? Verifique também as pastas de Spam e Lixo Eletrônico."
             />
             <RememberCardModal
                 isOpen={showRememberCardModal}

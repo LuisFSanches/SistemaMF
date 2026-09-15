@@ -364,6 +364,32 @@ button{
         }
     }
 
+    &.welcome-back-modal {
+        max-width: 440px;
+        padding: 0;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+
+        .modal-close {
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.05rem;
+            background: rgba(255, 255, 255, 0.75);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+
+        @media (max-width: 768px) {
+            border-radius: 0.875rem;
+        }
+    }
+
     @media (max-width: 768px){
         padding: 2rem;
     }
