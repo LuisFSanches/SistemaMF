@@ -73,7 +73,19 @@ export const validateVerificationCode = async ({
         phone_number,
         code,
     });
-    
+
+    return response;
+}
+
+export const resendVerificationCodeEmail = async ({
+    phone_number,
+    email,
+}: any) => {
+    const response = await api.post("/client/verification/resend-email", {
+        phone_number,
+        email,
+    });
+
     return response;
 }
 

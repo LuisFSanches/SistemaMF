@@ -4,6 +4,7 @@ import { ErrorCodes } from "../../exceptions/root";
 import { requestVerificationSchema } from "../../schemas/client/requestVerification";
 import { BadRequestException } from "../../exceptions/bad-request";
 import { EmailService } from "../email/EmailService";
+import { SendVerificationCodeWhatsAppService } from "../whatsapp/SendVerificationCodeWhatsAppService";
 
 class RequestVerificationService {
     async execute({ phone_number, email }: IRequestVerification) {
@@ -68,23 +69,38 @@ class RequestVerificationService {
                 },
             });
 
-            // 7. Enviar email com código (somente em produção)
+            // 7. Enviar código prioritariamente via WhatsApp (somente em produção)
+            let sentVia: "whatsapp" | "email" = "whatsapp";
+
             if (process.env.IS_PRODUCTION === 'true') {
-                const emailService = new EmailService();
-                await emailService.sendVerificationCodeEmail(
-                    email,
+                const sendWhatsAppService = new SendVerificationCodeWhatsAppService();
+                const whatsappResult = await sendWhatsAppService.execute(
+                    client.phone_number,
                     code,
-                    client.first_name
+                    client.country_code
                 );
+
+                if (!whatsappResult.success) {
+                    console.error(`[RequestVerificationService] WhatsApp send failed, falling back to email. Client: ${client.id}`, whatsappResult.error);
+
+                    const emailService = new EmailService();
+                    await emailService.sendVerificationCodeEmail(
+                        email,
+                        code,
+                        client.first_name
+                    );
+                    sentVia = "email";
+                }
             } else {
-                console.log(`[RequestVerificationService] DEV MODE - Code not sent. Email: ${email}, Code: ${code}, Client: ${client.id}`);
+                console.log(`[RequestVerificationService] DEV MODE - Code not sent. Phone: ${client.phone_number}, Email: ${email}, Code: ${code}, Client: ${client.id}`);
             }
 
             // 8. Retornar apenas o primeiro nome do cliente
             return {
                 client_exists: true,
                 first_name: client.first_name,
-                message: "Verification code sent to email",
+                sent_via: sentVia,
+                message: `Verification code sent via ${sentVia}`,
             };
 
         } catch (error: any) {

@@ -5,7 +5,7 @@ import moment from "moment";
 import { PhoneInput } from "../../components/PhoneInput";
 import { useCart } from "../../contexts/CartContext";
 import { useGTM } from "../../hooks/useGTM";
-import { createClientOnline, requestVerificationCode, validateVerificationCode } from "../../services/clientService";
+import { createClientOnline, requestVerificationCode, validateVerificationCode, resendVerificationCodeEmail } from "../../services/clientService";
 import { getPickupAddress } from "../../services/addressService";
 import { createOrder } from "../../services/orderService";
 import { createMercadoPagoPreference } from "../../services/mercadoPagoService";
@@ -55,6 +55,7 @@ import {
     StepCircle,
     StepLabel,
     StepSubLabel,
+    ResendCodeLink,
 } from "./style";
 
 moment.locale('pt-br');
@@ -124,6 +125,8 @@ export function Checkout() {
     const cardSectionRef = useRef<HTMLDivElement>(null);
     const previousPhoneRef = useRef<string>("");
     const [awaitingVerification, setAwaitingVerification] = useState(false);
+    const [verificationSentVia, setVerificationSentVia] = useState<"whatsapp" | "email">("whatsapp");
+    const [resendingEmail, setResendingEmail] = useState(false);
     const [clientExists, setClientExists] = useState(false);
     const [formStarted, setFormStarted] = useState(false);
     const [welcomeClientName, setWelcomeClientName] = useState("");
@@ -653,6 +656,7 @@ export function Checkout() {
                 // Cliente existe, solicitar código de verificação
                 setClientExists(true);
                 setAwaitingVerification(true);
+                setVerificationSentVia(data.sent_via || "whatsapp");
                 setWelcomeClientName(data.first_name);
                 setShowWelcomeModal(true);
             } else {
@@ -737,14 +741,51 @@ export function Checkout() {
         }
     };
 
+    const handleResendCodeByEmail = async () => {
+        const phoneNumber = watch('phone_number');
+        const email = watch('email');
+
+        if (!phoneNumber || !email) {
+            return;
+        }
+
+        setResendingEmail(true);
+
+        try {
+            await resendVerificationCodeEmail({
+                phone_number: rawTelephone(phoneNumber),
+                email: email,
+            });
+
+            setVerificationSentVia("email");
+            setSuccessMessage('Código reenviado para o seu e-mail!');
+            setTimeout(() => { setSuccessMessage('') }, 3000);
+        } catch (error: any) {
+            console.error(error);
+            const errorMsg = error?.response?.data?.message || 'Não foi possível reenviar o código, tente novamente';
+            setErrorMessage(errorMsg);
+            setTimeout(() => { setErrorMessage('') }, 3000);
+        } finally {
+            setResendingEmail(false);
+        }
+    };
+
     return (
         <Container>
             <WelcomeBackModal
                 isOpen={showWelcomeModal}
                 onRequestClose={() => setShowWelcomeModal(false)}
                 name={welcomeClientName}
-                textBody="Digite o código enviado para o seu e-mail para confirmar sua identidade."
-                spamNotice="Não recebeu? Verifique também as pastas de Spam e Lixo Eletrônico."
+                textBody={
+                    verificationSentVia === "whatsapp"
+                        ? "Digite o código enviado para o seu WhatsApp para confirmar sua identidade."
+                        : "Digite o código enviado para o seu e-mail para confirmar sua identidade."
+                }
+                spamNotice={
+                    verificationSentVia === "email"
+                        ? "Não recebeu? Verifique também as pastas de Spam e Lixo Eletrônico."
+                        : undefined
+                }
             />
             <RememberCardModal
                 isOpen={showRememberCardModal}
@@ -851,10 +892,14 @@ export function Checkout() {
                                             Código de Verificação
                                             <span>*</span>
                                         </Label>
-                                        <Input 
-                                            type="text" 
-                                            autoComplete="off" 
-                                            placeholder="Digite o código enviado para o email"
+                                        <Input
+                                            type="text"
+                                            autoComplete="off"
+                                            placeholder={
+                                                verificationSentVia === "whatsapp"
+                                                    ? "Digite o código enviado para o WhatsApp"
+                                                    : "Digite o código enviado para o email"
+                                            }
                                             maxLength={6}
                                             {...register("verification_code", {
                                                 required: "Digite o código",
@@ -872,6 +917,15 @@ export function Checkout() {
                                         <PrimaryButton type="button" onClick={handleValidateCode} style={{ marginTop: '10px' }}>
                                             Validar Código
                                         </PrimaryButton>
+                                        {verificationSentVia === "whatsapp" && (
+                                            <ResendCodeLink
+                                                type="button"
+                                                onClick={handleResendCodeByEmail}
+                                                disabled={resendingEmail}
+                                            >
+                                                {resendingEmail ? "Enviando..." : "Não recebeu no WhatsApp? Enviar código por e-mail"}
+                                            </ResendCodeLink>
+                                        )}
                                     </FormField>
                                 )}
 

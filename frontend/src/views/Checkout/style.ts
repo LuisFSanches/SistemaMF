@@ -1,5 +1,21 @@
 import styled from 'styled-components';
 
+export const ResendCodeLink = styled.button`
+    display: block;
+    margin: 10px auto 0;
+    background: none;
+    border: none;
+    color: #EC4899;
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+`;
+
 export const Container = styled.div`
     width: 100%;
     min-height: 100vh;
