@@ -48,6 +48,10 @@ import { ForgotPasswordPage } from "./views/ForgotPasswordPage";
 import { ResetPasswordPage } from "./views/ResetPasswordPage";
 import { CategoriesPage } from "./views/Categories";
 import { Coupons } from "./views/Coupons";
+import { Segments } from "./views/Segments";
+import { SpecialDates } from "./views/SpecialDates";
+import { Campaigns } from "./views/Campaigns";
+import { WhatsAppTemplates } from "./views/WhatsAppTemplates";
 import { Home } from "./views/Home";
 // import { SubscriptionPlans } from "./views/SubscriptionPlans";
 import { TermsOfService } from "./views/TermsOfService";
@@ -175,6 +179,26 @@ export default function routes(){
                         <Route path="/backoffice/cupons" element={
                             <PrivateRoute>
                                 <Coupons/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/segmentos" element={
+                            <PrivateRoute>
+                                <Segments/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/datas-especiais" element={
+                            <PrivateRoute>
+                                <SpecialDates/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/campanhas" element={
+                            <PrivateRoute>
+                                <Campaigns/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/whatsapp-templates" element={
+                            <PrivateRoute>
+                                <WhatsAppTemplates/>
                             </PrivateRoute>
                         }/>
                         <Route path="/backoffice/motoboys" element={

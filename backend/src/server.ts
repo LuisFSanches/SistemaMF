@@ -12,6 +12,7 @@ dotenv.config();
 
 import { router } from './routes';
 import { errorMiddleware } from './middlewares/errors';
+import './workers/campaignWorker';
 
 // Eventos agora emitem para rooms específicas por store_id
 orderEmitter.on(OrderEvents.WhatsappOrderReceived, (data) => {

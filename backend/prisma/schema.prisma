@@ -46,6 +46,11 @@ model Client {
   verificationCodes VerificationCode[]
   coupons Coupon[] @relation("CouponRestriction")
   couponUsages CouponUsageHistory[] @relation("CouponUsage")
+  segmentMemberships SegmentClient[]
+  campaignRecipients CampaignRecipient[]
+  last_campaign_received String?
+  last_campaign_date DateTime?
+  total_campaigns_received Int @default(0)
   created_at DateTime? @default(now())
   updated_at DateTime? @default(now())
 
@@ -406,6 +411,9 @@ model Store {
   storeCarousels   StoreCarousel[]
   subscription     Subscription?
   coupons          Coupon[]
+  segments         Segment[]
+  specialDates     SpecialDate[]
+  campaigns        Campaign[]
 
   @@map("stores")
 }
@@ -579,6 +587,7 @@ model Coupon {
   customer                Client?  @relation("CouponRestriction", fields: [specific_customer_id], references: [id])
   usage_history           CouponUsageHistory[]
   orders                  Order[]
+  campaigns               Campaign[]
 
   @@unique([code, store_id])
   @@map("coupons")
@@ -598,5 +607,144 @@ model CouponUsageHistory {
 
   @@index([coupon_id, customer_id])
   @@map("coupon_usage_history")
+}
+
+// Sistema de Segmentação de Clientes
+enum SegmentType {
+  DYNAMIC
+  MANUAL
+}
+
+model Segment {
+  id          String      @id @default(uuid())
+  store_id    String?
+  name        String
+  description String?
+  type        SegmentType @default(DYNAMIC)
+  criteria    Json?
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+
+  store       Store?          @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  clients     SegmentClient[]
+  campaigns   Campaign[]
+
+  @@index([store_id])
+  @@map("segments")
+}
+
+// Lista manual de clientes para segmentos type = MANUAL. Não usada para
+// segmentos DYNAMIC (nesses, a lista é sempre calculada on-demand).
+model SegmentClient {
+  segment_id String
+  client_id  String
+  added_at   DateTime @default(now())
+
+  segment    Segment  @relation(fields: [segment_id], references: [id], onDelete: Cascade)
+  client     Client   @relation(fields: [client_id], references: [id], onDelete: Cascade)
+
+  @@id([segment_id, client_id])
+  @@index([client_id])
+  @@map("segment_clients")
+}
+
+model SpecialDate {
+  id         String   @id @default(uuid())
+  store_id   String?
+  name       String
+  date       DateTime @db.Date
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  store      Store?   @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@index([store_id])
+  @@index([date])
+  @@map("special_dates")
+}
+
+// Sistema de Campanhas WhatsApp
+enum WhatsAppTemplateHeaderType {
+  NONE
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+model WhatsAppTemplate {
+  id                String                     @id @default(uuid())
+  name              String
+  language_code     String                     @default("pt_BR")
+  variable_count    Int                        @default(0)
+  variable_types    Json
+  header_type       WhatsAppTemplateHeaderType @default(NONE)
+  header_media_url  String?
+  preview_image_url String?
+  created_at        DateTime                   @default(now())
+  updated_at        DateTime                   @updatedAt
+
+  campaigns      Campaign[]
+
+  @@map("whatsapp_templates")
+}
+
+enum CampaignStatus {
+  DRAFT
+  QUEUED
+  SENDING
+  COMPLETED
+  FAILED
+}
+
+model Campaign {
+  id               String         @id @default(uuid())
+  store_id         String?
+  name             String
+  segment_id       String
+  template_id      String
+  coupon_id        String?
+  variable_values  Json
+  status           CampaignStatus @default(DRAFT)
+  total_recipients Int            @default(0)
+  sent_count       Int            @default(0)
+  failed_count     Int            @default(0)
+  started_at       DateTime?
+  completed_at     DateTime?
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+
+  store            Store?              @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  segment          Segment             @relation(fields: [segment_id], references: [id])
+  template         WhatsAppTemplate    @relation(fields: [template_id], references: [id])
+  coupon           Coupon?             @relation(fields: [coupon_id], references: [id])
+  recipients       CampaignRecipient[]
+
+  @@index([store_id])
+  @@index([segment_id])
+  @@map("campaigns")
+}
+
+enum CampaignRecipientStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model CampaignRecipient {
+  id            String                  @id @default(uuid())
+  campaign_id   String
+  client_id     String
+  status        CampaignRecipientStatus @default(PENDING)
+  message_id    String?
+  error_message String?
+  sent_at       DateTime?
+  created_at    DateTime                @default(now())
+
+  campaign      Campaign @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  client        Client   @relation(fields: [client_id], references: [id])
+
+  @@unique([campaign_id, client_id])
+  @@index([client_id])
+  @@map("campaign_recipients")
 }
 

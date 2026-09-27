@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import { BadRequestException } from '../exceptions/bad-request';
 import { ErrorCodes } from '../exceptions/root';
-import { productsUploadDir, storesUploadDir, categoriesUploadDir } from './paths';
+import { productsUploadDir, storesUploadDir, categoriesUploadDir, whatsappTemplatesUploadDir } from './paths';
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -98,5 +98,43 @@ export const uploadExcel = multer({
     fileFilter: excelFileFilter,
     limits: {
         fileSize: 5 * 1024 * 1024, // 5MB
+    }
+});
+
+// Configuração para upload do header de mídia de templates WhatsApp
+// (imagem, vídeo ou documento fixo, exigido pela Meta a cada envio)
+const whatsappTemplateStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, whatsappTemplatesUploadDir);
+    },
+    filename: (req, file, cb) => {
+        const hash = crypto.randomBytes(16).toString('hex');
+        const filename = `${hash}-${Date.now()}${path.extname(file.originalname)}`;
+        cb(null, filename);
+    }
+});
+
+const whatsappTemplateFileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    const allowedMimes = [
+        'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
+        'video/mp4', 'video/3gpp',
+        'application/pdf',
+    ];
+
+    if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new BadRequestException(
+            'Invalid file type. Only JPEG, PNG, WEBP, MP4, 3GPP and PDF are allowed',
+            ErrorCodes.VALIDATION_ERROR
+        ));
+    }
+};
+
+export const uploadWhatsAppTemplate = multer({
+    storage: whatsappTemplateStorage,
+    fileFilter: whatsappTemplateFileFilter,
+    limits: {
+        fileSize: 16 * 1024 * 1024, // 16MB (limite de vídeo da Meta)
     }
 });
