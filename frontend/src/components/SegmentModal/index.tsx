@@ -283,7 +283,7 @@ export function SegmentModal({
                                             onChange={(e) => setUsePurchaseRecency(e.target.checked)}
                                         />
                                     </CheckboxContainer>
-                                    📅 Recência de compra
+                                    📅 Data de compra
                                 </FilterBlockHeader>
                                 {usePurchaseRecency && (
                                     <>
