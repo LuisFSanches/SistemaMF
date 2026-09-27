@@ -7,6 +7,8 @@ interface IWhatsAppTemplateMessage {
     template_name: string
     language_code: string
     parameters: string[]
+    header_type?: "NONE" | "IMAGE" | "VIDEO" | "DOCUMENT"
+    header_media_url?: string | null
 }
 
 interface IWhatsAppTemplateResponse {
@@ -53,6 +55,22 @@ class SendWhatsAppTemplateService {
 
             // Preparar componentes do template
             const components = [];
+
+            // Componente de header (imagem/vídeo/documento fixo do template, exigido pela
+            // Meta em toda chamada quando o template foi aprovado com header de mídia,
+            // mesmo que a mídia seja sempre a mesma).
+            if (data.header_type && data.header_type !== "NONE" && data.header_media_url) {
+                const headerParamType = data.header_type.toLowerCase();
+                components.push({
+                    type: "header",
+                    parameters: [
+                        {
+                            type: headerParamType,
+                            [headerParamType]: { link: data.header_media_url }
+                        }
+                    ]
+                });
+            }
 
             // Adicionar parâmetros ao componente body (se houver)
             if (data.parameters && data.parameters.length > 0) {

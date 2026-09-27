@@ -792,6 +792,11 @@ export const Input = styled.input`
     &:focus {
         border-color: #d48a9b;
     }
+
+    &.file {
+        height: 40px;
+        padding: 5px;
+    }
 `;
 
 export const Select = styled.select<{ isEditField?: boolean }>`

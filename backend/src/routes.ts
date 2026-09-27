@@ -8,6 +8,7 @@ import { GetClientByPhoneNumbeController } from './controllers/client/GetClientB
 import { CreateClientController } from './controllers/client/CreateClientController'
 import { UpdateClientController } from './controllers/client/UpdateClientController';
 import { RequestVerificationController } from './controllers/client/RequestVerificationController';
+import { ResendVerificationCodeEmailController } from './controllers/client/ResendVerificationCodeEmailController';
 import { ValidateCodeController } from './controllers/client/ValidateCodeController';
 
 import { CreateCategoryController } from './controllers/category/CreateCategoryController';
@@ -201,6 +202,36 @@ import { DeleteCouponController } from './controllers/coupon/DeleteCouponControl
 import { GetCouponUsageHistoryController } from './controllers/coupon/GetCouponUsageHistoryController';
 import { ValidateCouponController } from './controllers/coupon/ValidateCouponController';
 
+// Segment Controllers
+import { CreateSegmentController } from './controllers/segment/CreateSegmentController';
+import { ListSegmentsController } from './controllers/segment/ListSegmentsController';
+import { GetSegmentDetailsController } from './controllers/segment/GetSegmentDetailsController';
+import { UpdateSegmentController } from './controllers/segment/UpdateSegmentController';
+import { DeleteSegmentController } from './controllers/segment/DeleteSegmentController';
+import { PreviewSegmentController } from './controllers/segment/PreviewSegmentController';
+import { PreviewSegmentDraftController } from './controllers/segment/PreviewSegmentDraftController';
+
+// Special Date Controllers
+import { CreateSpecialDateController } from './controllers/specialDate/CreateSpecialDateController';
+import { ListSpecialDatesController } from './controllers/specialDate/ListSpecialDatesController';
+import { UpdateSpecialDateController } from './controllers/specialDate/UpdateSpecialDateController';
+import { DeleteSpecialDateController } from './controllers/specialDate/DeleteSpecialDateController';
+
+// WhatsApp Template Controllers (SYS_ADMIN only)
+import { CreateWhatsAppTemplateController } from './controllers/whatsappTemplate/CreateWhatsAppTemplateController';
+import { UploadWhatsAppTemplateHeaderController } from './controllers/whatsappTemplate/UploadWhatsAppTemplateHeaderController';
+import { UploadWhatsAppTemplatePreviewController } from './controllers/whatsappTemplate/UploadWhatsAppTemplatePreviewController';
+import { ListWhatsAppTemplatesController } from './controllers/whatsappTemplate/ListWhatsAppTemplatesController';
+import { UpdateWhatsAppTemplateController } from './controllers/whatsappTemplate/UpdateWhatsAppTemplateController';
+import { DeleteWhatsAppTemplateController } from './controllers/whatsappTemplate/DeleteWhatsAppTemplateController';
+
+// Campaign Controllers
+import { CreateCampaignController } from './controllers/campaign/CreateCampaignController';
+import { ListCampaignsController } from './controllers/campaign/ListCampaignsController';
+import { GetCampaignDetailsController } from './controllers/campaign/GetCampaignDetailsController';
+import { DispatchCampaignController } from './controllers/campaign/DispatchCampaignController';
+import { DeleteCampaignController } from './controllers/campaign/DeleteCampaignController';
+
 // Subscription Controllers
 // import { CreateSubscriptionPlanController } from './controllers/subscription/CreateSubscriptionPlanController';
 // import { GetAllSubscriptionPlansController } from './controllers/subscription/GetAllSubscriptionPlansController';
@@ -218,7 +249,7 @@ import superAdminAuthMiddleware from './middlewares/super_admin_auth';
 import sysAdminAuthMiddleware from './middlewares/sys_admin_auth';
 // import subscriptionAuthMiddleware from './middlewares/subscription_auth';
 // import subscriptionWarningMiddleware from './middlewares/subscription_warning';
-import { upload, uploadStore, uploadCategory, uploadExcel } from './config/multer';
+import { upload, uploadStore, uploadCategory, uploadExcel, uploadWhatsAppTemplate } from './config/multer';
 import { processImage } from './middlewares/process_image';
 import { processBannerImage } from './middlewares/process_banner_image';
 import { handleMulterError } from './middlewares/multer_error';
@@ -233,6 +264,7 @@ router.get('/dashboard', adminAuthMiddleware, new DashboardController().handle);
 router.post('/client', adminAuthMiddleware, new CreateClientController().handle)
 router.post('/client/new/online', new CreateClientController().handle)
 router.post('/client/verification/request', new RequestVerificationController().handle)
+router.post('/client/verification/resend-email', new ResendVerificationCodeEmailController().handle)
 router.post('/client/verification/validate', new ValidateCodeController().handle)
 router.get('/clients/all', adminAuthMiddleware, new GetAllClientController().handle)
 router.get('/client/phone_number', adminAuthMiddleware, new GetClientByPhoneNumbeController().handle)
@@ -490,5 +522,35 @@ router.get('/admin/coupons/:id/history', adminAuthMiddleware, new GetCouponUsage
 
 //-- ROTAS COUPON (STORE) --
 router.post('/store/coupons/validate', new ValidateCouponController().handle);
+
+//-- ROTAS SEGMENT (ADMIN) --
+router.post('/admin/segments', adminAuthMiddleware, new CreateSegmentController().handle);
+router.get('/admin/segments', adminAuthMiddleware, new ListSegmentsController().handle);
+router.post('/admin/segments/preview', adminAuthMiddleware, new PreviewSegmentDraftController().handle);
+router.get('/admin/segments/:id', adminAuthMiddleware, new GetSegmentDetailsController().handle);
+router.put('/admin/segments/:id', adminAuthMiddleware, new UpdateSegmentController().handle);
+router.delete('/admin/segments/:id', adminAuthMiddleware, new DeleteSegmentController().handle);
+router.get('/admin/segments/:id/preview', adminAuthMiddleware, new PreviewSegmentController().handle);
+
+//-- ROTAS SPECIAL DATE (ADMIN) --
+router.post('/admin/special-dates', adminAuthMiddleware, new CreateSpecialDateController().handle);
+router.get('/admin/special-dates', adminAuthMiddleware, new ListSpecialDatesController().handle);
+router.put('/admin/special-dates/:id', adminAuthMiddleware, new UpdateSpecialDateController().handle);
+router.delete('/admin/special-dates/:id', adminAuthMiddleware, new DeleteSpecialDateController().handle);
+
+//-- ROTAS WHATSAPP TEMPLATE (SYS_ADMIN) --
+router.post('/admin/whatsapp-templates', sysAdminAuthMiddleware, new CreateWhatsAppTemplateController().handle);
+router.get('/admin/whatsapp-templates', sysAdminAuthMiddleware, new ListWhatsAppTemplatesController().handle);
+router.put('/admin/whatsapp-templates/:id', sysAdminAuthMiddleware, new UpdateWhatsAppTemplateController().handle);
+router.delete('/admin/whatsapp-templates/:id', sysAdminAuthMiddleware, new DeleteWhatsAppTemplateController().handle);
+router.post('/admin/whatsapp-templates/:id/header-media', sysAdminAuthMiddleware, uploadWhatsAppTemplate.single('file'), handleMulterError, new UploadWhatsAppTemplateHeaderController().handle);
+router.post('/admin/whatsapp-templates/:id/preview-image', sysAdminAuthMiddleware, uploadWhatsAppTemplate.single('file'), handleMulterError, new UploadWhatsAppTemplatePreviewController().handle);
+
+//-- ROTAS CAMPAIGN (ADMIN) --
+router.post('/admin/campaigns', adminAuthMiddleware, new CreateCampaignController().handle);
+router.get('/admin/campaigns', adminAuthMiddleware, new ListCampaignsController().handle);
+router.get('/admin/campaigns/:id', adminAuthMiddleware, new GetCampaignDetailsController().handle);
+router.post('/admin/campaigns/:id/dispatch', adminAuthMiddleware, new DispatchCampaignController().handle);
+router.delete('/admin/campaigns/:id', adminAuthMiddleware, new DeleteCampaignController().handle);
 
 export { router };

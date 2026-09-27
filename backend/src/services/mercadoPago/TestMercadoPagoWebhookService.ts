@@ -176,7 +176,7 @@ class TestMercadoPagoWebhookService {
         const shouldProcess = payment_status === 'approved' && 
                              order.status === 'PENDING_PAYMENT' && 
                              orderStatus === 'OPENED';
-
+        console.log('SH', shouldProcess)
         if (shouldProcess) {
             await this.sendWhatsAppNotification(updatedOrder);
             await this.updateStock(updatedOrder);
@@ -189,19 +189,20 @@ class TestMercadoPagoWebhookService {
     private async sendWhatsAppNotification(updatedOrder: any) {
         try {
             // Comentado para testes, mas mantendo a estrutura
-            //const sendWhatsAppService = new SendWhatsAppMessageService();
-            //const customerName = `${updatedOrder.client.first_name} ${updatedOrder.client.last_name}`;
-            //const storeName = 'Loja Teste';
+            const sendWhatsAppService = new SendWhatsAppMessageService();
+            const customerName = `${updatedOrder.client.first_name} ${updatedOrder.client.last_name}`;
+            const storeName = 'Loja Teste';
 
-            /*await sendWhatsAppService.execute({
+            await sendWhatsAppService.execute({
                 phone_number: updatedOrder.client.phone_number,
                 customer_name: customerName,
                 order_number: updatedOrder.code.toString(),
                 store_name: storeName,
                 store_phone_number: updatedOrder.store?.phone_number || '',
                 order_id: updatedOrder.id,
-                store_slug: updatedOrder.store?.slug || 'loja'
-            });*/
+                store_slug: updatedOrder.store?.slug || 'loja',
+                country_code: 'BR'
+            });
         } catch (whatsappError: any) {
             console.log(`[TestMercadoPagoWebhookService] WhatsApp error:`, whatsappError);
         }
