@@ -1,6 +1,14 @@
 backend/.data/
 backend/node_modules/
+backend/dist/
 backend/.env
 backend/prisma/migrations
 backend/package-lock.json
 backend/uploads
+backend/documentation
+frontend/documentation
+frontend/seu-site-essencial
+_bmad
+_bmad-output
+/.agents
+/.github
