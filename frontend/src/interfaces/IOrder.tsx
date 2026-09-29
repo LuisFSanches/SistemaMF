@@ -26,6 +26,7 @@ export interface IOrder {
     payment_received: boolean;
     delivery_date: string;
     status: Status;
+    printed?: boolean;
     has_card: false;
     card_message?: string;
     card_from?: string;

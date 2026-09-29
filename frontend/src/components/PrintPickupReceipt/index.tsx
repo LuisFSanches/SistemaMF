@@ -11,6 +11,7 @@ interface IPickupReceiptPrintProps {
     orderCode: string;
     clientName: string;
     clientTelephone: string;
+    onPrinted?: () => void;
 }
 
 export const PrintPickupReceipt = ({
@@ -18,6 +19,7 @@ export const PrintPickupReceipt = ({
     orderCode,
     clientName,
     clientTelephone,
+    onPrinted,
 }: IPickupReceiptPrintProps) => {
     const handlePrint = async () => {
         try {
@@ -140,6 +142,7 @@ export const PrintPickupReceipt = ({
 
                 setTimeout(() => {
                     printWindow.print();
+                    onPrinted?.();
                 }, 300);
             } else {
             }

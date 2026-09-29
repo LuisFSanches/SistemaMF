@@ -186,6 +186,12 @@ export const updateOrderPaymentStatus = async(id: string, payment_received: bool
 	return response.data;
 };
 
+export const markOrderAsPrinted = async(id: string) => {
+	const response = await api.patch(`/order/${id}/printed`);
+
+	return response.data;
+};
+
 export const confirmDeliveryPayment = async(orderId: string) => {
 	const response = await api.patch(`/orderDelivery/${orderId}/confirm-payment`);
 

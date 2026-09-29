@@ -54,6 +54,7 @@ import { GetAllOrderController } from './controllers/order/GetAllOrderController
 import { UpdateOrderController } from './controllers/order/UpdateOrderController';
 import { UpdateOrderStatusController } from './controllers/order/UpdateOrderStatusController';
 import { UpdateOrderPaymentController } from './controllers/order/UpdateOrderPaymentController';
+import { UpdateOrderPrintedController } from './controllers/order/UpdateOrderPrintedController';
 import { GetCompleteOrderController } from './controllers/order/GetCompleteOrderController';
 import { GetOrderDetailsController } from './controllers/order/GetOrderDetailsController';
 import { GetOrderStatusController } from './controllers/order/GetOrderStatusController';
@@ -306,6 +307,7 @@ router.put('/order/:id', adminAuthMiddleware, new UpdateOrderController().handle
 router.put('/order/finish/:id', new FinishOnlineOrderController().handle);
 router.patch('/order/:id', new UpdateOrderStatusController().handle);
 router.patch('/order/:id/payment', adminAuthMiddleware, new UpdateOrderPaymentController().handle);
+router.patch('/order/:id/printed', adminAuthMiddleware, new UpdateOrderPrintedController().handle);
 router.delete('/order/:id', adminAuthMiddleware, new DeleteOrderController().handle);
 
 //-- ROTAS PRODUCT --

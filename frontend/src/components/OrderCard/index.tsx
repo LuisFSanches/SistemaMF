@@ -13,10 +13,12 @@ import { PAYMENT_METHODS } from "../../constants";
 import { PrintOrder } from "../PrintOrder";
 import { PrintPickupReceipt } from "../PrintPickupReceipt";
 import { useAdmins } from "../../contexts/AdminsContext";
+import { useOrders } from "../../contexts/OrdersContext";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { formatNationalPhone } from "../PhoneInput/utils";
 import { RichText } from "../RichText";
+import { markOrderAsPrinted } from "../../services/orderService";
 
 moment.locale('pt-br');
 
@@ -35,8 +37,20 @@ export function OrderCard({
 	const [orderDetailModal, setOrderDetailModal] = useState(false);
 	const [viewCardMessage, setViewCardMessage] = useState(false);
 	const { admins } = useAdmins();
+	const { editOrder } = useOrders();
 	const { showSuccess } = useSuccessMessage();
 	const navigate = useNavigate();
+
+	async function handleOrderPrinted() {
+		if (order.printed) return;
+
+		try {
+			const updatedOrder = await markOrderAsPrinted(order.id);
+			editOrder(updatedOrder);
+		} catch (error) {
+			console.error("Erro ao marcar pedido como impresso:", error);
+		}
+	}
 
 	function handleOpenOrderDetailModal(order: IOrder){
         setOrderDetailModal(true);
@@ -165,11 +179,12 @@ export function OrderCard({
 				<h2>*** Pedido #{order?.code} ***</h2>
 				<div>
 					{!order.is_delivery && (
-						<PrintPickupReceipt 
+						<PrintPickupReceipt
 							order={order}
 							orderCode={order.code}
 							clientName={`${order.client.first_name} ${order.client.last_name}`}
 							clientTelephone={formatNationalPhone(order.client.phone_number, order.client.country_code)}
+							onPrinted={handleOrderPrinted}
 						/>
 					)}
 					<FontAwesomeIcon className="edit-icon" icon={faPen} onClick={() => handleOpenEditOrderModal(order)}/>
@@ -305,19 +320,25 @@ export function OrderCard({
 					<FontAwesomeIcon icon={faEye}/>
 					Pedido
 				</button>
-				<PrintOrder
-						order={order}
-						orderCode={order.code}
-						admins={admins}
-						clientName={`${order.client.first_name} ${order.client.last_name}`}
-						clientTelephone={formatNationalPhone(order.client.phone_number, order.client.country_code)}
-						buttonLabel={'Imprimir'}
-						style={{
-							background: 'white',
-							border: '1px solid black',
-							color: '#666666',
-						}}
-					/>
+				<div className="print-button-wrapper">
+					<PrintOrder
+							order={order}
+							orderCode={order.code}
+							admins={admins}
+							clientName={`${order.client.first_name} ${order.client.last_name}`}
+							clientTelephone={formatNationalPhone(order.client.phone_number, order.client.country_code)}
+							buttonLabel={'Imprimir'}
+							onPrinted={handleOrderPrinted}
+							style={{
+								background: 'white',
+								border: '1px solid black',
+								color: '#666666',
+							}}
+						/>
+					{order.printed &&
+						<span className="printed-message">Pedido impresso</span>
+					}
+				</div>
 				{((order.has_card && order.online_order) || (order.has_card && order.store_front_order)) &&
 					<button className="view-button" onClick={() => handleOpenViewCardMessage(order)}> 
 						<FontAwesomeIcon icon={faEnvelope}/>

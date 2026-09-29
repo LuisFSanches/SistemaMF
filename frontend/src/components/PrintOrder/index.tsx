@@ -21,6 +21,7 @@ interface IReceiptPrintProps {
     buttonLabel?: string;
     style?: React.CSSProperties;
     className?: string;
+    onPrinted?: () => void;
 }
 
 export const PrintOrder = ({
@@ -31,7 +32,8 @@ export const PrintOrder = ({
     clientTelephone,
     buttonLabel = "Imprimir",
     style,
-    className
+    className,
+    onPrinted
 }: IReceiptPrintProps) => {
     const date = moment();
     const baseUrl = process.env.REACT_APP_URL || "https://sistema-mf.vercel.app";
@@ -220,6 +222,7 @@ export const PrintOrder = ({
                 setTimeout(() => {
                     printWindow.print();
                     setIsLoading(false);
+                    onPrinted?.();
                 }, 300);
             } else {
                 setIsLoading(false);

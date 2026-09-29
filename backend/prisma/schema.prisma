@@ -229,6 +229,7 @@ model Order {
   created_by        String?
   updated_by        String?
   status            String        @default("Opened")
+  printed           Boolean       @default(false)
   has_card          Boolean       @default(false)
   card_message      String?
   card_from         String?
