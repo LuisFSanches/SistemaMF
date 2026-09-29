@@ -169,6 +169,23 @@ export const OrderCardContainer= styled.div`
             color: white;
             font-weight: 700;
         }
+
+        .print-button-wrapper {
+            position: relative;
+            display: flex;
+
+            .printed-message {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                text-align: center;
+                color: #dc3545;
+                font-size: 12px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+        }
     }
 
     .order-card-container, .value-container {

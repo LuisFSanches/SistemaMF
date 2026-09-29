@@ -567,12 +567,12 @@ export function CompleteOrder() {
                                                         setValue("postal_code", "");
                                                         setValue("street", "");
                                                         setValue("street_number", "");
-                                                        setValue("city", "");
+                                                        setValue("city", "Itaperuna");
                                                         setValue("neighborhood", "");
                                                         setValue("complement", "");
                                                         setValue("reference_point", "");
-                                                        setValue("state", "");
-                                                        setValue("country", "");
+                                                        setValue("state", "RJ");
+                                                        setValue("country", "Brasil");
                                                         setAddressId("");
                                                     }
                                                 }}
