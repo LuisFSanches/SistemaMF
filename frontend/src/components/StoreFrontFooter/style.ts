@@ -34,6 +34,7 @@ export const FooterColumn = styled.div`
     img {
         max-width: 100px;
         align-self: anchor-center;
+        border-radius: 50%;
     }
 `;
 
