@@ -72,7 +72,8 @@ class CreateOrderService{
 
 				include: {
 					client: true,
-          			clientAddress: true
+          			clientAddress: true,
+					createdBy: true
 				}
 		})
 
