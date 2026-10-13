@@ -3,7 +3,7 @@ import { listStoreProducts } from "../services/productService";
 import { IProduct } from "../interfaces/IProduct";
 interface ProductsContextType {
     products: IProduct[];
-    loadAvailableProducts: (storeId: string, page: number, pageSize: number, query: string, forceRefresh?: boolean) => Promise<void>;
+    loadAvailableProducts: (storeId: string, page: number, pageSize: number, query: string, forceRefresh?: boolean, groupVariants?: boolean) => Promise<void>;
     totalProducts: number;
     addProduct: (product: IProduct) => void;
     editProduct: (product: IProduct) => void;
@@ -16,7 +16,7 @@ export const ProductsProvider: React.FC = ({ children }) => {
     const [products, setProducts] = useState<IProduct[]>([]);
     const [totalProducts, setTotalProducts] = useState(0);
     const cacheRef = useRef<Map<string, { products: IProduct[], total: number, timestamp: number }>>(new Map());
-    const lastParamsRef = useRef<{ storeId: string, page: number, pageSize: number, query: string } | null>(null);
+    const lastParamsRef = useRef<{ storeId: string, page: number, pageSize: number, query: string, groupVariants: boolean } | null>(null);
     const CACHE_DURATION = 240 * 60 * 1000; // 240 minutos
 
     const loadAvailableProducts = useCallback(async (
@@ -24,13 +24,14 @@ export const ProductsProvider: React.FC = ({ children }) => {
         page: number, 
         pageSize: number, 
         query: string,
-        forceRefresh: boolean = false
+        forceRefresh: boolean = false,
+        groupVariants: boolean = false
     ) => {
-        const cacheKey = `${storeId}-${page}-${pageSize}-${query}`;
+        const cacheKey = `${storeId}-${page}-${pageSize}-${query}-${groupVariants}`;
         const now = Date.now();
         
         // Armazena os últimos parâmetros
-        lastParamsRef.current = { storeId, page, pageSize, query };
+        lastParamsRef.current = { storeId, page, pageSize, query, groupVariants };
 
         // Verifica se há cache válido e não está forçando refresh
         if (!forceRefresh && cacheRef.current.has(cacheKey)) {
@@ -45,7 +46,7 @@ export const ProductsProvider: React.FC = ({ children }) => {
         }
 
         // Busca os dados da API
-        const { data: { products: fetchedProducts, total } } = await listStoreProducts(storeId, page, pageSize, query);
+        const { data: { products: fetchedProducts, total } } = await listStoreProducts(storeId, page, pageSize, query, groupVariants);
         // Atualiza o cache
         cacheRef.current.set(cacheKey, {
             products: fetchedProducts,
@@ -64,8 +65,8 @@ export const ProductsProvider: React.FC = ({ children }) => {
         
         // Recarrega os produtos com os últimos parâmetros usados
         if (lastParamsRef.current) {
-            const { page, pageSize, query } = lastParamsRef.current;
-            await loadAvailableProducts(storeId, page, pageSize, query, true);
+            const { page, pageSize, query, groupVariants } = lastParamsRef.current;
+            await loadAvailableProducts(storeId, page, pageSize, query, true, groupVariants);
         }
     }, [loadAvailableProducts]);
 

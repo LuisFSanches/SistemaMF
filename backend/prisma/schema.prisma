@@ -106,15 +106,51 @@ model Product {
   image_3            String?
   qr_code            String?
   sales_count        Int      @default(0)
+  variant_group_id   String?
+  color_id           String?
+  variant_order      Int      @default(0)
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
   categories         ProductCategory[]
+
+  variantGroup ProductVariantGroup? @relation(fields: [variant_group_id], references: [id], onDelete: SetNull)
+  color        ProductColor?        @relation(fields: [color_id], references: [id], onDelete: SetNull)
 
   orderItems OrderItem[]
   stockTransactions StockTransaction[]
   storeProducts    StoreProduct[]
 
+  @@unique([variant_group_id, color_id])
+  @@index([variant_group_id])
   @@map("products")
+}
+
+// Groups the same product sold in different colors (e.g. "Buquê de 6 Rosas").
+// Each color is still its own Product (own price, stock, QR code and order history).
+model ProductVariantGroup {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  products    Product[]
+
+  @@map("product_variant_groups")
+}
+
+model ProductColor {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  hex        String?
+  is_mixed   Boolean  @default(false)
+  sort_order Int      @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  products   Product[]
+
+  @@map("product_colors")
 }
 
 

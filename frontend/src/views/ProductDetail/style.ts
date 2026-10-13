@@ -399,3 +399,13 @@ export const ErrorMessage = styled.p`
     font-size: 1.2rem;
     color: var(--text-title);
 `;
+
+export const VariantSection = styled.div`
+    margin: 0.5rem 0 1.25rem;
+
+    > div {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+`;

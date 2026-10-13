@@ -1,3 +1,5 @@
+import { IProductColor, IStoreProductVariant } from "./IProductVariant";
+
 export interface IStoreProductDetail {
         id: string;
         store_id: string;
@@ -24,6 +26,9 @@ export interface IStoreProductDetail {
                         };
                 }>;
         };
+        color?: IProductColor | null;
+        variant_group?: { id: string; name: string } | null;
+        variants?: IStoreProductVariant[];
         created_at: string;
         updated_at: string;
 }

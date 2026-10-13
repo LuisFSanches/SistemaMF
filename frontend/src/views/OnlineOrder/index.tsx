@@ -413,7 +413,7 @@ Cartão: Desejamos um feliz aniversário!`
         if (!adminData.store_id) return;
         setShowLoader(true);
         setTimeout(() => {
-            loadAvailableProducts(adminData.store_id!, page, pageSize, query).then(() => {
+            loadAvailableProducts(adminData.store_id!, page, pageSize, query, false, true).then(() => {
                 setShowLoader(false);
             }).catch(() => {
                 setShowLoader(false);

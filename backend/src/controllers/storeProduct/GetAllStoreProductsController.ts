@@ -3,7 +3,7 @@ import { GetAllStoreProductsService } from '../../services/storeProduct/GetAllSt
 
 class GetAllStoreProductsController {
     async handle(req: Request, res: Response, next: NextFunction) {
-        const { store_id, page, pageSize, query } = req.query;
+        const { store_id, page, pageSize, query, group_variants } = req.query;
 
         if (!store_id || typeof store_id !== 'string') {
             return res.status(400).json({ error: "store_id is required" });
@@ -19,7 +19,8 @@ class GetAllStoreProductsController {
             store_id,
             page: pageNumber,
             pageSize: pageSizeNumber,
-            query: searchQuery  
+            query: searchQuery,
+            group_variants: group_variants === 'true'
         });
 
         return res.json(result);

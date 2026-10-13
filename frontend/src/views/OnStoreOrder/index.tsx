@@ -678,7 +678,7 @@ export function OnStoreOrder() {
         if (step === 1 && adminData.store_id) { 
             setShowLoader(true);
             setTimeout(() => {
-                loadAvailableProducts(adminData.store_id!, page, pageSize, query).then(() => {
+                loadAvailableProducts(adminData.store_id!, page, pageSize, query, false, true).then(() => {
                     setShowLoader(false);
                 }).catch(() => {
                     setShowLoader(false);

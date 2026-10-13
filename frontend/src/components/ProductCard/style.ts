@@ -178,3 +178,17 @@ export const BottomActions = styled.div`
         gap: 8px;
     }
 `;
+
+export const SwatchRow = styled.div`
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    padding: 0 16px 10px;
+
+    > div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+`;

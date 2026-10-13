@@ -25,6 +25,7 @@ import { ProductStockDetail } from "./views/ProductStockDetail";
 import { SupplierStockDetail } from "./views/SupplierStockDetail";
 import { GeneralCatalog } from "./views/GeneralCatalog";
 import { ParentProducts } from "./views/ParentProducts";
+import { ProductVariantGroups } from "./views/ProductVariantGroups";
 import { OnlineStoreProducts } from "./views/OnlineStoreProducts";
 import { OrdersToReceivePage } from "./views/OrdersToReceive";
 import { OrderDeliveriesPage } from "./views/OrderDeliveries";
@@ -139,6 +140,11 @@ export default function routes(){
                         <Route path="/backoffice/produtos-pais" element={
                             <PrivateRoute>
                                 <ParentProducts/>
+                            </PrivateRoute>
+                        }/>
+                        <Route path="/backoffice/variacoes-cor" element={
+                            <PrivateRoute>
+                                <ProductVariantGroups/>
                             </PrivateRoute>
                         }/>
                         <Route path="/backoffice/produtos-online" element={
