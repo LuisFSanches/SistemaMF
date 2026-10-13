@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp, faPix } from "@fortawesome/free-brands-svg-icons";
@@ -8,6 +8,8 @@ import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
 import { useGTM } from "../../hooks/useGTM";
 import { getStoreFrontProductDetail } from "../../services/productService";
 import { IStoreProductDetail } from "../../interfaces/IStoreProductDetail";
+import { IStoreProductVariant } from "../../interfaces/IProductVariant";
+import { ColorSwatches } from "../../components/ColorSwatches";
 import { StoreFrontHeader } from "../../components/StoreFrontHeader";
 import { StoreFrontFooter } from "../../components/StoreFrontFooter";
 import { CategoryMenu } from "../../components/CategoryMenu";
@@ -52,6 +54,7 @@ import {
     StockInfo,
     ErrorContainer,
     ErrorMessage,
+    VariantSection,
 } from "./style";
 
 interface Schedule {
@@ -80,11 +83,14 @@ export function ProductDetail() {
     const [storeSchedules, setStoreSchedules] = useState<Schedule[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [storeName, setStoreName] = useState<string | null>(null);
+    // Ids of the colors of the current variant group, to switch color without the full page loader
+    const variantIdsRef = useRef<string[]>([]);
 
     const loadProductDetail = async (productId: string) => {
         try {
             setError(null);
             const { data } = await getStoreFrontProductDetail(productId);
+            variantIdsRef.current = (data.variants || []).map((variant: IStoreProductVariant) => variant.id);
             setProduct(data);
         } catch (err: any) {
             console.error('Erro ao carregar detalhes do produto:', err);
@@ -108,7 +114,12 @@ export function ProductDetail() {
 
     useEffect(() => {
         if (productId) {
-            setShowLoader(true);
+            // Switching color inside the same variant group reloads data without the full page loader
+            const isVariantSwitch = variantIdsRef.current.includes(productId);
+            if (!isVariantSwitch) {
+                setShowLoader(true);
+            }
+            setCurrentImageIndex(0);
             loadProductDetail(productId);
             
             // Carregar schedules e nome da loja do sessionStorage (salvos pelo StoreFront)
@@ -208,6 +219,14 @@ export function ProductDetail() {
         window.open(whatsappUrl, "_blank");
     };
 
+    const hasVariants = (product?.variants?.length || 0) > 1;
+
+    const handleSelectVariant = (variant: IStoreProductVariant) => {
+        if (variant.id !== product?.id) {
+            navigate(`/${slug}/produto/${variant.id}`, { replace: true });
+        }
+    };
+
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
@@ -287,12 +306,26 @@ export function ProductDetail() {
                     </ImageSection>
 
                     <InfoSection>
-                        <ProductTitle>{product.product.name}</ProductTitle>
+                        <ProductTitle>
+                            {hasVariants ? product.variant_group?.name || product.product.name : product.product.name}
+                        </ProductTitle>
 
                         <ProductPrice>
                             {formatPrice(product.price)}
                             <ProductUnity>/ {product.product.unity}</ProductUnity>
                         </ProductPrice>
+
+                        {hasVariants && (
+                            <VariantSection>
+                                <ColorSwatches
+                                    variants={product.variants || []}
+                                    selectedId={product.id}
+                                    onSelect={handleSelectVariant}
+                                    size={32}
+                                    showSelectedLabel
+                                />
+                            </VariantSection>
+                        )}
 
                         {product.product.categories && product.product.categories.length > 0 && (
                             <CategoryContainer>

@@ -26,6 +26,18 @@ import { RemoveProductCategoryController } from './controllers/productCategory/R
 import { UpdateProductCategoriesController } from './controllers/productCategory/UpdateProductCategoriesController';
 import { RemoveAllProductCategoriesController } from './controllers/productCategory/RemoveAllProductCategoriesController';
 
+import { CreateProductColorController } from './controllers/productColor/CreateProductColorController';
+import { GetAllProductColorsController } from './controllers/productColor/GetAllProductColorsController';
+import { UpdateProductColorController } from './controllers/productColor/UpdateProductColorController';
+import { DeleteProductColorController } from './controllers/productColor/DeleteProductColorController';
+
+import { CreateProductVariantGroupController } from './controllers/productVariantGroup/CreateProductVariantGroupController';
+import { GetAllProductVariantGroupsController } from './controllers/productVariantGroup/GetAllProductVariantGroupsController';
+import { GetProductVariantGroupController } from './controllers/productVariantGroup/GetProductVariantGroupController';
+import { UpdateProductVariantGroupController } from './controllers/productVariantGroup/UpdateProductVariantGroupController';
+import { SetProductVariantsController } from './controllers/productVariantGroup/SetProductVariantsController';
+import { DeleteProductVariantGroupController } from './controllers/productVariantGroup/DeleteProductVariantGroupController';
+
 import { CreateProductController } from './controllers/product/CreateProductController';
 import { GetAllProductController } from './controllers/product/GetAllProductController';
 import { GetAvailableProductsForStoreController } from './controllers/product/GetAvailableProductsForStoreController';
@@ -324,6 +336,20 @@ router.delete('/product/:id/image', adminAuthMiddleware, new DeleteProductImageC
 router.post('/product/:id/qrcode', adminAuthMiddleware, new GenerateProductQRCodeController().handle)
 router.get('/product/export/excel', adminAuthMiddleware, new ExportProductsToExcelController().handle)
 router.post('/product/import/excel', adminAuthMiddleware, uploadExcel.single('file'), handleMulterError, new ImportProductsFromExcelController().handle)
+
+//-- ROTAS PRODUCT COLOR --
+router.get('/product-color/all', adminAuthMiddleware, new GetAllProductColorsController().handle)
+router.post('/product-color', sysAdminAuthMiddleware, new CreateProductColorController().handle)
+router.put('/product-color/:id', sysAdminAuthMiddleware, new UpdateProductColorController().handle)
+router.delete('/product-color/:id', sysAdminAuthMiddleware, new DeleteProductColorController().handle)
+
+//-- ROTAS PRODUCT VARIANT GROUP --
+router.get('/product-variant-group/all', adminAuthMiddleware, new GetAllProductVariantGroupsController().handle)
+router.get('/product-variant-group/:id', adminAuthMiddleware, new GetProductVariantGroupController().handle)
+router.post('/product-variant-group', sysAdminAuthMiddleware, new CreateProductVariantGroupController().handle)
+router.put('/product-variant-group/:id', sysAdminAuthMiddleware, new UpdateProductVariantGroupController().handle)
+router.put('/product-variant-group/:id/variants', sysAdminAuthMiddleware, new SetProductVariantsController().handle)
+router.delete('/product-variant-group/:id', sysAdminAuthMiddleware, new DeleteProductVariantGroupController().handle)
 
 //-- ROTAS STORE PRODUCTS EXCEL --
 router.get('/store-product/export/excel', adminAuthMiddleware, new ExportStoreProductsToExcelController().handle)

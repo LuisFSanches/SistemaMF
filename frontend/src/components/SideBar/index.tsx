@@ -235,6 +235,7 @@ export function SideBar(){
             case 'catalogo-geral':
             case 'produtos-online':
             case 'produtos-pais':
+            case 'variacoes-cor':
                 setActive({...isActive, 
                     'dashboard':false,
                     'pedidoBalcao':false,
@@ -540,6 +541,13 @@ export function SideBar(){
                             <NavLink to="/backoffice/produtos-pais">
                                 <button className="submenu-item" onClick={()=>handleActiveMenuButton('produtos-pais')}>
                                     Produtos Pais (SYS_ADMIN)
+                                </button>
+                            </NavLink>
+                        )}
+                        {adminData.role === 'SYS_ADMIN' && (
+                            <NavLink to="/backoffice/variacoes-cor">
+                                <button className="submenu-item" onClick={()=>handleActiveMenuButton('variacoes-cor')}>
+                                    Variações de Cor (SYS_ADMIN)
                                 </button>
                             </NavLink>
                         )}

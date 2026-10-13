@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma";
 import { BadRequestException } from "../../exceptions/bad-request";
 import { ErrorCodes } from "../../exceptions/root";
+import { loadStoreProductVariants } from "../../utils/storeProductVariants";
 
 interface IGetStoreProductByIdRequest {
     id: string;
@@ -41,6 +42,13 @@ class GetStoreProductByIdService {
                             image: true,
                             image_2: true,
                             image_3: true,
+                            variant_group_id: true,
+                            variantGroup: {
+                                select: { id: true, name: true },
+                            },
+                            color: {
+                                select: { id: true, name: true, hex: true, is_mixed: true },
+                            },
                             categories: {
                                 include: {
                                     category: {
@@ -63,6 +71,11 @@ class GetStoreProductByIdService {
                     ErrorCodes.USER_NOT_FOUND
                 );
             }
+
+            const variantGroupId = storeProduct.product.variant_group_id;
+            const variantsByGroup = variantGroupId
+                ? await loadStoreProductVariants(storeProduct.store_id, [variantGroupId], { onlineOnly: true })
+                : new Map();
 
             // Retornar apenas os dados necessários para a PDP
             const productDetail = {
@@ -91,6 +104,9 @@ class GetStoreProductByIdService {
                         category: pc.category,
                     })),
                 },
+                color: storeProduct.product.color,
+                variant_group: storeProduct.product.variantGroup,
+                variants: variantGroupId ? variantsByGroup.get(variantGroupId) || [] : [],
                 created_at: storeProduct.created_at,
                 updated_at: storeProduct.updated_at,
             };

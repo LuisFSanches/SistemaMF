@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSuccessMessage } from "../../contexts/SuccessMessageContext";
+import { ColorSwatches } from "../ColorSwatches";
+import { IStoreProductVariant } from "../../interfaces/IProductVariant";
 import {
     Card,
     ProductImage,
@@ -16,6 +18,7 @@ import {
     MoneySign,
     PriceDisplay,
     ClickableArea,
+    SwatchRow,
 } from './style';
 
 interface IProduct {
@@ -41,25 +44,55 @@ export function ProductCard({ product, image, onAdd, editablePrice = true, enabl
     const [quantity, setQuantity] = useState<number>(1);
     const [initialPrice, setInitialPrice] = useState<any>(product.price);
 
+    // Products grouped by color: the card shows the group and lets the user switch colors
+    const variants: IStoreProductVariant[] = product.variants || [];
+    const hasVariants = variants.length > 1;
+    const [selectedVariantId, setSelectedVariantId] = useState<string>(product.id);
+    const selectedVariant = variants.find(variant => variant.id === selectedVariantId);
+
+    const activeProduct = selectedVariant && selectedVariant.id !== product.id
+        ? { ...product, id: selectedVariant.id, name: selectedVariant.name, price: selectedVariant.price, image: selectedVariant.image || product.image }
+        : product;
+    const activeImage = selectedVariant && selectedVariant.id !== product.id
+        ? selectedVariant.image || image
+        : image;
+    const displayName = hasVariants ? product.variant_group?.name || product.name : product.name;
+
+    const handleSelectVariant = (variant: IStoreProductVariant) => {
+        setSelectedVariantId(variant.id);
+        setInitialPrice(variant.price);
+    };
+
     const handleAddClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (quantity > 0) {
-            onAdd(product, quantity, initialPrice);
-            showSuccess(`x${quantity} ${product.name} adicionado ao pedido!`, 1800);
+            onAdd(activeProduct, quantity, initialPrice);
+            showSuccess(`x${quantity} ${activeProduct.name} adicionado ao pedido!`, 1800);
         }
     };
 
     const handleCardClick = () => {
         if (enableDetailView && slug) {
-            navigate(`/${slug}/produto/${product.id}`);
+            navigate(`/${slug}/produto/${activeProduct.id}`);
         }
     };
 
     return (
         <Card onClick={handleCardClick} clickable={enableDetailView}>
             <ClickableArea>
-                <ProductImage src={image} alt={product.name} />
-                <ProductName>{product.name}</ProductName>
+                <ProductImage src={activeImage} alt={activeProduct.name} />
+                <ProductName>{displayName}</ProductName>
+                {hasVariants && (
+                    <SwatchRow>
+                        <ColorSwatches
+                            variants={variants}
+                            selectedId={selectedVariantId}
+                            onSelect={handleSelectVariant}
+                            maxVisible={6}
+                            showSelectedLabel
+                        />
+                    </SwatchRow>
+                )}
                 {editablePrice ? (
                     <PriceInputWrapper onClick={(e) => e.stopPropagation()}>
                         <MoneySign>R$</MoneySign>
