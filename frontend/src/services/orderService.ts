@@ -125,6 +125,12 @@ export const getOnGoingOrders = async () => {
 	return response;
 };
 
+export const getPanelOrders = async () => {
+	const response = await api.get("/order/panel");
+
+	return response;
+};
+
 export interface IOrderSearchFilters {
 	query?: string;
 	clientName?: string;

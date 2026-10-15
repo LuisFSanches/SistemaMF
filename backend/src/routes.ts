@@ -50,6 +50,7 @@ import { GetPickUpAddressController } from './controllers/address/GetPickUpAddre
 import { CreateOrderController } from './controllers/order/CreateOrderController';
 import { CreateOrderByAIController } from './controllers/order/CreateOrderByAIController';
 import { GetOnGoingOrderController } from './controllers/order/GetOnGoingOrderController';
+import { GetPanelOrdersController } from './controllers/order/GetPanelOrdersController';
 import { GetAllOrderController } from './controllers/order/GetAllOrderController';
 import { UpdateOrderController } from './controllers/order/UpdateOrderController';
 import { UpdateOrderStatusController } from './controllers/order/UpdateOrderStatusController';
@@ -299,6 +300,7 @@ router.get('/order/status/:id', new GetOrderStatusController().handle); // Rota 
 router.get('/order/detail/:id', adminAuthMiddleware, new GetOrderDetailsController().handle);
 router.get('/order/completedOrder/:id', new GetCompleteOrderController().handle);
 router.get('/order/ongoing', adminAuthMiddleware, new GetOnGoingOrderController().handle);
+router.get('/order/panel', adminAuthMiddleware, new GetPanelOrdersController().handle);
 router.get('/order/all', adminAuthMiddleware, new GetAllOrderController().handle);
 router.get('/order/waitingForClient', adminAuthMiddleware, new GetWaitingOnlineOrderController().handle);
 router.post('/order', new CreateOrderController().handle);

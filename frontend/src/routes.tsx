@@ -38,6 +38,7 @@ import { ClientDetail } from "./views/ClientDetail";
 import { DeliveryMenPage } from "./views/DeliveryMen";
 import { DeliveryManDetail } from "./views/DeliveryManDetail";
 import { OrderDetail } from "./views/OrderDetail";
+import { StorePanel } from "./views/StorePanel";
 import { ProductDetail } from "./views/ProductDetail";
 // import { StoreRegistration } from "./views/StoreRegistration";
 import { Reports } from "./views/Reports";
@@ -95,6 +96,11 @@ export default function routes(){
                 <ScrollToTop />
                 <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/backoffice/painel" element={
+                        <PrivateRoute>
+                            <StorePanel/>
+                        </PrivateRoute>
+                    }/>
                     <Route element={<SideBarLayout/>}>
                         <Route path ="/backoffice/dashboard" element={
                             <PrivateRoute>

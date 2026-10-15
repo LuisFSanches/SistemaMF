@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Container, AlertContent } from './style';
+import { playNotificationSound, playDeliverySound, playPaymentConfirmedSound } from '../../utils/notificationSounds';
 
 type Notification = {
     id: string;
@@ -11,78 +12,6 @@ type Notification = {
     isPaymentConfirmed?: boolean;
     amount?: number;
     paymentType?: string;
-};
-
-// Função para tocar som de notificação de novo pedido
-const playNotificationSound = () => {
-    try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
-    gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.8);
-
-    } catch (error) {
-        console.error('Erro ao reproduzir som de notificação:', error);
-    }
-};
-
-// Função para tocar som de notificação de pedido entregue (som diferente)
-const playDeliverySound = () => {
-    try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        // Som mais grave e melódico para entrega
-        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-        oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.15);
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.3);
-        gainNode.gain.setValueAtTime(1.0, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 1);
-
-    } catch (error) {
-        console.error('Erro ao reproduzir som de entrega:', error);
-    }
-};
-
-// Função para tocar som de pagamento confirmado para pedido online no site
-const playPaymentConfirmedSound = () => {
-    try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        // Som suave e melódico para recebimento de pedido online - mais longo e agradável
-        oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.3);
-        oscillator.frequency.setValueAtTime(700, audioContext.currentTime + 0.6);
-        oscillator.frequency.setValueAtTime(900, audioContext.currentTime + 0.9);
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 1.2);
-        gainNode.gain.setValueAtTime(1.0, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.8);
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 2);
-
-    } catch (error) {
-        console.error('Erro ao reproduzir som de pagamento confirmado:', error);
-    }
 };
 
 export const OrderNotification = () => {
