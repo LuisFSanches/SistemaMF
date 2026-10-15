@@ -55,7 +55,8 @@ export const Container = styled.main`
 
     .panel-header { flex-shrink: 0; min-height: 113px; padding: 20px 30px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; border-bottom: 1px solid var(--sp-border); background: var(--sp-header-surface); }
     .store-brand { display: flex; align-items: center; gap: 15px; min-width: 0; }
-    .brand-mark { color: var(--sp-success); width: 49px; height: 49px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--sp-border); border-radius: 8px; font-size: 24px; flex-shrink: 0; }
+    .brand-mark { color: var(--sp-success); width: 49px; height: 49px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--sp-border); border-radius: 8px; font-size: 24px; flex-shrink: 0; overflow: hidden; }
+    .brand-mark img { width: 100%; height: 100%; object-fit: contain; }
     .store-brand h1 { font-size: 27px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .brand-dot { color: var(--sp-success); }
     .store-brand p { font-size: 11px; color: var(--sp-muted-foreground); margin-top: 7px; font-weight: 600; }
@@ -302,7 +303,10 @@ export const StartScreen = styled.div`
         justify-content: center;
         font-size: 42px;
         color: #4ccd8a;
+        overflow: hidden;
     }
+
+    .start-mark img { width: 100%; height: 100%; object-fit: contain; }
 
     h1 { font-size: 34px; margin: 0; }
     p { font-size: 18px; color: #b4b7bd; margin: 0; max-width: 560px; line-height: 1.5; }
@@ -314,8 +318,8 @@ export const StartScreen = styled.div`
         padding: 20px 44px;
         border: 0;
         border-radius: 10px;
-        background: #4ccd8a;
-        color: #0f1115;
+        background: #EC4899;
+        color: white;
         font-family: inherit;
         font-size: 24px;
         font-weight: 800;

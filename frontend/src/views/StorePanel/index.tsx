@@ -120,11 +120,14 @@ export function StorePanel() {
 
         setStarted(true);
     };
-
     if (!started) {
         return (
             <StartScreen>
-                <span className="start-mark"><FontAwesomeIcon icon={faSeedling} /></span>
+                <span className="start-mark">
+                    {storeData?.logo
+                        ? <img src={storeData.logo} alt={storeData.name} />
+                        : <FontAwesomeIcon icon={faSeedling} />}
+                </span>
                 <h1>Painel da loja</h1>
                 <p>
                     Mostra os pedidos de hoje e os atrasados, e toca um som a cada pedido novo,
@@ -138,10 +141,10 @@ export function StorePanel() {
         );
     }
 
-    return <PanelBoard storeName={storeData?.name || "Painel da loja"} />;
+    return <PanelBoard storeName={storeData?.name || "Painel da loja"} storeLogo={storeData?.logo} />;
 }
 
-function PanelBoard({ storeName }: { storeName: string }) {
+function PanelBoard({ storeName, storeLogo }: { storeName: string; storeLogo?: string }) {
     const [data, setData] = useState<IPanelOrdersResponse | null>(null);
     const [lastSuccess, setLastSuccess] = useState<number | null>(null);
     const [freshCodes, setFreshCodes] = useState<number[]>([]);
@@ -347,7 +350,11 @@ function PanelBoard({ storeName }: { storeName: string }) {
         <Container>
             <header className="panel-header">
                 <div className="store-brand">
-                    <span className="brand-mark"><FontAwesomeIcon icon={faSeedling} /></span>
+                    <span className="brand-mark">
+                        {storeLogo
+                            ? <img src={storeLogo} alt={storeName} />
+                            : <FontAwesomeIcon icon={faSeedling} />}
+                    </span>
                     <div>
                         <h1>{storeName}<span className="brand-dot">.</span></h1>
                         <p>PAINEL DA LOJA</p>
