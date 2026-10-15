@@ -508,6 +508,11 @@ export function SideBar(){
                                 Pedidos Finalizados
                             </button>
                         </NavLink>
+                        <NavLink to="/backoffice/painel" target="_blank" rel="noopener noreferrer">
+                            <button className="submenu-item">
+                                Painel da Loja (TV)
+                            </button>
+                        </NavLink>
                     </div>
                 </SideBarItemContainer>
 
