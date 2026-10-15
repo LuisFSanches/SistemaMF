@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { ModalContainer, Form, Input, Label, Select, ErrorMessage, CheckboxContainer, Checkbox } from '../../styles/global';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
-import { createSegment, updateSegment, previewSegmentDraft } from '../../services/segmentService';
+import { createSegment, updateSegment, previewSegmentDraft, getSegmentDetails } from '../../services/segmentService';
 import { listSpecialDates } from '../../services/specialDateService';
 import { listClients } from '../../services/clientService';
 import categoryService from '../../services/categoryService';
@@ -86,6 +86,8 @@ export function SegmentModal({
     const [clientSearchResults, setClientSearchResults] = useState<ISegmentClient[]>([]);
     const [selectedClients, setSelectedClients] = useState<ISegmentClient[]>([]);
 
+    const [loadingClients, setLoadingClients] = useState(false);
+
     const [previewCount, setPreviewCount] = useState<number | null>(null);
     const [previewLoading, setPreviewLoading] = useState(false);
 
@@ -135,8 +137,27 @@ export function SegmentModal({
                 setMinOrderCount(criteria.min_order_count);
             }
 
-            if (currentSegment.type === 'MANUAL' && currentSegment.clients) {
-                setSelectedClients(currentSegment.clients.map((c) => c.client));
+            if (currentSegment.type === 'MANUAL') {
+                if (currentSegment.clients) {
+                    setSelectedClients(currentSegment.clients.map((c) => c.client));
+                } else {
+                    // A listagem traz apenas _count; os clientes vêm do endpoint de detalhes.
+                    let cancelled = false;
+                    setLoadingClients(true);
+                    getSegmentDetails(currentSegment.id)
+                        .then((res) => {
+                            if (cancelled) return;
+                            const clients = (res.data.segment?.clients || []) as { client: ISegmentClient }[];
+                            setSelectedClients(clients.map((c) => c.client));
+                        })
+                        .catch((error) => console.error('Failed to load segment clients:', error))
+                        .finally(() => {
+                            if (!cancelled) setLoadingClients(false);
+                        });
+                    return () => {
+                        cancelled = true;
+                    };
+                }
             }
         } else if (isOpen && action === 'create') {
             reset({});
@@ -201,6 +222,7 @@ export function SegmentModal({
     };
 
     const onSubmit = async (formData: { name: string; description?: string }) => {
+        if (loadingClients) return;
         setShowLoader(true);
         try {
             const payload: ICreateSegmentData = {
@@ -235,7 +257,7 @@ export function SegmentModal({
             overlayClassName="react-modal-overlay"
             className="react-modal-content-medium"
         >
-            <Loader show={showLoader} />
+            <Loader show={showLoader || loadingClients} />
             <button type="button" onClick={onRequestClose} className="modal-close">
                 <FontAwesomeIcon icon={faXmark} />
             </button>
