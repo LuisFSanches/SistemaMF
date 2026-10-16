@@ -45,8 +45,8 @@ export function OrderCard({
 		if (order.printed) return;
 
 		try {
-			const updatedOrder = await markOrderAsPrinted(order.id);
-			editOrder(updatedOrder);
+			await markOrderAsPrinted(order.id);
+			editOrder({ ...order, printed: true });
 		} catch (error) {
 			console.error("Erro ao marcar pedido como impresso:", error);
 		}
@@ -295,7 +295,7 @@ export function OrderCard({
 						{order.payment_received ? "✓ Pago" : "⏳ Pendente"}
 					</span>
 				</p>
-				<p><strong>Responsável pelo Pedido: </strong>{order.createdBy?.name || "Próprio Cliente"}</p>
+				<p><strong>Responsável pelo Pedido: </strong>{order.store_front_order ? "Próprio Cliente" : (order.createdBy?.name || "---")}</p>
 			</div>
 			<div className="move-order">
 				{previousStatus &&
